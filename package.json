@@ -1,0 +1,31 @@
+{
+  "name": "mio-docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "types:check": "next typegen && tsc --noEmit",
+    "check:links": "node scripts/check-links.mjs"
+  },
+  "dependencies": {
+    "next": "16.4.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "fumadocs-core": "16.17.7",
+    "fumadocs-ui": "16.17.7",
+    "fumadocs-mdx": "15.4.8",
+    "tailwindcss": "^4.3.0",
+    "@tailwindcss/postcss": "^4.3.0",
+    "lucide-react": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/mdx": "^2"
+  }
+}

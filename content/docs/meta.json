@@ -1,0 +1,13 @@
+{
+  "title": "Mio 文档",
+  "pages": [
+    "index",
+    "getting-started",
+    "language",
+    "bunko",
+    "mochi",
+    "native-aot",
+    "lsp",
+    "editors"
+  ]
+}

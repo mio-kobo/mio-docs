@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+:root { --color-fd-primary: #4370B9; --color-fd-primary-foreground: #fff; --hikari-lilac: #A99BDD; --hikari-mist: #79C5C7; }
+.dark { --color-fd-background: #0E1728; --color-fd-primary: #79C5C7; --color-fd-primary-foreground: #0E1728; }
+body { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+.hikari-home { max-width: 1040px; margin: auto; padding: 5rem 1.5rem; }
+.hikari-home h1 { font-size: clamp(2.4rem, 7vw, 4.8rem); font-weight: 650; letter-spacing: -.04em; line-height: 1.1; }
+.hikari-home p { max-width: 42rem; margin: 1.8rem 0; line-height: 1.9; color: var(--color-fd-muted-foreground); }
+.hikari-home nav { display: flex; flex-wrap: wrap; gap: 1.4rem; margin: 2.4rem 0; }
+.hikari-home a { text-decoration: underline; text-underline-offset: .3em; }
+.hikari-home .topics { border-top: 1px solid var(--color-fd-border); margin-top: 4rem; padding-top: 1rem; }
+.hikari-home .topics a { display: inline-block; margin: 1rem 1.8rem 0 0; }
