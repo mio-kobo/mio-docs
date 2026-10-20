@@ -23,8 +23,8 @@ title: MioCore LSP
 
 ## 2. 工作区隔离
 
-- M12～M15（Native AOT、GC）的未提交改动位于 `/Volumes/Sector0/AppData/Goland/Mio`（分支 `Mio-2`）。
-- 本阶段全部改动只发生在独立工作区 `/Volumes/Sector0/AppData/Goland/Mio-vscode-worktree`（分支 `feature/vscode-language-support`）。
+- M12～M15（Native AOT、GC）的未提交改动位于 核心工作区（分支 `Mio-2`）。
+- 本阶段全部改动只发生在独立工作区 独立 LSP 工作区（分支 `feature/vscode-language-support`）。
 - 不修改 `internal/aot/**`、`internal/mochi/**`、`internal/mma/**`、`mma/**`、`internal/vm/**` 中与 GC / AOT / 字节码格式相关的文件。
 - 不修改 Mochi v14 格式，不修改 Native AOT 流程，不修改 GC。
 - 不执行 `git commit` / `push` / `tag` / `release`。
