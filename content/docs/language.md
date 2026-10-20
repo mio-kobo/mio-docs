@@ -160,7 +160,7 @@ waza first<T>(values: []T) -> T? {
 }
 
 kaku pair = Pair[int64] { first: 20, second: 22 };
-kaku item = first[int64](https://github.com/mio-kobo/mio/blob/29746a65692c73d637510cbc3f4463e68a49d05c/docs/[7, 8]);
+kaku item = first[int64]([7, 8]);
 ```
 
 泛型采用运行时擦除策略：每个泛型函数只有一份字节码，静态检查在调用点完成类型替换，因此递归不会触发编译期无限实例化。本版本不提供 HKT、型变或 trait 约束。
