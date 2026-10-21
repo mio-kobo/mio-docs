@@ -1,0 +1,136 @@
+{
+  "baseline": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+  "committedTarget": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+  "commits": [
+    {
+      "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "subject": "ci(bootstrap): 验证原生 B-C-D 固定点与真实黄金产物"
+    },
+    {
+      "commit": "21e44d66b745794fad13f39d8b9a929061d68f4e",
+      "subject": "ci(core): 并行执行 Apple Silicon 验收并构建审计工具"
+    },
+    {
+      "commit": "eafd56885df5bcf2ce2a6086346756f3b23b406c",
+      "subject": "docs(migration): 修正核心仓库克隆后的目录名称"
+    },
+    {
+      "commit": "c235756f66f839eac36ccf65e8d3f0d28e99735d",
+      "subject": "fix(test): 为 Mach-O 执行测试补齐 macOS ARM64 平台检查"
+    },
+    {
+      "commit": "0a1f57128aafb8cc041cf439ef631a73fd13d87b",
+      "subject": "chore(migration): 确认核心仓库转移并记录历史保留结果"
+    },
+    {
+      "commit": "94fb9889d50d608ce7eb500eaf96ab52438f9df3",
+      "subject": "docs(migration): 修正核心首页的独立插件入口"
+    },
+    {
+      "commit": "adca584853a92603ad524322ff96d58401805008",
+      "subject": "chore(migration): 拆分编辑器目录并整理核心 CI 与项目入口"
+    },
+    {
+      "commit": "29746a65692c73d637510cbc3f4463e68a49d05c",
+      "subject": "ci(editors): 配置 JetBrains 与 VS Code 独立发布流水线"
+    },
+    {
+      "commit": "78487fd38fcaadeeff176eec45453c262163da8f",
+      "subject": "feat(aot): 推进 M17e 纯 Mio lowering 与 NativeFS GC 验证"
+    },
+    {
+      "commit": "cf5dda61ae5ff659ebdf12b6e7ce4947cd29a430",
+      "subject": "feat(aot): 实现纯 Mio ARM64 编码器与 Mach-O Writer"
+    },
+    {
+      "commit": "a77ecc1e814882455569b1cc5d2447d6f46576f6",
+      "subject": "feat(lsp): 集成 MioCore 语言服务器与容错语义分析"
+    },
+    {
+      "commit": "ac8e95602b3063fa52f5dd6dc2a2fcba8a41e707",
+      "subject": "ci: 拆分 Mio Core、JetBrains 与 VS Code 独立测试流水线"
+    },
+    {
+      "commit": "8e489599999c64ff58fd6cec1f1f257a59455eab",
+      "subject": "feat(vscode): 发布 v0.3.0"
+    },
+    {
+      "commit": "15a11a54afcf4940622cc88128ee3d7bb6354b75",
+      "subject": "feat(mio): 完成纯 Mio 二进制工具与 Mochi v14 解码器"
+    },
+    {
+      "commit": "a1dc0ba2eeb6cc360f3b8e7cd3dbe381b896207e",
+      "subject": "feat(aot): 完成 M16b 多代原生自举闭环"
+    },
+    {
+      "commit": "1810b24f07dbe7338817bda0d3896fb58f1e30a8",
+      "subject": "feat(aot): 完成原生运行时扩展与自举内存修复"
+    },
+    {
+      "commit": "096891b04093aca26b6d18d5011306d294c2999d",
+      "subject": "feat(aot): 实现 M15b 闭包捕获环境与精确 GC"
+    },
+    {
+      "commit": "b7b57c89e72d2cdbc90f0eb46fa4f2007f9bc5ba",
+      "subject": "feat(vscode): 添加 VSCode 插件支持"
+    },
+    {
+      "commit": "2ebcaba8a8dd2eb7989e04a11db6055500f8ed5a",
+      "subject": "feat(aot): 将 ARM64 精确 GC Runtime 集成至原生编译流程"
+    },
+    {
+      "commit": "02fbc9a0614d73d27402ebd7aa4bee87fbd2631f",
+      "subject": "feat(aot): 实现 ARM64 原生精确 Mark-Sweep GC"
+    },
+    {
+      "commit": "7d1fd6285c4a6b279c7cb8fbae3f74365ef38f39",
+      "subject": "feat(aot): 实现 ARM64 精确 GC Root 与对象可达性标记"
+    },
+    {
+      "commit": "4dce346304e04003fa7d40710dca9df4850e8589",
+      "subject": "feat(aot): 实现 ARM64 原生堆分配器与对象布局"
+    },
+    {
+      "commit": "fb279ec37b207840f4860d2653f0bc7150a26c0f",
+      "subject": "feat(aot): 实现 ARM64 原生 UTF-8 字符串与只读常量区"
+    },
+    {
+      "commit": "118cadcd50f0e5133feff6bb61a264c20c530ac6",
+      "subject": "feat(aot): 实现 ARM64 原生浮点十进制输出"
+    },
+    {
+      "commit": "ac37a57a5c08a39734ce026a05a51a43804d4094",
+      "subject": "feat(aot): 实现 ARM64 原生 float32 与 float64 计算"
+    },
+    {
+      "commit": "97aeba0749236537780371a926871bcfb5d47d51",
+      "subject": "feat(aot): 实现 ARM64 扩展操作数栈与 ABI 完善"
+    },
+    {
+      "commit": "8d5442ae2a00516c66e3e45afa54ef67dbda955a",
+      "subject": "feat(aot): 实现 ARM64 原生函数调用与递归"
+    },
+    {
+      "commit": "191b92be39171045c5577acc3937ee5d7c955f77",
+      "subject": "feat(aot): 实现 ARM64 原生控制流与布尔运算"
+    },
+    {
+      "commit": "f950421058a2628736f84eb8687ccb11949b1be9",
+      "subject": "feat(aot): 实现 Arm64 原生变量存储并进行差分验证"
+    },
+    {
+      "commit": "029bea0c3b5c661a940eb5b6320f4a180e09d8f2",
+      "subject": "feat(aot): 实现 ARM64 原生整数计算并通过 Mochi VM 差分验证"
+    },
+    {
+      "commit": "367eb3ad4757a84bbb54c80c4992131a2f67401a",
+      "subject": "git: 排除 .mio 缓存文件夹"
+    },
+    {
+      "commit": "85a0e2136b6cfce0708db5083ff879981b3f768b",
+      "subject": "feat(aot): 实现 macOS ARM64 首个原生程序并完成实机验证"
+    }
+  ],
+  "dirtyRcEvidence": "rc4-source.diff",
+  "note": "M18 and version update are uncommitted RC4 sources; later release automation is not included in RC4."
+}

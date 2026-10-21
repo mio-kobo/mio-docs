@@ -1,0 +1,169 @@
+{
+  "status": "passed",
+  "scope": "B-owned pages and their Markdown internal links; HTTP and exactly one H1",
+  "baseUrl": "http://127.0.0.1:3217",
+  "results": [
+    {
+      "path": "/docs/bunko",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/bunko",
+      "passed": true
+    },
+    {
+      "path": "/docs/editors",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/editors",
+      "passed": true
+    },
+    {
+      "path": "/docs/internals/gc",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/internals/gc",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/array",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/array",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/bytes",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/bytes",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/compiler-modules",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/compiler-modules",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/convert",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/convert",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/encoding-binary",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/encoding-binary",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/encoding-mochi",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/encoding-mochi",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/fs",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/fs",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/io",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/io",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/math",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/math",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/path",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/path",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/string",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/string",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/testing",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/testing",
+      "passed": true
+    },
+    {
+      "path": "/docs/kiso/utf8",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/kiso/utf8",
+      "passed": true
+    },
+    {
+      "path": "/docs/language",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/language",
+      "passed": true
+    },
+    {
+      "path": "/docs/lsp",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/lsp",
+      "passed": true
+    },
+    {
+      "path": "/docs/mochi",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/mochi",
+      "passed": true
+    },
+    {
+      "path": "/docs/native-aot",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/native-aot",
+      "passed": true
+    },
+    {
+      "path": "/docs/reference/collections",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/reference/collections",
+      "passed": true
+    },
+    {
+      "path": "/docs/reference/functions",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/reference/functions",
+      "passed": true
+    },
+    {
+      "path": "/docs/reference/modules",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/reference/modules",
+      "passed": true
+    },
+    {
+      "path": "/docs/reference/syntax",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/reference/syntax",
+      "passed": true
+    },
+    {
+      "path": "/docs/reference/types",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/reference/types",
+      "passed": true
+    },
+    {
+      "path": "/docs/tooling/cli",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/tooling/cli",
+      "passed": true
+    },
+    {
+      "path": "/docs/tooling/verification",
+      "status": 200,
+      "resolvedUrl": "http://127.0.0.1:3217/docs/tooling/verification",
+      "passed": true
+    }
+  ]
+}

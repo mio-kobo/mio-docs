@@ -1,0 +1,31 @@
+{
+  "mio-vscode": {
+    "commit": "9091db690941c87f5ef7e05fd2ad6dff26f9a4c8",
+    "status": "",
+    "files": {
+      "package.json": "d436c0af60118f5188c5ad15bc8d0587ad34c5a6f98647ccbf25fbd312227364",
+      "core-source.json": "9f94bf6b67bf8b6f0378e80e1db9ef42d117680058ea82ec4200a984fa2836d1",
+      "src/extension.ts": "a6e77084c2e69010461e93bb4d5890ebff39394cf41f959063857482a25b8c83",
+      "src/cli/cliResolver.ts": "8e98d5f6bfa0e9d60103e3a8330872e88f6de5666488826df29214d207cac3b0",
+      "src/lsp/serverOptions.ts": "eef339dd30066a11d869889bdbad0205e02f07ad6b2d1612e4f3ed0f0c70736f",
+      "src/cli/cliService.ts": "72033dd8f1bb9f9e765a3422a88ad1f704d43f26e769afc0839f925a9ee2a09d",
+      "src/lsp/client.ts": "3368c848348acb730475ea89fbc64cde109aa170a36c6d49f9d860e0561eb9e5"
+    },
+    "verification": "source-audit-only; IDE integration/build not run"
+  },
+  "mio-jetbrains": {
+    "commit": "b705828fa33ead18eb45d4f14f4343ae9c533d87",
+    "status": "",
+    "files": {
+      "build.gradle.kts": "3cee8837a157495bb0c1308f854ad8530901f258116e34b8978e47712ecfaa7b",
+      "src/main/resources/META-INF/plugin.xml": "371b8b896c8e66f5576242be25717a0e648a0402544fcf68a8addb4f5c082ea8",
+      "README.md": "1eea50dc249b346f4d7b5f8f874d23b5eea96ff02700224b0d6898835560a909",
+      "src/main/kotlin/com/exmikupro/mio/cli/MioCliResolver.kt": "cc04da39098235d46150f28a6f48e7b09de4b6f3687b5bcc2995fa09b85ac3b9",
+      "src/main/kotlin/com/exmikupro/mio/run/MioRunConfiguration.kt": "ac689bc81772bd17ae7423c55471ad585a4dc6011c71b9126ded3046ef07c963",
+      "src/main/kotlin/com/exmikupro/mio/sdk/MioSdkSelection.kt": "75952c79d48445bc18e9a54d038083cfb89a1bc4cf9aff18b70642e3ed71a01e",
+      "src/main/kotlin/com/exmikupro/mio/diagnostics/MioDiagnosticService.kt": "42655096c446adf2c2a9d618a8afe8ba4448cb8354eab1b4d4c8623a6b26ef8a",
+      "src/main/kotlin/com/exmikupro/mio/diagnostics/MioSettings.kt": "673fa948e373bf448a64ec920872a1e3a25f8ca70f6520f53cd94721671be7fb"
+    },
+    "verification": "source-audit-only; IDE integration/build not run"
+  }
+}

@@ -1,0 +1,1200 @@
+{
+  "status": "BOOTSTRAP_PASS",
+  "scope": "native bootstrap; repository regressions reported separately",
+  "root": "/Volumes/Sector0/AppData/Mio/mio",
+  "commands": [
+    {
+      "label": "git-head",
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.02073995799946715
+    },
+    {
+      "label": "git-ci-ancestor",
+      "argv": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "8b53a25",
+        "HEAD"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.010305333998985589
+    },
+    {
+      "label": "git-status",
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.019296208000014303
+    },
+    {
+      "label": "git-diff",
+      "argv": [
+        "git",
+        "diff",
+        "--binary"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.020774249998794403
+    },
+    {
+      "label": "build-mio",
+      "argv": [
+        "go",
+        "build",
+        "-o",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/mio",
+        "./cmd/mio"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.44931820800047717
+    },
+    {
+      "label": "build-go-aot",
+      "argv": [
+        "go",
+        "build",
+        "-o",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/go-aot-seed-only",
+        "./cmd/mochi-aot"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.33325574999980745
+    },
+    {
+      "label": "build-mochi",
+      "argv": [
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/mio",
+        "build",
+        "-o",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/native-aot.mochi",
+        "/Volumes/Sector0/AppData/Mio/mio/selfhost/native-aot"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.3332647499992163
+    },
+    {
+      "label": "build-seed",
+      "argv": [
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/go-aot-seed-only",
+        "-heap-mib",
+        "1024",
+        "-o",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/seed.unsigned",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/native-aot.mochi"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.3400662089989055
+    },
+    {
+      "label": "seed-sign",
+      "argv": [
+        "/usr/bin/codesign",
+        "--force",
+        "--sign",
+        "-",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/seed.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.020989749998989282
+    },
+    {
+      "label": "seed-verify",
+      "argv": [
+        "/usr/bin/codesign",
+        "--verify",
+        "--strict",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/seed.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.009782958000869257
+    },
+    {
+      "label": "seed-to-stage1",
+      "argv": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/seed-to-stage1-work/sandbox.sb",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/seed.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/seed-to-stage1-work",
+      "environment": {
+        "PATH": "",
+        "HOME": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/seed-to-stage1-work"
+      },
+      "exit_code": 0,
+      "wall_seconds": 1.0251022080010443
+    },
+    {
+      "label": "stage1-sign",
+      "argv": [
+        "/usr/bin/codesign",
+        "--force",
+        "--sign",
+        "-",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage1.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.02044416700300644
+    },
+    {
+      "label": "stage1-verify",
+      "argv": [
+        "/usr/bin/codesign",
+        "--verify",
+        "--strict",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage1.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.010508584000490373
+    },
+    {
+      "label": "stage1-to-stage2",
+      "argv": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage1-to-stage2-work/sandbox.sb",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage1.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage1-to-stage2-work",
+      "environment": {
+        "PATH": "",
+        "HOME": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage1-to-stage2-work"
+      },
+      "exit_code": 0,
+      "wall_seconds": 4.894715375001397
+    },
+    {
+      "label": "stage2-sign",
+      "argv": [
+        "/usr/bin/codesign",
+        "--force",
+        "--sign",
+        "-",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage2.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.020610457999282517
+    },
+    {
+      "label": "stage2-verify",
+      "argv": [
+        "/usr/bin/codesign",
+        "--verify",
+        "--strict",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage2.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.010744415998487966
+    },
+    {
+      "label": "stage2-to-stage3",
+      "argv": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage2-to-stage3-work/sandbox.sb",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage2.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage2-to-stage3-work",
+      "environment": {
+        "PATH": "",
+        "HOME": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage2-to-stage3-work"
+      },
+      "exit_code": 0,
+      "wall_seconds": 3.840863665998768
+    },
+    {
+      "label": "stage3-sign",
+      "argv": [
+        "/usr/bin/codesign",
+        "--force",
+        "--sign",
+        "-",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage3.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.019345041997439694
+    },
+    {
+      "label": "stage3-verify",
+      "argv": [
+        "/usr/bin/codesign",
+        "--verify",
+        "--strict",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage3.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.010379792001913302
+    },
+    {
+      "label": "stage3-to-stage4",
+      "argv": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage3-to-stage4-work/sandbox.sb",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage3.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage3-to-stage4-work",
+      "environment": {
+        "PATH": "",
+        "HOME": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage3-to-stage4-work"
+      },
+      "exit_code": 0,
+      "wall_seconds": 1.5267199160007294
+    },
+    {
+      "label": "stage4-sign",
+      "argv": [
+        "/usr/bin/codesign",
+        "--force",
+        "--sign",
+        "-",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.01962620900303591
+    },
+    {
+      "label": "stage4-verify",
+      "argv": [
+        "/usr/bin/codesign",
+        "--verify",
+        "--strict",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.01118437500190339
+    },
+    {
+      "label": "stage4-to-stage5",
+      "argv": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4-to-stage5-work/sandbox.sb",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4-to-stage5-work",
+      "environment": {
+        "PATH": "",
+        "HOME": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4-to-stage5-work"
+      },
+      "exit_code": 0,
+      "wall_seconds": 0.9848218330007512
+    },
+    {
+      "label": "stage5-sign",
+      "argv": [
+        "/usr/bin/codesign",
+        "--force",
+        "--sign",
+        "-",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage5.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.019170249997841893
+    },
+    {
+      "label": "stage5-verify",
+      "argv": [
+        "/usr/bin/codesign",
+        "--verify",
+        "--strict",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage5.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.010944583002128638
+    },
+    {
+      "label": "build-gc-mochi",
+      "argv": [
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/mio",
+        "build",
+        "-o",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder.mochi",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder.mio"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.07670554200012702
+    },
+    {
+      "label": "stage4-to-gc-builder",
+      "argv": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4-to-gc-builder-work/sandbox.sb",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4-to-gc-builder-work",
+      "environment": {
+        "PATH": "",
+        "HOME": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4-to-gc-builder-work"
+      },
+      "exit_code": 0,
+      "wall_seconds": 0.6200424589987961
+    },
+    {
+      "label": "gc-builder-sign",
+      "argv": [
+        "/usr/bin/codesign",
+        "--force",
+        "--sign",
+        "-",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.02193829200041364
+    },
+    {
+      "label": "gc-builder-verify",
+      "argv": [
+        "/usr/bin/codesign",
+        "--verify",
+        "--strict",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.010809457999130245
+    },
+    {
+      "label": "gc-builder-to-compiler",
+      "argv": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder-to-compiler-work/sandbox.sb",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder-to-compiler-work",
+      "environment": {
+        "PATH": "",
+        "HOME": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder-to-compiler-work"
+      },
+      "exit_code": 0,
+      "wall_seconds": 1.1576900000000023
+    },
+    {
+      "label": "gc-compiler-sign",
+      "argv": [
+        "/usr/bin/codesign",
+        "--force",
+        "--sign",
+        "-",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.024119166999298614
+    },
+    {
+      "label": "gc-compiler-verify",
+      "argv": [
+        "/usr/bin/codesign",
+        "--verify",
+        "--strict",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.011589915997319622
+    },
+    {
+      "label": "gc-compiler-to-fixed-point",
+      "argv": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler-to-fixed-point-work/sandbox.sb",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler-to-fixed-point-work",
+      "environment": {
+        "PATH": "",
+        "HOME": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler-to-fixed-point-work"
+      },
+      "exit_code": 0,
+      "wall_seconds": 1.0347684580010537
+    },
+    {
+      "label": "gc-rebuilt-sign",
+      "argv": [
+        "/usr/bin/codesign",
+        "--force",
+        "--sign",
+        "-",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-rebuilt.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.019307167000079062
+    },
+    {
+      "label": "gc-rebuilt-verify",
+      "argv": [
+        "/usr/bin/codesign",
+        "--verify",
+        "--strict",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-rebuilt.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 0,
+      "wall_seconds": 0.011159333000250626
+    },
+    {
+      "label": "gc-debug",
+      "argv": [
+        "/usr/bin/lldb",
+        "--batch",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler.native",
+        "-o",
+        "process launch --stop-at-entry",
+        "-o",
+        "script b = lldb.target.GetModuleAtIndex(0).FindSection('__TEXT').GetLoadAddress(lldb.target); print(lldb.target.BreakpointCreateByAddress(b + 992))",
+        "-o",
+        "continue",
+        "-o",
+        "register read pc x0 x23 x24",
+        "-o",
+        "script import json; f = lldb.frame; p = lldb.process; e = lldb.SBError(); m = f.FindRegister(\"x23\").GetValueAsUnsigned(); r = {\"metadata\": m, \"bump\": p.ReadUnsignedFromMemory(m, 8, e), \"end\": p.ReadUnsignedFromMemory(m + 8, 8, e), \"gc_count\": p.ReadUnsignedFromMemory(m + 16, 8, e), \"shadow_frame\": f.FindRegister(\"x24\").GetValueAsUnsigned(), \"exit_argument\": f.FindRegister(\"x0\").GetValueAsUnsigned()}; assert e.Success(); open('/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-observation.json', \"w\").write(json.dumps(r, indent=2))",
+        "-o",
+        "continue"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-debug-work",
+      "exit_code": 0,
+      "wall_seconds": 5.469509290996939
+    },
+    {
+      "label": "invalid-input",
+      "argv": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4-to-stage5-work/sandbox.sb",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4.native"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/invalid-work",
+      "environment": {
+        "PATH": ""
+      },
+      "exit_code": 0,
+      "wall_seconds": 0.011033583999960683
+    },
+    {
+      "label": "sandbox-denial-probe",
+      "argv": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/sandbox-probe.sb",
+        "/bin/sh",
+        "-c",
+        "exec /usr/bin/true"
+      ],
+      "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+      "exit_code": 1,
+      "wall_seconds": 0.00984045800214517
+    }
+  ],
+  "artifacts": {
+    "seed": {
+      "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/seed.unsigned",
+      "bytes": 2211840,
+      "sha256": "b92e4887ace8be54b76d62f29a708037eb8633edbb04876d0aade65e5ae0794d",
+      "layout": {
+        "segments": [
+          {
+            "name": "__PAGEZERO",
+            "address": 0,
+            "size": 4294967296,
+            "offset": 0,
+            "file_size": 0
+          },
+          {
+            "name": "__TEXT",
+            "address": 4294967296,
+            "size": 2211840,
+            "offset": 0,
+            "file_size": 2211840
+          },
+          {
+            "name": "__LINKEDIT",
+            "address": 4297179136,
+            "size": 16384,
+            "offset": 2211840,
+            "file_size": 0
+          }
+        ],
+        "sections": [
+          {
+            "name": "__text",
+            "segment": "__TEXT",
+            "address": 4294968064,
+            "offset": 768,
+            "size": 2022412
+          },
+          {
+            "name": "__const",
+            "segment": "__TEXT",
+            "address": 4296990480,
+            "offset": 2023184,
+            "size": 183644
+          }
+        ],
+        "entry": 768,
+        "machine_words": 505603,
+        "relocations": 0
+      },
+      "signed": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/seed.native",
+        "bytes": 2247376,
+        "sha256": "c245f39aaa8ef223a6cbd3987969e4b39c4f7459d1015e89c5ec74897100cb9a"
+      },
+      "codesign_strict": true
+    },
+    "stage1": {
+      "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage1.unsigned",
+      "bytes": 2080768,
+      "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d",
+      "layout": {
+        "segments": [
+          {
+            "name": "__PAGEZERO",
+            "address": 0,
+            "size": 4294967296,
+            "offset": 0,
+            "file_size": 0
+          },
+          {
+            "name": "__TEXT",
+            "address": 4294967296,
+            "size": 2080768,
+            "offset": 0,
+            "file_size": 2080768
+          },
+          {
+            "name": "__LINKEDIT",
+            "address": 4297048064,
+            "size": 16384,
+            "offset": 2080768,
+            "file_size": 0
+          }
+        ],
+        "sections": [
+          {
+            "name": "__text",
+            "segment": "__TEXT",
+            "address": 4294968064,
+            "offset": 768,
+            "size": 2066724
+          },
+          {
+            "name": "__const",
+            "segment": "__TEXT",
+            "address": 4297034792,
+            "offset": 2067496,
+            "size": 7330
+          }
+        ],
+        "entry": 768,
+        "machine_words": 516681,
+        "relocations": 0
+      },
+      "signed": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage1.native",
+        "bytes": 2115280,
+        "sha256": "958e1a50c4d6f717f8da25e939742377f4c1fc01c31091267b4b9528932bab1b"
+      },
+      "codesign_strict": true
+    },
+    "stage2": {
+      "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage2.unsigned",
+      "bytes": 2080768,
+      "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d",
+      "layout": {
+        "segments": [
+          {
+            "name": "__PAGEZERO",
+            "address": 0,
+            "size": 4294967296,
+            "offset": 0,
+            "file_size": 0
+          },
+          {
+            "name": "__TEXT",
+            "address": 4294967296,
+            "size": 2080768,
+            "offset": 0,
+            "file_size": 2080768
+          },
+          {
+            "name": "__LINKEDIT",
+            "address": 4297048064,
+            "size": 16384,
+            "offset": 2080768,
+            "file_size": 0
+          }
+        ],
+        "sections": [
+          {
+            "name": "__text",
+            "segment": "__TEXT",
+            "address": 4294968064,
+            "offset": 768,
+            "size": 2066724
+          },
+          {
+            "name": "__const",
+            "segment": "__TEXT",
+            "address": 4297034792,
+            "offset": 2067496,
+            "size": 7330
+          }
+        ],
+        "entry": 768,
+        "machine_words": 516681,
+        "relocations": 0
+      },
+      "signed": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage2.native",
+        "bytes": 2115280,
+        "sha256": "7074e7556f6534efa725c4294ee11f06a281d1f4f5b6bc0b1c7aabdbc77e0bd8"
+      },
+      "codesign_strict": true
+    },
+    "stage3": {
+      "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage3.unsigned",
+      "bytes": 2080768,
+      "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d",
+      "layout": {
+        "segments": [
+          {
+            "name": "__PAGEZERO",
+            "address": 0,
+            "size": 4294967296,
+            "offset": 0,
+            "file_size": 0
+          },
+          {
+            "name": "__TEXT",
+            "address": 4294967296,
+            "size": 2080768,
+            "offset": 0,
+            "file_size": 2080768
+          },
+          {
+            "name": "__LINKEDIT",
+            "address": 4297048064,
+            "size": 16384,
+            "offset": 2080768,
+            "file_size": 0
+          }
+        ],
+        "sections": [
+          {
+            "name": "__text",
+            "segment": "__TEXT",
+            "address": 4294968064,
+            "offset": 768,
+            "size": 2066724
+          },
+          {
+            "name": "__const",
+            "segment": "__TEXT",
+            "address": 4297034792,
+            "offset": 2067496,
+            "size": 7330
+          }
+        ],
+        "entry": 768,
+        "machine_words": 516681,
+        "relocations": 0
+      },
+      "signed": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage3.native",
+        "bytes": 2115280,
+        "sha256": "4541fa20c1edd56958ea05090568907f480875331c02417d61fc58c91ff48252"
+      },
+      "codesign_strict": true
+    },
+    "stage4": {
+      "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4.unsigned",
+      "bytes": 2080768,
+      "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d",
+      "layout": {
+        "segments": [
+          {
+            "name": "__PAGEZERO",
+            "address": 0,
+            "size": 4294967296,
+            "offset": 0,
+            "file_size": 0
+          },
+          {
+            "name": "__TEXT",
+            "address": 4294967296,
+            "size": 2080768,
+            "offset": 0,
+            "file_size": 2080768
+          },
+          {
+            "name": "__LINKEDIT",
+            "address": 4297048064,
+            "size": 16384,
+            "offset": 2080768,
+            "file_size": 0
+          }
+        ],
+        "sections": [
+          {
+            "name": "__text",
+            "segment": "__TEXT",
+            "address": 4294968064,
+            "offset": 768,
+            "size": 2066724
+          },
+          {
+            "name": "__const",
+            "segment": "__TEXT",
+            "address": 4297034792,
+            "offset": 2067496,
+            "size": 7330
+          }
+        ],
+        "entry": 768,
+        "machine_words": 516681,
+        "relocations": 0
+      },
+      "signed": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4.native",
+        "bytes": 2115280,
+        "sha256": "f452ed044414e144638a909860da4c8957be7f3d0f0a1d530e0941a14d3c20ed"
+      },
+      "codesign_strict": true
+    },
+    "stage5": {
+      "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage5.unsigned",
+      "bytes": 2080768,
+      "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d",
+      "layout": {
+        "segments": [
+          {
+            "name": "__PAGEZERO",
+            "address": 0,
+            "size": 4294967296,
+            "offset": 0,
+            "file_size": 0
+          },
+          {
+            "name": "__TEXT",
+            "address": 4294967296,
+            "size": 2080768,
+            "offset": 0,
+            "file_size": 2080768
+          },
+          {
+            "name": "__LINKEDIT",
+            "address": 4297048064,
+            "size": 16384,
+            "offset": 2080768,
+            "file_size": 0
+          }
+        ],
+        "sections": [
+          {
+            "name": "__text",
+            "segment": "__TEXT",
+            "address": 4294968064,
+            "offset": 768,
+            "size": 2066724
+          },
+          {
+            "name": "__const",
+            "segment": "__TEXT",
+            "address": 4297034792,
+            "offset": 2067496,
+            "size": 7330
+          }
+        ],
+        "entry": 768,
+        "machine_words": 516681,
+        "relocations": 0
+      },
+      "signed": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage5.native",
+        "bytes": 2115280,
+        "sha256": "816432ea0c4e8e053543bf01024786740e9dfe9b05aac9d2b24b263fd0ad782e"
+      },
+      "codesign_strict": true
+    },
+    "gc-builder": {
+      "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder.unsigned",
+      "bytes": 2080768,
+      "sha256": "6f461c7eff5506f7fde1369d06871b6f5064f2c7bcf879972efe700d881083f2",
+      "layout": {
+        "segments": [
+          {
+            "name": "__PAGEZERO",
+            "address": 0,
+            "size": 4294967296,
+            "offset": 0,
+            "file_size": 0
+          },
+          {
+            "name": "__TEXT",
+            "address": 4294967296,
+            "size": 2080768,
+            "offset": 0,
+            "file_size": 2080768
+          },
+          {
+            "name": "__LINKEDIT",
+            "address": 4297048064,
+            "size": 16384,
+            "offset": 2080768,
+            "file_size": 0
+          }
+        ],
+        "sections": [
+          {
+            "name": "__text",
+            "segment": "__TEXT",
+            "address": 4294968064,
+            "offset": 768,
+            "size": 2066724
+          },
+          {
+            "name": "__const",
+            "segment": "__TEXT",
+            "address": 4297034792,
+            "offset": 2067496,
+            "size": 7330
+          }
+        ],
+        "entry": 768,
+        "machine_words": 516681,
+        "relocations": 0
+      },
+      "signed": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder.native",
+        "bytes": 2115296,
+        "sha256": "0331bf9a92564d2fda4d22abffe15d03d97b5ec7c69473765438479b7296fb74"
+      },
+      "codesign_strict": true
+    },
+    "gc-compiler": {
+      "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler.unsigned",
+      "bytes": 2080768,
+      "sha256": "e8d41f679ee681aeedb347579b2ebe54574f31cf375f6f1e63e4b8e605683ed9",
+      "layout": {
+        "segments": [
+          {
+            "name": "__PAGEZERO",
+            "address": 0,
+            "size": 4294967296,
+            "offset": 0,
+            "file_size": 0
+          },
+          {
+            "name": "__TEXT",
+            "address": 4294967296,
+            "size": 2080768,
+            "offset": 0,
+            "file_size": 2080768
+          },
+          {
+            "name": "__LINKEDIT",
+            "address": 4297048064,
+            "size": 16384,
+            "offset": 2080768,
+            "file_size": 0
+          }
+        ],
+        "sections": [
+          {
+            "name": "__text",
+            "segment": "__TEXT",
+            "address": 4294968064,
+            "offset": 768,
+            "size": 2066724
+          },
+          {
+            "name": "__const",
+            "segment": "__TEXT",
+            "address": 4297034792,
+            "offset": 2067496,
+            "size": 7330
+          }
+        ],
+        "entry": 768,
+        "machine_words": 516681,
+        "relocations": 0
+      },
+      "signed": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler.native",
+        "bytes": 2115296,
+        "sha256": "1a3fdc404479e8497f81e7fe0010bbf1c3bfed71c52319684f3a420caa7cbaae"
+      },
+      "codesign_strict": true
+    },
+    "gc-rebuilt": {
+      "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-rebuilt.unsigned",
+      "bytes": 2080768,
+      "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d",
+      "layout": {
+        "segments": [
+          {
+            "name": "__PAGEZERO",
+            "address": 0,
+            "size": 4294967296,
+            "offset": 0,
+            "file_size": 0
+          },
+          {
+            "name": "__TEXT",
+            "address": 4294967296,
+            "size": 2080768,
+            "offset": 0,
+            "file_size": 2080768
+          },
+          {
+            "name": "__LINKEDIT",
+            "address": 4297048064,
+            "size": 16384,
+            "offset": 2080768,
+            "file_size": 0
+          }
+        ],
+        "sections": [
+          {
+            "name": "__text",
+            "segment": "__TEXT",
+            "address": 4294968064,
+            "offset": 768,
+            "size": 2066724
+          },
+          {
+            "name": "__const",
+            "segment": "__TEXT",
+            "address": 4297034792,
+            "offset": 2067496,
+            "size": 7330
+          }
+        ],
+        "entry": 768,
+        "machine_words": 516681,
+        "relocations": 0
+      },
+      "signed": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-rebuilt.native",
+        "bytes": 2115296,
+        "sha256": "8cd53e098049284120cac62fe8635e6fde1b7fddf25a28d3841f417e86361e2d"
+      },
+      "codesign_strict": true
+    }
+  },
+  "stages": [
+    {
+      "command": "seed-to-stage1",
+      "compiler": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/seed.native",
+        "bytes": 2247376,
+        "sha256": "c245f39aaa8ef223a6cbd3987969e4b39c4f7459d1015e89c5ec74897100cb9a"
+      },
+      "input": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/native-aot.mochi",
+        "bytes": 186933,
+        "sha256": "a07ee129a44938ab276806be30bc06a85a477ad74c0b4064489ed592b1b0da13"
+      },
+      "output": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage1.unsigned",
+        "bytes": 2080768,
+        "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d"
+      },
+      "sandbox": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/seed-to-stage1-work/sandbox.sb",
+      "exit_code": 0
+    },
+    {
+      "command": "stage1-to-stage2",
+      "compiler": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage1.native",
+        "bytes": 2115280,
+        "sha256": "958e1a50c4d6f717f8da25e939742377f4c1fc01c31091267b4b9528932bab1b"
+      },
+      "input": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/native-aot.mochi",
+        "bytes": 186933,
+        "sha256": "a07ee129a44938ab276806be30bc06a85a477ad74c0b4064489ed592b1b0da13"
+      },
+      "output": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage2.unsigned",
+        "bytes": 2080768,
+        "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d"
+      },
+      "sandbox": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage1-to-stage2-work/sandbox.sb",
+      "exit_code": 0
+    },
+    {
+      "command": "stage2-to-stage3",
+      "compiler": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage2.native",
+        "bytes": 2115280,
+        "sha256": "7074e7556f6534efa725c4294ee11f06a281d1f4f5b6bc0b1c7aabdbc77e0bd8"
+      },
+      "input": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/native-aot.mochi",
+        "bytes": 186933,
+        "sha256": "a07ee129a44938ab276806be30bc06a85a477ad74c0b4064489ed592b1b0da13"
+      },
+      "output": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage3.unsigned",
+        "bytes": 2080768,
+        "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d"
+      },
+      "sandbox": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage2-to-stage3-work/sandbox.sb",
+      "exit_code": 0
+    },
+    {
+      "command": "stage3-to-stage4",
+      "compiler": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage3.native",
+        "bytes": 2115280,
+        "sha256": "4541fa20c1edd56958ea05090568907f480875331c02417d61fc58c91ff48252"
+      },
+      "input": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/native-aot.mochi",
+        "bytes": 186933,
+        "sha256": "a07ee129a44938ab276806be30bc06a85a477ad74c0b4064489ed592b1b0da13"
+      },
+      "output": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4.unsigned",
+        "bytes": 2080768,
+        "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d"
+      },
+      "sandbox": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage3-to-stage4-work/sandbox.sb",
+      "exit_code": 0
+    },
+    {
+      "command": "stage4-to-stage5",
+      "compiler": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4.native",
+        "bytes": 2115280,
+        "sha256": "f452ed044414e144638a909860da4c8957be7f3d0f0a1d530e0941a14d3c20ed"
+      },
+      "input": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/native-aot.mochi",
+        "bytes": 186933,
+        "sha256": "a07ee129a44938ab276806be30bc06a85a477ad74c0b4064489ed592b1b0da13"
+      },
+      "output": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage5.unsigned",
+        "bytes": 2080768,
+        "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d"
+      },
+      "sandbox": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4-to-stage5-work/sandbox.sb",
+      "exit_code": 0
+    },
+    {
+      "command": "stage4-to-gc-builder",
+      "compiler": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4.native",
+        "bytes": 2115280,
+        "sha256": "f452ed044414e144638a909860da4c8957be7f3d0f0a1d530e0941a14d3c20ed"
+      },
+      "input": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder.mochi",
+        "bytes": 186933,
+        "sha256": "274e61b470317d911cbfcb8e02ceca54a01018069dff9e544dc1344152824606"
+      },
+      "output": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder.unsigned",
+        "bytes": 2080768,
+        "sha256": "6f461c7eff5506f7fde1369d06871b6f5064f2c7bcf879972efe700d881083f2"
+      },
+      "sandbox": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/stage4-to-gc-builder-work/sandbox.sb",
+      "exit_code": 0
+    },
+    {
+      "command": "gc-builder-to-compiler",
+      "compiler": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder.native",
+        "bytes": 2115296,
+        "sha256": "0331bf9a92564d2fda4d22abffe15d03d97b5ec7c69473765438479b7296fb74"
+      },
+      "input": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/native-aot.mochi",
+        "bytes": 186933,
+        "sha256": "a07ee129a44938ab276806be30bc06a85a477ad74c0b4064489ed592b1b0da13"
+      },
+      "output": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler.unsigned",
+        "bytes": 2080768,
+        "sha256": "e8d41f679ee681aeedb347579b2ebe54574f31cf375f6f1e63e4b8e605683ed9"
+      },
+      "sandbox": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-builder-to-compiler-work/sandbox.sb",
+      "exit_code": 0
+    },
+    {
+      "command": "gc-compiler-to-fixed-point",
+      "compiler": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler.native",
+        "bytes": 2115296,
+        "sha256": "1a3fdc404479e8497f81e7fe0010bbf1c3bfed71c52319684f3a420caa7cbaae"
+      },
+      "input": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/native-aot.mochi",
+        "bytes": 186933,
+        "sha256": "a07ee129a44938ab276806be30bc06a85a477ad74c0b4064489ed592b1b0da13"
+      },
+      "output": {
+        "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-rebuilt.unsigned",
+        "bytes": 2080768,
+        "sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d"
+      },
+      "sandbox": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-compiler-to-fixed-point-work/sandbox.sb",
+      "exit_code": 0
+    }
+  ],
+  "mochi": {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/native-aot.mochi",
+    "bytes": 186933,
+    "sha256": "a07ee129a44938ab276806be30bc06a85a477ad74c0b4064489ed592b1b0da13"
+  },
+  "gc_witness": {
+    "metadata": 4298342400,
+    "bump": 4566778144,
+    "end": 4566778144,
+    "gc_count": 1,
+    "shadow_frame": 0,
+    "exit_argument": 0
+  },
+  "native_fixed_point": true,
+  "go_aot_invocations": 1,
+  "stage4_executed": true,
+  "stage5_continuation": true
+}

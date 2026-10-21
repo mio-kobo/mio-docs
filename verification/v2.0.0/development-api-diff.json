@@ -1,0 +1,75 @@
+{
+  "baseline": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+  "target": "RC4",
+  "modules": {
+    "kiso/aot/arm64": {
+      "added": [
+        {
+          "name": "assembler_label_word",
+          "after": "koukai waza assembler_label_word(value: Assembler, name: string) -> int64"
+        }
+      ],
+      "removed": [],
+      "changed": [
+        {
+          "name": "Assembler",
+          "before": "koukai kata Assembler { words: []uint32; labels: []Label; fixups: []Fixup; errors: []EncodeError; }",
+          "after": "koukai kata Assembler { words: []uint32; labels: []Label; label_index: [][]int64; fixups: []Fixup; errors: []EncodeError; }"
+        }
+      ]
+    },
+    "kiso/aot/lower": {
+      "added": [
+        {
+          "name": "compile_with_heap",
+          "after": "koukai waza compile_with_heap(file: mochi.File, capacity: int64, gc_stress: bool) -> LowerResult"
+        }
+      ],
+      "removed": [],
+      "changed": [
+        {
+          "name": "LowerError",
+          "before": "koukai sentaku LowerError {\n    UnsupportedConstant;\n    UnsupportedOpcode(int64);\n    UnsupportedClosure;\n    InvalidFunction;\n    InvalidOperand(int64);\n    FrameTooLarge;\n    EncodeFailure;\n    UnsafeType(int64);\n    UnsupportedNative(int64);\n}",
+          "after": "koukai sentaku LowerError {\n    UnsupportedConstant;\n    UnsupportedOpcode(int64);\n    UnsupportedClosure;\n    InvalidFunction;\n    InvalidOperand(int64);\n    FrameTooLarge;\n    EncodeFailure;\n    UnsafeType(int64);\n    UnsupportedNative(int64);\n    BranchOutOfRange(int64);\n}"
+        }
+      ]
+    },
+    "kiso/aot/lower/types": {
+      "added": [
+        {
+          "name": "enum_read_tag",
+          "after": "koukai waza enum_read_tag(file: mochi.File, data: []uint8, at: int64) -> int64"
+        },
+        {
+          "name": "reachable_functions",
+          "after": "koukai waza reachable_functions(file: mochi.File) -> []bool"
+        },
+        {
+          "name": "array_forward_opcode",
+          "after": "koukai waza array_forward_opcode(function: mochi.Function) -> int64"
+        },
+        {
+          "name": "is_float_predicate",
+          "after": "koukai waza is_float_predicate(function: mochi.Function) -> bool"
+        },
+        {
+          "name": "analyze_types_traced",
+          "after": "koukai waza analyze_types_traced(file: mochi.File, trace: bool) -> TypeAnalysis"
+        }
+      ],
+      "removed": [],
+      "changed": [
+        {
+          "name": "TypeArena",
+          "before": "koukai kata TypeArena {\n    parent: []int64;\n    kind: []int64;\n    nullable: []bool;\n    struct_arity: []int64;\n    struct_exact: []bool;\n    fields: [][]int64;\n    array_width: []int64;\n}",
+          "after": "koukai kata TypeArena {\n    parent: []int64;\n    revision: []int64;\n    kind: []int64;\n    nullable: []bool;\n    struct_arity: []int64;\n    struct_exact: []bool;\n    fields: [][]int64;\n    array_width: []int64;\n    integer_descriptor: []int64;\n    targets: [][]int64;\n    variants: [][][]int64;\n    trace: []bool;\n    context: []int64;\n    nullable_origins: [][]int64;\n}"
+        },
+        {
+          "name": "TypeAnalysis",
+          "before": "koukai kata TypeAnalysis {\n    arena: TypeArena;\n    globals: []int64;\n    locals: [][]int64;\n    returns: []int64;\n    blocks: []TypeBlock;\n    error_detail: int64;\n}",
+          "after": "koukai kata TypeAnalysis {\n    arena: TypeArena;\n    globals: []int64;\n    locals: [][]int64;\n    returns: []int64;\n    upvalues: [][]int64;\n    cells: [][]bool;\n    blocks: []TypeBlock;\n    error_detail: int64;\n}"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,123 @@
+yobu "kiso/array";
+
+koukai kata ByteBuffer { data: []uint8; }
+
+koukai waza equal(left: []uint8, right: []uint8) -> bool {
+    moshi (len(left) != len(right)) { kaesu iie; }
+    kaku index = 0;
+    aida (index < len(left)) {
+        moshi (left[index] != right[index]) { kaesu iie; }
+        index = index + 1;
+    }
+    kaesu hai;
+}
+
+koukai waza compare(left: []uint8, right: []uint8) -> int64 {
+    kaku limit = len(left);
+    moshi (len(right) < limit) { limit = len(right); }
+    kaku index = 0;
+    aida (index < limit) {
+        moshi (left[index] < right[index]) { kaesu -1; }
+        moshi (left[index] > right[index]) { kaesu 1; }
+        index = index + 1;
+    }
+    moshi (len(left) < len(right)) { kaesu -1; }
+    moshi (len(left) > len(right)) { kaesu 1; }
+    kaesu 0;
+}
+
+koukai waza index(values: []uint8, target: uint8) -> int64 {
+    kaku current = 0;
+    aida (current < len(values)) {
+        moshi (values[current] == target) { kaesu current; }
+        current = current + 1;
+    }
+    kaesu -1;
+}
+
+koukai waza contains(values: []uint8, target: uint8) -> bool {
+    kaesu index(values, target) >= 0;
+}
+
+koukai waza has_prefix(values: []uint8, prefix: []uint8) -> bool {
+    moshi (len(prefix) > len(values)) { kaesu iie; }
+    kaku index = 0;
+    aida (index < len(prefix)) {
+        moshi (values[index] != prefix[index]) { kaesu iie; }
+        index = index + 1;
+    }
+    kaesu hai;
+}
+
+koukai waza has_suffix(values: []uint8, suffix: []uint8) -> bool {
+    moshi (len(suffix) > len(values)) { kaesu iie; }
+    kaku offset = len(values) - len(suffix);
+    kaku index = 0;
+    aida (index < len(suffix)) {
+        moshi (values[offset + index] != suffix[index]) { kaesu iie; }
+        index = index + 1;
+    }
+    kaesu hai;
+}
+
+koukai waza copy(destination: []uint8, source: []uint8) -> int64 {
+    kaku count = len(destination);
+    moshi (len(source) < count) { count = len(source); }
+    kaku index = 0;
+    aida (index < count) {
+        destination[index] = source[index];
+        index = index + 1;
+    }
+    kaesu count;
+}
+
+koukai waza fill(values: []uint8, value: uint8) -> unit {
+    kaku index = 0;
+    aida (index < len(values)) {
+        values[index] = value;
+        index = index + 1;
+    }
+    kaesu;
+}
+
+koukai waza clone(values: []uint8) -> []uint8 {
+    kaesu array.clone(values);
+}
+
+koukai waza new_buffer() -> ByteBuffer {
+    kaesu ByteBuffer { data: array.with_capacity[uint8](0) };
+}
+
+koukai waza buffer_with_capacity(capacity: int64) -> ByteBuffer {
+    kaesu ByteBuffer { data: array.with_capacity[uint8](capacity) };
+}
+
+koukai waza write_byte(buffer: ByteBuffer, value: uint8) -> unit {
+    array.push(buffer.data, value);
+}
+
+koukai waza write(buffer: ByteBuffer, source: []uint8) -> int64 {
+    kaku count = len(source);
+    array.append_all(buffer.data, source);
+    kaesu count;
+}
+
+koukai waza buffer_len(buffer: ByteBuffer) -> int64 {
+    kaesu len(buffer.data);
+}
+
+koukai waza buffer_capacity(buffer: ByteBuffer) -> int64 {
+    kaesu array.capacity(buffer.data);
+}
+
+koukai waza reset(buffer: ByteBuffer) -> unit {
+    array.truncate(buffer.data, 0);
+}
+
+koukai waza buffer_clone(buffer: ByteBuffer) -> ByteBuffer {
+    kaesu ByteBuffer { data: array.clone(buffer.data) };
+}
+
+koukai waza buffer_bytes(buffer: ByteBuffer) -> []uint8 {
+    kaesu array.clone(buffer.data);
+}

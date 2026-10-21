@@ -1,0 +1,6 @@
+
+> mio-docs@0.1.0 check:links
+> node scripts/check-links.mjs
+
+Checked 168 links and all navigation entries across 66 routes.
+HTTP 200, heading, rendered local links and anchors verified for 66 pages.

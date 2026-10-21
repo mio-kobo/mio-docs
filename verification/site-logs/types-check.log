@@ -1,0 +1,7 @@
+
+> mio-docs@0.1.0 types:check
+> next typegen && tsc --noEmit
+
+[MDX] generated files in 0.958958999999993ms
+Generating route types...
+✓ Types generated successfully

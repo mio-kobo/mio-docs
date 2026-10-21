@@ -1,0 +1,35 @@
+{
+  "owner": "A",
+  "note": "A-owned navigation only. Add these legacy/unversioned technical routes if desired; do not automatically copy into Stable v1.0. Source scope is the documented Mio-2 snapshot.",
+  "sections": {
+    "reference": [
+      "collections",
+      "functions",
+      "modules",
+      "syntax",
+      "types"
+    ],
+    "kiso": [
+      "array",
+      "bytes",
+      "compiler-modules",
+      "convert",
+      "encoding-binary",
+      "encoding-mochi",
+      "fs",
+      "io",
+      "math",
+      "path",
+      "string",
+      "testing",
+      "utf8"
+    ],
+    "tooling": [
+      "cli",
+      "verification"
+    ],
+    "internals": [
+      "gc"
+    ]
+  }
+}

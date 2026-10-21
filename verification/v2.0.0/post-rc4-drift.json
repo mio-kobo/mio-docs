@@ -1,0 +1,11 @@
+{
+  "note": "Current source differences from RC4; excluded from candidate documentation claims",
+  "files": [
+    ".github/workflows/ci.yml",
+    ".github/workflows/release-candidate.yml",
+    "docs/releases/v2.0.0-checklist.md",
+    "docs/releases/v2.0.0.md",
+    "scripts/prepare-release.py",
+    "scripts/smoke-release.py"
+  ]
+}

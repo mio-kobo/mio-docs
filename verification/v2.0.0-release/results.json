@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "kind": "documentation-release-verification",
+  "version": "2.0.0",
+  "tag": "v2.0.0",
+  "sourceCommit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+  "releaseUrl": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+  "publishedAt": "2026-10-21T08:31:25Z",
+  "verifiedOn": "2026-10-21",
+  "host": {
+    "os": "macOS 15.6.1",
+    "architecture": "arm64",
+    "go": "go1.25.9 darwin/arm64",
+    "node": "v24.15.0"
+  },
+  "artifact": {
+    "name": "mio-2.0.0-darwin-arm64.tar.gz",
+    "size": 3645944,
+    "sha256": "15a7a65c048e4bac4dc1e792c2106df979d7e68ca28b36e213343c8d1e3dde2e",
+    "checksumFile": "SHA256SUMS",
+    "checksumResult": "OK",
+    "signature": "ad-hoc; codesign --verify --strict passed for mio, mochi-aot, mochi-aot-audit and native-aot",
+    "notarization": "none"
+  },
+  "cli": {
+    "versionOutput": "Mio 2.0.0",
+    "helpOutput": "usage lists version, help, check, run, build, exec, disasm, test, lsp"
+  },
+  "commands": [
+    {
+      "id": "hello-vm",
+      "argv": ["mio", "check", "hello.mio"],
+      "exit": 0,
+      "stdout": "check passed\n",
+      "stderr": ""
+    },
+    {
+      "id": "hello-run",
+      "argv": ["mio", "run", "hello.mio"],
+      "exit": 0,
+      "stdout": "Hello, Mio!\n",
+      "stderr": ""
+    },
+    {
+      "id": "hello-build",
+      "argv": ["mio", "build", "-o", "hello.mochi", "hello.mio"],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "id": "hello-exec",
+      "argv": ["mio", "exec", "hello.mochi"],
+      "exit": 0,
+      "stdout": "Hello, Mio!\n",
+      "stderr": ""
+    },
+    {
+      "id": "hello-disasm",
+      "argv": ["mio", "disasm", "hello.mochi"],
+      "exit": 0,
+      "stdout": "Globals: 0\nConstants (1):\n  [0] string \"Hello, Mio!\"\nInstructions:\n0000 OpConstant 0\n0003 OpChant\nFunctions (0):\n",
+      "stderr": ""
+    },
+    {
+      "id": "math",
+      "argv": ["mio", "run", "math.mio"],
+      "exit": 0,
+      "stdout": "12\n6\n",
+      "stderr": ""
+    },
+    {
+      "id": "array",
+      "argv": ["mio", "run", "arrays.mio"],
+      "exit": 0,
+      "stdout": "3\n30\n",
+      "stderr": ""
+    },
+    {
+      "id": "string",
+      "argv": ["mio", "run", "strings.mio"],
+      "exit": 0,
+      "stdout": "Mio v2.0.0\n3\n",
+      "stderr": ""
+    },
+    {
+      "id": "convert",
+      "argv": ["mio", "run", "convert.mio"],
+      "exit": 0,
+      "stdout": "43\n",
+      "stderr": ""
+    },
+    {
+      "id": "fs",
+      "argv": ["mio", "run", "fs-example.mio"],
+      "exit": 0,
+      "stdout": "hello\n",
+      "stderr": ""
+    },
+    {
+      "id": "binary",
+      "argv": ["mio", "run", "binary.mio"],
+      "exit": 0,
+      "stdout": "258\n",
+      "stderr": ""
+    },
+    {
+      "id": "function",
+      "argv": ["mio", "run", "functions.mio"],
+      "exit": 0,
+      "stdout": "42\n",
+      "stderr": ""
+    },
+    {
+      "id": "directory-entry",
+      "argv": ["mio", "run", "pkg"],
+      "exit": 0,
+      "stdout": "9\n",
+      "stderr": ""
+    },
+    {
+      "id": "test-human",
+      "argv": ["mio", "test", "./testing/mathdemo"],
+      "exit": 0,
+      "stdout": "Starting tests testing/mathdemo\n--- PASS: test_add (0.000s)\n--- PASS: test_twice (0.000s)\nTests complete: 2 passed, 0 failed\ntotal duration: 0.004s\n",
+      "stderr": ""
+    },
+    {
+      "id": "test-json",
+      "argv": ["mio", "test", "./testing/mathdemo", "--format=json"],
+      "exit": 0,
+      "stdout": "{\"schema_version\":1,\"packages\":[{\"path\":\"testing/mathdemo\",\"status\":\"passed\",\"tests\":[{\"name\":\"test_add\",\"path\":\"testing/mathdemo/math_test.mio\",\"status\":\"passed\",\"duration_ms\":0.034},{\"name\":\"test_twice\",\"path\":\"testing/mathdemo/math_test.mio\",\"status\":\"passed\",\"duration_ms\":0.012}]}],\"summary\":{\"status\":\"passed\",\"passed\":2,\"failed\":0,\"duration_ms\":3.13}}\n",
+      "stderr": ""
+    },
+    {
+      "id": "test-filter",
+      "argv": ["mio", "test", "./testing/mathdemo", "--run=^test_add$"],
+      "exit": 0,
+      "stdout": "Starting tests testing/mathdemo\n--- PASS: test_add (0.000s)\nTests complete: 1 passed, 0 failed\ntotal duration: 0.004s\n",
+      "stderr": ""
+    },
+    {
+      "id": "diagnostic-short",
+      "argv": ["mio", "check", "--format=short", "--color=never", "bad.mio"],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "bad.mio:1:17: error[E0301]: 变量 \"x\" 的初始化类型不正确\n"
+    },
+    {
+      "id": "diagnostic-json",
+      "argv": ["mio", "check", "--format=json", "--color=never", "bad.mio"],
+      "exit": 1,
+      "stdout": "{\"code\":\"E0301\",\"severity\":\"error\",\"message\":\"变量 \\\"x\\\" 的初始化类型不正确\",\"path\":\"bad.mio\",\"location\":{\"offset\":16,\"line\":1,\"column\":17},\"labels\":[{\"span\":{\"start\":{\"offset\":16,\"line\":1,\"column\":17},\"end\":{\"offset\":20,\"line\":1,\"column\":21}},\"primary\":true}],\"expected\":\"int64\",\"actual\":\"string\"}\n",
+      "stderr": ""
+    },
+    {
+      "id": "unknown-command",
+      "argv": ["mio", "nope"],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage written to stderr"
+    },
+    {
+      "id": "mochi-aot",
+      "argv": ["mochi-aot", "-o", "hello-go-native", "-target", "darwin-arm64", "-heap-mib", "1", "hello.mochi"],
+      "exit": 0,
+      "stdout": "wrote hello-go-native (16384 bytes, unsigned Mach-O arm64)\non macOS, run: codesign --force --sign - hello-go-native\n",
+      "stderr": "",
+      "post": {
+        "codesignVerify": "passed",
+        "runStdout": "Hello, Mio!\n"
+      }
+    },
+    {
+      "id": "mochi-aot-heap-0",
+      "argv": ["mochi-aot", "-o", "x", "-heap-mib", "0", "hello.mochi"],
+      "exit": 1,
+      "stderr": "mochi-aot: heap-mib must be between 1 and 1024\n"
+    },
+    {
+      "id": "mochi-aot-heap-1025",
+      "argv": ["mochi-aot", "-o", "x", "-heap-mib", "1025", "hello.mochi"],
+      "exit": 1,
+      "stderr": "mochi-aot: heap-mib must be between 1 and 1024\n"
+    },
+    {
+      "id": "mochi-aot-target",
+      "argv": ["mochi-aot", "-o", "x", "-target", "linux-arm64", "hello.mochi"],
+      "exit": 1,
+      "stderr": "mochi-aot: usage: ..."
+    },
+    {
+      "id": "native-aot",
+      "argv": ["native-aot"],
+      "cwdConfig": {
+        "input.config": "absolute path to hello.mochi, no trailing newline",
+        "output.config": "absolute new path, no trailing newline"
+      },
+      "exit": 0,
+      "stdout": "native-aot: ok\n176\n16384\n",
+      "stderr": "",
+      "post": {
+        "newArtifact": true,
+        "chmod": "+x",
+        "codesignVerify": "passed",
+        "runStdout": "Hello, Mio!\n"
+      }
+    },
+    {
+      "id": "native-aot-decode-failure",
+      "argv": ["native-aot"],
+      "input": "truncated MOCHI file",
+      "exit": 0,
+      "stdout": "native-aot: decode failed\n",
+      "stderr": "",
+      "post": {
+        "newArtifact": false
+      }
+    },
+    {
+      "id": "lsp",
+      "argv": ["mio", "lsp", "--stdio"],
+      "protocol": {
+        "initialize": {
+          "serverInfo": {"name": "MioCore", "version": "2.0.0"},
+          "capabilities": ["completionProvider", "definitionProvider", "documentSymbolProvider", "hoverProvider", "positionEncoding", "referencesProvider", "signatureHelpProvider", "textDocumentSync"]
+        },
+        "shutdownExit": 0
+      }
+    },
+    {
+      "id": "source-build",
+      "argv": ["go", "build", "-o", "mio", "./cmd/mio"],
+      "source": "git archive 0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+      "go": "go1.25.9 darwin/arm64",
+      "exit": 0,
+      "versionOutput": "Mio 2.0.0"
+    }
+  ],
+  "tutorialVerifier": {
+    "command": "DOCS_VERSION=v2.0 MIO_CLI=<release>/mio MIO_BUNKO=<release>/bunko node scripts/check-examples.mjs",
+    "exit": 0,
+    "stdout": "Verified 15 complete Mio programs and 5 exercises: type checking and exact stdout. Hello build/exec/disasm passed."
+  },
+  "notRun": [
+    "full M18 Seed -> Stage 1..5 chain",
+    "256 MiB GC witness and LLDB observation",
+    "full Go test suite and AOT race",
+    "Intel Mac, Linux, Windows",
+    "VS Code Extension Host and JetBrains IDE end-to-end",
+    "Developer ID signing, notarization, Gatekeeper first-open"
+  ]
+}

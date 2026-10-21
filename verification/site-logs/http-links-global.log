@@ -1,0 +1,14 @@
+
+> mio-docs@0.1.0 check:links
+> node scripts/check-links.mjs
+
+Checked 180 links and all navigation entries across 66 routes.
+file:///Volumes/Sector0/AppData/Mio/mio-docs/scripts/check-links.mjs:53
+    if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+                            ^
+
+Error: /docs/internals: HTTP 404
+    at file:///Volumes/Sector0/AppData/Mio/mio-docs/scripts/check-links.mjs:53:29
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+
+Node.js v24.15.0

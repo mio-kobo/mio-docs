@@ -1,0 +1,658 @@
+[
+  {
+    "path": "content/docs/bunko.md",
+    "beforeSha256": "2ae49e63f8bb8c195d5903cade7d6db7f33ea53aa697405628350612d233c5ef",
+    "afterSha256": "2ae49e63f8bb8c195d5903cade7d6db7f33ea53aa697405628350612d233c5ef",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/editors.mdx",
+    "beforeSha256": "6a9eb4600c82fc3ab7825f8e16c14ed2ec0fe63830020b0ae8475a474212c542",
+    "afterSha256": "6a9eb4600c82fc3ab7825f8e16c14ed2ec0fe63830020b0ae8475a474212c542",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/internals/gc.mdx",
+    "beforeSha256": "f5229805eaa9863ae34b114d4f198600f00100ab03346006d23f51678d8cd485",
+    "afterSha256": "f5229805eaa9863ae34b114d4f198600f00100ab03346006d23f51678d8cd485",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/kiso/array.mdx",
+    "beforeSha256": "052fad3392e9a7c083c69c1d33b038f2f2c62c5fdaa6fe9bfd6a5f0fad80a51c",
+    "afterSha256": "052fad3392e9a7c083c69c1d33b038f2f2c62c5fdaa6fe9bfd6a5f0fad80a51c",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/bytes.mdx",
+    "beforeSha256": "e548ad5708071423dbe1aea07e51b9798f4da8c267f08c84ce481d60525ded1f",
+    "afterSha256": "e548ad5708071423dbe1aea07e51b9798f4da8c267f08c84ce481d60525ded1f",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/compiler-modules.mdx",
+    "beforeSha256": "c4d77d093444591768d0712677a5e8a130ea3efe751df8de6e6c467831f41df2",
+    "afterSha256": "c4d77d093444591768d0712677a5e8a130ea3efe751df8de6e6c467831f41df2",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/convert.mdx",
+    "beforeSha256": "5146585cc3cea0b3fc0eeddb2c2f73e7570dcecfc4647a5a2d14822977bed6da",
+    "afterSha256": "5146585cc3cea0b3fc0eeddb2c2f73e7570dcecfc4647a5a2d14822977bed6da",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/encoding-binary.mdx",
+    "beforeSha256": "f33aa5a6a4ea77646975819db86edbf028da0186d42f95536272bf7b58d7ae06",
+    "afterSha256": "f33aa5a6a4ea77646975819db86edbf028da0186d42f95536272bf7b58d7ae06",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/encoding-mochi.mdx",
+    "beforeSha256": "9e10f039c18ea2051549a0e847c0d2bfc0168287efb9d8a93351be4f5d290ea2",
+    "afterSha256": "9e10f039c18ea2051549a0e847c0d2bfc0168287efb9d8a93351be4f5d290ea2",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/fs.mdx",
+    "beforeSha256": "e355e35cf7ab47c46d2b547c54846389e1950063291ab18e975aa4497b23c1a9",
+    "afterSha256": "e355e35cf7ab47c46d2b547c54846389e1950063291ab18e975aa4497b23c1a9",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/io.mdx",
+    "beforeSha256": "25a1ec0886b7ca7b84701dcb631921aea152e25287a108b5595b330961402cce",
+    "afterSha256": "25a1ec0886b7ca7b84701dcb631921aea152e25287a108b5595b330961402cce",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/math.mdx",
+    "beforeSha256": "bbd240761a53f937556f19aeb8b3a663271477a29ef58a01330cd1f9714a326e",
+    "afterSha256": "bbd240761a53f937556f19aeb8b3a663271477a29ef58a01330cd1f9714a326e",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/path.mdx",
+    "beforeSha256": "ae41e71b59466e5be98fee317527049216f93cda84ae8d92dab42a15c8025c0c",
+    "afterSha256": "ae41e71b59466e5be98fee317527049216f93cda84ae8d92dab42a15c8025c0c",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/string.mdx",
+    "beforeSha256": "34603600799d8192c3416d5a5a20fa171e8039d2c0e72cac7a8a546c17e7e748",
+    "afterSha256": "34603600799d8192c3416d5a5a20fa171e8039d2c0e72cac7a8a546c17e7e748",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/testing.mdx",
+    "beforeSha256": "18900f7d7efc474c535b8edafbc57603010afc28f96c08b4d61322ae3241b647",
+    "afterSha256": "18900f7d7efc474c535b8edafbc57603010afc28f96c08b4d61322ae3241b647",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/kiso/utf8.mdx",
+    "beforeSha256": "68650ba71691e8c7601f4dd3efd3236454604477b480a2eadf18c5d4510d6693",
+    "afterSha256": "68650ba71691e8c7601f4dd3efd3236454604477b480a2eadf18c5d4510d6693",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11",
+      "CQ07",
+      "CQ08"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。 对应 V2 API 页已按固定声明重建；旧工作树开发签名不作为该版本承诺。"
+  },
+  {
+    "path": "content/docs/language.md",
+    "beforeSha256": "ee20d4a3e8a00e155d1e18980be8832ca4a1846b5b9ccb9eed236dc7a5d1b72e",
+    "afterSha256": "ee20d4a3e8a00e155d1e18980be8832ca4a1846b5b9ccb9eed236dc7a5d1b72e",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/lsp.md",
+    "beforeSha256": "719224886d7786fb3ef4dcd039195c264926fc80851991df00420ce5f94d54de",
+    "afterSha256": "719224886d7786fb3ef4dcd039195c264926fc80851991df00420ce5f94d54de",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/mochi.md",
+    "beforeSha256": "b62f817af72f6332b827d98c921d491ed3f051590c01d519fb2c7d64d0e9a6c7",
+    "afterSha256": "b62f817af72f6332b827d98c921d491ed3f051590c01d519fb2c7d64d0e9a6c7",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/native-aot.mdx",
+    "beforeSha256": "9b07549450972712bece0b13c1b51b57b9397459617b18fa09c3ce2efba8f980",
+    "afterSha256": "9b07549450972712bece0b13c1b51b57b9397459617b18fa09c3ce2efba8f980",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/reference/collections.mdx",
+    "beforeSha256": "c193d184c36c565a774063c51113084c26ca02e4f4116aa77626c06d51858ee7",
+    "afterSha256": "c193d184c36c565a774063c51113084c26ca02e4f4116aa77626c06d51858ee7",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/reference/functions.mdx",
+    "beforeSha256": "9c712f4ef3c5531d99e40680ebdb802aa201da7761ca1c59fd456da10771a0dd",
+    "afterSha256": "9c712f4ef3c5531d99e40680ebdb802aa201da7761ca1c59fd456da10771a0dd",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/reference/modules.mdx",
+    "beforeSha256": "7c14ddc3e393cb3fb011e84c459b5d57b445749ab1a60263e26d6faefabaa513",
+    "afterSha256": "7c14ddc3e393cb3fb011e84c459b5d57b445749ab1a60263e26d6faefabaa513",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/reference/syntax.mdx",
+    "beforeSha256": "5f27ae6511651165c7313d4a0c20cf4d209badd107fe18c0a9dc21a3e039a09a",
+    "afterSha256": "5f27ae6511651165c7313d4a0c20cf4d209badd107fe18c0a9dc21a3e039a09a",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/reference/types.mdx",
+    "beforeSha256": "184b5be6750c7fb6b5851e2341cc4cc3e563b825e45ed4ad5ca8d0dc715ab670",
+    "afterSha256": "184b5be6750c7fb6b5851e2341cc4cc3e563b825e45ed4ad5ca8d0dc715ab670",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/tooling/cli.mdx",
+    "beforeSha256": "c2c34ebf8649c8e36f0efe3739d4e1799b65bb287a28768da45a5828781984cc",
+    "afterSha256": "c2c34ebf8649c8e36f0efe3739d4e1799b65bb287a28768da45a5828781984cc",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/tooling/verification.mdx",
+    "beforeSha256": "31e67f99079336f61098de76be86424d0fb7ed9fd3e9faa2aa7f3a7d9db4ab44",
+    "afterSha256": "31e67f99079336f61098de76be86424d0fb7ed9fd3e9faa2aa7f3a7d9db4ab44",
+    "priorityFindings": [
+      "CQ02",
+      "CQ11"
+    ],
+    "status": "retained-with-boundary",
+    "action": "保留为来源独立的旧迁移资料；完整 Mio 程序在 V2 干净提交重新执行，不改写既有历史证据。"
+  },
+  {
+    "path": "content/docs/v1.0/getting-started.mdx",
+    "beforeSha256": "355506ad448dc2cc855f5f7e8dab02ac35e817aea8bfc9ad5357e637602bd1e8",
+    "afterSha256": "355506ad448dc2cc855f5f7e8dab02ac35e817aea8bfc9ad5357e637602bd1e8",
+    "priorityFindings": [
+      "CQ03",
+      "CQ04",
+      "CQ05",
+      "CQ06"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v1.0/index.mdx",
+    "beforeSha256": "8e831a365592583090951bf4b0572b3d986423e315e271e2c8b6742f7bbaf68d",
+    "afterSha256": "8e831a365592583090951bf4b0572b3d986423e315e271e2c8b6742f7bbaf68d",
+    "priorityFindings": [
+      "CQ03",
+      "CQ01",
+      "CQ07",
+      "CQ09"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v1.0/internals/index.mdx",
+    "beforeSha256": "b2cba1494623f50eeef65c2570cfb75439715b52b86774c5a5e22f5903653cc6",
+    "afterSha256": "b2cba1494623f50eeef65c2570cfb75439715b52b86774c5a5e22f5903653cc6",
+    "priorityFindings": [
+      "CQ03",
+      "CQ01",
+      "CQ07",
+      "CQ09"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v1.0/kiso/index.mdx",
+    "beforeSha256": "52b6d995150ceb6d1a8896f07a317193da6ba5b1188b1aacf645d0735696cd2f",
+    "afterSha256": "52b6d995150ceb6d1a8896f07a317193da6ba5b1188b1aacf645d0735696cd2f",
+    "priorityFindings": [
+      "CQ03",
+      "CQ01",
+      "CQ07",
+      "CQ09"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v1.0/learn/collections.mdx",
+    "beforeSha256": "83a75e628503e80ad421b5e30927a954f19621dcecd2a930446ee8a7073db1b9",
+    "afterSha256": "83a75e628503e80ad421b5e30927a954f19621dcecd2a930446ee8a7073db1b9",
+    "priorityFindings": [
+      "CQ03",
+      "CQ04",
+      "CQ05",
+      "CQ06"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v1.0/learn/control-flow.mdx",
+    "beforeSha256": "891947a8526523437653ce5002a2fc10466cf665839a11f59af9e9c812ae73d1",
+    "afterSha256": "891947a8526523437653ce5002a2fc10466cf665839a11f59af9e9c812ae73d1",
+    "priorityFindings": [
+      "CQ03",
+      "CQ04",
+      "CQ05",
+      "CQ06"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v1.0/learn/functions.mdx",
+    "beforeSha256": "1723a512882a1638c04186d41d6a28f3d975d96080e2cb005541793dedafd982",
+    "afterSha256": "1723a512882a1638c04186d41d6a28f3d975d96080e2cb005541793dedafd982",
+    "priorityFindings": [
+      "CQ03",
+      "CQ04",
+      "CQ05",
+      "CQ06"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v1.0/learn/index.mdx",
+    "beforeSha256": "c62fe955c3358c5cd88113e111d671457f72abc7af5f01f2765c9faedac74b5f",
+    "afterSha256": "c62fe955c3358c5cd88113e111d671457f72abc7af5f01f2765c9faedac74b5f",
+    "priorityFindings": [
+      "CQ03",
+      "CQ04",
+      "CQ05",
+      "CQ06"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v1.0/learn/modules.mdx",
+    "beforeSha256": "f7e3b2d5e1d4c7174d9d2a54a8592d942bf01db3febfb8bf332524efb15ada10",
+    "afterSha256": "f7e3b2d5e1d4c7174d9d2a54a8592d942bf01db3febfb8bf332524efb15ada10",
+    "priorityFindings": [
+      "CQ03",
+      "CQ04",
+      "CQ05",
+      "CQ06"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v1.0/learn/variables.mdx",
+    "beforeSha256": "05cbeb7bbd4bc0bf3424ab333ba14914fad2e2c29122b238a7717d63f70e7dc8",
+    "afterSha256": "05cbeb7bbd4bc0bf3424ab333ba14914fad2e2c29122b238a7717d63f70e7dc8",
+    "priorityFindings": [
+      "CQ03",
+      "CQ04",
+      "CQ05",
+      "CQ06"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v1.0/reference/index.mdx",
+    "beforeSha256": "a5a9b531562e5102569b4429c7a161d295d90a572928b69e9876b06dfc9ee6da",
+    "afterSha256": "a5a9b531562e5102569b4429c7a161d295d90a572928b69e9876b06dfc9ee6da",
+    "priorityFindings": [
+      "CQ03",
+      "CQ01",
+      "CQ07",
+      "CQ09"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v1.0/tooling/index.mdx",
+    "beforeSha256": "77bcf9e17b3e8cf1f3b09779f188582ffa897e2b7a6e921be30d625fe2bb735a",
+    "afterSha256": "77bcf9e17b3e8cf1f3b09779f188582ffa897e2b7a6e921be30d625fe2bb735a",
+    "priorityFindings": [
+      "CQ03",
+      "CQ01",
+      "CQ07",
+      "CQ09"
+    ],
+    "status": "pending-review",
+    "action": "冻结原文与锁不变；对应完整修订稿与新增页置 .docs-drafts/corrections/v1.0，等待维护者审核。"
+  },
+  {
+    "path": "content/docs/v2.0/development.mdx",
+    "beforeSha256": "731d0666d907e3334e8e157427b0fd7e87831e559b2ca310b7c05e961d13c4e8",
+    "afterSha256": "731d0666d907e3334e8e157427b0fd7e87831e559b2ca310b7c05e961d13c4e8",
+    "priorityFindings": [
+      "CQ01",
+      "CQ07",
+      "CQ09",
+      "CQ10"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/getting-started.mdx",
+    "beforeSha256": "4bb91c9b33643f0b8e27afed76b30c1b34d169d4452f1779dff604f1f226bb8c",
+    "afterSha256": "26758f7537ee19af7267c1ee42250b71b55f8989395ad52cdd05ca66fe01b6f3",
+    "priorityFindings": [
+      "CQ04",
+      "CQ05",
+      "CQ06",
+      "CQ11"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/index.mdx",
+    "beforeSha256": "6031139186f9a3f7fc4119112cb3aed5187d82f70d78c2cd282849bb058dfc75",
+    "afterSha256": "17b1891aaa55acd53fc189ace924ebbbe9138ceb7899810d84acc5fca0a13f5f",
+    "priorityFindings": [
+      "CQ01",
+      "CQ07",
+      "CQ09",
+      "CQ10"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/internals/index.mdx",
+    "beforeSha256": "b2cba1494623f50eeef65c2570cfb75439715b52b86774c5a5e22f5903653cc6",
+    "afterSha256": "be7e5120e5886c2ec58ec0fef8ef398fac675364dcd40b1cf0014ae1ef53aa9e",
+    "priorityFindings": [
+      "CQ01",
+      "CQ07",
+      "CQ09",
+      "CQ10"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/kiso/index.mdx",
+    "beforeSha256": "c272733eeb9a7c44e04c0aad901c6546933ece22d60a46ac9276b1d38c5ba0f3",
+    "afterSha256": "5a98dbc193d9741934b02d2bbc209ad2c0bd671214d541760c36d2568bbba692",
+    "priorityFindings": [
+      "CQ01",
+      "CQ07",
+      "CQ09",
+      "CQ10"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/learn/collections.mdx",
+    "beforeSha256": "fdc69149c867abe892e8be4b67890de94a263654334412bbc694d336956d0522",
+    "afterSha256": "e2977b472f9ac2297f9ded2a902101b1a998e0e30be2b3e5d12796d79b9ed815",
+    "priorityFindings": [
+      "CQ04",
+      "CQ05",
+      "CQ06",
+      "CQ11"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/learn/control-flow.mdx",
+    "beforeSha256": "986dc167e3be80e2ad20608b64ba4abe5fd500bdc8cd1454b8bcdc4e5979bf7b",
+    "afterSha256": "b588b5bd336c7ffa9b8533c892b74df35d0a4887de2296c271ae3f61bcd09116",
+    "priorityFindings": [
+      "CQ04",
+      "CQ05",
+      "CQ06",
+      "CQ11"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/learn/functions.mdx",
+    "beforeSha256": "e9568724690b80399cdccef611bdde52fc0969cea481cf2ed4c81a2d08db96dd",
+    "afterSha256": "b1675a018dd2935a2de2f17d797307efac82e5f1431969beb6021b17c8401cf8",
+    "priorityFindings": [
+      "CQ04",
+      "CQ05",
+      "CQ06",
+      "CQ11"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/learn/index.mdx",
+    "beforeSha256": "ee365a03b3c73f400c319ed1c266f7f1a60c83ae38cbc74830096852a5c943c6",
+    "afterSha256": "fb2dff5d2f9182bc54d01e93ad6fbf1efbf801a3489ece43540d4b10932b410e",
+    "priorityFindings": [
+      "CQ04",
+      "CQ05",
+      "CQ06",
+      "CQ11"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/learn/modules.mdx",
+    "beforeSha256": "042a489620c0bc05d5922e53795cbd7a2ea04b5ff6f1ce0839d3fb2d97330be2",
+    "afterSha256": "16c9fc96fbf3d16d1716c9639d053bc4e3cd242a8a00c489672e99f9e14875cf",
+    "priorityFindings": [
+      "CQ04",
+      "CQ05",
+      "CQ06",
+      "CQ11"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/learn/variables.mdx",
+    "beforeSha256": "61c22539ca66c01368747be4fe5e6a3aeabf1be44c6a77b79799f6706cf1aea7",
+    "afterSha256": "b83741a3c268f67cb31d17d5bbcf6d0ea9abcfefa2694bdea1d4a5c5c666616a",
+    "priorityFindings": [
+      "CQ04",
+      "CQ05",
+      "CQ06",
+      "CQ11"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/reference/index.mdx",
+    "beforeSha256": "181b87787a8c852f62d3b03a5fb9cba89e761177fd80675d63882ab81fce2de3",
+    "afterSha256": "997e3198a0ca7bf65c0c783b1b0e7efd5ac16c7402b969dc1283e25ac4b30611",
+    "priorityFindings": [
+      "CQ01",
+      "CQ07",
+      "CQ09",
+      "CQ10"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/v2.0/tooling/index.mdx",
+    "beforeSha256": "3829e996a15bf2e0b9bd30d1464874798e95bfa1fc138b852cd5edeade602001",
+    "afterSha256": "843ced0041afa8226e18f664a92ad1db0dbffa4492094cfa6a3d2a71ad55af91",
+    "priorityFindings": [
+      "CQ01",
+      "CQ07",
+      "CQ09",
+      "CQ10"
+    ],
+    "status": "revised",
+    "action": "固定提交核验并精修，栏目补足版本化技术正文；具体页面内容及哈希见 QUALITY_SOURCES.json。"
+  },
+  {
+    "path": "content/docs/versions.mdx",
+    "beforeSha256": "ee7a44d3ea34ee38f6f2aa6ec58b6ea3d296db4fec5c28f24ea9313f66a313b9",
+    "afterSha256": "ee7a44d3ea34ee38f6f2aa6ec58b6ea3d296db4fec5c28f24ea9313f66a313b9",
+    "priorityFindings": [],
+    "status": "retained-with-boundary",
+    "action": "核对版本注册表与冻结逻辑，未改动版本政策。"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "gh",
+    "api",
+    "repos/mio-kobo/mio/releases/tags/v2.0.0"
+  ],
+  "exit": 1,
+  "stdout": "{\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/releases/releases#get-a-release-by-tag-name\",\"status\":\"404\"}",
+  "stderr": "gh: Not Found (HTTP 404)\n",
+  "interpretation": "Read-only observation; HTTP 404 can mean absent or inaccessible, not proof of no release."
+}

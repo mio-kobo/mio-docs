@@ -1,0 +1,369 @@
+[
+  {
+    "name": "m18-bootstrap",
+    "argv": [
+      "python3",
+      "scripts/check-native-aot-fixed-point.py",
+      "--evidence",
+      "build/v2.0.0-preparation/m18",
+      "--gc-witness"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792507775.376183,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 22.595770835876465
+  },
+  {
+    "name": "full",
+    "argv": [
+      "go",
+      "test",
+      "./...",
+      "-count=1",
+      "-timeout",
+      "30m"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792507776.508121,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 289.27336716651917
+  },
+  {
+    "name": "aot-race",
+    "argv": [
+      "go",
+      "test",
+      "-race",
+      "./internal/aot/...",
+      "-count=1",
+      "-timeout",
+      "30m"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792507777.6721191,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 810.9812247753143
+  },
+  {
+    "name": "m18-tests",
+    "argv": [
+      "env",
+      "MIO_M18_EVIDENCE_DIR=/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18",
+      "go",
+      "test",
+      "./internal/aot",
+      "-run",
+      "^TestM18",
+      "-count=1",
+      "-v",
+      "-timeout",
+      "30m"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792507823.886838,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 24.89072012901306
+  },
+  {
+    "name": "m18-race",
+    "argv": [
+      "env",
+      "MIO_M18_EVIDENCE_DIR=/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18-race",
+      "go",
+      "test",
+      "-race",
+      "./internal/aot",
+      "-run",
+      "^TestM18",
+      "-count=1",
+      "-v",
+      "-timeout",
+      "30m"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792507825.06673,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 152.27781987190247
+  },
+  {
+    "name": "vet",
+    "argv": [
+      "go",
+      "vet",
+      "./..."
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792507826.191892,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 0.32077503204345703
+  },
+  {
+    "name": "pure-mio",
+    "argv": [
+      "go",
+      "run",
+      "./cmd/mio",
+      "test",
+      "./..."
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792507834.472939,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 1.0326128005981445
+  },
+  {
+    "name": "pure-mio-aot",
+    "argv": [
+      "go",
+      "run",
+      "./cmd/mio",
+      "test",
+      "./bunko/kiso/aot/..."
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792507835.563245,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 0.3876159191131592
+  },
+  {
+    "name": "decoder-golden",
+    "argv": [
+      "go",
+      "test",
+      "./internal/aot",
+      "-run",
+      "^TestM17PureMioDecoderGoldenVMAndNative$",
+      "-count=1",
+      "-v",
+      "-timeout",
+      "30m"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792507930.953145,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 4.3108601570129395
+  },
+  {
+    "name": "candidate-build",
+    "argv": [
+      "bash",
+      "scripts/build-release.sh",
+      "--output",
+      "build/v2.0.0-rc1",
+      "--m18-evidence",
+      "build/v2.0.0-preparation/m18"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508209.397695,
+    "status": "FAIL",
+    "exit_code": 1,
+    "seconds": 6.485018968582153
+  },
+  {
+    "name": "candidate-build-rc2",
+    "argv": [
+      "bash",
+      "scripts/build-release.sh",
+      "--output",
+      "build/v2.0.0-rc2",
+      "--m18-evidence",
+      "build/v2.0.0-preparation/m18"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508234.584167,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 5.187219858169556
+  },
+  {
+    "name": "runtime-regressions",
+    "argv": [
+      "go",
+      "test",
+      "./internal/aot/...",
+      "-run",
+      "GCStress|ShadowFrame|M13a|M17ePureMio(Array|Heap|ReadAll|Large|Arena)|M10|M11",
+      "-count=1",
+      "-v",
+      "-timeout",
+      "30m"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508235.714401,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 62.04647397994995
+  },
+  {
+    "name": "source-native-bootstrap",
+    "argv": [
+      "bash",
+      "build/v2.0.0-preparation/source-snapshot/scripts/check-native-bootstrap.sh"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508279.113573,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 172.6766119003296
+  },
+  {
+    "name": "aot-full",
+    "argv": [
+      "go",
+      "test",
+      "./internal/aot/...",
+      "-count=1",
+      "-timeout",
+      "30m"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508280.108842,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 185.96000623703003
+  },
+  {
+    "name": "checksums",
+    "argv": [
+      "shasum",
+      "-a",
+      "256",
+      "-c",
+      "build/v2.0.0-rc2/SHA256SUMS"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508281.276314,
+    "status": "FAIL",
+    "exit_code": 1,
+    "seconds": 0.013714075088500977
+  },
+  {
+    "name": "checksums-rc2",
+    "argv": [
+      "sh",
+      "-c",
+      "cd build/v2.0.0-rc2 && shasum -a 256 -c SHA256SUMS"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508305.4986181,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 0.03162884712219238
+  },
+  {
+    "name": "whitespace",
+    "argv": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508305.613088,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 0.02418208122253418
+  },
+  {
+    "name": "safety",
+    "argv": [
+      "python3",
+      "build/v2.0.0-preparation/check-safety.py"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508330.452436,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 0.2240300178527832
+  },
+  {
+    "name": "candidate-build-rc3",
+    "argv": [
+      "bash",
+      "scripts/build-release.sh",
+      "--output",
+      "build/v2.0.0-rc3",
+      "--m18-evidence",
+      "build/v2.0.0-preparation/m18"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508371.265193,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 3.2271668910980225
+  },
+  {
+    "name": "candidate-build-final",
+    "argv": [
+      "bash",
+      "scripts/build-release.sh",
+      "--output",
+      "build/v2.0.0-rc4",
+      "--m18-evidence",
+      "build/v2.0.0-preparation/m18"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508423.053686,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 3.3291752338409424
+  },
+  {
+    "name": "checksums-final",
+    "argv": [
+      "sh",
+      "-c",
+      "cd build/v2.0.0-rc4 && shasum -a 256 -c SHA256SUMS"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508455.499116,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 0.02523207664489746
+  },
+  {
+    "name": "safety-final",
+    "argv": [
+      "python3",
+      "build/v2.0.0-preparation/check-safety.py"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508455.547931,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 0.19345307350158691
+  },
+  {
+    "name": "whitespace-final",
+    "argv": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508455.764454,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 0.01808929443359375
+  },
+  {
+    "name": "final-audit",
+    "argv": [
+      "python3",
+      "build/v2.0.0-preparation/final-audit.py"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "started": 1792508644.139734,
+    "status": "PASS",
+    "exit_code": 0,
+    "seconds": 0.12749791145324707
+  }
+]

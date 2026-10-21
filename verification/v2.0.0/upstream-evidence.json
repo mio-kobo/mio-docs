@@ -1,0 +1,555 @@
+[
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/acceptance.json",
+    "sha256": "fce0a614b0ce07a234ad406b1186568141a3a7674073ce0ff5434c61a316e8a5",
+    "bytes": 9167,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/aot-full.json",
+    "sha256": "e78626168d83a28b2e0eecc5e3eb7c05becffdfdb0fccaceb1fef52179d34df7",
+    "bytes": 280,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/aot-race.json",
+    "sha256": "7a676f11ccd36f3d924b0f6c0e4a4e47ed12d98c39e317c25c20668251fb574f",
+    "bytes": 293,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/candidate-build-final.json",
+    "sha256": "5afd52d5988e0c2bdc24eb23b67fb86ddf7e28658db4099ec5d59f4f6850a1f9",
+    "bytes": 344,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/candidate-build-rc2.json",
+    "sha256": "75b5017a4ab8193fb49b93568f0345d0866e4b7050373bcac38c65ad7274013a",
+    "bytes": 341,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/candidate-build-rc3.json",
+    "sha256": "940a9ec14219eb6b4511e54c62f6c1bec63d984f36cc7bd21c94aa268dd1a742",
+    "bytes": 342,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/candidate-build.json",
+    "sha256": "b1da34d321d07cd2ac01c01ef6b46354b53f301afe74c1368c3925ffa12d0fea",
+    "bytes": 337,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/checksums-final.json",
+    "sha256": "9c956b7c55281cf6fa413ba59171812b232b86b02568a33d95fb6ad7502528b6",
+    "bytes": 275,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/checksums-rc2.json",
+    "sha256": "1e1426527dd184c2d43c611617a33031dfd4c45089c86160047b89f373408ea0",
+    "bytes": 274,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/checksums.json",
+    "sha256": "b090a3bfd78ed8bb04a3b0c210c0014f0e0d0f0ffb6492be1d8d25125833938a",
+    "bytes": 272,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/decoder-golden.json",
+    "sha256": "43c31fc69a86f34c97724656e9b25304acb8f42d3f6d1283711f202b82e36342",
+    "bytes": 352,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/final-audit.json",
+    "sha256": "2423739abcbcbcd1f68f3992ecae9baf2cb7cf5f162af2fe98ec59b1b2bf9650",
+    "bytes": 255,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/full.json",
+    "sha256": "03d86ab199bb68dc11b93081bbd5a182ae781882ea55c52fe2616355643fdb82",
+    "bytes": 263,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/generated-files.json",
+    "sha256": "8658ed1cc9aff1a0f0944f93c0ea7a894229cde7b216e0fd9f6ce838c70a4e1d",
+    "bytes": 267605,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/differential-abi-12/result.json",
+    "sha256": "54f5b33b51e0eb0fa31db0ccf495901d0e0f7184b330bc8ec8a4315cc1ea6cee",
+    "bytes": 237,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/differential-closure-cell/result.json",
+    "sha256": "0c18e12057df7b45db1edf23d882ed150e95264653160f46beff7cd69530d2cc",
+    "bytes": 240,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/differential-nativefs/result.json",
+    "sha256": "553e057702fb0d9f976fa2061aaf25c66cd7f3cd610fc9bb35bc92c8e5b0ceca",
+    "bytes": 284,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/differential-types/result.json",
+    "sha256": "c588377f1bddee3afa27176c8c40438ddd1f8a22703df6cc7bc80f39e60146b1",
+    "bytes": 270,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/gc-observation.json",
+    "sha256": "fc50ab1fcbf433039f60bffc4c6161a2739660e48f4fa7c5e208615a5abba14e",
+    "bytes": 131,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/provenance.json",
+    "sha256": "6300a1345ed04b9353b0ecb56eb7fa246e816c04c11b12d8f7d7a5afce5bbb3f",
+    "bytes": 38372,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/source-manifest.json",
+    "sha256": "6d4687c428ae94d9336be3380d21c755855604202682513f64c205236c34bc67",
+    "bytes": 55919,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18/vm-work/result.json",
+    "sha256": "7b1c3d5f10a4c653531b74dfc9a9d5356ddc55eb84b88b01148455eb271c7fb4",
+    "bytes": 191,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18-bootstrap.json",
+    "sha256": "01df692c15bf538ca4b75d2d66d299f947a9175701c44fa5e950616797f9b8a5",
+    "bytes": 330,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18-race/differential-abi-12/result.json",
+    "sha256": "54f5b33b51e0eb0fa31db0ccf495901d0e0f7184b330bc8ec8a4315cc1ea6cee",
+    "bytes": 237,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18-race/differential-closure-cell/result.json",
+    "sha256": "0c18e12057df7b45db1edf23d882ed150e95264653160f46beff7cd69530d2cc",
+    "bytes": 240,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18-race/differential-nativefs/result.json",
+    "sha256": "7b376ebffe9e1b938f909a5032104dd1d40eff30771d73cadd4870157067cb3d",
+    "bytes": 284,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18-race/differential-types/result.json",
+    "sha256": "c588377f1bddee3afa27176c8c40438ddd1f8a22703df6cc7bc80f39e60146b1",
+    "bytes": 270,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18-race/inputs.json",
+    "sha256": "fd8c35420ce0d7234a7d9bccdb69739621ffa6577f2af5695c175d7a7be14712",
+    "bytes": 100,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18-race/vm-work/result.json",
+    "sha256": "e3ed11a5604200c4f0e03d93a809e842d2d3d5c9c9a40cf55603e4ee5fa7d693",
+    "bytes": 193,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18-race.json",
+    "sha256": "6e1e621de413836f94f2c5ebaae99c551ad0e3a784863f0ab4dfc2598d772d27",
+    "bytes": 432,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18-tests.json",
+    "sha256": "8354fbc70784dec451ef07c7f60ad5a53db6e7ea4c001f22c723944500bc4be3",
+    "bytes": 415,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/pure-mio-aot.json",
+    "sha256": "46e5d8e02692778295a4c01def0b95bdc6e7cc7b475437cc0892c2bdb1a225d8",
+    "bytes": 271,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/pure-mio.json",
+    "sha256": "707e1d63f6cc8acd346e510c107a5ec5883d5aa53e70dfe32381628a911d4269",
+    "bytes": 252,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/runtime-regressions.json",
+    "sha256": "a70460c57d0c8879bc0260322e0940dc065438297123ba709227e5ce7633e929",
+    "bytes": 397,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/safety-details.json",
+    "sha256": "7e80a1921efb066f1f6b85345dcecc3f528dbfe33589dff238a341da3a5e31f4",
+    "bytes": 1849,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/safety-final.json",
+    "sha256": "0e91852e6efb87e099bb938352c67dd358b2eb9669f5399306ce21f4d4aee3a8",
+    "bytes": 257,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/safety.json",
+    "sha256": "3c65253de78530e62c4ef98a704e9d62f2a18e7d9ead949496059ab88324ed81",
+    "bytes": 250,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/source-native-bootstrap.json",
+    "sha256": "9a5be10aac931fb43829aa91a17753c7fb149f06fb72ab3e86df7446a957e7ec",
+    "bytes": 297,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/validation-summary.json",
+    "sha256": "d65281fa1628c489f5c0d9b70993b29cdc636b97fcd5a771aafde274db1f5e24",
+    "bytes": 7975,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/vet.json",
+    "sha256": "235cd29bf98be1a5938705e2bd1d8f4d5afaec3d9d393cbb57d0747e91836d62",
+    "bytes": 219,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/whitespace-final.json",
+    "sha256": "6711c63c755064c9a556762e3d55b875af333ccd7bf60507f69db1d935319485",
+    "bytes": 236,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/whitespace.json",
+    "sha256": "7b1ed5d8633c12cd911dc244b32128da2190288d9f33ce7ab3333c4629b3ea41",
+    "bytes": 230,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "RC4 preparation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/final-verify-smoke.json",
+    "sha256": "006de5d0e6a60379c1577835ae2a0efcfd39157f4f2eefb5a651bab0290ee839",
+    "bytes": 10612,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18/differential-abi-12/result.json",
+    "sha256": "54f5b33b51e0eb0fa31db0ccf495901d0e0f7184b330bc8ec8a4315cc1ea6cee",
+    "bytes": 237,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18/differential-closure-cell/result.json",
+    "sha256": "0c18e12057df7b45db1edf23d882ed150e95264653160f46beff7cd69530d2cc",
+    "bytes": 240,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18/differential-nativefs/result.json",
+    "sha256": "aee83b3cff3cdf1501c1b9b5d692bbd7831e7a5c9ec3e0a82616060ccaafb7b7",
+    "bytes": 284,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18/differential-types/result.json",
+    "sha256": "c588377f1bddee3afa27176c8c40438ddd1f8a22703df6cc7bc80f39e60146b1",
+    "bytes": 270,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18/gc-observation.json",
+    "sha256": "dc3eba07f198dd3edb3790422f743c629da9a8bc42b595b385dcb2bb5052a810",
+    "bytes": 131,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18/provenance.json",
+    "sha256": "93435adbdab80c8be1c81bae0da2441899a91c845f8b8cfc203a9d6a27e8f9f3",
+    "bytes": 39077,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18/source-manifest.json",
+    "sha256": "6d4687c428ae94d9336be3380d21c755855604202682513f64c205236c34bc67",
+    "bytes": 55919,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18/vm-work/result.json",
+    "sha256": "8184ae810d20a89ecb31d22dab9d01379e0972c366e42dde1898ce5f4d546b2e",
+    "bytes": 192,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18-race/differential-abi-12/result.json",
+    "sha256": "54f5b33b51e0eb0fa31db0ccf495901d0e0f7184b330bc8ec8a4315cc1ea6cee",
+    "bytes": 237,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18-race/differential-closure-cell/result.json",
+    "sha256": "0c18e12057df7b45db1edf23d882ed150e95264653160f46beff7cd69530d2cc",
+    "bytes": 240,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18-race/differential-nativefs/result.json",
+    "sha256": "3680dfc5a23e703fe8f0bcdb7bb114e340d644eac117cc5e38c1d573055e4364",
+    "bytes": 284,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18-race/differential-types/result.json",
+    "sha256": "c588377f1bddee3afa27176c8c40438ddd1f8a22703df6cc7bc80f39e60146b1",
+    "bytes": 270,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/m18-race/vm-work/result.json",
+    "sha256": "7746bb9ef39f1a9dfe8c70efe403b53da7f9dc8468c33b2a2a3d4d5455aea980",
+    "bytes": 193,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/preservation.json",
+    "sha256": "1b4abf716d11e68474d5b074d5c19c67004585de84fe6d813b788aa8bbb0fb78",
+    "bytes": 236,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc4-smoke.json",
+    "sha256": "2d77bc7dd430e7730515447a97d8d3ac59e8d11c64d9d7ac87d1acb9d7b15e12",
+    "bytes": 10470,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5/commands.json",
+    "sha256": "da6a8ab7e2454607ab41fdadc80b23991a7f2ea1b5b6f06b3f527c139f6c7e1b",
+    "bytes": 11124,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5/install-smoke.json",
+    "sha256": "f2b3c5c763a04245cdd87788e9ebd606abb06afcce7d7269cd6cc650dbb65bef",
+    "bytes": 10598,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5/mio-2.0.0-rc.5-darwin-arm64/BUILD-INFO.json",
+    "sha256": "5db2b34956d02375bcc24da513b40d9dd8474d707e9424f84a84f474c81c32e8",
+    "bytes": 2006,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5/mio-2.0.0-rc.5-darwin-arm64/MANIFEST.json",
+    "sha256": "3910fe97a5619aa6bd69641c430a6c34755aef42816bdbfb0d95cc7ef3d55ec9",
+    "bytes": 19378,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5/release-provenance.json",
+    "sha256": "386e03e57c9d621dd6045f0fac52d3b782d4af7dcf0a63f675ce05d7bb9aa3e9",
+    "bytes": 12628,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5/source-manifest.json",
+    "sha256": "b30fe88dc692248554abba27c0683dcc1134ef91eecf00adebe90176830e351c",
+    "bytes": 46175,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5-final/commands.json",
+    "sha256": "9116563952c3bedba850ed191504b2235936df76027d092165b35b1776fec794",
+    "bytes": 11313,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5-final/install-smoke.json",
+    "sha256": "464e7e72c413e8f0fa068315b2ca4a725a8c7bd7465d3e5583758bde34ffee46",
+    "bytes": 10604,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5-final/mio-2.0.0-rc.5-darwin-arm64/BUILD-INFO.json",
+    "sha256": "ffdb5b57e93c4b94be42c0478a0f07d43a6e9d735ff6600c6892a56ebe80edb7",
+    "bytes": 2006,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5-final/mio-2.0.0-rc.5-darwin-arm64/MANIFEST.json",
+    "sha256": "f77bc26a0a90fa9cc5c60721dd00dbb8ed0b5885f1b15049748ca3efd9f812cc",
+    "bytes": 19378,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5-final/release-provenance.json",
+    "sha256": "4563640b9597e53e03a4545133a97d0b69806b83d4b4ff80e45bcae5e6006821",
+    "bytes": 12634,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/rc5-final/source-manifest.json",
+    "sha256": "ed6852a91f666576f425d89a4d0ac50a21c5d4907b917d3a5b5d2d3b635d73cd",
+    "bytes": 46175,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/results.json",
+    "sha256": "7f0959a8defeec20045184e847505d94a8e781a97f410513d9e3537f33084ce0",
+    "bytes": 1459,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/transported/release-provenance.json",
+    "sha256": "386e03e57c9d621dd6045f0fac52d3b782d4af7dcf0a63f675ce05d7bb9aa3e9",
+    "bytes": 12628,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/transported/verify-smoke.json",
+    "sha256": "006d75c81492c7f957a76bea4cb9edb942c814a409d34452580d7818ff37a594",
+    "bytes": 10606,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/validated-package/commands.json",
+    "sha256": "750af80101005ef18f7355a064869c7c8498981d37fd3e63ba8823f927e89909",
+    "bytes": 11545,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/validated-package/install-smoke.json",
+    "sha256": "f2dce624e5e456786cdd5aed64621e160ac50251305a8db8c59e5ccdc54d5729",
+    "bytes": 10612,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/validated-package/mio-2.0.0-rc.5-darwin-arm64/BUILD-INFO.json",
+    "sha256": "811c9ab427cdb4b81069359778236e28271dd8c7d8ed6dc748632aa478e52c91",
+    "bytes": 2006,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/validated-package/mio-2.0.0-rc.5-darwin-arm64/MANIFEST.json",
+    "sha256": "a19cd5616bb364b0026c1984117fcc918dd21a68ede28ad9d217a284ad5c0391",
+    "bytes": 19379,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/validated-package/release-provenance.json",
+    "sha256": "a91b7c71b413e5cbac1d38b1af69bbc50670aa8c10243969e4424cb0f39ea50d",
+    "bytes": 12642,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  },
+  {
+    "path": "/Volumes/Sector0/AppData/Mio/mio/build/release-automation-audit/validated-package/source-manifest.json",
+    "sha256": "d6604ceffddf363ef40cb606694b2d7e80d693d34cf74397f3e54ac833f9ce3b",
+    "bytes": 46175,
+    "scope": "existing core evidence, not executed by docs task",
+    "phase": "post-RC4 release automation"
+  }
+]

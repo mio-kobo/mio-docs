@@ -1,0 +1,47 @@
+{
+  "verifiedAt": "2026-10-20T14:13:46.883855+00:00",
+  "build": {
+    "status": "passed",
+    "command": "npm run build",
+    "log": "verification/site-logs/build.log"
+  },
+  "types": {
+    "status": "passed",
+    "command": "npm run types:check",
+    "log": "verification/site-logs/types-check.log"
+  },
+  "staticLinks": {
+    "status": "passed",
+    "command": "npm run check:links",
+    "links": 168,
+    "routes": 66,
+    "log": "verification/site-logs/links-static.log"
+  },
+  "ownedPageHttp": {
+    "status": "passed",
+    "report": "verification/http-reference.json",
+    "pages": 27
+  },
+  "globalHttp": {
+    "status": "passed",
+    "command": "BASE_URL=http://127.0.0.1:3217 npm run check:links",
+    "log": "verification/site-logs/http-links-final.log",
+    "owner": "A",
+    "observations": [
+      "First run: /docs/getting-started HTTP 404",
+      "Second run: /docs/internals HTTP 404",
+      "Direct Node fetch: /docs/tooling redirected to /docs/v1.0/tooling,%20/docs/v1.0/tooling and returned 404",
+      "Direct Node fetch: /docs/kiso redirected to /docs/v1.0/kiso,%20/docs/v1.0/kiso and returned 404"
+    ],
+    "action": "Final production server recheck passed all routes, rendered local links and anchors. Earlier legacy redirect failures retained below as historical observations; no open B-owned link failure.",
+    "routes": 66
+  },
+  "sources": {
+    "package.json": "b848c2787f365fad2733dcb945dd177f8d6826666f10fbc41db5b3309429f5f5",
+    "package-lock.json": "8b87fd8fc85e20181dd8cb54821be59928ce733a27a2c2abc766b0259c576e57",
+    "next.config.mjs": "1fb3d5c93bcd25643de571612300580220ccd3db24882730d39a7773f660bf5a",
+    "lib/render-doc.tsx": "8c291d138fe14147bb304be58c552a78285e476196ec1bedab433727d16eb1ce",
+    "lib/versions.mjs": "339321ad6671e45bb5dae850f4098a3bac230d81fb489c5258924dc3198c1823",
+    "content/versions.json": "2d35157104b3508420274bdb450ff6d5423febe30305e8fde6785c272a5b73c2"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "content/docs/v1.0/getting-started.mdx": "355506ad448dc2cc855f5f7e8dab02ac35e817aea8bfc9ad5357e637602bd1e8",
+  "content/docs/v1.0/index.mdx": "8e831a365592583090951bf4b0572b3d986423e315e271e2c8b6742f7bbaf68d",
+  "content/docs/v1.0/meta.json": "244ff28f29f5c9bd74c8d306383da453211940c8643ad9f06620fe8ca75cf293",
+  "content/docs/v1.0/internals/index.mdx": "b2cba1494623f50eeef65c2570cfb75439715b52b86774c5a5e22f5903653cc6",
+  "content/docs/v1.0/internals/meta.json": "afb5753d9600594fda27d56ee23cbaa1b110511930f0f64115e7a48881d66d3a",
+  "content/docs/v1.0/kiso/index.mdx": "52b6d995150ceb6d1a8896f07a317193da6ba5b1188b1aacf645d0735696cd2f",
+  "content/docs/v1.0/kiso/meta.json": "bec915c46220ae760a6c5d7ce31a22f1720e3797dd1e0a3ba474c6a78d98f48b",
+  "content/docs/v1.0/learn/collections.mdx": "83a75e628503e80ad421b5e30927a954f19621dcecd2a930446ee8a7073db1b9",
+  "content/docs/v1.0/learn/control-flow.mdx": "891947a8526523437653ce5002a2fc10466cf665839a11f59af9e9c812ae73d1",
+  "content/docs/v1.0/learn/functions.mdx": "1723a512882a1638c04186d41d6a28f3d975d96080e2cb005541793dedafd982",
+  "content/docs/v1.0/learn/index.mdx": "c62fe955c3358c5cd88113e111d671457f72abc7af5f01f2765c9faedac74b5f",
+  "content/docs/v1.0/learn/meta.json": "7317d88628771f3688cd0041615cffec5f6983a7f1ccd47fde5e7d1feb45286c",
+  "content/docs/v1.0/learn/modules.mdx": "f7e3b2d5e1d4c7174d9d2a54a8592d942bf01db3febfb8bf332524efb15ada10",
+  "content/docs/v1.0/learn/variables.mdx": "05cbeb7bbd4bc0bf3424ab333ba14914fad2e2c29122b238a7717d63f70e7dc8",
+  "content/docs/v1.0/reference/index.mdx": "a5a9b531562e5102569b4429c7a161d295d90a572928b69e9876b06dfc9ee6da",
+  "content/docs/v1.0/reference/meta.json": "5f43c9a051bfe84da505e6b1d20a30b3b3bc6a33ba418797eae64d66f389449e",
+  "content/docs/v1.0/tooling/index.mdx": "77bcf9e17b3e8cf1f3b09779f188582ffa897e2b7a6e921be30d625fe2bb735a",
+  "content/docs/v1.0/tooling/meta.json": "597303e4cc962c44a4bee118ba6487ba983d36cb0f0d12106e265d481f8d29b8",
+  "content/version-locks/v1.0.json": "2b42a267287c36c733ad27d995c53e9336d3db0c07017d361658f1335757cf20",
+  "content/versions.json": "2d35157104b3508420274bdb450ff6d5423febe30305e8fde6785c272a5b73c2",
+  ".docs-drafts/corrections/review.json": "35d7cf482a7f84920c93b02350bde1e601f59e93ff6e15a88219cfd885e35c33"
+}

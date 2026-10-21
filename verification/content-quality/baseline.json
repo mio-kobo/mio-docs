@@ -1,0 +1,965 @@
+[
+  {
+    "path": "content/docs/bunko.md",
+    "sha256": "2ae49e63f8bb8c195d5903cade7d6db7f33ea53aa697405628350612d233c5ef",
+    "characters": 1246,
+    "headings": [
+      "基础 API",
+      "编译工具链 API",
+      "支持边界"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/kiso/array",
+      "/docs/kiso/bytes",
+      "/docs/kiso/string",
+      "/docs/kiso/utf8",
+      "/docs/kiso/path",
+      "/docs/kiso/convert",
+      "/docs/kiso/math",
+      "/docs/kiso/io",
+      "/docs/kiso/fs",
+      "/docs/kiso/encoding-binary",
+      "/docs/kiso/encoding-mochi",
+      "/docs/kiso/testing",
+      "/docs/kiso/compiler-modules",
+      "/docs/tooling/verification"
+    ]
+  },
+  {
+    "path": "content/docs/editors.mdx",
+    "sha256": "6a9eb4600c82fc3ab7825f8e16c14ed2ec0fe63830020b0ae8475a474212c542",
+    "characters": 2124,
+    "headings": [
+      "VS Code",
+      "JetBrains",
+      "来源"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/tooling/verification"
+    ]
+  },
+  {
+    "path": "content/docs/internals/gc.mdx",
+    "sha256": "f5229805eaa9863ae34b114d4f198600f00100ab03346006d23f51678d8cd485",
+    "characters": 1462,
+    "headings": [
+      "Go AOT Runtime",
+      "纯 Mio Runtime",
+      "能验证什么",
+      "来源"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/array.mdx",
+    "sha256": "052fad3392e9a7c083c69c1d33b038f2f2c62c5fdaa6fe9bfd6a5f0fad80a51c",
+    "characters": 1948,
+    "headings": [
+      "函数",
+      "make",
+      "with_capacity",
+      "push",
+      "capacity",
+      "reserve",
+      "clone",
+      "truncate",
+      "append_all",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/bytes.mdx",
+    "sha256": "e548ad5708071423dbe1aea07e51b9798f4da8c267f08c84ce481d60525ded1f",
+    "characters": 3166,
+    "headings": [
+      "公开类型与常量",
+      "函数",
+      "equal",
+      "compare",
+      "index",
+      "contains",
+      "has_prefix",
+      "has_suffix",
+      "copy",
+      "fill",
+      "clone",
+      "new_buffer",
+      "buffer_with_capacity",
+      "write_byte",
+      "write",
+      "buffer_len",
+      "buffer_capacity",
+      "reset",
+      "buffer_clone",
+      "buffer_bytes",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/compiler-modules.mdx",
+    "sha256": "c4d77d093444591768d0712677a5e8a130ea3efe751df8de6e6c467831f41df2",
+    "characters": 11339,
+    "headings": [
+      "kiso/aot/arm64",
+      "kiso/aot/macho",
+      "kiso/aot/lower",
+      "kiso/aot/lower/types",
+      "kiso/aot/lower/nativefs"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/convert.mdx",
+    "sha256": "5146585cc3cea0b3fc0eeddb2c2f73e7570dcecfc4647a5a2d14822977bed6da",
+    "characters": 2174,
+    "headings": [
+      "函数",
+      "parse_int",
+      "parse_uint",
+      "format_int",
+      "format_uint",
+      "parse_bool",
+      "format_bool",
+      "parse_float64",
+      "parse_float32",
+      "format_float64",
+      "format_float32",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/encoding-binary.mdx",
+    "sha256": "f33aa5a6a4ea77646975819db86edbf028da0186d42f95536272bf7b58d7ae06",
+    "characters": 14135,
+    "headings": [
+      "公开类型与常量",
+      "函数",
+      "read_u8",
+      "read_u16_le",
+      "read_u16_be",
+      "read_u32_le",
+      "read_u32_be",
+      "read_i8",
+      "read_i16_le",
+      "read_i16_be",
+      "read_i32_le",
+      "read_i32_be",
+      "read_i64_le",
+      "read_i64_be",
+      "write_u8",
+      "write_u16_le",
+      "write_u16_be",
+      "write_u32_le",
+      "write_u32_be",
+      "write_i8",
+      "write_i16_le",
+      "write_i16_be",
+      "write_i32_le",
+      "write_i32_be",
+      "write_i64_le",
+      "write_i64_be",
+      "write_var_u32",
+      "read_var_u32",
+      "write_var_i64",
+      "read_var_i64",
+      "reader",
+      "reader_offset",
+      "reader_remaining",
+      "reader_eof",
+      "reader_seek",
+      "reader_skip",
+      "reader_read_u8",
+      "reader_read_u16_le",
+      "reader_read_u16_be",
+      "reader_read_u32_le",
+      "reader_read_u32_be",
+      "reader_read_u64_le",
+      "reader_read_u64_be",
+      "reader_read_bytes",
+      "writer",
+      "writer_offset",
+      "writer_reserve",
+      "writer_write_bytes",
+      "writer_write_length_prefixed",
+      "writer_write_u8",
+      "writer_write_u16_le",
+      "writer_write_u16_be",
+      "writer_write_u32_le",
+      "writer_write_u32_be",
+      "writer_write_u64_le",
+      "writer_write_u64_be",
+      "writer_patch_u16_be",
+      "writer_patch_u16_le",
+      "writer_patch_u32_be",
+      "writer_patch_u32_le",
+      "writer_patch_u64_be",
+      "writer_patch_u64_le",
+      "writer_bytes",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/encoding-mochi.mdx",
+    "sha256": "9e10f039c18ea2051549a0e847c0d2bfc0168287efb9d8a93351be4f5d290ea2",
+    "characters": 2966,
+    "headings": [
+      "公开类型与常量",
+      "函数",
+      "decode",
+      "error_code",
+      "canonical_bytes",
+      "summarize",
+      "decode_file",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/fs.mdx",
+    "sha256": "e355e35cf7ab47c46d2b547c54846389e1950063291ab18e975aa4497b23c1a9",
+    "characters": 3931,
+    "headings": [
+      "公开类型与常量",
+      "函数",
+      "open_read",
+      "open_write",
+      "open_append",
+      "read",
+      "write",
+      "close",
+      "reader",
+      "writer",
+      "read_all",
+      "write_all",
+      "stat",
+      "exists",
+      "is_file",
+      "is_dir",
+      "create_dir",
+      "read_dir",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/io.mdx",
+    "sha256": "25a1ec0886b7ca7b84701dcb631921aea152e25287a108b5595b330961402cce",
+    "characters": 2755,
+    "headings": [
+      "公开类型与常量",
+      "函数",
+      "read",
+      "write",
+      "read_full",
+      "write_all",
+      "copy_stream",
+      "reader_from_bytes",
+      "writer_to_buffer",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/math.mdx",
+    "sha256": "bbd240761a53f937556f19aeb8b3a663271477a29ef58a01330cd1f9714a326e",
+    "characters": 3056,
+    "headings": [
+      "公开类型与常量",
+      "函数",
+      "min",
+      "max",
+      "checked_abs",
+      "abs",
+      "clamp",
+      "sqrt",
+      "floor",
+      "ceil",
+      "round",
+      "trunc",
+      "is_nan",
+      "is_inf",
+      "is_finite",
+      "checked_gcd",
+      "gcd",
+      "checked_lcm",
+      "lcm",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/path.mdx",
+    "sha256": "ae41e71b59466e5be98fee317527049216f93cda84ae8d92dab42a15c8025c0c",
+    "characters": 1704,
+    "headings": [
+      "公开类型与常量",
+      "函数",
+      "clean",
+      "join",
+      "join_all",
+      "is_abs",
+      "base",
+      "dir",
+      "ext",
+      "split",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/string.mdx",
+    "sha256": "34603600799d8192c3416d5a5a20fa171e8039d2c0e72cac7a8a546c17e7e748",
+    "characters": 3071,
+    "headings": [
+      "公开类型与常量",
+      "函数",
+      "to_bytes",
+      "from_utf8",
+      "byte_len",
+      "rune_count",
+      "has_prefix",
+      "has_suffix",
+      "index",
+      "contains",
+      "concat",
+      "new_builder",
+      "builder_with_capacity",
+      "write_string",
+      "write_rune",
+      "builder_len",
+      "builder_capacity",
+      "builder_reset",
+      "builder_string",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/testing.mdx",
+    "sha256": "18900f7d7efc474c535b8edafbc57603010afc28f96c08b4d61322ae3241b647",
+    "characters": 1044,
+    "headings": [
+      "函数",
+      "expect",
+      "fail",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/kiso/utf8.mdx",
+    "sha256": "68650ba71691e8c7601f4dd3efd3236454604477b480a2eadf18c5d4510d6693",
+    "characters": 1917,
+    "headings": [
+      "公开类型与常量",
+      "函数",
+      "is_valid_rune",
+      "rune_width",
+      "decode_one",
+      "encode_rune",
+      "append_rune",
+      "valid",
+      "rune_count",
+      "完整示例",
+      "源码"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/language.md",
+    "sha256": "ee20d4a3e8a00e155d1e18980be8832ca4a1846b5b9ccb9eed236dc7a5d1b72e",
+    "characters": 1332,
+    "headings": [
+      "与旧 LANGUAGE.md 的差异",
+      "内置调用",
+      "证据入口"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot",
+      "/docs/reference/syntax",
+      "/docs/reference/types",
+      "/docs/reference/functions",
+      "/docs/reference/collections",
+      "/docs/reference/modules"
+    ]
+  },
+  {
+    "path": "content/docs/lsp.md",
+    "sha256": "719224886d7786fb3ef4dcd039195c264926fc80851991df00420ce5f94d54de",
+    "characters": 1393,
+    "headings": [
+      "协议与能力",
+      "分析范围与限制",
+      "配置与接入",
+      "来源"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/editors"
+    ]
+  },
+  {
+    "path": "content/docs/mochi.md",
+    "sha256": "b62f817af72f6332b827d98c921d491ed3f051590c01d519fb2c7d64d0e9a6c7",
+    "characters": 5725,
+    "headings": [
+      "公共头部和主指令流",
+      "常量表",
+      "Mochi v2 至 v14 函数表",
+      "Opcode",
+      "验证限制",
+      "兼容性",
+      "执行系统与验证范围"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/internals/gc"
+    ]
+  },
+  {
+    "path": "content/docs/native-aot.mdx",
+    "sha256": "9b07549450972712bece0b13c1b51b57b9397459617b18fa09c3ce2efba8f980",
+    "characters": 2239,
+    "headings": [
+      "两条后端",
+      "最新已记录事实",
+      "远分支修复与当前阻塞",
+      "固定点的阶段边界",
+      "本轮新验证",
+      "来源"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/kiso/compiler-modules",
+      "/docs/internals/gc"
+    ]
+  },
+  {
+    "path": "content/docs/reference/collections.mdx",
+    "sha256": "c193d184c36c565a774063c51113084c26ca02e4f4116aa77626c06d51858ee7",
+    "characters": 2424,
+    "headings": [
+      "数组",
+      "结构体与枚举",
+      "Map"
+    ],
+    "programs": 4,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot",
+      "/docs/kiso/array"
+    ]
+  },
+  {
+    "path": "content/docs/reference/functions.mdx",
+    "sha256": "9c712f4ef3c5531d99e40680ebdb802aa201da7761ca1c59fd456da10771a0dd",
+    "characters": 1613,
+    "headings": [
+      "变量与词法作用域",
+      "具名函数",
+      "闭包与函数值",
+      "VM 资源边界"
+    ],
+    "programs": 3,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/reference/modules.mdx",
+    "sha256": "7c14ddc3e393cb3fb011e84c459b5d57b445749ab1a60263e26d6faefabaa513",
+    "characters": 1505,
+    "headings": [
+      "泛型",
+      "编译期常量",
+      "包和导入"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot",
+      "/docs/tooling/cli",
+      "/docs/kiso/testing"
+    ]
+  },
+  {
+    "path": "content/docs/reference/syntax.mdx",
+    "sha256": "5f27ae6511651165c7313d4a0c20cf4d209badd107fe18c0a9dc21a3e039a09a",
+    "characters": 2225,
+    "headings": [
+      "词法",
+      "关键字",
+      "表达式与优先级",
+      "控制语句"
+    ],
+    "programs": 3,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot",
+      "/docs/reference/collections"
+    ]
+  },
+  {
+    "path": "content/docs/reference/types.mdx",
+    "sha256": "184b5be6750c7fb6b5851e2341cc4cc3e563b825e45ed4ad5ca8d0dc715ab670",
+    "characters": 2199,
+    "headings": [
+      "数值类型",
+      "bool 与 string",
+      "可空类型",
+      "unit、函数和资源"
+    ],
+    "programs": 2,
+    "unversionedLinks": [
+      "/docs/tooling/verification",
+      "/docs/native-aot",
+      "/docs/kiso/string",
+      "/docs/reference/functions"
+    ]
+  },
+  {
+    "path": "content/docs/tooling/cli.mdx",
+    "sha256": "c2c34ebf8649c8e36f0efe3739d4e1799b65bb287a28768da45a5828781984cc",
+    "characters": 3009,
+    "headings": [
+      "命令",
+      "诊断",
+      "测试",
+      "Bunko 根目录",
+      "从源码构建",
+      "ARM64 工具链",
+      "来源"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/kiso/testing",
+      "/docs/tooling/verification",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/tooling/verification.mdx",
+    "sha256": "31e67f99079336f61098de76be86424d0fb7ed9fd3e9faa2aa7f3a7d9db4ab44",
+    "characters": 2658,
+    "headings": [
+      "文件与复跑",
+      "实际验证内容",
+      "版本边界",
+      "未执行与未验收"
+    ],
+    "programs": 0,
+    "unversionedLinks": []
+  },
+  {
+    "path": "content/docs/v1.0/getting-started.mdx",
+    "sha256": "355506ad448dc2cc855f5f7e8dab02ac35e817aea8bfc9ad5357e637602bd1e8",
+    "characters": 1656,
+    "headings": [
+      "准备环境",
+      "第一个程序",
+      "生成并执行 Mochi 字节码",
+      "标准库放在哪里",
+      "练习",
+      "常见错误"
+    ],
+    "programs": 1,
+    "unversionedLinks": []
+  },
+  {
+    "path": "content/docs/v1.0/index.mdx",
+    "sha256": "8e831a365592583090951bf4b0572b3d986423e315e271e2c8b6742f7bbaf68d",
+    "characters": 724,
+    "headings": [
+      "阅读入口",
+      "文档范围"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/versions"
+    ]
+  },
+  {
+    "path": "content/docs/v1.0/internals/index.mdx",
+    "sha256": "b2cba1494623f50eeef65c2570cfb75439715b52b86774c5a5e22f5903653cc6",
+    "characters": 392,
+    "headings": [
+      "当前边界"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/mochi",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/v1.0/kiso/index.mdx",
+    "sha256": "52b6d995150ceb6d1a8896f07a317193da6ba5b1188b1aacf645d0735696cd2f",
+    "characters": 283,
+    "headings": [],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/bunko"
+    ]
+  },
+  {
+    "path": "content/docs/v1.0/learn/collections.mdx",
+    "sha256": "83a75e628503e80ad421b5e30927a954f19621dcecd2a930446ee8a7073db1b9",
+    "characters": 924,
+    "headings": [
+      "完整程序",
+      "逐步理解",
+      "练习",
+      "常见错误"
+    ],
+    "programs": 1,
+    "unversionedLinks": []
+  },
+  {
+    "path": "content/docs/v1.0/learn/control-flow.mdx",
+    "sha256": "891947a8526523437653ce5002a2fc10466cf665839a11f59af9e9c812ae73d1",
+    "characters": 888,
+    "headings": [
+      "完整程序",
+      "逐步理解",
+      "练习",
+      "常见错误"
+    ],
+    "programs": 1,
+    "unversionedLinks": []
+  },
+  {
+    "path": "content/docs/v1.0/learn/functions.mdx",
+    "sha256": "1723a512882a1638c04186d41d6a28f3d975d96080e2cb005541793dedafd982",
+    "characters": 958,
+    "headings": [
+      "完整程序",
+      "逐步理解",
+      "练习",
+      "常见错误"
+    ],
+    "programs": 1,
+    "unversionedLinks": []
+  },
+  {
+    "path": "content/docs/v1.0/learn/index.mdx",
+    "sha256": "c62fe955c3358c5cd88113e111d671457f72abc7af5f01f2765c9faedac74b5f",
+    "characters": 1133,
+    "headings": [
+      "学习路线",
+      "如何使用示例",
+      "关键词速查"
+    ],
+    "programs": 0,
+    "unversionedLinks": []
+  },
+  {
+    "path": "content/docs/v1.0/learn/modules.mdx",
+    "sha256": "f7e3b2d5e1d4c7174d9d2a54a8592d942bf01db3febfb8bf332524efb15ada10",
+    "characters": 1139,
+    "headings": [
+      "完整程序",
+      "逐步理解",
+      "练习",
+      "常见错误",
+      "接下来"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/language"
+    ]
+  },
+  {
+    "path": "content/docs/v1.0/learn/variables.mdx",
+    "sha256": "05cbeb7bbd4bc0bf3424ab333ba14914fad2e2c29122b238a7717d63f70e7dc8",
+    "characters": 886,
+    "headings": [
+      "完整程序",
+      "逐步理解",
+      "练习",
+      "常见错误"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/language"
+    ]
+  },
+  {
+    "path": "content/docs/v1.0/reference/index.mdx",
+    "sha256": "a5a9b531562e5102569b4429c7a161d295d90a572928b69e9876b06dfc9ee6da",
+    "characters": 239,
+    "headings": [],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/language"
+    ]
+  },
+  {
+    "path": "content/docs/v1.0/tooling/index.mdx",
+    "sha256": "77bcf9e17b3e8cf1f3b09779f188582ffa897e2b7a6e921be30d625fe2bb735a",
+    "characters": 303,
+    "headings": [],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/editors",
+      "/docs/lsp"
+    ]
+  },
+  {
+    "path": "content/docs/v2.0/development.mdx",
+    "sha256": "731d0666d907e3334e8e157427b0fd7e87831e559b2ca310b7c05e961d13c4e8",
+    "characters": 328,
+    "headings": [
+      "尚未完成的工作",
+      "切回稳定文档"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/versions"
+    ]
+  },
+  {
+    "path": "content/docs/v2.0/getting-started.mdx",
+    "sha256": "4bb91c9b33643f0b8e27afed76b30c1b34d169d4452f1779dff604f1f226bb8c",
+    "characters": 1618,
+    "headings": [
+      "准备环境",
+      "第一个程序",
+      "生成并执行 Mochi 字节码",
+      "标准库放在哪里",
+      "练习",
+      "常见错误"
+    ],
+    "programs": 1,
+    "unversionedLinks": []
+  },
+  {
+    "path": "content/docs/v2.0/index.mdx",
+    "sha256": "6031139186f9a3f7fc4119112cb3aed5187d82f70d78c2cd282849bb058dfc75",
+    "characters": 738,
+    "headings": [
+      "阅读入口",
+      "文档范围"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/versions"
+    ]
+  },
+  {
+    "path": "content/docs/v2.0/internals/index.mdx",
+    "sha256": "b2cba1494623f50eeef65c2570cfb75439715b52b86774c5a5e22f5903653cc6",
+    "characters": 392,
+    "headings": [
+      "当前边界"
+    ],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/mochi",
+      "/docs/native-aot"
+    ]
+  },
+  {
+    "path": "content/docs/v2.0/kiso/index.mdx",
+    "sha256": "c272733eeb9a7c44e04c0aad901c6546933ece22d60a46ac9276b1d38c5ba0f3",
+    "characters": 283,
+    "headings": [],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/bunko"
+    ]
+  },
+  {
+    "path": "content/docs/v2.0/learn/collections.mdx",
+    "sha256": "fdc69149c867abe892e8be4b67890de94a263654334412bbc694d336956d0522",
+    "characters": 924,
+    "headings": [
+      "完整程序",
+      "逐步理解",
+      "练习",
+      "常见错误"
+    ],
+    "programs": 1,
+    "unversionedLinks": []
+  },
+  {
+    "path": "content/docs/v2.0/learn/control-flow.mdx",
+    "sha256": "986dc167e3be80e2ad20608b64ba4abe5fd500bdc8cd1454b8bcdc4e5979bf7b",
+    "characters": 888,
+    "headings": [
+      "完整程序",
+      "逐步理解",
+      "练习",
+      "常见错误"
+    ],
+    "programs": 1,
+    "unversionedLinks": []
+  },
+  {
+    "path": "content/docs/v2.0/learn/functions.mdx",
+    "sha256": "e9568724690b80399cdccef611bdde52fc0969cea481cf2ed4c81a2d08db96dd",
+    "characters": 958,
+    "headings": [
+      "完整程序",
+      "逐步理解",
+      "练习",
+      "常见错误"
+    ],
+    "programs": 1,
+    "unversionedLinks": []
+  },
+  {
+    "path": "content/docs/v2.0/learn/index.mdx",
+    "sha256": "ee365a03b3c73f400c319ed1c266f7f1a60c83ae38cbc74830096852a5c943c6",
+    "characters": 1133,
+    "headings": [
+      "学习路线",
+      "如何使用示例",
+      "关键词速查"
+    ],
+    "programs": 0,
+    "unversionedLinks": []
+  },
+  {
+    "path": "content/docs/v2.0/learn/modules.mdx",
+    "sha256": "042a489620c0bc05d5922e53795cbd7a2ea04b5ff6f1ce0839d3fb2d97330be2",
+    "characters": 1139,
+    "headings": [
+      "完整程序",
+      "逐步理解",
+      "练习",
+      "常见错误",
+      "接下来"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/language"
+    ]
+  },
+  {
+    "path": "content/docs/v2.0/learn/variables.mdx",
+    "sha256": "61c22539ca66c01368747be4fe5e6a3aeabf1be44c6a77b79799f6706cf1aea7",
+    "characters": 886,
+    "headings": [
+      "完整程序",
+      "逐步理解",
+      "练习",
+      "常见错误"
+    ],
+    "programs": 1,
+    "unversionedLinks": [
+      "/docs/language"
+    ]
+  },
+  {
+    "path": "content/docs/v2.0/reference/index.mdx",
+    "sha256": "181b87787a8c852f62d3b03a5fb9cba89e761177fd80675d63882ab81fce2de3",
+    "characters": 239,
+    "headings": [],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/language"
+    ]
+  },
+  {
+    "path": "content/docs/v2.0/tooling/index.mdx",
+    "sha256": "3829e996a15bf2e0b9bd30d1464874798e95bfa1fc138b852cd5edeade602001",
+    "characters": 303,
+    "headings": [],
+    "programs": 0,
+    "unversionedLinks": [
+      "/docs/editors",
+      "/docs/lsp"
+    ]
+  },
+  {
+    "path": "content/docs/versions.mdx",
+    "sha256": "ee7a44d3ea34ee38f6f2aa6ec58b6ea3d296db4fec5c28f24ea9313f66a313b9",
+    "characters": 969,
+    "headings": [
+      "当前可读版本",
+      "状态说明",
+      "精确版本与语言",
+      "发布边界"
+    ],
+    "programs": 0,
+    "unversionedLinks": []
+  }
+]

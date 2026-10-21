@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "release_state": "local candidate; not published",
+  "target": "darwin-arm64",
+  "head": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+  "branch": "EXP/multi-repo-migration",
+  "dirty": true,
+  "git_status": " M .github/workflows/ci.yml\n M CHANGELOG.md\n M README.md\n M bunko/kiso/aot/arm64/arm64.mio\n M bunko/kiso/aot/arm64/arm64_test.mio\n M bunko/kiso/aot/lower/README.md\n M bunko/kiso/aot/lower/lower.mio\n M bunko/kiso/aot/lower/lower_test.mio\n M bunko/kiso/aot/lower/types/types.mio\n M cmd/mio/main.go\n M cmd/mio/main_test.go\n M docs/NATIVE_AOT_M17E.md\n M docs/TESTING.md\n M internal/aot/m17e_array_test.go\n M internal/aot/m17e_probe_test.go\n M scripts/build-release.sh\n?? .github/workflows/release-candidate.yml\n?? bunko/kiso/aot/lower/types/types_test.mio\n?? docs/NATIVE_AOT_M18.md\n?? docs/releases/\n?? internal/aot/m17e_array_types_test.go\n?? internal/aot/m17e_branch_test.go\n?? internal/aot/m17e_closure_test.go\n?? internal/aot/m17e_heap_test.go\n?? internal/aot/m18_selfhost_test.go\n?? scripts/check-native-aot-fixed-point.py\n?? scripts/prepare-release.py\n?? scripts/smoke-release.py\n?? selfhost/native-aot/\n",
+  "source_diff_sha256": "c02ee0547b334fda25458520b4e0362cbfe66b03fc17a192af3306fcf42e5d8f",
+  "source_manifest_sha256": "c124a13a0972417dfbefe74917a836961f264bffeb9c66b4e973b64a6b1c3fad",
+  "go_version": "go version go1.25.9 darwin/arm64",
+  "host": "macOS-15.6.1-arm64-arm-64bit",
+  "m18_evidence": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-preparation/m18",
+  "m18_provenance_sha256": "6300a1345ed04b9353b0ecb56eb7fa246e816c04c11b12d8f7d7a5afce5bbb3f",
+  "native_aot_origin": "M18 Stage 4, pure Mio generated",
+  "native_aot_unsigned_sha256": "1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d",
+  "signing": "ad-hoc; no Developer ID; no notarization",
+  "heap_protocol_mib": 1024
+}

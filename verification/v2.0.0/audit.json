@@ -1,0 +1,48 @@
+{
+  "findings": [
+    {
+      "id": "R01",
+      "finding": "Development HEAD CLI was beta.1; RC4 version is 2.0.0 with dirty source provenance.",
+      "action": "Bound draft to RC4 archive/BUILD-INFO/source manifest; rewrote installation."
+    },
+    {
+      "id": "R02",
+      "finding": "M17e not accepted / M18 not started descriptions are stale for RC4.",
+      "action": "Replaced candidate internals/status pages using existing proof; separated source and AOT bootstrap."
+    },
+    {
+      "id": "R03",
+      "finding": "Development has 358 public declarations; RC4 has 365 plus four changed public layouts.",
+      "action": "Updated three affected Kiso pages, extracted both V1 and Development diffs."
+    },
+    {
+      "id": "R04",
+      "finding": "Source checkout of HEAD cannot reproduce the candidate.",
+      "action": "Removed HEAD-only installation promise; retained dirty manifests and captured 353 exact source files."
+    },
+    {
+      "id": "R05",
+      "finding": "Native feature support cannot be inferred from VM examples.",
+      "action": "Ran two migration programs on both V1/V2 VMs and both candidate Native backends; listed subset limits."
+    },
+    {
+      "id": "R06",
+      "finding": "Packaging, sign/notarization, platform and plugin claims need boundaries.",
+      "action": "Recorded darwin-arm64-only observed support, ad-hoc signature, no Gatekeeper/IDE certification."
+    },
+    {
+      "id": "R07",
+      "finding": "Core working tree contains post-RC4 release automation changes.",
+      "action": "Excluded six drifted existing files plus later added automation files from RC4 feature claims."
+    },
+    {
+      "id": "R08",
+      "finding": "DOCS_CONTRACT changed during parallel preparation to allow independent patch-version URLs.",
+      "action": "Applied latest /docs/v2.0.0 draft links; preserved /docs/v2.0 and registry. Copied final contract to evidence."
+    }
+  ],
+  "baseline": "development-baseline.json",
+  "target": "RC4",
+  "draft": ".docs-drafts/v2.0.0",
+  "reviewScope": "content and local candidate; website activation not performed"
+}

@@ -1,0 +1,19 @@
+{
+  "status": "v2-complete-v1-pending-review",
+  "runtimeEvidence": "verification/content-quality/results.json",
+  "runtimeStatus": "passed",
+  "codeExecutions": 128,
+  "apiDeclarations": {
+    "v1.0": 171,
+    "v2.0": 358
+  },
+  "freezeUnchanged": true,
+  "siteStatus": "passed",
+  "v1Review": "pending",
+  "limitations": [
+    "Linux-only filesystem cleanup test skipped in both versions",
+    "Native AOT/GC and complete bootstrap not re-run",
+    "IDE and all-platform integration not run",
+    "Two dependency CSS warnings"
+  ]
+}

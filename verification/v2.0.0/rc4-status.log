@@ -1,0 +1,29 @@
+ M .github/workflows/ci.yml
+ M CHANGELOG.md
+ M README.md
+ M bunko/kiso/aot/arm64/arm64.mio
+ M bunko/kiso/aot/arm64/arm64_test.mio
+ M bunko/kiso/aot/lower/README.md
+ M bunko/kiso/aot/lower/lower.mio
+ M bunko/kiso/aot/lower/lower_test.mio
+ M bunko/kiso/aot/lower/types/types.mio
+ M cmd/mio/main.go
+ M cmd/mio/main_test.go
+ M docs/NATIVE_AOT_M17E.md
+ M docs/TESTING.md
+ M internal/aot/m17e_array_test.go
+ M internal/aot/m17e_probe_test.go
+ M scripts/build-release.sh
+?? .github/workflows/release-candidate.yml
+?? bunko/kiso/aot/lower/types/types_test.mio
+?? docs/NATIVE_AOT_M18.md
+?? docs/releases/
+?? internal/aot/m17e_array_types_test.go
+?? internal/aot/m17e_branch_test.go
+?? internal/aot/m17e_closure_test.go
+?? internal/aot/m17e_heap_test.go
+?? internal/aot/m18_selfhost_test.go
+?? scripts/check-native-aot-fixed-point.py
+?? scripts/prepare-release.py
+?? scripts/smoke-release.py
+?? selfhost/native-aot/

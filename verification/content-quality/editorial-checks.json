@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "frozenBaselineUnchanged": true,
+  "candidates": [
+    {
+      "version": "v1.0",
+      "pages": 41
+    },
+    {
+      "version": "v2.0",
+      "pages": 48
+    }
+  ],
+  "failures": []
+}

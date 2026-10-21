@@ -1,0 +1,550 @@
+{
+  "BUILD-INFO.json": {
+    "bytes": 1876,
+    "sha256": "b37dfcd422e14c4883e6a511bd7f4d0d4601ad6815751ce65cd463d1a5d63f2e"
+  },
+  "CHANGELOG.md": {
+    "bytes": 4958,
+    "sha256": "4071a8f0011b3783e29b36f59504bde6707074bf63195ebe528eb800b270b999"
+  },
+  "GO-LICENSE": {
+    "bytes": 1453,
+    "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+  },
+  "GO-PATENTS": {
+    "bytes": 1303,
+    "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+  },
+  "LICENSE": {
+    "bytes": 1066,
+    "sha256": "769b88cf0f81bc3cbae0fdf5fe9f102ef8c7eb6c5714123952b4f76f87ffb275"
+  },
+  "README.md": {
+    "bytes": 14850,
+    "sha256": "371ee8da892598559a93a359b713e4e2e2c499dbb98ee5f20e0f3d6f7865f5b1"
+  },
+  "THIRD_PARTY_NOTICES.txt": {
+    "bytes": 298,
+    "sha256": "34583341dae62384aed084c224e1f3a86a2746710326703196eab1257dda35fb"
+  },
+  "bunko/README.md": {
+    "bytes": 240,
+    "sha256": "46bf25b6b92d522834f0e28edd9c62f6c67b752eb69f0293c59c87e3d7be9513"
+  },
+  "bunko/kiso/aot/arm64/README.md": {
+    "bytes": 522,
+    "sha256": "d98158b3d0a2bf62ef02e57fdd348fa8f7a0bafb8c8a5588a16cd99addf35e85"
+  },
+  "bunko/kiso/aot/arm64/arm64.mio": {
+    "bytes": 21932,
+    "sha256": "1991c650725af69a6a93e26149e28728a5f747b0cd4ffbf551cb931d3ed8efe5"
+  },
+  "bunko/kiso/aot/arm64/arm64.mochi": {
+    "bytes": 8042,
+    "sha256": "8621ca12e7ddb80c98a606981be56b9bb5d3ad2ce9c51c9676a0882d3f28e29d"
+  },
+  "bunko/kiso/aot/arm64/arm64_test.mio": {
+    "bytes": 7616,
+    "sha256": "388690bf59726dea13d21fa8823d5d0f2425e05998ce25c946548346e5d2d43c"
+  },
+  "bunko/kiso/aot/lower/README.md": {
+    "bytes": 2603,
+    "sha256": "05239f9077ef08b2ef4cd2f6df8f9e591a87239ad096ba48ba03a90dda768f3c"
+  },
+  "bunko/kiso/aot/lower/lower.mio": {
+    "bytes": 121541,
+    "sha256": "6906d0f2774829d9d853c1a500f6e7a5dd80eab7a84bc0914c2750f2e51db51f"
+  },
+  "bunko/kiso/aot/lower/lower_test.mio": {
+    "bytes": 7679,
+    "sha256": "b9764d482b33e74e95cb57548d25a5010e10dc6e0eeffd2a32e4c80515000c05"
+  },
+  "bunko/kiso/aot/lower/nativefs/nativefs.mio": {
+    "bytes": 40052,
+    "sha256": "19e75005dca0d2225a0cc2983ae9fc2440eec68d970adde7d80f4ed1d22629bd"
+  },
+  "bunko/kiso/aot/lower/types/types.mio": {
+    "bytes": 64587,
+    "sha256": "a5b8be874506258065eef122195c7dc6fa5d66b2ff75786cc3e48179d250256d"
+  },
+  "bunko/kiso/aot/lower/types/types_test.mio": {
+    "bytes": 2742,
+    "sha256": "af964ff7f5ea30512252c96fb8aa9f6451af10ec7ce83d85dd10c2f7aeb99748"
+  },
+  "bunko/kiso/aot/macho/README.md": {
+    "bytes": 654,
+    "sha256": "96e880db02fecd13749db68d37528df4868a2f659e80ed64c5f43216f66a9699"
+  },
+  "bunko/kiso/aot/macho/macho.mio": {
+    "bytes": 17209,
+    "sha256": "4396e451a04fa052d34f846187de8a41bba832189b0997ea72c3498a171af2c5"
+  },
+  "bunko/kiso/aot/macho/macho_test.mio": {
+    "bytes": 2231,
+    "sha256": "3a7cdcd8bacb9031db832555ac8e12194f7dd3b685af2bbc1a53581a9c111985"
+  },
+  "bunko/kiso/array/README.md": {
+    "bytes": 381,
+    "sha256": "0114f7f4f77c0de437ba83d283945c3056d2727c80b239ebbf3727ca80838943"
+  },
+  "bunko/kiso/array/array.mio": {
+    "bytes": 790,
+    "sha256": "a2d7cbe2385873f015fc032ee1be309de7e93d813aaacbb69d279895e24e153f"
+  },
+  "bunko/kiso/bytes/README.md": {
+    "bytes": 650,
+    "sha256": "14dc12be413dfa770722f82f8aebf88af32a03dd36214c9ff030a746adc855e1"
+  },
+  "bunko/kiso/bytes/bytes.mio": {
+    "bytes": 3321,
+    "sha256": "cca8c910bc492a3f39bd2872ef0923b55dc642b88bc0b5d810f9039e3e9e6c5f"
+  },
+  "bunko/kiso/convert/README.md": {
+    "bytes": 1650,
+    "sha256": "30a248a1e91a0ac72a14a311dfc9f66829e8b28368d6e327136e994ccba0a10b"
+  },
+  "bunko/kiso/convert/convert.mio": {
+    "bytes": 3103,
+    "sha256": "f802730285564dc17c44eaf860392e6b9df72e49a4b1163c0c29d0b8dd471b2d"
+  },
+  "bunko/kiso/convert/float.mio": {
+    "bytes": 23219,
+    "sha256": "85b05cfd3ecc7e3eaa7dd56470f16c82970c2a753e9e4926b2cdde9a548a179c"
+  },
+  "bunko/kiso/encoding/binary/README.md": {
+    "bytes": 2225,
+    "sha256": "41bb08a89a4b745dce9d026c6786797a174fa6210a38cd5ff92d9de97cb84381"
+  },
+  "bunko/kiso/encoding/binary/binary.mio": {
+    "bytes": 12931,
+    "sha256": "73f84eacaae6c6301b72150c24dbcc1748d76958a95258eb7bd014b610b38f0a"
+  },
+  "bunko/kiso/encoding/binary/binary_test.mio": {
+    "bytes": 3532,
+    "sha256": "7a424ab115a3bf03ddfb71e3b3ef9d2861acecb36b8c8b35552af2bf8ef222c1"
+  },
+  "bunko/kiso/encoding/binary/stream.mio": {
+    "bytes": 9123,
+    "sha256": "74ad1f1ded30a44b604717e0221f09fb1d328b4a03ae8290a1676468f1dac0ce"
+  },
+  "bunko/kiso/encoding/binary/stream_test.mio": {
+    "bytes": 2076,
+    "sha256": "d0dfc5cfabd1180b36d1c0f9f3f8ed32de433cf7df4a926669f398f9ec6ab094"
+  },
+  "bunko/kiso/encoding/mochi/README.md": {
+    "bytes": 1364,
+    "sha256": "0825923d6dffd99f7cfed744cf34c6f0c8ef531d310b810357a24df24a1191b7"
+  },
+  "bunko/kiso/encoding/mochi/decode.mio": {
+    "bytes": 23075,
+    "sha256": "205a528c3f88f02b52c911b8cd7d61fd294e9d06a440e9ae7f15abfa2e04f82d"
+  },
+  "bunko/kiso/encoding/mochi/decode_test.mio": {
+    "bytes": 8543,
+    "sha256": "186ad5141cc8227342e91651a53658b4010707775a158b4240745247fc16aad6"
+  },
+  "bunko/kiso/encoding/mochi/encode.mio": {
+    "bytes": 3613,
+    "sha256": "754e2241e08a97da95bd3809e8ef30ff956b7f599178e77ba6e5f5e853961867"
+  },
+  "bunko/kiso/encoding/mochi/file.mio": {
+    "bytes": 1429,
+    "sha256": "d30815c4c97ed744552f5d705e4313875b087428df8546608f97fe63b5835ed1"
+  },
+  "bunko/kiso/fs/README.md": {
+    "bytes": 1611,
+    "sha256": "d365f3f86048d54dd37d121b382f3f11505ec9cca3e55459e4711b66167888dc"
+  },
+  "bunko/kiso/fs/fs.mio": {
+    "bytes": 10737,
+    "sha256": "53c8f5a65f0db868269bf15b8212d63b15c046934a5a7185a5fd0d2a691093ee"
+  },
+  "bunko/kiso/io/README.md": {
+    "bytes": 1040,
+    "sha256": "6d7872fe6425165039432eb956779721bcee6fd34d81794c5422508d2c453e5f"
+  },
+  "bunko/kiso/io/io.mio": {
+    "bytes": 5935,
+    "sha256": "68e0e56e765a262092db578cd9dfaf25c40271d0b3489af6abff18609e9ace67"
+  },
+  "bunko/kiso/io/io_test.mio": {
+    "bytes": 6546,
+    "sha256": "0e1564da61c96ed9b39dba84b4dc4fe02415a95f79eb0e05d772d87264aa2d0d"
+  },
+  "bunko/kiso/math/README.md": {
+    "bytes": 1208,
+    "sha256": "0127251f7621736c44deee1e0c4383438bd537d8b27e31e4b4478361c9f42593"
+  },
+  "bunko/kiso/math/compare.mio": {
+    "bytes": 1176,
+    "sha256": "7cadb689838a1fcf48bb31ec69a52d683482706e7fde1c94bd2820590412b27e"
+  },
+  "bunko/kiso/math/constants.mio": {
+    "bytes": 334,
+    "sha256": "e346e50367337bf9b32a3f4a2a814d05628945955302a3dae441c94b4b87dc02"
+  },
+  "bunko/kiso/math/float.mio": {
+    "bytes": 581,
+    "sha256": "e2e16c03416c7bea5e45a2deedea531afd05df6186a64fabeb40373fcfcdc5ab"
+  },
+  "bunko/kiso/math/integer.mio": {
+    "bytes": 1408,
+    "sha256": "3e0b4bc2a8a3d6080d605e54c88fd03bc091feb410ff01d39358a28ef845e6bb"
+  },
+  "bunko/kiso/math/math_test.mio": {
+    "bytes": 229,
+    "sha256": "8ecdbb0537b87565f09fa20afb1bfcb7536eec81589ce1db549f5d0d353b8332"
+  },
+  "bunko/kiso/path/README.md": {
+    "bytes": 657,
+    "sha256": "f4cbd267b75df77e993b48a57e6040e7afe6938f13ce524fd9122a14ec82aa4d"
+  },
+  "bunko/kiso/path/path.mio": {
+    "bytes": 4395,
+    "sha256": "92306d1fa6f0fa6f7d5180e93e0e27313ce18f4cdacf05201aa9cd07a3dc66bd"
+  },
+  "bunko/kiso/path/path_test.mio": {
+    "bytes": 1208,
+    "sha256": "d9b122d6022f8f9d9ae4bdf967f6ce513507f299984ca3773c97463bd77699b5"
+  },
+  "bunko/kiso/string/README.md": {
+    "bytes": 1641,
+    "sha256": "0f45511c4127af4408c84af2687f419dc22038ea9bb5ec1815301f0c62624fbc"
+  },
+  "bunko/kiso/string/string.mio": {
+    "bytes": 2990,
+    "sha256": "50b1a63def96b1aacd3a1b3287d05b70a6fd7f3048a8951e847c43c5ff8ba9e7"
+  },
+  "bunko/kiso/testing/README.md": {
+    "bytes": 294,
+    "sha256": "693dab65bf0f2d374bb7e930e99b8f8486ccd04bd4882ac6cd5f658e32bc0683"
+  },
+  "bunko/kiso/testing/testing.mio": {
+    "bytes": 215,
+    "sha256": "d5ed599c326856c7816451202b6d8434fb851153ef14ccce097acc9f53f629ce"
+  },
+  "bunko/kiso/utf8/README.md": {
+    "bytes": 1515,
+    "sha256": "1f56af5f789f9211de5274d012f727751073d261c1238bc4e7d47bf934f0a505"
+  },
+  "bunko/kiso/utf8/utf8.mio": {
+    "bytes": 5540,
+    "sha256": "61c91357b2a5de3de4de54b5fa2f2e215d27d82fe5289aa90a76f400f8d67f06"
+  },
+  "docs/BUNKO.md": {
+    "bytes": 4434,
+    "sha256": "671a6471dcf7e5ac3cad22211209f4ede92ebf8e9e1064b6006116d9d64dd112"
+  },
+  "docs/I18N.md": {
+    "bytes": 645,
+    "sha256": "670ed6a63a58fdb65f790199ead24d84b2517f860921195358328ac7da494771"
+  },
+  "docs/LANGUAGE.md": {
+    "bytes": 12933,
+    "sha256": "6b758a77b05db23f1e4e1992a119ef7c4a3342a97666dd541bf7ef91e4351f7d"
+  },
+  "docs/MIOCORE_LSP.md": {
+    "bytes": 26782,
+    "sha256": "39fb2e07071d43020f43396773243ea8c35757a0814912d2e735c893cec13f38"
+  },
+  "docs/MIO_MASTER_TODO.md": {
+    "bytes": 34304,
+    "sha256": "a8ba37f19c4398a8e29bc58a6f58595e2de4557cc43a03beb01781118e4a597a"
+  },
+  "docs/MMA.md": {
+    "bytes": 5625,
+    "sha256": "e1d5d8c56a8ec3c2dc58e45431f9bca1037a4b51c0e9755c68e054f6cd896cbb"
+  },
+  "docs/MOCHI.md": {
+    "bytes": 7831,
+    "sha256": "42cf1442d284f4c8808ade40a2ac143fa9b8bb2abbb2685930335400f5b8eb31"
+  },
+  "docs/MULTI_REPO_MIGRATION.md": {
+    "bytes": 1118,
+    "sha256": "425b32fa99ec3546455e1d47ec004d48a6a458441fce49d05ff4aad382fa227a"
+  },
+  "docs/NATIVE_AOT_BOOTSTRAP_AUDIT.md": {
+    "bytes": 4595,
+    "sha256": "a8a4de4a85ce46c4f60aa07cc9f06c01fa1de91665f8d2d0f8434dec5a6df0ac"
+  },
+  "docs/NATIVE_AOT_M0.md": {
+    "bytes": 7288,
+    "sha256": "540447c7342441b221a42f6ce279f7438cd804f68a5e0e25e4dfcf8cb86245c8"
+  },
+  "docs/NATIVE_AOT_M1.md": {
+    "bytes": 4027,
+    "sha256": "8cce2dab18bb397387297494e11f8fd9835f06c26c76544ac878a25c8de9b62c"
+  },
+  "docs/NATIVE_AOT_M10.md": {
+    "bytes": 6592,
+    "sha256": "9f0646c480337ae7d5952c9484ac043291529a1d339ef572fc890addb0694eeb"
+  },
+  "docs/NATIVE_AOT_M11A.md": {
+    "bytes": 2461,
+    "sha256": "d223386320e4ba70812dc17df92bab469de4b9c9b2c6087e20dc3704cccd0944"
+  },
+  "docs/NATIVE_AOT_M13A.md": {
+    "bytes": 2169,
+    "sha256": "dd3fe529648e7804cf09eaf34c8866ac58e651f401a751b7fbf118f8366325f7"
+  },
+  "docs/NATIVE_AOT_M13B.md": {
+    "bytes": 4085,
+    "sha256": "1186a9449ab27399696d82dcb4e2b1c3c8f13808ab9c89c8615f19431ef9eaa8"
+  },
+  "docs/NATIVE_AOT_M15B.md": {
+    "bytes": 2268,
+    "sha256": "077ad2c40ba67fe62e24317d2cc8ffc8b5095cf3ada192f3dfef6b53ad03bf10"
+  },
+  "docs/NATIVE_AOT_M16B.md": {
+    "bytes": 3156,
+    "sha256": "7bcefb1effd1f1dc28ca2357a55ecf65729bf804bbb64a9d87517c4e59849019"
+  },
+  "docs/NATIVE_AOT_M17AB.md": {
+    "bytes": 3989,
+    "sha256": "d4fe3eeb331134e0f60a46d347869cdf6a14567a4c2fc493b04006b331d075ce"
+  },
+  "docs/NATIVE_AOT_M17CD.md": {
+    "bytes": 5390,
+    "sha256": "812ea7f2fa5ad3da796b06f4b264d879ee1ee2f8a67936ab8c5f736b4f13a8af"
+  },
+  "docs/NATIVE_AOT_M17E.md": {
+    "bytes": 80955,
+    "sha256": "3ed2c933815e91bd10a4860852277243f84ded05fcc287b32e68edcd2142727f"
+  },
+  "docs/NATIVE_AOT_M18.md": {
+    "bytes": 13562,
+    "sha256": "486dff7c77e6e72cc195a71e9a2d09d0e33c5b8fb578d8d79ae0041f250cdcfa"
+  },
+  "docs/NATIVE_AOT_M2.md": {
+    "bytes": 3341,
+    "sha256": "dc8ec011166b6c7b27a267ebc84863d70ebeb4c84886a8b39685e158eac4eb6d"
+  },
+  "docs/NATIVE_AOT_M3.md": {
+    "bytes": 3071,
+    "sha256": "86803f064572a6d9bc65b4c2385dd74ac2e477adabaa4a4802986b016ac96860"
+  },
+  "docs/NATIVE_AOT_M4.md": {
+    "bytes": 4227,
+    "sha256": "ad0732f098f9dd4345b587d5927602c82884fa5f422106f41d37a35c70a796eb"
+  },
+  "docs/NATIVE_AOT_M5.md": {
+    "bytes": 4144,
+    "sha256": "fbc36bb666597ef2a3dcfcc509785a96bee5e6c7272a3dcf3e17101e5e766051"
+  },
+  "docs/NATIVE_AOT_M6.md": {
+    "bytes": 4852,
+    "sha256": "31cfdaf12b41c4607d33c733c9130835009b71ef4d883a90be13a64b0cd6db7e"
+  },
+  "docs/NATIVE_AOT_M6B.md": {
+    "bytes": 4876,
+    "sha256": "3665092f13f4db9dde80f488b946fe4a5b38c8d784ee9c9e2858f02885b417d5"
+  },
+  "docs/NATIVE_AOT_M8.md": {
+    "bytes": 4305,
+    "sha256": "f7972cf83f11f374a32833939882514e55abf1539a71c45cb0902118d4781377"
+  },
+  "docs/NATIVE_AOT_M9.md": {
+    "bytes": 6633,
+    "sha256": "fb37ee9d0bd7f4da15d8ed348858a4cab5488dae086299bd62752992c27a8cb9"
+  },
+  "docs/NATIVE_FLOAT_RUNTIME_ARM64.S": {
+    "bytes": 11256,
+    "sha256": "ef43a691c00c46ba2135750e58b1f7d9c6cd55bd13b9772c11288034f4c3178e"
+  },
+  "docs/PLUGIN_RELEASE.md": {
+    "bytes": 544,
+    "sha256": "ca4a386ba89ffdef399549c8bf5329f744ecf767843336b125e0ab895685bdb2"
+  },
+  "docs/TESTING.md": {
+    "bytes": 5310,
+    "sha256": "c804fa02856a3100cd89c073cc009f7c853abb886b6bc39e899632d604a26fbd"
+  },
+  "docs/releases/v2.0.0-checklist.md": {
+    "bytes": 4210,
+    "sha256": "cdedf03c2694acf85ccd8454dfa79be65c08736b896c4d5f37916a1da4bed864"
+  },
+  "docs/releases/v2.0.0-platforms.md": {
+    "bytes": 3932,
+    "sha256": "309f5da4c8da00bc8c6eb58429eb543565edf2153ff08958a4650cc0b7ad63ef"
+  },
+  "docs/releases/v2.0.0.md": {
+    "bytes": 5932,
+    "sha256": "28b94c25d12fee431b9b8aad3e24fd4cf20db1ab80cb53a325c77a0af250fb8e"
+  },
+  "examples/aot_m0/empty.mio": {
+    "bytes": 120,
+    "sha256": "370034347c7a5569f37cdaf393c8ff4b67e78cdcb2948bde05e9fd30d382868f"
+  },
+  "examples/aot_m1/arithmetic.mio": {
+    "bytes": 132,
+    "sha256": "d17797c91a16976d37b99386fddf764f9b6810ef696a755d6acec6026e85399c"
+  },
+  "examples/aot_m1/make_arithmetic_mochi.go": {
+    "bytes": 1841,
+    "sha256": "bbe783aba69041728349b9ab6992a6e4acb4b9ef0645982cfe57723efb31a582"
+  },
+  "examples/aot_m10/make_gc_probe.go": {
+    "bytes": 686,
+    "sha256": "550bd7339cc1929814fa1fc6f1fb3e5d3799ff4634c4dfd4096f0321c0ed8113"
+  },
+  "examples/aot_m11a/runtime_integration.mio": {
+    "bytes": 198,
+    "sha256": "df2fffffc1164f40e747e7d2a4770edfcef5cff73c627f540a6fa1baa91f3aa7"
+  },
+  "examples/aot_m2/globals.mio": {
+    "bytes": 163,
+    "sha256": "e9e5d1d678f50f23768a67cfd83c1f2a7aecbb668c6970e8109c6a382e377d9a"
+  },
+  "examples/aot_m2/make_globals_mochi.go": {
+    "bytes": 2275,
+    "sha256": "831f37338b88dd6dbbc5dcee17eee70b1ddd2be01974a2fba85d94d1681a108a"
+  },
+  "examples/aot_m3/control.mio": {
+    "bytes": 379,
+    "sha256": "b0b9b797fdf47125b7d3d52cb9709ce072106b6952fe6ef8a9aff4b04f8bc8d6"
+  },
+  "examples/aot_m3/make_control_mochi.go": {
+    "bytes": 3605,
+    "sha256": "d6c2baf5a817515b2d498fecc89cbefc52dcfc7c2a5edde2bfc391dd61d28b58"
+  },
+  "examples/aot_m4/functions.mio": {
+    "bytes": 737,
+    "sha256": "7de3d63d8a10af950da30ce74c7bc170ce68659cdbcaa83c4280de99dd2e9db9"
+  },
+  "examples/aot_m4/make_functions_mochi.go": {
+    "bytes": 5299,
+    "sha256": "fe9a252363f0a3bc7a7aa3d8bf29155dacc43c1b4edf135dde8e4757c2edecfd"
+  },
+  "examples/aot_m5/deep_stack.mio": {
+    "bytes": 983,
+    "sha256": "2779af7cea7950050a9a28daa5f383cd255ab900ff8e525b7234f3bb154d368d"
+  },
+  "examples/aot_m5/make_stack_mochi.go": {
+    "bytes": 4204,
+    "sha256": "ed4a87bac4fa16ab9fe7e015d642e6745473c29c7ee31a6cb74bdbef6107696b"
+  },
+  "examples/aot_m6/floating.mio": {
+    "bytes": 987,
+    "sha256": "dcf3aee65c5169e1b79db83b4f7b5fa76bb08f1cd314fcb72867b788fca5e892"
+  },
+  "examples/aot_m6/make_float_mochi.go": {
+    "bytes": 5986,
+    "sha256": "4bdef642e20b930c7a401bb3eb238ed866c1427cc19586eb60545d90dfe35bf8"
+  },
+  "examples/aot_m6b/floating_output.mio": {
+    "bytes": 571,
+    "sha256": "aac5173519e65cbd5aab2df1555153f0bb7eb230f208ef0dfbc57a8d6791ac0f"
+  },
+  "examples/aot_m6b/make_float_print_mochi.go": {
+    "bytes": 3369,
+    "sha256": "5af4e687af9c2603f069e8e1f337e6c191ec91b5882556e3c8e914b77ee9d3cc"
+  },
+  "examples/aot_m6b/mixed_pop.mio": {
+    "bytes": 215,
+    "sha256": "6574f65e708e118d6b631f1895682a1a99df7785d97d0d166dd032b0da2c27cc"
+  },
+  "examples/aot_m7/make_strings_mochi.go": {
+    "bytes": 3790,
+    "sha256": "479615aa8220f4bbabbcc972104cdfc8ab370945d8409a5e9aecfbf4e444a000"
+  },
+  "examples/aot_m7/strings.mio": {
+    "bytes": 348,
+    "sha256": "0ea515ab9c7e1b44fc3ac035a9c4e5d2066d6a80f5c57127e57ab4afcc4feca8"
+  },
+  "examples/aot_m8/make_allocator_probe.go": {
+    "bytes": 1326,
+    "sha256": "065481c659348f1031d49def0475a1676d0937dfe59817b0385180a55d645fa5"
+  },
+  "examples/aot_m9/make_gc_probe.go": {
+    "bytes": 1240,
+    "sha256": "244a76c051f5e5b2bea4580fa3bf3f9f795cfeb77ba4139e48a7255c49bdaf9e"
+  },
+  "examples/functions.mio": {
+    "bytes": 153,
+    "sha256": "e04e4e3a83862cf4958c5ad2d356596ab8711a500321ce9be42f9252a6c05d5d"
+  },
+  "examples/hello_world.mio": {
+    "bytes": 22,
+    "sha256": "d4f237aa74ad6835ccd23da6b26c3826f74698adde4af63ef6c704603e9b740e"
+  },
+  "examples/local_scope.mio": {
+    "bytes": 166,
+    "sha256": "c27c13eaebf58e5a0e6aa47d085598d732cda077be1e392fdbeeeaa93275ba35"
+  },
+  "examples/m17_decoder/inspect.mio": {
+    "bytes": 845,
+    "sha256": "3ba313aa58ee7df5ada1d273ef7063965f5f8727e1161af9cb6fe5b4a4cadbbf"
+  },
+  "examples/m17_native_builder/build.mio": {
+    "bytes": 4199,
+    "sha256": "91d8e0d29b0d2a35122cbbf7c3c3522d6094c8ea2ca952858d488b1d024c9468"
+  },
+  "examples/m17e_aot/build.mio": {
+    "bytes": 1117,
+    "sha256": "059b3978f50ba55ead769a2bf38ec866c725b8ad314ddd7a615ed4d3edc80cd0"
+  },
+  "examples/m17e_aot/stage1.mio": {
+    "bytes": 355,
+    "sha256": "b88930aeca7f14bfecf4d92f27c03121739320eedcf3e13606e184edce96c2db"
+  },
+  "examples/recursion.mio": {
+    "bytes": 153,
+    "sha256": "716acc2d01dbb98aecbcffe4d7a790bedd226bd1d86e16fcca601be901a87fad"
+  },
+  "examples/variables_and_conditionals.mio": {
+    "bytes": 151,
+    "sha256": "f977ce23a1fc8cc03029a45541ec2868a90d47bcb6af6e06af7eb0a4a934f232"
+  },
+  "go-third-party/golang.org/x/crypto/LICENSE": {
+    "bytes": 1453,
+    "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+  },
+  "go-third-party/golang.org/x/crypto/PATENTS": {
+    "bytes": 1303,
+    "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+  },
+  "go-third-party/golang.org/x/net/LICENSE": {
+    "bytes": 1453,
+    "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+  },
+  "go-third-party/golang.org/x/net/PATENTS": {
+    "bytes": 1303,
+    "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+  },
+  "go-third-party/golang.org/x/sys/LICENSE": {
+    "bytes": 1453,
+    "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+  },
+  "go-third-party/golang.org/x/sys/PATENTS": {
+    "bytes": 1303,
+    "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+  },
+  "go-third-party/golang.org/x/text/LICENSE": {
+    "bytes": 1453,
+    "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+  },
+  "go-third-party/golang.org/x/text/PATENTS": {
+    "bytes": 1303,
+    "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+  },
+  "mio": {
+    "bytes": 3975888,
+    "sha256": "9aab538b0ca27aba352978e3849ae1039c23cdd1ef36f198c42bd31a2fa9a6fa"
+  },
+  "mochi-aot": {
+    "bytes": 2810688,
+    "sha256": "bb5127706aa6f89bf61baa3375ae945327f72aa0c439b7a03ad7a4c5f0f88b8d"
+  },
+  "mochi-aot-audit": {
+    "bytes": 2199168,
+    "sha256": "1d88fe99151b97b87447ce3c84b550c26bfae21832d9bcf3a0307a2ac9c31b0f"
+  },
+  "native-aot": {
+    "bytes": 2115280,
+    "sha256": "f452ed044414e144638a909860da4c8957be7f3d0f0a1d530e0941a14d3c20ed"
+  },
+  "native-aot.mochi": {
+    "bytes": 186933,
+    "sha256": "a07ee129a44938ab276806be30bc06a85a477ad74c0b4064489ed592b1b0da13"
+  }
+}

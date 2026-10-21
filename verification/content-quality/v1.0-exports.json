@@ -1,0 +1,1223 @@
+{
+  "modules": {
+    "kiso/array": [
+      {
+        "name": "make",
+        "kind": "waza",
+        "signature": "koukai waza make<T>(length: int64, initial: T) -> []T",
+        "source": "bunko/kiso/array/array.mio",
+        "line": 1
+      },
+      {
+        "name": "with_capacity",
+        "kind": "waza",
+        "signature": "koukai waza with_capacity<T>(capacity: int64) -> []T",
+        "source": "bunko/kiso/array/array.mio",
+        "line": 5
+      },
+      {
+        "name": "push",
+        "kind": "waza",
+        "signature": "koukai waza push<T>(values: []T, value: T) -> unit",
+        "source": "bunko/kiso/array/array.mio",
+        "line": 9
+      },
+      {
+        "name": "capacity",
+        "kind": "waza",
+        "signature": "koukai waza capacity<T>(values: []T) -> int64",
+        "source": "bunko/kiso/array/array.mio",
+        "line": 13
+      },
+      {
+        "name": "reserve",
+        "kind": "waza",
+        "signature": "koukai waza reserve<T>(values: []T, additional: int64) -> unit",
+        "source": "bunko/kiso/array/array.mio",
+        "line": 17
+      },
+      {
+        "name": "clone",
+        "kind": "waza",
+        "signature": "koukai waza clone<T>(values: []T) -> []T",
+        "source": "bunko/kiso/array/array.mio",
+        "line": 21
+      },
+      {
+        "name": "truncate",
+        "kind": "waza",
+        "signature": "koukai waza truncate<T>(values: []T, new_length: int64) -> unit",
+        "source": "bunko/kiso/array/array.mio",
+        "line": 25
+      },
+      {
+        "name": "append_all",
+        "kind": "waza",
+        "signature": "koukai waza append_all<T>(destination: []T, source: []T) -> unit",
+        "source": "bunko/kiso/array/array.mio",
+        "line": 29
+      }
+    ],
+    "kiso/bytes": [
+      {
+        "name": "ByteBuffer",
+        "kind": "kata",
+        "signature": "koukai kata ByteBuffer { data: []uint8; }",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 3
+      },
+      {
+        "name": "equal",
+        "kind": "waza",
+        "signature": "koukai waza equal(left: []uint8, right: []uint8) -> bool",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 5
+      },
+      {
+        "name": "compare",
+        "kind": "waza",
+        "signature": "koukai waza compare(left: []uint8, right: []uint8) -> int64",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 15
+      },
+      {
+        "name": "index",
+        "kind": "waza",
+        "signature": "koukai waza index(values: []uint8, target: uint8) -> int64",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 29
+      },
+      {
+        "name": "contains",
+        "kind": "waza",
+        "signature": "koukai waza contains(values: []uint8, target: uint8) -> bool",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 38
+      },
+      {
+        "name": "has_prefix",
+        "kind": "waza",
+        "signature": "koukai waza has_prefix(values: []uint8, prefix: []uint8) -> bool",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 42
+      },
+      {
+        "name": "has_suffix",
+        "kind": "waza",
+        "signature": "koukai waza has_suffix(values: []uint8, suffix: []uint8) -> bool",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 52
+      },
+      {
+        "name": "copy",
+        "kind": "waza",
+        "signature": "koukai waza copy(destination: []uint8, source: []uint8) -> int64",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 63
+      },
+      {
+        "name": "fill",
+        "kind": "waza",
+        "signature": "koukai waza fill(values: []uint8, value: uint8) -> unit",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 74
+      },
+      {
+        "name": "clone",
+        "kind": "waza",
+        "signature": "koukai waza clone(values: []uint8) -> []uint8",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 83
+      },
+      {
+        "name": "new_buffer",
+        "kind": "waza",
+        "signature": "koukai waza new_buffer() -> ByteBuffer",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 87
+      },
+      {
+        "name": "buffer_with_capacity",
+        "kind": "waza",
+        "signature": "koukai waza buffer_with_capacity(capacity: int64) -> ByteBuffer",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 91
+      },
+      {
+        "name": "write_byte",
+        "kind": "waza",
+        "signature": "koukai waza write_byte(buffer: ByteBuffer, value: uint8) -> unit",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 95
+      },
+      {
+        "name": "write",
+        "kind": "waza",
+        "signature": "koukai waza write(buffer: ByteBuffer, source: []uint8) -> int64",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 99
+      },
+      {
+        "name": "buffer_len",
+        "kind": "waza",
+        "signature": "koukai waza buffer_len(buffer: ByteBuffer) -> int64",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 105
+      },
+      {
+        "name": "buffer_capacity",
+        "kind": "waza",
+        "signature": "koukai waza buffer_capacity(buffer: ByteBuffer) -> int64",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 109
+      },
+      {
+        "name": "reset",
+        "kind": "waza",
+        "signature": "koukai waza reset(buffer: ByteBuffer) -> unit",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 113
+      },
+      {
+        "name": "buffer_clone",
+        "kind": "waza",
+        "signature": "koukai waza buffer_clone(buffer: ByteBuffer) -> ByteBuffer",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 117
+      },
+      {
+        "name": "buffer_bytes",
+        "kind": "waza",
+        "signature": "koukai waza buffer_bytes(buffer: ByteBuffer) -> []uint8",
+        "source": "bunko/kiso/bytes/bytes.mio",
+        "line": 121
+      }
+    ],
+    "kiso/convert": [
+      {
+        "name": "parse_int",
+        "kind": "waza",
+        "signature": "koukai waza parse_int(value: string) -> int64?",
+        "source": "bunko/kiso/convert/convert.mio",
+        "line": 49
+      },
+      {
+        "name": "parse_uint",
+        "kind": "waza",
+        "signature": "koukai waza parse_uint(value: string) -> uint32?",
+        "source": "bunko/kiso/convert/convert.mio",
+        "line": 69
+      },
+      {
+        "name": "format_int",
+        "kind": "waza",
+        "signature": "koukai waza format_int(value: int64) -> string",
+        "source": "bunko/kiso/convert/convert.mio",
+        "line": 80
+      },
+      {
+        "name": "format_uint",
+        "kind": "waza",
+        "signature": "koukai waza format_uint(value: uint32) -> string",
+        "source": "bunko/kiso/convert/convert.mio",
+        "line": 85
+      },
+      {
+        "name": "parse_bool",
+        "kind": "waza",
+        "signature": "koukai waza parse_bool(value: string) -> bool?",
+        "source": "bunko/kiso/convert/convert.mio",
+        "line": 89
+      },
+      {
+        "name": "format_bool",
+        "kind": "waza",
+        "signature": "koukai waza format_bool(value: bool) -> string",
+        "source": "bunko/kiso/convert/convert.mio",
+        "line": 95
+      },
+      {
+        "name": "parse_float64",
+        "kind": "waza",
+        "signature": "koukai waza parse_float64(value: string) -> float64?",
+        "source": "bunko/kiso/convert/float.mio",
+        "line": 363
+      },
+      {
+        "name": "parse_float32",
+        "kind": "waza",
+        "signature": "koukai waza parse_float32(value: string) -> float32?",
+        "source": "bunko/kiso/convert/float.mio",
+        "line": 390
+      },
+      {
+        "name": "format_float64",
+        "kind": "waza",
+        "signature": "koukai waza format_float64(value: float64) -> string",
+        "source": "bunko/kiso/convert/float.mio",
+        "line": 617
+      },
+      {
+        "name": "format_float32",
+        "kind": "waza",
+        "signature": "koukai waza format_float32(value: float32) -> string",
+        "source": "bunko/kiso/convert/float.mio",
+        "line": 631
+      }
+    ],
+    "kiso/encoding/binary": [
+      {
+        "name": "BinaryError",
+        "kind": "sentaku",
+        "signature": "koukai sentaku BinaryError {\n    InvalidOffset;\n    InsufficientData;\n    Overflow;\n    MalformedVarint;\n}",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 3
+      },
+      {
+        "name": "U8Result",
+        "kind": "kata",
+        "signature": "koukai kata U8Result { value: uint8; error: BinaryError?; }",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 10
+      },
+      {
+        "name": "U16Result",
+        "kind": "kata",
+        "signature": "koukai kata U16Result { value: uint16; error: BinaryError?; }",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 11
+      },
+      {
+        "name": "U32Result",
+        "kind": "kata",
+        "signature": "koukai kata U32Result { value: uint32; error: BinaryError?; }",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 12
+      },
+      {
+        "name": "I8Result",
+        "kind": "kata",
+        "signature": "koukai kata I8Result { value: int8; error: BinaryError?; }",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 13
+      },
+      {
+        "name": "I16Result",
+        "kind": "kata",
+        "signature": "koukai kata I16Result { value: int16; error: BinaryError?; }",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 14
+      },
+      {
+        "name": "I32Result",
+        "kind": "kata",
+        "signature": "koukai kata I32Result { value: int32; error: BinaryError?; }",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 15
+      },
+      {
+        "name": "I64Result",
+        "kind": "kata",
+        "signature": "koukai kata I64Result { value: int64; error: BinaryError?; }",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 16
+      },
+      {
+        "name": "BytesResult",
+        "kind": "kata",
+        "signature": "koukai kata BytesResult { data: []uint8; error: BinaryError?; }",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 17
+      },
+      {
+        "name": "VarU32Result",
+        "kind": "kata",
+        "signature": "koukai kata VarU32Result { value: uint32; count: int64; error: BinaryError?; }",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 18
+      },
+      {
+        "name": "VarI64Result",
+        "kind": "kata",
+        "signature": "koukai kata VarI64Result { value: int64; count: int64; error: BinaryError?; }",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 19
+      },
+      {
+        "name": "read_u8",
+        "kind": "waza",
+        "signature": "koukai waza read_u8(data: []uint8, offset: int64) -> U8Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 27
+      },
+      {
+        "name": "read_u16_le",
+        "kind": "waza",
+        "signature": "koukai waza read_u16_le(data: []uint8, offset: int64) -> U16Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 33
+      },
+      {
+        "name": "read_u16_be",
+        "kind": "waza",
+        "signature": "koukai waza read_u16_be(data: []uint8, offset: int64) -> U16Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 39
+      },
+      {
+        "name": "read_u32_le",
+        "kind": "waza",
+        "signature": "koukai waza read_u32_le(data: []uint8, offset: int64) -> U32Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 45
+      },
+      {
+        "name": "read_u32_be",
+        "kind": "waza",
+        "signature": "koukai waza read_u32_be(data: []uint8, offset: int64) -> U32Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 52
+      },
+      {
+        "name": "read_i8",
+        "kind": "waza",
+        "signature": "koukai waza read_i8(data: []uint8, offset: int64) -> I8Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 59
+      },
+      {
+        "name": "read_i16_le",
+        "kind": "waza",
+        "signature": "koukai waza read_i16_le(data: []uint8, offset: int64) -> I16Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 68
+      },
+      {
+        "name": "read_i16_be",
+        "kind": "waza",
+        "signature": "koukai waza read_i16_be(data: []uint8, offset: int64) -> I16Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 77
+      },
+      {
+        "name": "read_i32_le",
+        "kind": "waza",
+        "signature": "koukai waza read_i32_le(data: []uint8, offset: int64) -> I32Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 86
+      },
+      {
+        "name": "read_i32_be",
+        "kind": "waza",
+        "signature": "koukai waza read_i32_be(data: []uint8, offset: int64) -> I32Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 95
+      },
+      {
+        "name": "read_i64_le",
+        "kind": "waza",
+        "signature": "koukai waza read_i64_le(data: []uint8, offset: int64) -> I64Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 124
+      },
+      {
+        "name": "read_i64_be",
+        "kind": "waza",
+        "signature": "koukai waza read_i64_be(data: []uint8, offset: int64) -> I64Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 125
+      },
+      {
+        "name": "write_u8",
+        "kind": "waza",
+        "signature": "koukai waza write_u8(destination: []uint8, offset: int64, value: uint8) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 161
+      },
+      {
+        "name": "write_u16_le",
+        "kind": "waza",
+        "signature": "koukai waza write_u16_le(destination: []uint8, offset: int64, value: uint16) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 162
+      },
+      {
+        "name": "write_u16_be",
+        "kind": "waza",
+        "signature": "koukai waza write_u16_be(destination: []uint8, offset: int64, value: uint16) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 163
+      },
+      {
+        "name": "write_u32_le",
+        "kind": "waza",
+        "signature": "koukai waza write_u32_le(destination: []uint8, offset: int64, value: uint32) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 164
+      },
+      {
+        "name": "write_u32_be",
+        "kind": "waza",
+        "signature": "koukai waza write_u32_be(destination: []uint8, offset: int64, value: uint32) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 165
+      },
+      {
+        "name": "write_i8",
+        "kind": "waza",
+        "signature": "koukai waza write_i8(destination: []uint8, offset: int64, value: int8) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 166
+      },
+      {
+        "name": "write_i16_le",
+        "kind": "waza",
+        "signature": "koukai waza write_i16_le(destination: []uint8, offset: int64, value: int16) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 167
+      },
+      {
+        "name": "write_i16_be",
+        "kind": "waza",
+        "signature": "koukai waza write_i16_be(destination: []uint8, offset: int64, value: int16) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 168
+      },
+      {
+        "name": "write_i32_le",
+        "kind": "waza",
+        "signature": "koukai waza write_i32_le(destination: []uint8, offset: int64, value: int32) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 169
+      },
+      {
+        "name": "write_i32_be",
+        "kind": "waza",
+        "signature": "koukai waza write_i32_be(destination: []uint8, offset: int64, value: int32) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 170
+      },
+      {
+        "name": "write_i64_le",
+        "kind": "waza",
+        "signature": "koukai waza write_i64_le(destination: []uint8, offset: int64, value: int64) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 171
+      },
+      {
+        "name": "write_i64_be",
+        "kind": "waza",
+        "signature": "koukai waza write_i64_be(destination: []uint8, offset: int64, value: int64) -> BinaryError?",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 172
+      },
+      {
+        "name": "write_var_u32",
+        "kind": "waza",
+        "signature": "koukai waza write_var_u32(value: uint32) -> BytesResult",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 174
+      },
+      {
+        "name": "read_var_u32",
+        "kind": "waza",
+        "signature": "koukai waza read_var_u32(data: []uint8, offset: int64) -> VarU32Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 185
+      },
+      {
+        "name": "write_var_i64",
+        "kind": "waza",
+        "signature": "koukai waza write_var_i64(value: int64) -> BytesResult",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 208
+      },
+      {
+        "name": "read_var_i64",
+        "kind": "waza",
+        "signature": "koukai waza read_var_i64(data: []uint8, offset: int64) -> VarI64Result",
+        "source": "bunko/kiso/encoding/binary/binary.mio",
+        "line": 224
+      }
+    ],
+    "kiso/fs": [
+      {
+        "name": "FsError",
+        "kind": "sentaku",
+        "signature": "koukai sentaku FsError {\n    NotFound(string);\n    PermissionDenied(string);\n    Closed(string);\n    InvalidArgument(string);\n    NoSpace(string);\n    InvalidPath(string);\n    IOFailure(string);\n}",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 5
+      },
+      {
+        "name": "File",
+        "kind": "kata",
+        "signature": "koukai kata File { handle: resource; }",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 15
+      },
+      {
+        "name": "FileResult",
+        "kind": "kata",
+        "signature": "koukai kata FileResult { file: File?; error: FsError?; }",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 16
+      },
+      {
+        "name": "ReadAllResult",
+        "kind": "kata",
+        "signature": "koukai kata ReadAllResult { data: []uint8; error: FsError?; }",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 17
+      },
+      {
+        "name": "UnitResult",
+        "kind": "kata",
+        "signature": "koukai kata UnitResult { error: FsError?; }",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 18
+      },
+      {
+        "name": "StatResult",
+        "kind": "kata",
+        "signature": "koukai kata StatResult { exists: bool; is_file: bool; is_dir: bool; error: FsError?; }",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 19
+      },
+      {
+        "name": "DirEntry",
+        "kind": "kata",
+        "signature": "koukai kata DirEntry { name: string; is_file: bool; is_dir: bool; }",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 20
+      },
+      {
+        "name": "DirResult",
+        "kind": "kata",
+        "signature": "koukai kata DirResult { entries: []DirEntry; error: FsError?; }",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 21
+      },
+      {
+        "name": "open_read",
+        "kind": "waza",
+        "signature": "koukai waza open_read(path: string) -> FileResult",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 59
+      },
+      {
+        "name": "open_write",
+        "kind": "waza",
+        "signature": "koukai waza open_write(path: string) -> FileResult",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 60
+      },
+      {
+        "name": "open_append",
+        "kind": "waza",
+        "signature": "koukai waza open_append(path: string) -> FileResult",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 61
+      },
+      {
+        "name": "read",
+        "kind": "waza",
+        "signature": "koukai waza read(file: File, destination: []uint8, offset: int64, length: int64) -> io.ReadResult",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 63
+      },
+      {
+        "name": "write",
+        "kind": "waza",
+        "signature": "koukai waza write(file: File, source: []uint8, offset: int64, length: int64) -> io.WriteResult",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 85
+      },
+      {
+        "name": "close",
+        "kind": "waza",
+        "signature": "koukai waza close(file: File) -> UnitResult",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 105
+      },
+      {
+        "name": "reader",
+        "kind": "waza",
+        "signature": "koukai waza reader(file: File) -> io.Reader",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 111
+      },
+      {
+        "name": "writer",
+        "kind": "waza",
+        "signature": "koukai waza writer(file: File) -> io.Writer",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 117
+      },
+      {
+        "name": "read_all",
+        "kind": "waza",
+        "signature": "koukai waza read_all(path: string) -> ReadAllResult",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 123
+      },
+      {
+        "name": "write_all",
+        "kind": "waza",
+        "signature": "koukai waza write_all(path: string, data: []uint8) -> UnitResult",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 159
+      },
+      {
+        "name": "stat",
+        "kind": "waza",
+        "signature": "koukai waza stat(path: string) -> StatResult",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 180
+      },
+      {
+        "name": "exists",
+        "kind": "waza",
+        "signature": "koukai waza exists(path: string) -> bool",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 190
+      },
+      {
+        "name": "is_file",
+        "kind": "waza",
+        "signature": "koukai waza is_file(path: string) -> bool",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 191
+      },
+      {
+        "name": "is_dir",
+        "kind": "waza",
+        "signature": "koukai waza is_dir(path: string) -> bool",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 192
+      },
+      {
+        "name": "create_dir",
+        "kind": "waza",
+        "signature": "koukai waza create_dir(path: string) -> UnitResult",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 194
+      },
+      {
+        "name": "read_dir",
+        "kind": "waza",
+        "signature": "koukai waza read_dir(path: string) -> DirResult",
+        "source": "bunko/kiso/fs/fs.mio",
+        "line": 200
+      }
+    ],
+    "kiso/io": [
+      {
+        "name": "IoError",
+        "kind": "sentaku",
+        "signature": "koukai sentaku IoError {\n    Closed;\n    InvalidArgument;\n    NoProgress;\n    UnexpectedEOF;\n    Other(string);\n}",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 4
+      },
+      {
+        "name": "ReadResult",
+        "kind": "kata",
+        "signature": "koukai kata ReadResult { count: int64; eof: bool; error: IoError?; }",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 12
+      },
+      {
+        "name": "WriteResult",
+        "kind": "kata",
+        "signature": "koukai kata WriteResult { count: int64; error: IoError?; }",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 13
+      },
+      {
+        "name": "CopyResult",
+        "kind": "kata",
+        "signature": "koukai kata CopyResult { count: int64; error: IoError?; }",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 14
+      },
+      {
+        "name": "Reader",
+        "kind": "kata",
+        "signature": "koukai kata Reader { read: ([]uint8, int64, int64) -> ReadResult; }",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 16
+      },
+      {
+        "name": "Writer",
+        "kind": "kata",
+        "signature": "koukai kata Writer { write: ([]uint8, int64, int64) -> WriteResult; }",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 17
+      },
+      {
+        "name": "read",
+        "kind": "waza",
+        "signature": "koukai waza read(reader: Reader, destination: []uint8, offset: int64, length: int64) -> ReadResult",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 23
+      },
+      {
+        "name": "write",
+        "kind": "waza",
+        "signature": "koukai waza write(writer: Writer, source: []uint8, offset: int64, length: int64) -> WriteResult",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 30
+      },
+      {
+        "name": "read_full",
+        "kind": "waza",
+        "signature": "koukai waza read_full(reader: Reader, destination: []uint8, offset: int64, length: int64) -> ReadResult",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 37
+      },
+      {
+        "name": "write_all",
+        "kind": "waza",
+        "signature": "koukai waza write_all(writer: Writer, source: []uint8, offset: int64, length: int64) -> WriteResult",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 65
+      },
+      {
+        "name": "copy_stream",
+        "kind": "waza",
+        "signature": "koukai waza copy_stream(reader: Reader, writer: Writer) -> CopyResult",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 87
+      },
+      {
+        "name": "reader_from_bytes",
+        "kind": "waza",
+        "signature": "koukai waza reader_from_bytes(source: []uint8) -> Reader",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 117
+      },
+      {
+        "name": "writer_to_buffer",
+        "kind": "waza",
+        "signature": "koukai waza writer_to_buffer(buffer: bytes.ByteBuffer) -> Writer",
+        "source": "bunko/kiso/io/io.mio",
+        "line": 137
+      }
+    ],
+    "kiso/math": [
+      {
+        "name": "min",
+        "kind": "waza",
+        "signature": "koukai waza min<T: Number>(left: T, right: T) -> T",
+        "source": "bunko/kiso/math/compare.mio",
+        "line": 1
+      },
+      {
+        "name": "max",
+        "kind": "waza",
+        "signature": "koukai waza max<T: Number>(left: T, right: T) -> T",
+        "source": "bunko/kiso/math/compare.mio",
+        "line": 10
+      },
+      {
+        "name": "checked_abs",
+        "kind": "waza",
+        "signature": "koukai waza checked_abs<T: Signed>(value: T) -> T?",
+        "source": "bunko/kiso/math/compare.mio",
+        "line": 19
+      },
+      {
+        "name": "abs",
+        "kind": "waza",
+        "signature": "koukai waza abs<T: Signed>(value: T) -> T",
+        "source": "bunko/kiso/math/compare.mio",
+        "line": 25
+      },
+      {
+        "name": "clamp",
+        "kind": "waza",
+        "signature": "koukai waza clamp<T: Number>(value: T, lower: T, upper: T) -> T",
+        "source": "bunko/kiso/math/compare.mio",
+        "line": 32
+      },
+      {
+        "name": "pi32",
+        "kind": "teisu",
+        "signature": "koukai teisu pi32: float32 = 3.14159265358979323846264338327950288419716939937510;",
+        "source": "bunko/kiso/math/constants.mio",
+        "line": 1
+      },
+      {
+        "name": "pi64",
+        "kind": "teisu",
+        "signature": "koukai teisu pi64: float64 = 3.14159265358979323846264338327950288419716939937510;",
+        "source": "bunko/kiso/math/constants.mio",
+        "line": 2
+      },
+      {
+        "name": "tau32",
+        "kind": "teisu",
+        "signature": "koukai teisu tau32: float32 = 6.28318530717958647692528676655900576839433879875021;",
+        "source": "bunko/kiso/math/constants.mio",
+        "line": 3
+      },
+      {
+        "name": "tau64",
+        "kind": "teisu",
+        "signature": "koukai teisu tau64: float64 = 6.28318530717958647692528676655900576839433879875021;",
+        "source": "bunko/kiso/math/constants.mio",
+        "line": 4
+      },
+      {
+        "name": "sqrt",
+        "kind": "waza",
+        "signature": "koukai waza sqrt<T: Float>(value: T) -> T",
+        "source": "bunko/kiso/math/float.mio",
+        "line": 1
+      },
+      {
+        "name": "floor",
+        "kind": "waza",
+        "signature": "koukai waza floor<T: Float>(value: T) -> T",
+        "source": "bunko/kiso/math/float.mio",
+        "line": 3
+      },
+      {
+        "name": "ceil",
+        "kind": "waza",
+        "signature": "koukai waza ceil<T: Float>(value: T) -> T",
+        "source": "bunko/kiso/math/float.mio",
+        "line": 5
+      },
+      {
+        "name": "round",
+        "kind": "waza",
+        "signature": "koukai waza round<T: Float>(value: T) -> T",
+        "source": "bunko/kiso/math/float.mio",
+        "line": 7
+      },
+      {
+        "name": "trunc",
+        "kind": "waza",
+        "signature": "koukai waza trunc<T: Float>(value: T) -> T",
+        "source": "bunko/kiso/math/float.mio",
+        "line": 9
+      },
+      {
+        "name": "is_nan",
+        "kind": "waza",
+        "signature": "koukai waza is_nan<T: Float>(value: T) -> bool",
+        "source": "bunko/kiso/math/float.mio",
+        "line": 11
+      },
+      {
+        "name": "is_inf",
+        "kind": "waza",
+        "signature": "koukai waza is_inf<T: Float>(value: T) -> bool",
+        "source": "bunko/kiso/math/float.mio",
+        "line": 13
+      },
+      {
+        "name": "is_finite",
+        "kind": "waza",
+        "signature": "koukai waza is_finite<T: Float>(value: T) -> bool",
+        "source": "bunko/kiso/math/float.mio",
+        "line": 15
+      },
+      {
+        "name": "checked_gcd",
+        "kind": "waza",
+        "signature": "koukai waza checked_gcd(left: int64, right: int64) -> int64?",
+        "source": "bunko/kiso/math/integer.mio",
+        "line": 1
+      },
+      {
+        "name": "gcd",
+        "kind": "waza",
+        "signature": "koukai waza gcd(left: int64, right: int64) -> int64",
+        "source": "bunko/kiso/math/integer.mio",
+        "line": 15
+      },
+      {
+        "name": "checked_lcm",
+        "kind": "waza",
+        "signature": "koukai waza checked_lcm(left: int64, right: int64) -> int64?",
+        "source": "bunko/kiso/math/integer.mio",
+        "line": 22
+      },
+      {
+        "name": "lcm",
+        "kind": "waza",
+        "signature": "koukai waza lcm(left: int64, right: int64) -> int64",
+        "source": "bunko/kiso/math/integer.mio",
+        "line": 39
+      }
+    ],
+    "kiso/path": [
+      {
+        "name": "SplitResult",
+        "kind": "kata",
+        "signature": "koukai kata SplitResult { dir: string; base: string; }",
+        "source": "bunko/kiso/path/path.mio",
+        "line": 4
+      },
+      {
+        "name": "clean",
+        "kind": "waza",
+        "signature": "koukai waza clean(value: string) -> string",
+        "source": "bunko/kiso/path/path.mio",
+        "line": 37
+      },
+      {
+        "name": "join",
+        "kind": "waza",
+        "signature": "koukai waza join(left: string, right: string) -> string",
+        "source": "bunko/kiso/path/path.mio",
+        "line": 65
+      },
+      {
+        "name": "join_all",
+        "kind": "waza",
+        "signature": "koukai waza join_all(parts: []string) -> string",
+        "source": "bunko/kiso/path/path.mio",
+        "line": 75
+      },
+      {
+        "name": "is_abs",
+        "kind": "waza",
+        "signature": "koukai waza is_abs(value: string) -> bool",
+        "source": "bunko/kiso/path/path.mio",
+        "line": 92
+      },
+      {
+        "name": "base",
+        "kind": "waza",
+        "signature": "koukai waza base(value: string) -> string",
+        "source": "bunko/kiso/path/path.mio",
+        "line": 97
+      },
+      {
+        "name": "dir",
+        "kind": "waza",
+        "signature": "koukai waza dir(value: string) -> string",
+        "source": "bunko/kiso/path/path.mio",
+        "line": 109
+      },
+      {
+        "name": "ext",
+        "kind": "waza",
+        "signature": "koukai waza ext(value: string) -> string",
+        "source": "bunko/kiso/path/path.mio",
+        "line": 124
+      },
+      {
+        "name": "split",
+        "kind": "waza",
+        "signature": "koukai waza split(value: string) -> SplitResult",
+        "source": "bunko/kiso/path/path.mio",
+        "line": 135
+      }
+    ],
+    "kiso/string": [
+      {
+        "name": "StringBuilder",
+        "kind": "kata",
+        "signature": "koukai kata StringBuilder { buffer: bytes.ByteBuffer; }",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 4
+      },
+      {
+        "name": "to_bytes",
+        "kind": "waza",
+        "signature": "koukai waza to_bytes(value: string) -> []uint8",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 6
+      },
+      {
+        "name": "from_utf8",
+        "kind": "waza",
+        "signature": "koukai waza from_utf8(data: []uint8) -> string?",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 10
+      },
+      {
+        "name": "byte_len",
+        "kind": "waza",
+        "signature": "koukai waza byte_len(value: string) -> int64",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 15
+      },
+      {
+        "name": "rune_count",
+        "kind": "waza",
+        "signature": "koukai waza rune_count(value: string) -> int64",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 19
+      },
+      {
+        "name": "has_prefix",
+        "kind": "waza",
+        "signature": "koukai waza has_prefix(value: string, prefix: string) -> bool",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 26
+      },
+      {
+        "name": "has_suffix",
+        "kind": "waza",
+        "signature": "koukai waza has_suffix(value: string, suffix: string) -> bool",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 30
+      },
+      {
+        "name": "index",
+        "kind": "waza",
+        "signature": "koukai waza index(value: string, pattern: string) -> int64",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 34
+      },
+      {
+        "name": "contains",
+        "kind": "waza",
+        "signature": "koukai waza contains(value: string, pattern: string) -> bool",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 57
+      },
+      {
+        "name": "concat",
+        "kind": "waza",
+        "signature": "koukai waza concat(left: string, right: string) -> string",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 61
+      },
+      {
+        "name": "new_builder",
+        "kind": "waza",
+        "signature": "koukai waza new_builder() -> StringBuilder",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 68
+      },
+      {
+        "name": "builder_with_capacity",
+        "kind": "waza",
+        "signature": "koukai waza builder_with_capacity(capacity: int64) -> StringBuilder",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 72
+      },
+      {
+        "name": "write_string",
+        "kind": "waza",
+        "signature": "koukai waza write_string(builder: StringBuilder, value: string) -> unit",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 76
+      },
+      {
+        "name": "write_rune",
+        "kind": "waza",
+        "signature": "koukai waza write_rune(builder: StringBuilder, value: rune) -> unit",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 80
+      },
+      {
+        "name": "builder_len",
+        "kind": "waza",
+        "signature": "koukai waza builder_len(builder: StringBuilder) -> int64",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 84
+      },
+      {
+        "name": "builder_capacity",
+        "kind": "waza",
+        "signature": "koukai waza builder_capacity(builder: StringBuilder) -> int64",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 88
+      },
+      {
+        "name": "builder_reset",
+        "kind": "waza",
+        "signature": "koukai waza builder_reset(builder: StringBuilder) -> unit",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 92
+      },
+      {
+        "name": "builder_string",
+        "kind": "waza",
+        "signature": "koukai waza builder_string(builder: StringBuilder) -> string",
+        "source": "bunko/kiso/string/string.mio",
+        "line": 96
+      }
+    ],
+    "kiso/testing": [
+      {
+        "name": "expect",
+        "kind": "waza",
+        "signature": "koukai waza expect(condition: bool, message: string) -> unit",
+        "source": "bunko/kiso/testing/testing.mio",
+        "line": 3
+      },
+      {
+        "name": "fail",
+        "kind": "waza",
+        "signature": "koukai waza fail(message: string) -> unit",
+        "source": "bunko/kiso/testing/testing.mio",
+        "line": 7
+      }
+    ],
+    "kiso/utf8": [
+      {
+        "name": "DecodeResult",
+        "kind": "kata",
+        "signature": "koukai kata DecodeResult {\n    value: rune;\n    width: int64;\n    valid: bool;\n}",
+        "source": "bunko/kiso/utf8/utf8.mio",
+        "line": 4
+      },
+      {
+        "name": "is_valid_rune",
+        "kind": "waza",
+        "signature": "koukai waza is_valid_rune(value: rune) -> bool",
+        "source": "bunko/kiso/utf8/utf8.mio",
+        "line": 78
+      },
+      {
+        "name": "rune_width",
+        "kind": "waza",
+        "signature": "koukai waza rune_width(value: rune) -> int64",
+        "source": "bunko/kiso/utf8/utf8.mio",
+        "line": 83
+      },
+      {
+        "name": "decode_one",
+        "kind": "waza",
+        "signature": "koukai waza decode_one(data: []uint8, offset: int64) -> DecodeResult",
+        "source": "bunko/kiso/utf8/utf8.mio",
+        "line": 95
+      },
+      {
+        "name": "encode_rune",
+        "kind": "waza",
+        "signature": "koukai waza encode_rune(value: rune) -> []uint8",
+        "source": "bunko/kiso/utf8/utf8.mio",
+        "line": 112
+      },
+      {
+        "name": "append_rune",
+        "kind": "waza",
+        "signature": "koukai waza append_rune(destination: []uint8, value: rune) -> unit",
+        "source": "bunko/kiso/utf8/utf8.mio",
+        "line": 119
+      },
+      {
+        "name": "valid",
+        "kind": "waza",
+        "signature": "koukai waza valid(data: []uint8) -> bool",
+        "source": "bunko/kiso/utf8/utf8.mio",
+        "line": 127
+      },
+      {
+        "name": "rune_count",
+        "kind": "waza",
+        "signature": "koukai waza rune_count(data: []uint8) -> int64?",
+        "source": "bunko/kiso/utf8/utf8.mio",
+        "line": 149
+      }
+    ]
+  }
+}

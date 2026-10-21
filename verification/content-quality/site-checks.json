@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-10-20T14:47:53.769241+00:00",
+  "commands": [
+    {
+      "argv": [
+        "npm",
+        "run",
+        "types:check"
+      ],
+      "exit": 0,
+      "stdout": "\n> mio-docs@0.1.0 types:check\n> next typegen && tsc --noEmit\n\n[MDX] generated files in 1.0859589999999457ms\nGenerating route types...\n✓ Types generated successfully\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "npm",
+        "run",
+        "test:versions"
+      ],
+      "exit": 0,
+      "stdout": "\n> mio-docs@0.1.0 test:versions\n> node --test scripts/versioning.test.mjs\n\n✔ numeric ordering supports minor 10, optional patch and future majors (1.225417ms)\n✔ default never follows an unreleased higher development version (0.205792ms)\n✔ release evidence, duplicate numeric identities, maintenance and EOL are validated (0.150167ms)\n✔ same chapter and language survive version switches (0.475958ms)\n✔ missing chapter returns target version home in the current language (0.055083ms)\n✔ missing translation is explicit and never a fake translated URL (0.063917ms)\n✔ official Fumadocs projection supplies native same-page navigation and fallback (0.089833ms)\n✔ every published root uses native version metadata and independent owned content (0.3515ms)\n﹣ production routes, redirects, dev boundaries, untranslated 404 and version-isolated search (0.042458ms) # SKIP\n✔ version scaffolding stays unpublished, refuses duplicates and blocks unreviewed activation (6.288625ms)\n✔ reviewed development activation registers a real directory without changing stable default (3.983041ms)\n✔ frozen historical content rejects changed semantics and deletion (2.48675ms)\nℹ tests 12\nℹ suites 0\nℹ pass 11\nℹ fail 0\nℹ cancelled 0\nℹ skipped 1\nℹ todo 0\nℹ duration_ms 89.834041\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "npm",
+        "run",
+        "check:versions"
+      ],
+      "exit": 0,
+      "stdout": "\n> mio-docs@0.1.0 check:versions\n> node scripts/check-versions.mjs\n\nValidated 2 native version roots, release/default policy and frozen documentation hashes.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "npm",
+        "run",
+        "check:links"
+      ],
+      "exit": 0,
+      "stdout": "\n> mio-docs@0.1.0 check:links\n> node scripts/check-links.mjs\n\nChecked 677 links and all navigation entries across 101 routes.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit": 0,
+      "stdout": "\n> mio-docs@0.1.0 build\n> node scripts/check-versions.mjs && next build\n\nValidated 2 native version roots, release/default policy and frozen documentation hashes.\n▲ Next.js 16.4.2 (Turbopack)\n[MDX] generated files in 0.7592089999999985ms\n✓ Running next.config.mjs took 106ms\n\n  Creating an optimized production build ...\n✓ Compiled successfully in 2.3s\n  Running TypeScript ...\n  Finished TypeScript in 777ms ...\n  Collecting page data using 8 workers ...\n  Generating static pages using 8 workers (0/105) ...\n  Generating static pages using 8 workers (26/105) \n  Generating static pages using 8 workers (52/105) \n  Generating static pages using 8 workers (78/105) \n✓ Generating static pages using 8 workers (105/105) in 1064ms\n  Finalizing page optimization ...\n\nRoute (app)\n┌ ○ /\n├ ○ /_not-found\n├ ● /[lang]/docs/[[...slug]]\n├ ƒ /api/search\n├   /docs/[[...slug]]\n│ ├ ● /docs\n│ ├ ● /docs/bunko\n│ ├ ● /docs/editors\n│ └ ● [+97 more paths]\n└ ○ /icon.svg\n\n\n○  (Static)   prerendered as static content\n●  (SSG)      prerendered as static HTML (uses generateStaticParams)\nƒ  (Dynamic)  server-rendered on demand\n\n",
+      "stderr": "Found 2 warnings while optimizing generated CSS:\n\nIssue #1:\n\u001b[2m│     }\u001b[22m\n\u001b[2m│   }\u001b[22m\n\u001b[2m│\u001b[22m   .\\[\\&_\\:\\:highlight\\(fd-search\\)\\]\\:text-fd-primary ::highlight(fd-search) {\n\u001b[2m┆\u001b[22m                                                                   \u001b[33m\u001b[2m^--\u001b[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?\u001b[39m\n\u001b[2m┆\u001b[22m\n\u001b[2m│     color: var(--color-fd-primary);\u001b[22m\n\u001b[2m│   }\u001b[22m\n\nIssue #2:\n\u001b[2m│     color: var(--color-fd-primary);\u001b[22m\n\u001b[2m│   }\u001b[22m\n\u001b[2m│\u001b[22m   .\\[\\&_\\:\\:highlight\\(fd-search\\)\\]\\:underline ::highlight(fd-search) {\n\u001b[2m┆\u001b[22m                                                             \u001b[33m\u001b[2m^--\u001b[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?\u001b[39m\n\u001b[2m┆\u001b[22m\n\u001b[2m│     text-decoration-line: underline;\u001b[22m\n\u001b[2m│   }\u001b[22m\n\n"
+    }
+  ]
+}

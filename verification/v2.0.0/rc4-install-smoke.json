@@ -1,0 +1,247 @@
+{
+  "status": "PASS",
+  "archive": "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64.tar.gz",
+  "commands": [
+    {
+      "label": "checkout-denial-probe",
+      "argv": [
+        "/bin/cat",
+        "/Volumes/Sector0/AppData/Mio/mio/go.mod"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "cat: /Volumes/Sector0/AppData/Mio/mio/go.mod: Operation not permitted\n"
+    },
+    {
+      "label": "version",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "Mio 2.0.0\n",
+      "stderr": ""
+    },
+    {
+      "label": "version-alias",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "Mio 2.0.0\n",
+      "stderr": ""
+    },
+    {
+      "label": "help",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "help"
+      ],
+      "exit_code": 0,
+      "stdout": "Mio 2.0.0\nUsage:\n  mio check <file.mio>\n  mio run <file.mio>\n  options: --color=auto|always|never --format=human|short|json --verbose\n  mio test <directory|./...> [--run=<regexp>] [--lang=zh-CN|ja-JP|en-US]\n  mio build [-o <file.mochi>] <file.mio>\n  mio exec <file.mochi>\n  mio disasm <file.mochi>\n  mio lsp [--stdio]\n  mio version\n  mio help\n",
+      "stderr": ""
+    },
+    {
+      "label": "hello-check",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "check",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/hello.mio"
+      ],
+      "exit_code": 0,
+      "stdout": "check passed\n",
+      "stderr": ""
+    },
+    {
+      "label": "hello-vm-run",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "run",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/hello.mio"
+      ],
+      "exit_code": 0,
+      "stdout": "Hello, Mio!\n",
+      "stderr": ""
+    },
+    {
+      "label": "hello-build",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "build",
+        "-o",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/hello.mochi",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/hello.mio"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "label": "hello-vm-exec",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "exec",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/hello.mochi"
+      ],
+      "exit_code": 0,
+      "stdout": "Hello, Mio!\n",
+      "stderr": ""
+    },
+    {
+      "label": "hello-host-aot",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mochi-aot",
+        "-o",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/hello-mochi-aot",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/hello.mochi"
+      ],
+      "exit_code": 0,
+      "stdout": "wrote /private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/hello-mochi-aot (16384 bytes, unsigned Mach-O arm64)\non macOS, run: codesign --force --sign - /private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/hello-mochi-aot\n",
+      "stderr": ""
+    },
+    {
+      "label": "hello-mochi-aot-execute",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/hello-mochi-aot"
+      ],
+      "exit_code": 0,
+      "stdout": "Hello, Mio!\n",
+      "stderr": ""
+    },
+    {
+      "label": "hello-pure-aot",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/native-aot"
+      ],
+      "exit_code": 0,
+      "stdout": "native-aot: ok\n176\n16384\n",
+      "stderr": ""
+    },
+    {
+      "label": "hello-native-aot-execute",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/hello-native-aot"
+      ],
+      "exit_code": 0,
+      "stdout": "Hello, Mio!\n",
+      "stderr": ""
+    },
+    {
+      "label": "features-check",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "check",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/features.mio"
+      ],
+      "exit_code": 0,
+      "stdout": "check passed\n",
+      "stderr": ""
+    },
+    {
+      "label": "features-vm-run",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "run",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/features.mio"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n41\n42\n",
+      "stderr": ""
+    },
+    {
+      "label": "features-build",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "build",
+        "-o",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/features.mochi",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/features.mio"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "label": "features-vm-exec",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "exec",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/features.mochi"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n41\n42\n",
+      "stderr": ""
+    },
+    {
+      "label": "features-host-aot",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mochi-aot",
+        "-o",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/features-mochi-aot",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/features.mochi"
+      ],
+      "exit_code": 0,
+      "stdout": "wrote /private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/features-mochi-aot (32768 bytes, unsigned Mach-O arm64)\non macOS, run: codesign --force --sign - /private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/features-mochi-aot\n",
+      "stderr": ""
+    },
+    {
+      "label": "features-mochi-aot-execute",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/features-mochi-aot"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n41\n42\n",
+      "stderr": ""
+    },
+    {
+      "label": "features-pure-aot",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/native-aot"
+      ],
+      "exit_code": 0,
+      "stdout": "native-aot: ok\n1767\n16384\n",
+      "stderr": ""
+    },
+    {
+      "label": "features-native-aot-execute",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/features-native-aot"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n41\n42\n",
+      "stderr": ""
+    },
+    {
+      "label": "error-diagnostic",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "check",
+        "--format=json",
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/bad.mio"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "{\"code\":\"E0301\",\"severity\":\"error\",\"message\":\"\u53d8\u91cf \\\"x\\\" \u7684\u521d\u59cb\u5316\u7c7b\u578b\u4e0d\u6b63\u786e\",\"path\":\"/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/first-project/bad.mio\",\"location\":{\"offset\":16,\"line\":1,\"column\":17},\"labels\":[{\"span\":{\"start\":{\"offset\":16,\"line\":1,\"column\":17},\"end\":{\"offset\":23,\"line\":1,\"column\":24}},\"primary\":true}],\"expected\":\"int64\",\"actual\":\"string\"}\n"
+    },
+    {
+      "label": "lsp-handshake",
+      "argv": [
+        "/private/var/folders/19/kmpz3dtn0bb4kkrhfbphds340000gn/T/mio-install-5iiu4n5o/mio-2.0.0-darwin-arm64/mio",
+        "lsp",
+        "--stdio"
+      ],
+      "exit_code": 0,
+      "stdout": "Content-Length: 444\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"positionEncoding\":\"utf-16\",\"textDocumentSync\":{\"openClose\":true,\"change\":2,\"save\":{\"includeText\":false}},\"hoverProvider\":true,\"definitionProvider\":true,\"referencesProvider\":true,\"documentSymbolProvider\":true,\"completionProvider\":{\"triggerCharacters\":[\".\"]},\"signatureHelpProvider\":{\"triggerCharacters\":[\"(\",\",\"],\"retriggerCharacters\":[\",\"]}},\"serverInfo\":{\"name\":\"MioCore\",\"version\":\"2.0.0\"}}}Content-Length: 38\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":null}",
+      "stderr": "mio lsp: 2026/10/21 00:00:26 initialize: roots=[], diagnostics=true, delay=150ms\nmio lsp: 2026/10/21 00:00:26 shutdown requested\n"
+    }
+  ],
+  "environment": "empty PATH, isolated HOME, packaged MIO_BUNKO",
+  "sandbox": "deny checkout reads, process-fork and all other process-exec",
+  "go_available": false,
+  "manifest_files": 137,
+  "independent_install": true,
+  "executable_bytes_preserved": true,
+  "strict_codesign": true,
+  "hello_and_features_vm_and_both_aot": true
+}

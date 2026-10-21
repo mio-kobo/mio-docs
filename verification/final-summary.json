@@ -1,0 +1,19 @@
+{
+  "verifiedAt": "2026-10-20T14:13:46.883855+00:00",
+  "status": "passed",
+  "technicalPages": 27,
+  "fixtures": 36,
+  "publicModules": 17,
+  "publicDeclarations": 364,
+  "nativeGCTests": 5,
+  "runtimeEvidence": "verification/latest.json",
+  "finalContentEvidence": "verification/content-check.json",
+  "siteEvidence": "verification/site-integration.json",
+  "versionMetadata": "content/SOURCES.json",
+  "limitations": [
+    "One Linux-only filesystem cleanup test skipped on macOS",
+    "IDE integration and packaging not run",
+    "Full Compiler A build and A-to-B not re-run",
+    "Compiler A generated and started; target Heap OOM still blocks A-to-B; M17e not accepted; M18 not started"
+  ]
+}

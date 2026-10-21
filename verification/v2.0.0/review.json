@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "artifact": "RC4 local candidate",
+  "readiness": "Ready for Release Review",
+  "validationStatus": "passed",
+  "review": {
+    "status": "pending",
+    "approved": false
+  },
+  "stable": false,
+  "activated": false,
+  "finalSourceCommit": null,
+  "sourceCommitIsCompleteIdentity": false,
+  "sourceHead": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+  "sourceManifest": "rc4-source-manifest.json",
+  "validationEvidence": "results.json",
+  "note": "Readiness applies to this RC4 documentation candidate. Maintainer approval, immutable final source and published release verification remain required."
+}

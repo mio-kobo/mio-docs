@@ -1,0 +1,57 @@
+
+> mio-docs@0.1.0 build
+> node scripts/check-versions.mjs && next build
+
+Validated 2 native version roots, release/default policy and frozen documentation hashes.
+▲ Next.js 16.4.2 (Turbopack)
+[MDX] generated files in 0.9035000000000082ms
+✓ Running next.config.mjs took 172ms
+
+  Creating an optimized production build ...
+Found 2 warnings while optimizing generated CSS:
+
+Issue #1:
+[2m│     }[22m
+[2m│   }[22m
+[2m│[22m   .\[\&_\:\:highlight\(fd-search\)\]\:text-fd-primary ::highlight(fd-search) {
+[2m┆[22m                                                                   [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│     color: var(--color-fd-primary);[22m
+[2m│   }[22m
+
+Issue #2:
+[2m│     color: var(--color-fd-primary);[22m
+[2m│   }[22m
+[2m│[22m   .\[\&_\:\:highlight\(fd-search\)\]\:underline ::highlight(fd-search) {
+[2m┆[22m                                                             [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│     text-decoration-line: underline;[22m
+[2m│   }[22m
+
+✓ Compiled successfully in 2.0s
+  Running TypeScript ...
+  Finished TypeScript in 970ms ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/69) ...
+  Generating static pages using 7 workers (17/69) 
+  Generating static pages using 7 workers (34/69) 
+  Generating static pages using 7 workers (51/69) 
+✓ Generating static pages using 7 workers (69/69) in 609ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ● /[lang]/docs/[[...slug]]
+├ ƒ /api/search
+└   /docs/[[...slug]]
+  ├ ● /docs
+  ├ ● /docs/bunko
+  ├ ● /docs/editors
+  └ ● [+62 more paths]
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

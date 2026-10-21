@@ -1,0 +1,415 @@
+[
+  {
+    "label": "build-mio",
+    "argv": [
+      "env",
+      "CGO_ENABLED=0",
+      "GOOS=darwin",
+      "GOARCH=arm64",
+      "go",
+      "build",
+      "-buildvcs=false",
+      "-trimpath",
+      "-ldflags=-s -w -buildid=",
+      "-o",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mio",
+      "./cmd/mio"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.35227298736572266
+  },
+  {
+    "label": "build-mochi-aot",
+    "argv": [
+      "env",
+      "CGO_ENABLED=0",
+      "GOOS=darwin",
+      "GOARCH=arm64",
+      "go",
+      "build",
+      "-buildvcs=false",
+      "-trimpath",
+      "-ldflags=-s -w -buildid=",
+      "-o",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot",
+      "./cmd/mochi-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.10928010940551758
+  },
+  {
+    "label": "build-mochi-aot-audit",
+    "argv": [
+      "env",
+      "CGO_ENABLED=0",
+      "GOOS=darwin",
+      "GOARCH=arm64",
+      "go",
+      "build",
+      "-buildvcs=false",
+      "-trimpath",
+      "-ldflags=-s -w -buildid=",
+      "-o",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot-audit",
+      "./cmd/mochi-aot-audit"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.09703278541564941
+  },
+  {
+    "label": "version",
+    "argv": [
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mio",
+      "version"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.14069008827209473
+  },
+  {
+    "label": "goroot",
+    "argv": [
+      "go",
+      "env",
+      "GOROOT"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.006669044494628906
+  },
+  {
+    "label": "head",
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.012633800506591797
+  },
+  {
+    "label": "branch",
+    "argv": [
+      "git",
+      "branch",
+      "--show-current"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.010637998580932617
+  },
+  {
+    "label": "status",
+    "argv": [
+      "git",
+      "status",
+      "--porcelain=v1"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.014801025390625
+  },
+  {
+    "label": "ci-ancestor",
+    "argv": [
+      "git",
+      "merge-base",
+      "--is-ancestor",
+      "8b53a25",
+      "HEAD"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.011026859283447266
+  },
+  {
+    "label": "go-version",
+    "argv": [
+      "go",
+      "version"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.006938934326171875
+  },
+  {
+    "label": "mio-sign",
+    "argv": [
+      "/usr/bin/codesign",
+      "--force",
+      "--sign",
+      "-",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mio"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.014448881149291992
+  },
+  {
+    "label": "mio-verify",
+    "argv": [
+      "/usr/bin/codesign",
+      "--verify",
+      "--strict",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mio"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.007710933685302734
+  },
+  {
+    "label": "mio-signature",
+    "argv": [
+      "/usr/bin/codesign",
+      "-dvv",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mio"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.0046749114990234375
+  },
+  {
+    "label": "mio-file",
+    "argv": [
+      "/usr/bin/file",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mio"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.0029489994049072266
+  },
+  {
+    "label": "mio-headers",
+    "argv": [
+      "/usr/bin/otool",
+      "-hv",
+      "-l",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mio"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.011193990707397461
+  },
+  {
+    "label": "mio-libraries",
+    "argv": [
+      "/usr/bin/otool",
+      "-L",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mio"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.010007143020629883
+  },
+  {
+    "label": "mochi-aot-sign",
+    "argv": [
+      "/usr/bin/codesign",
+      "--force",
+      "--sign",
+      "-",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.011286020278930664
+  },
+  {
+    "label": "mochi-aot-verify",
+    "argv": [
+      "/usr/bin/codesign",
+      "--verify",
+      "--strict",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.006446123123168945
+  },
+  {
+    "label": "mochi-aot-signature",
+    "argv": [
+      "/usr/bin/codesign",
+      "-dvv",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.004129171371459961
+  },
+  {
+    "label": "mochi-aot-file",
+    "argv": [
+      "/usr/bin/file",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.0029859542846679688
+  },
+  {
+    "label": "mochi-aot-headers",
+    "argv": [
+      "/usr/bin/otool",
+      "-hv",
+      "-l",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.009701251983642578
+  },
+  {
+    "label": "mochi-aot-libraries",
+    "argv": [
+      "/usr/bin/otool",
+      "-L",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.009536027908325195
+  },
+  {
+    "label": "mochi-aot-audit-sign",
+    "argv": [
+      "/usr/bin/codesign",
+      "--force",
+      "--sign",
+      "-",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot-audit"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.01121973991394043
+  },
+  {
+    "label": "mochi-aot-audit-verify",
+    "argv": [
+      "/usr/bin/codesign",
+      "--verify",
+      "--strict",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot-audit"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.006311178207397461
+  },
+  {
+    "label": "mochi-aot-audit-signature",
+    "argv": [
+      "/usr/bin/codesign",
+      "-dvv",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot-audit"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.004955768585205078
+  },
+  {
+    "label": "mochi-aot-audit-file",
+    "argv": [
+      "/usr/bin/file",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot-audit"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.0032510757446289062
+  },
+  {
+    "label": "mochi-aot-audit-headers",
+    "argv": [
+      "/usr/bin/otool",
+      "-hv",
+      "-l",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot-audit"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.01104879379272461
+  },
+  {
+    "label": "mochi-aot-audit-libraries",
+    "argv": [
+      "/usr/bin/otool",
+      "-L",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/mochi-aot-audit"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.009734869003295898
+  },
+  {
+    "label": "native-aot-verify",
+    "argv": [
+      "/usr/bin/codesign",
+      "--verify",
+      "--strict",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/native-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.006000041961669922
+  },
+  {
+    "label": "native-aot-signature",
+    "argv": [
+      "/usr/bin/codesign",
+      "-dvv",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/native-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.004302024841308594
+  },
+  {
+    "label": "native-aot-file",
+    "argv": [
+      "/usr/bin/file",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/native-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.002930879592895508
+  },
+  {
+    "label": "native-aot-headers",
+    "argv": [
+      "/usr/bin/otool",
+      "-hv",
+      "-l",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/native-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.009401798248291016
+  },
+  {
+    "label": "native-aot-libraries",
+    "argv": [
+      "/usr/bin/otool",
+      "-L",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64/native-aot"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 0.009340286254882812
+  },
+  {
+    "label": "install-smoke",
+    "argv": [
+      "python3",
+      "/Volumes/Sector0/AppData/Mio/mio/scripts/smoke-release.py",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/mio-2.0.0-darwin-arm64.tar.gz",
+      "--report",
+      "/Volumes/Sector0/AppData/Mio/mio/build/v2.0.0-rc4/install-smoke.json"
+    ],
+    "cwd": "/Volumes/Sector0/AppData/Mio/mio",
+    "exit_code": 0,
+    "seconds": 1.3136799335479736
+  }
+]

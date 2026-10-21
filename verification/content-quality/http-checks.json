@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-20T14:48:48.371180+00:00",
+  "commands": [
+    {
+      "argv": [
+        "npm",
+        "run",
+        "test:versions"
+      ],
+      "environment": {
+        "BASE_URL": "http://127.0.0.1:3214"
+      },
+      "exit": 0,
+      "stdout": "\n> mio-docs@0.1.0 test:versions\n> node --test scripts/versioning.test.mjs\n\n✔ numeric ordering supports minor 10, optional patch and future majors (2.360875ms)\n✔ default never follows an unreleased higher development version (0.376166ms)\n✔ release evidence, duplicate numeric identities, maintenance and EOL are validated (0.176083ms)\n✔ same chapter and language survive version switches (0.169083ms)\n✔ missing chapter returns target version home in the current language (0.129875ms)\n✔ missing translation is explicit and never a fake translated URL (0.094667ms)\n✔ official Fumadocs projection supplies native same-page navigation and fallback (0.126791ms)\n✔ every published root uses native version metadata and independent owned content (0.484167ms)\n✔ production routes, redirects, dev boundaries, untranslated 404 and version-isolated search (495.176917ms)\n✔ version scaffolding stays unpublished, refuses duplicates and blocks unreviewed activation (3.414916ms)\n✔ reviewed development activation registers a real directory without changing stable default (4.540042ms)\n✔ frozen historical content rejects changed semantics and deletion (2.440875ms)\nℹ tests 12\nℹ suites 0\nℹ pass 12\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 584.818375\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "npm",
+        "run",
+        "check:links"
+      ],
+      "environment": {
+        "BASE_URL": "http://127.0.0.1:3214"
+      },
+      "exit": 0,
+      "stdout": "\n> mio-docs@0.1.0 check:links\n> node scripts/check-links.mjs\n\nChecked 677 links and all navigation entries across 101 routes.\nHTTP 200, heading, rendered local links and anchors verified for 101 pages.\n",
+      "stderr": ""
+    }
+  ]
+}
