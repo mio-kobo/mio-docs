@@ -1,0 +1,4 @@
+{
+  "code": "yobu \"kiso/math\";\n\nwaza square(value: float64) -> float64 {\n    kaesu value * value;\n}\n\nkaku area = square(12.0);\nchant(area);\nchant(math.sqrt(area));",
+  "output": "144\n12"
+}

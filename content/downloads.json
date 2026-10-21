@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-10-21",
+  "releases": [
+    {
+      "version": "1.0.0",
+      "docsVersion": "v1.0",
+      "tag": "v1.0.0",
+      "releaseUrl": "https://github.com/mio-kobo/mio/releases/tag/v1.0.0",
+      "assets": [
+        {
+          "name": "mio_v1.0.0_darwin_amd64.tar.gz",
+          "platform": "macOS",
+          "architecture": "x86_64",
+          "size": 1320574,
+          "sha256": "dfeb39d89104e700fec483213473ece6195204328e3202543806b815caeb71e8",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v1.0.0/mio_v1.0.0_darwin_amd64.tar.gz"
+        },
+        {
+          "name": "mio_v1.0.0_darwin_arm64.tar.gz",
+          "platform": "macOS",
+          "architecture": "arm64",
+          "size": 1253627,
+          "sha256": "fd7ff0195d2822c356935bddafae0b486c61d9efae6b3ae7482ebe0244e0913f",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v1.0.0/mio_v1.0.0_darwin_arm64.tar.gz"
+        },
+        {
+          "name": "mio_v1.0.0_linux_amd64.tar.gz",
+          "platform": "Linux",
+          "architecture": "x86_64",
+          "size": 1300101,
+          "sha256": "7affb3adb84c76aab5171499efb892fadf6259f210e6bb7151b850eb9948b41f",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v1.0.0/mio_v1.0.0_linux_amd64.tar.gz"
+        },
+        {
+          "name": "mio_v1.0.0_linux_arm64.tar.gz",
+          "platform": "Linux",
+          "architecture": "arm64",
+          "size": 1207367,
+          "sha256": "489c5008b08fab7c3c0a3c2abc4edca74f7e8e80199b15229bfd8043358a11a7",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v1.0.0/mio_v1.0.0_linux_arm64.tar.gz"
+        },
+        {
+          "name": "mio_v1.0.0_windows_amd64.zip",
+          "platform": "Windows",
+          "architecture": "x86_64",
+          "size": 1371067,
+          "sha256": "2190111bc8bc605bcb38ba54b9dbcb1c2fbba9745dbd04ea410c27a5c53918a4",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v1.0.0/mio_v1.0.0_windows_amd64.zip"
+        }
+      ]
+    }
+  ]
+}

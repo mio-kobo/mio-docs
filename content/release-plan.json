@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "mode": "prepared",
+  "docsVersion": "v2.0",
+  "previousStable": "v1.0",
+  "released": true,
+  "releaseUrl": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+  "publishedAt": "2026-10-21T08:31:25Z",
+  "sourceCommit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+  "acceptance": null
+}
