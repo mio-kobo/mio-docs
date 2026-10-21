@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-10-21",
+  "defaultVersion": "v1.0",
+  "versions": [
+    {
+      "id": "v1.0",
+      "version": "1.0",
+      "status": "Stable",
+      "maintenance": "unspecified",
+      "locales": [
+        "zh-CN"
+      ],
+      "release": {
+        "tag": "v1.0.0",
+        "url": "https://github.com/mio-kobo/mio/releases/tag/v1.0.0",
+        "publishedAt": "2026-10-17T13:02:10Z",
+        "prerelease": false
+      },
+      "source": {
+        "commit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+        "ref": "v1.0.0",
+        "cliVersion": "Mio 1.0.0-beta.2"
+      },
+      "frozen": true
+    },
+    {
+      "id": "v2.0",
+      "version": "2.0",
+      "status": "Development",
+      "maintenance": "preview",
+      "locales": [
+        "zh-CN"
+      ],
+      "release": null,
+      "source": {
+        "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+        "ref": "v2.0.0",
+        "cliVersion": "Mio 2.0.0"
+      },
+      "frozen": false
+    }
+  ]
+}

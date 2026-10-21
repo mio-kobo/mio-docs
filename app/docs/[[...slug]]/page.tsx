@@ -1,7 +1,11 @@
 import { source } from '@/lib/source';
-import { notFound } from 'next/navigation';
-import { DocsPage, DocsBody, DocsTitle, DocsDescription } from 'fumadocs-ui/page';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
-export default async function Page(props: { params: Promise<{ slug?: string[] }> }) { const { slug } = await props.params; const page = source.getPage(slug); if (!page) notFound(); const MDX = page.data.body; return <DocsPage toc={page.data.toc}><DocsTitle>{page.data.title}</DocsTitle><DocsDescription>{page.data.description}</DocsDescription><DocsBody><MDX components={defaultMdxComponents}/></DocsBody></DocsPage>; }
-export function generateStaticParams() { return source.generateParams(); }
-export async function generateMetadata(props: { params: Promise<{ slug?: string[] }> }) { const { slug } = await props.params; const page = source.getPage(slug); if (!page) notFound(); return { title: page.data.title, description: page.data.description }; }
+import { defaultVersion } from '@/lib/versions.mjs';
+import { renderDoc, docMetadata } from '@/lib/render-doc';
+export default async function Page({ params }: { params: Promise<{ slug?:string[] }> }) { return renderDoc((await params).slug); }
+export function generateStaticParams() {
+  const pages = source.getPages('zh-CN');
+  const owned = new Set(['getting-started','learn','reference','kiso','tooling','internals']);
+  const aliases = pages.filter(page => page.slugs[0] === defaultVersion && owned.has(page.slugs[1]) && !source.getPage(page.slugs.slice(1),'zh-CN')).map(page => ({slug:page.slugs.slice(1)}));
+  return [{slug:[]}, ...pages.map(page=>({slug:page.slugs})), ...aliases];
+}
+export async function generateMetadata({ params }: { params:Promise<{slug?:string[]}> }) { return docMetadata((await params).slug); }

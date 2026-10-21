@@ -1,4 +1,6 @@
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { source } from '@/lib/source';
+import { DocsShell } from '@/components/docs-shell';
+import { getDocsTree } from '@/lib/version-tree';
 import type { ReactNode } from 'react';
-export default function Layout({ children }: { children: ReactNode }) { return <DocsLayout tree={source.pageTree} nav={{ title: 'Mio Kōbō · 澪光', url: '/' }} githubUrl="https://github.com/mio-kobo">{children}</DocsLayout>; }
+export default function Layout({ children }: { children: ReactNode }) {
+  return <DocsShell tree={getDocsTree()}>{children}</DocsShell>;
+}
