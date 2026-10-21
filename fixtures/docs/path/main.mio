@@ -1,0 +1,8 @@
+yobu "kiso/path";
+chant(path.clean("/a//b/../c/"));
+chant(path.clean(""));
+chant(path.join("a", "/b"));
+chant(path.ext(".env"));
+kaku result = path.split("a/b.mio");
+chant(result.dir);
+chant(result.base);

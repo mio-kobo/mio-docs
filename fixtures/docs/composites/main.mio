@@ -1,0 +1,12 @@
+kata Pair<T> { first: T; second: T; }
+sentaku Result<T, E> { Ok(T); Err(E); }
+waza get(result: Result<int64, string>) -> int64 {
+    awase (result) {
+        baai Ok(value) { kaesu value; }
+        baai Err(message) { chant(message); kaesu 0; }
+    }
+}
+kaku pair = Pair[int64] { second: 22, first: 20 };
+chant(pair.first + pair.second);
+kaku result: Result<int64, string> = Result.Ok(7);
+chant(get(result));

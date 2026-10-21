@@ -1,0 +1,1 @@
+yobu "kiso/utf8"; utf8.encode_rune(rune(55296));

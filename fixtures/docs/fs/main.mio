@@ -1,0 +1,17 @@
+yobu "kiso/fs";
+yobu "kiso/string";
+kaku written = fs.write_all("sample.txt", string.to_bytes("Mio"));
+chant(written.error == mu);
+kaku loaded = fs.read_all("sample.txt");
+chant(loaded.error == mu);
+chant(len(loaded.data));
+chant(fs.is_file("sample.txt"));
+kaku opened = fs.open_read("sample.txt");
+kaku file = opened.file;
+moshi (file != mu) {
+    kaku active = file;
+    kaku first = fs.close(active);
+    chant(first.error == mu);
+    kaku second = fs.close(active);
+    chant(second.error != mu);
+}

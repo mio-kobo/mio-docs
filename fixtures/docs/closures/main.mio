@@ -1,0 +1,7 @@
+waza counter() -> () -> int64 {
+    kaku n = 0;
+    kaesu waza () -> int64 { n = n + 1; kaesu n; };
+}
+kaku next = counter();
+chant(next());
+chant(next());

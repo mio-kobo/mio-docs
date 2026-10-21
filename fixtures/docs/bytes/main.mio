@@ -1,0 +1,12 @@
+yobu "kiso/bytes";
+kaku buffer = bytes.new_buffer();
+bytes.write_byte(buffer, uint8(65));
+kaku source: []uint8 = [66, 67];
+chant(bytes.write(buffer, source));
+chant(bytes.buffer_len(buffer));
+kaku copied = bytes.buffer_bytes(buffer);
+copied[0] = 90;
+chant(buffer.data[0]);
+chant(bytes.compare(source, source));
+bytes.reset(buffer);
+chant(bytes.buffer_len(buffer));

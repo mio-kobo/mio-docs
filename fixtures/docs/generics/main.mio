@@ -1,0 +1,8 @@
+waza first<T>(values: []T) -> T? {
+    moshi (len(values) == 0) { kaesu mu; }
+    kaesu values[0];
+}
+waza plus<T: Number>(left: T, right: T) -> T { kaesu left + right; }
+kaku item = first[int64]([7, 8]);
+moshi (item != mu) { chant(item); }
+chant(plus[float32](1.5, 2.5));

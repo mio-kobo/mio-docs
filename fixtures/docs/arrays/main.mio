@@ -1,0 +1,14 @@
+yobu "kiso/array";
+kaku original = [1, 2];
+kaku alias = original;
+alias[0] = 9;
+array.push(alias, 3);
+chant(original[0]);
+chant(len(original));
+kaku copied = array.clone(original);
+copied[0] = 7;
+chant(original[0]);
+array.append_all(original, original);
+chant(len(original));
+array.truncate(alias, 1);
+chant(len(original));

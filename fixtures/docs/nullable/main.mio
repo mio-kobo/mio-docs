@@ -1,0 +1,9 @@
+kaku age: int64? = mu;
+chant(age == mu);
+age = 18;
+moshi (age != mu) { chant(age + 1); }
+kaku values: []int64? = [10, mu];
+kaku item = values[0];
+moshi (item != mu) { chant(item); }
+kaku optional: ([]int64)? = [7];
+moshi (optional != mu) { chant(len(optional)); }

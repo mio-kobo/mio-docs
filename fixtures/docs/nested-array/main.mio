@@ -1,0 +1,5 @@
+kaku values: [][]int64 = [[1], [2]];
+kaku inner = values[0];
+inner[0] = 9;
+chant(values[0][0]);
+chant(len(values));

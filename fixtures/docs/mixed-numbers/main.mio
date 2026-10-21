@@ -1,0 +1,1 @@
+kaku a: int8 = 1; kaku b: int64 = 2; chant(a + b);

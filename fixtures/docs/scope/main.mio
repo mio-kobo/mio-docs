@@ -1,0 +1,5 @@
+kaku value = 10;
+moshi (hai) { kaku value = 20; chant(value); }
+chant(value);
+value = value + 1;
+chant(value);

@@ -1,0 +1,10 @@
+yobu "kiso/utf8";
+kaku data = utf8.encode_rune('澪');
+kaku result = utf8.decode_one(data, 0);
+chant(result.valid);
+chant(result.width);
+chant(result.value);
+kaku end = utf8.decode_one(data, len(data));
+chant(end.width);
+kaku invalid: []uint8 = [255];
+chant(utf8.rune_count(invalid) == mu);

@@ -1,0 +1,8 @@
+chant(2 + 3 * 4);
+chant(7 / 2);
+chant(!iie && (hai || iie));
+kaku calls = 0;
+waza touch() -> bool { calls = calls + 1; kaesu hai; }
+chant(iie && touch());
+chant(hai || touch());
+chant(calls);

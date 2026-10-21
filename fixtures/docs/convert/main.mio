@@ -1,0 +1,8 @@
+yobu "kiso/convert";
+kaku number = convert.parse_int("-42");
+moshi (number != mu) { chant(number); }
+chant(convert.parse_uint("-1") == mu);
+chant(convert.parse_bool("true") == mu);
+chant(convert.format_bool(hai));
+kaku value = convert.parse_float32("1.25");
+moshi (value != mu) { chant(convert.format_float32(value)); }

@@ -1,0 +1,6 @@
+waza factorial(n: int64) -> int64 {
+    moshi (n <= 1) { kaesu 1; }
+    kaesu n * factorial(n - 1);
+}
+waza show(value: int64) -> unit { chant(value); kaesu; }
+show(factorial(5));

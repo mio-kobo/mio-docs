@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "fixtures": [
+    {
+      "id": "lexical",
+      "path": "fixtures/docs/lexical/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/lexical/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "scope",
+      "path": "fixtures/docs/scope/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/scope/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "operators",
+      "path": "fixtures/docs/operators/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/operators/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "numbers",
+      "path": "fixtures/docs/numbers/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/numbers/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "control",
+      "path": "fixtures/docs/control/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/control/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "functions",
+      "path": "fixtures/docs/functions/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/functions/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "nullable",
+      "path": "fixtures/docs/nullable/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/nullable/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "arrays",
+      "path": "fixtures/docs/arrays/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/arrays/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "composites",
+      "path": "fixtures/docs/composites/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/composites/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "generics",
+      "path": "fixtures/docs/generics/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/generics/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "closures",
+      "path": "fixtures/docs/closures/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/closures/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "maps",
+      "path": "fixtures/docs/maps/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/maps/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "bytes",
+      "path": "fixtures/docs/bytes/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/bytes/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "string",
+      "path": "fixtures/docs/string/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/string/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "utf8",
+      "path": "fixtures/docs/utf8/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/utf8/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "math",
+      "path": "fixtures/docs/math/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/math/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "convert",
+      "path": "fixtures/docs/convert/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/convert/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "path",
+      "path": "fixtures/docs/path/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/path/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "io",
+      "path": "fixtures/docs/io/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/io/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "fs",
+      "path": "fixtures/docs/fs/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/fs/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "binary",
+      "path": "fixtures/docs/binary/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/binary/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "mochi",
+      "path": "fixtures/docs/mochi/main.mio",
+      "mode": "run",
+      "stdout": "fixtures/docs/mochi/stdout.txt",
+      "exit": 0
+    },
+    {
+      "id": "nullable-inference",
+      "path": "fixtures/docs/nullable-inference/main.mio",
+      "mode": "check",
+      "exit": 1,
+      "diagnostic": "E0401",
+      "diagnosticContains": "cannot infer type"
+    },
+    {
+      "id": "mixed-numbers",
+      "path": "fixtures/docs/mixed-numbers/main.mio",
+      "mode": "check",
+      "exit": 1,
+      "diagnostic": "E0302"
+    },
+    {
+      "id": "string-add",
+      "path": "fixtures/docs/string-add/main.mio",
+      "mode": "check",
+      "exit": 1,
+      "diagnostic": "E0302"
+    },
+    {
+      "id": "len-string",
+      "path": "fixtures/docs/len-string/main.mio",
+      "mode": "check",
+      "exit": 1,
+      "diagnostic": "E0305"
+    },
+    {
+      "id": "nested-array",
+      "path": "fixtures/docs/nested-array/main.mio",
+      "mode": "run",
+      "exit": 0,
+      "stdout": "fixtures/docs/nested-array/stdout.txt"
+    },
+    {
+      "id": "field-write",
+      "path": "fixtures/docs/field-write/main.mio",
+      "mode": "check",
+      "exit": 1,
+      "diagnostic": "E0101"
+    },
+    {
+      "id": "nullable-use",
+      "path": "fixtures/docs/nullable-use/main.mio",
+      "mode": "check",
+      "exit": 1,
+      "diagnostic": "E0302"
+    },
+    {
+      "id": "uint64",
+      "path": "fixtures/docs/uint64/main.mio",
+      "mode": "check",
+      "exit": 1,
+      "diagnostic": "E0401",
+      "diagnosticContains": "unknown type"
+    },
+    {
+      "id": "bounds",
+      "path": "fixtures/docs/bounds/main.mio",
+      "mode": "run",
+      "exit": 1,
+      "diagnostic": "E0501",
+      "diagnosticContains": "array index 1 out of bounds"
+    },
+    {
+      "id": "divide-zero",
+      "path": "fixtures/docs/divide-zero/main.mio",
+      "mode": "run",
+      "exit": 1,
+      "diagnostic": "E0501",
+      "diagnosticContains": "division by zero"
+    },
+    {
+      "id": "conversion-range",
+      "path": "fixtures/docs/conversion-range/main.mio",
+      "mode": "run",
+      "exit": 1,
+      "diagnostic": "E0501",
+      "diagnosticContains": "outside int8 range"
+    },
+    {
+      "id": "invalid-rune",
+      "path": "fixtures/docs/invalid-rune/main.mio",
+      "mode": "run",
+      "exit": 1,
+      "diagnostic": "E0501",
+      "diagnosticContains": "invalid Unicode scalar value"
+    },
+    {
+      "id": "invalid-truncate",
+      "path": "fixtures/docs/invalid-truncate/main.mio",
+      "mode": "run",
+      "exit": 1,
+      "diagnostic": "E0501",
+      "diagnosticContains": "array length 2 is outside range"
+    },
+    {
+      "id": "testing",
+      "path": "fixtures/docs/testing",
+      "mode": "test",
+      "exit": 0,
+      "passed": 1
+    }
+  ]
+}

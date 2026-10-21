@@ -1,0 +1,1 @@
+yobu "kiso/array"; kaku a = [1]; array.truncate(a, 2);

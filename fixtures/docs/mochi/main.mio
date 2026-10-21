@@ -1,0 +1,4 @@
+yobu "kiso/encoding/mochi";
+kaku input: []uint8 = [];
+kaku result = mochi.decode(input);
+chant(result.error != mu);

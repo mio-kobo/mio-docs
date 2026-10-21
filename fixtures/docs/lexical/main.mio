@@ -1,0 +1,6 @@
+// ASCII 标识符，Unicode 文本与 rune
+/* block comment */
+kaku text = "澪\nMio";
+chant(text);
+chant('A');
+chant(2.5e1);

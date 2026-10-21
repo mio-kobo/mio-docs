@@ -1,0 +1,9 @@
+kaku i = 0;
+kaku sum = 0;
+aida (i < 5) {
+    i = i + 1;
+    moshi (i == 2) { tsuzuku; }
+    moshi (i == 5) { nukeru; }
+    sum = sum + i;
+}
+chant(sum);

@@ -1,0 +1,9 @@
+yobu "kiso/io";
+yobu "kiso/bytes";
+kaku source: []uint8 = [65, 66, 67];
+kaku reader = io.reader_from_bytes(source);
+kaku buffer = bytes.new_buffer();
+kaku result = io.copy_stream(reader, io.writer_to_buffer(buffer));
+chant(result.count);
+chant(result.error == mu);
+chant(bytes.equal(buffer.data, source));

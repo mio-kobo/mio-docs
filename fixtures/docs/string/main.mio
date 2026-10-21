@@ -1,0 +1,10 @@
+yobu "kiso/string";
+chant(string.byte_len("澪A"));
+chant(string.rune_count("澪A"));
+chant(string.index("澪A", "A"));
+kaku builder = string.new_builder();
+string.write_string(builder, "Mio");
+string.write_rune(builder, '!');
+chant(string.builder_string(builder));
+kaku invalid: []uint8 = [255];
+chant(string.from_utf8(invalid) == mu);

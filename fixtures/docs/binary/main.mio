@@ -1,0 +1,15 @@
+yobu "kiso/array";
+yobu "kiso/encoding/binary";
+kaku data = array.make[uint8](8, uint8(0));
+kaku error = binary.write_i64_be(data, 0, -42);
+chant(error == mu);
+kaku result = binary.read_i64_be(data, 0);
+chant(result.value);
+kaku bad = binary.read_u32_le(data, 6);
+chant(bad.error != mu);
+kaku writer = binary.writer(16);
+kaku write_error = binary.writer_write_u32_be(writer, uint32(42));
+chant(write_error == mu);
+kaku reader = binary.reader(binary.writer_bytes(writer));
+kaku read_result = binary.reader_read_u32_be(reader);
+chant(read_result.value);

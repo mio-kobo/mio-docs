@@ -1,0 +1,1 @@
+kaku values = [1]; chant(values[1]);

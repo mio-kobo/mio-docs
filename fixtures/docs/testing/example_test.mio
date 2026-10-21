@@ -1,0 +1,2 @@
+yobu "kiso/testing";
+waza test_answer() -> unit { testing.expect(6 * 7 == 42, "answer"); }

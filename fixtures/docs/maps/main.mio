@@ -1,0 +1,7 @@
+kaku entries = Map[string, int64]();
+entries["answer"] = 42;
+kaku alias = entries;
+alias["answer"] = 43;
+kaku answer = entries["answer"];
+moshi (answer != mu) { chant(answer); }
+chant(entries["missing"] == mu);

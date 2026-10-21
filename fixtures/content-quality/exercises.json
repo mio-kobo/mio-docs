@@ -1,0 +1,47 @@
+[
+  {
+    "page": "learn/strings.mdx",
+    "replace": [
+      [
+        "\"澪Mio\"",
+        "\"Mio\""
+      ]
+    ],
+    "stdout": "3\n3\n3\nhai\nMio!\n"
+  },
+  {
+    "page": "learn/maps.mdx",
+    "replace": [
+      [
+        "= 43;",
+        "= 99;"
+      ]
+    ],
+    "stdout": "99\nhai\n"
+  },
+  {
+    "page": "learn/models.mdx",
+    "replace": [
+      [
+        "Result.Ok(7)",
+        "Result.Err(\"missing\")"
+      ]
+    ],
+    "stdout": "42\nmissing\n0\n"
+  },
+  {
+    "page": "learn/closures.mdx",
+    "append": "chant(next());",
+    "stdout": "1\n2\n3\n"
+  },
+  {
+    "page": "learn/generics.mdx",
+    "replace": [
+      [
+        "[7, 8]",
+        "[9, 10]"
+      ]
+    ],
+    "stdout": "9\n4\n"
+  }
+]

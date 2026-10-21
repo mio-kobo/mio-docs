@@ -1,0 +1,7 @@
+yobu "kiso/math";
+chant(math.gcd(54, 24));
+chant(math.lcm(6, 8));
+chant(math.clamp(12, 0, 10));
+chant(math.sqrt[float64](9.0));
+chant(math.round[float32](2.5));
+chant(math.checked_abs[int8](-128) == mu);

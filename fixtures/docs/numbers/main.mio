@@ -1,0 +1,7 @@
+kaku small: int8 = 127;
+chant(small + int8(1));
+kaku f: float32 = 1.5;
+chant(float64(f));
+chant(int64(-2.75));
+teisu answer: int64 = 6 * 7;
+chant(answer);
