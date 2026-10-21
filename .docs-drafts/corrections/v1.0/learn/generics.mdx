@@ -1,0 +1,64 @@
+---
+title: 泛型与数值约束
+description: 在保留静态类型的同时复用同一算法。
+---
+
+## 学习目标与前置
+
+在保留静态类型的同时复用同一算法。 前置：[上课：函数值与闭包](/docs/v1.0/learn/closures)。本章使用固定版本的 Go 引导 CLI / Mochi VM。
+
+## 为什么需要
+
+取数组第一个元素的算法与元素究竟是整数还是字符串无关。泛型把这种不变的结构写一次，同时让调用点得到具体类型，而非丢失类型信息。
+
+## 保存与运行
+
+在安装页的 `mio-tutorial` 目录保存为 `generics.mio`，使用该版本构建的 CLI 和同一份 `bunko/`：
+
+```sh
+./mio check generics.mio
+./mio run generics.mio
+```
+
+`check` 成功报告 `check passed`。下面是完整程序与 `run` 的标准输出，末尾包含换行。
+
+```mio title="generics.mio"
+waza first<T>(values: []T) -> T? {
+    moshi (len(values) == 0) { kaesu mu; }
+    kaesu values[0];
+}
+waza plus<T: Number>(left: T, right: T) -> T { kaesu left + right; }
+kaku item = first[int64]([7, 8]);
+moshi (item != mu) { chant(item); }
+chant(plus[float32](1.5, 2.5));
+```
+
+```text title="output"
+7
+4
+```
+
+## 逐段理解
+
+`first<T>` 接收 `[]T`，返回 `T?`。空数组没有第一个元素，返回 `mu`；非空时返回索引 0。调用 `first[int64]` 明确选择元素类型，读取结果仍须检查非空。这把数组边界与可空类型合在一个可复用函数里。
+
+`plus<T: Number>` 则需要加法能力，因此声明数值约束。`plus[float32](1.5, 2.5)` 在 `float32` 上下文检查字面量，返回同类型的 4。不写约束的任意 T 不能直接拿来作数值运算。
+
+声明用尖括号 `<T>`，显式调用用方括号 `[T]`，类型标注如 `Pair<int64>` 又使用尖括号。`Number`、`Integer`、`Signed`、`Float` 是实现中的数值约束，不代表可以声明任意 trait。不同数值类型变量不会因为都满足 Number 就自动混合。
+
+## 练习
+
+把 `[7, 8]` 改为 `[9, 10]`。 先预测再执行 `check` 与 `run`，预期逐行输出：
+
+```text title="exercise-output"
+9
+4
+```
+
+## 常见陷阱与核对
+
+`first<T>` 是声明，`first[int64]` 是显式调用，两种括号不可互换。数组为空时会返回 `mu`，要在非空分支使用结果。不同数值类型都满足 Number，并不使它们可以直接相加。
+
+## 延伸阅读与下一章
+
+完整规则见 [Reference](/docs/v1.0/reference)，相关库的签名、错误约定和验证范围见 [Kiso](/docs/v1.0/kiso)。上一课：[函数值与闭包](/docs/v1.0/learn/closures)；下一课：[继续学习](/docs/v1.0/learn/modules)。

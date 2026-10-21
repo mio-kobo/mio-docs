@@ -1,0 +1,95 @@
+---
+title: Mio CLI 与编译流程
+description: 实际命令、诊断选项、Bunko 发现与退出码。
+---
+
+**版本范围：V2.0.0 · RC4 审阅快照（尚未发布）**。来源为 RC4 的 source-manifest 与包内 BUILD-INFO；HEAD 加未提交来源共同构成候选，不能只检出 HEAD。正文示例默认走包内 CLI / VM。
+
+本页描述快照中的 Go 引导 CLI，版本字符串为 `Mio 2.0.0`。命令由 `cmd/mio/main.go`、`test_command.go` 解析，不据帮助标题推断未实现参数。
+
+## 命令
+
+| 命令 | 行为 |
+| --- | --- |
+| `mio version` | 输出版本字符串 |
+| `mio help`、`mio -h`、`mio --help` | 输出用法 |
+| `mio check <file-or-directory>` | 加载包、折叠常量、解析名称、检查类型；成功输出 `check passed` |
+| `mio run <file-or-directory>` | 同上，再生成字节码并在 VM 中运行 |
+| `mio build <source> [-o <file.mochi>]` | 验证并原子写入 Mochi 文件，成功无 stdout；也接受 `build -o <output> <source>` |
+| `mio exec <file.mochi>` | 解码验证并在 VM 执行 |
+| `mio disasm <file.mochi>` | 解码验证，输出 globals、constants、instructions、functions/captures |
+| `mio test <directory-or-./...>` | 发现并运行 Mio 测试包 |
+| `mio lsp [--stdio]` | 启动 stdio JSON-RPC 语言服务器 |
+
+build 不指定 -o 时，用入口路径去掉扩展名后加 `.mochi`。输出目录必须存在。这里的 build 生成字节码；生成 ARM64 Mach-O 使用下文独立工具。
+
+run/exec 除 chant 外，还会打印 VM 最后保存的普通表达式值；不要把任意表达式语句当作完全没有 stdout 的操作。run 不接受入口之后的程序参数。没有 `mio native`、`--release`、`--watch`、`--heap-mib` 等推断出的主 CLI 参数。
+
+## 诊断
+
+check/run 支持以下精确写法，可放在路径前后：
+
+```sh
+mio check --format=json --color=never main.mio
+mio run main.mio --format=short --verbose
+```
+
+- `--color=auto|always|never`
+- `--format=human|short|json`
+- `--verbose`
+
+这是 `--name=value` 形式，不能擅自改为两个参数。build/exec/disasm 没有接入这些选项。诊断写 stderr，正常输出写 stdout。JSON 含 code、severity、message、location，以及存在时的 path、labels、notes、helps、expected/actual；当前只报告第一条失败，不能假定总有可靠成员源文件位置。
+
+主 CLI：成功 exit 0，编译/加载/执行错误 exit 1，未知命令、缺参数或不合法命令结构 exit 2。test 发现不到测试可 exit 0 且 summary.status=no_tests；因此不能只凭 exit 0 声称测试执行过。
+
+## 测试
+
+```sh
+mio test ./bunko/kiso/math --run='^test_' --lang=en-US --format=json
+```
+
+参数支持 `--run=<regexp>`、`--lang=zh-CN|ja-JP|en-US` 及上述诊断选项；recursive 目标使用 `./...`。函数发现与测试专用宿主接口见 [kiso/testing](/docs/v2.0.0/kiso/testing)。JSON 报告含 schema_version、packages 与 summary；duration 随执行变化。实际命中数量、failed 和 status 必须共同检查。
+
+## Bunko 根目录
+
+优先使用环境变量 `MIO_BUNKO`。否则从入口路径所在目录向祖先查找存在的 `bunko/`；没有则使用工作目录相对路径 `bunko`。导入始终写 `kiso/...`，环境变量应指向包含 kiso 的物理根。
+
+```sh
+MIO_BUNKO=/absolute/path/to/mio/bunko mio run main.mio
+```
+
+## 从源码构建
+
+在对应 Mio 核心源码目录执行：
+
+```sh
+go build -o /tmp/mio ./cmd/mio
+/tmp/mio version
+/tmp/mio check examples/recursion.mio
+```
+
+go.mod 声明 `go 1.22.2`；RC4 构建时实际使用的 Go/OS/架构及二进制 SHA256 见 [验证报告](/docs/v2.0.0/tooling/verification)。RC4 使用 dirty 源码清单，最终提交待固定；此处不提供仅检出 HEAD 的重建承诺。
+
+## ARM64 工具链
+
+在核心仓库构建独立 Go AOT 命令：
+
+```sh
+go build -o /tmp/mochi-aot ./cmd/mochi-aot
+/tmp/mio build -o /tmp/main.mochi main.mio
+/tmp/mochi-aot -o /tmp/main -target darwin-arm64 -heap-mib 1 /tmp/main.mochi
+codesign --force --sign - /tmp/main
+/tmp/main
+```
+
+目标仅 `darwin-arm64`，输出 unsigned Mach-O，macOS 执行前需签名。flag 包在首个位置参数停止解析，选项应写在输入文件之前。支持 `-gc-stress`、`-gc-telemetry` 和 `-m11-gc`；后者是 M11 集成生命周期自测模式，与 gc-stress 互斥。`-heap-mib` 默认 1，合法 1..1024；这属于 Go AOT 命令，正式纯 Mio 自举另使用 1 GiB 协议并有独立证据。后端可能因不支持的表示或指令拒绝输入。
+
+Native 迁移样例本轮执行范围与既有 GC 核心验收分别见报告；[Native AOT](/docs/v2.0.0/internals/native-aot) 明确区分 Go 后端与纯 Mio 后端。
+
+## 来源
+
+`cmd/mio/main.go`、`cmd/mio/test_command.go`、`internal/tester/tester.go`、`cmd/mochi-aot/main.go`。shell 片段是调用说明；验证器另以参数数组执行等价命令并记录结果，不把说明本身作为实测证据。
+
+## 纯 Mio native-aot
+
+发行包提供纯 Mio Stage 4 工具，读取当前目录 input.config / output.config，UTF-8 路径无末尾换行；没有通用 argv 参数。成功必须同时检查 native-aot: ok 标记和全新产物，失败可能 exit 0。输出后 chmod +x 再 ad-hoc 签名及 strict verify。完整命令见迁移指南。

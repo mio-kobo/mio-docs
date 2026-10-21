@@ -1,0 +1,49 @@
+---
+title: 泛型、常量与模块
+description: 类型参数、数值约束、包加载与公开成员。
+---
+
+**版本范围：V2.0.0 · RC4 审阅快照（尚未发布）**。来源为 RC4 的 source-manifest 与包内 BUILD-INFO；HEAD 加未提交来源共同构成候选，不能只检出 HEAD。正文示例默认走包内 CLI / VM。
+
+## 泛型
+
+函数、结构体和枚举声明使用 `<T>`，函数调用/构造显式参数使用 `[T]`。静态类型标注如 `Pair<int64>` 使用尖括号。参数通常可从实参、字段或目标类型推断。
+
+函数可声明 `T: Number`、`Integer`、`Signed`、`Float` 约束：Number 是全部整数和浮点，Integer 是整数，Signed 是有符号整数与浮点，Float 是两种浮点。约束不提供隐式转换。不支持 HKT、型变或用户 trait 约束。
+
+```mio fixture="generics"
+waza first<T>(values: []T) -> T? {
+    moshi (len(values) == 0) { kaesu mu; }
+    kaesu values[0];
+}
+waza plus<T: Number>(left: T, right: T) -> T { kaesu left + right; }
+kaku item = first[int64]([7, 8]);
+moshi (item != mu) { chant(item); }
+chant(plus[float32](1.5, 2.5));
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+7
+4
+```
+
+Go 引导编译器采用泛型运行时擦除，每个泛型函数保留一份字节码，调用点静态替换类型。不要将其解释为 Native 全部泛型表示均已验收。
+
+## 编译期常量
+
+`teisu name[: T] = expression;` 只接受可折叠的字面量、常量引用、纯运算和显式数值转换。常量不可赋值，在编译期折叠，不占运行时全局槽。`koukai teisu` 可导出。
+
+## 包和导入
+
+以目录为入口或导入包时，同目录普通 `.mio` 文件合并并共享包级声明，子目录是独立包；以单个文件为入口时只加载该文件及显式导入依赖，不自动合并旁边的练习文件。加载顺序按文件名稳定排序。入口可为源文件或包目录。依赖必须显式 `yobu "kiso/math";`，限定名默认取路径末段，如 `math.sqrt(...)`。
+
+只有 `koukai` 函数、类型、常量可供包外访问，不能导出变量。标准库路径以公开命名空间 `kiso/` 开始；一般导入路径相对于 Bunko 根定位，不能加物理 `bunko/` 前缀。加载器拒绝绝对路径、路径回退、越过 Bunko 根的符号链接和循环导入，同一路径只编译一次。`mio/fs/runtime` 是注册宿主模块，不代表可任意导入 Go 包。
+
+Bunko 根查找与 `MIO_BUNKO` 见 [CLI](/docs/v2.0.0/tooling/cli)。`_test.mio` 与测试函数发现规则见 [kiso/testing](/docs/v2.0.0/kiso/testing)。
+
+证据：`internal/parser/parser.go`、`internal/typecheck/signature.go`、`definitions.go`、`internal/bunko/`、`internal/constant/` 与 `cmd/mio/main.go`。
+
+
+相关规则：[语法](/docs/v2.0.0/reference/syntax) · [类型](/docs/v2.0.0/reference/types) · [函数](/docs/v2.0.0/reference/functions) · [集合](/docs/v2.0.0/reference/collections) · [模块](/docs/v2.0.0/reference/modules)。

@@ -1,0 +1,140 @@
+---
+title: kiso/aot/lower/nativefs
+description: V2.0.0 RC4的签名、输入单位、结果与错误协议。
+---
+
+**V2.0.0 RC4 审阅快照（尚未发布）**，来源锁见 `verification/v2.0.0/rc4-source-manifest.json`。**V1.0 不提供本包**。公开声明不代表稳定 API；本页仅承诺此快照已有声明及明确列出的验证。
+
+纯 Mio lowering 的 NativeFS MMA bridge。operation 按完整签名指纹识别宿主入口；普通文件操作请用 kiso/fs。参数根和返回引用约定供代码发射与精确 GC 使用，不是用户可自行扩展的外部 ABI。
+
+## 导入与检索
+
+导入路径为 `kiso/aot/lower/nativefs`。以下签名不是可执行程序，参数名和类型逐字保留源码；函数行为与错误分开查阅。
+
+`op_none` · `op_close` · `op_dir_close` · `op_dir_is_dir` · `op_dir_is_file` · `op_dir_name` · `op_dir_next` · `op_dir_status` · `op_file_status` · `op_mkdir` · `op_open` · `op_open_dir` · `op_read` · `op_stat` · `op_write` · [operation](#operation) · [parameter_count](#parameter_count) · [parameter_is_root](#parameter_is_root) · [returns_reference](#returns_reference) · [entry_label](#entry_label) · [emit_runtime](#emit_runtime)
+
+## 类型与常量
+
+```text
+koukai teisu op_none = 0;
+
+koukai teisu op_close = 1;
+
+koukai teisu op_dir_close = 2;
+
+koukai teisu op_dir_is_dir = 3;
+
+koukai teisu op_dir_is_file = 4;
+
+koukai teisu op_dir_name = 5;
+
+koukai teisu op_dir_next = 6;
+
+koukai teisu op_dir_status = 7;
+
+koukai teisu op_file_status = 8;
+
+koukai teisu op_mkdir = 9;
+
+koukai teisu op_open = 10;
+
+koukai teisu op_open_dir = 11;
+
+koukai teisu op_read = 12;
+
+koukai teisu op_stat = 13;
+
+koukai teisu op_write = 14;
+```
+
+类型字段为实际公开布局；复制含数组字段的值仍共享数组。不得把公开字段解释为可安全伪造内部状态的许可。
+
+## 函数
+
+### operation
+
+```text
+koukai waza operation(name: string) -> int64
+```
+
+参数：`name`：标签名或完整签名名；具体匹配规则见本节。
+
+按完整宿主签名名称识别操作；未识别返回 op_none。
+
+[源码：nativefs.mio:24](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/nativefs/nativefs.mio#L24)。
+
+### parameter_count
+
+```text
+koukai waza parameter_count(op: int64) -> int64
+```
+
+参数：`op`：由 operation 识别的 NativeFS 操作编号。
+
+返回所识别操作的参数个数；应先用 operation 检查是否识别。
+
+[源码：nativefs.mio:42](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/nativefs/nativefs.mio#L42)。
+
+### parameter_is_root
+
+```text
+koukai waza parameter_is_root(op: int64, index: int64) -> bool
+```
+
+参数：`op`：由 operation 识别的 NativeFS 操作编号；`index`：从 0 开始的参数/成员索引。
+
+返回对应操作参数是否应按精确根发布；索引语义按操作签名。
+
+[源码：nativefs.mio:51](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/nativefs/nativefs.mio#L51)。
+
+### returns_reference
+
+```text
+koukai waza returns_reference(op: int64) -> bool
+```
+
+参数：`op`：由 operation 识别的 NativeFS 操作编号。
+
+返回该操作是否返回受管理引用。
+
+[源码：nativefs.mio:59](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/nativefs/nativefs.mio#L59)。
+
+### entry_label
+
+```text
+koukai waza entry_label(op: int64) -> string
+```
+
+参数：`op`：由 operation 识别的 NativeFS 操作编号。
+
+返回 Runtime 入口标签名；只对受支持操作生成有效调用。
+
+[源码：nativefs.mio:64](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/nativefs/nativefs.mio#L64)。
+
+### emit_runtime
+
+```text
+koukai waza emit_runtime(code: arm64.Assembler, empty_tagged: int64) -> unit
+```
+
+参数：`code`：接收发射指令的共享 Assembler；`empty_tagged`：供发射器使用的空字符串 tagged 值。
+
+把 NativeFS Runtime 指令写入 Assembler，返回 unit；需检查累积编码错误和最终组装结果。
+
+[源码：nativefs.mio:251](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/nativefs/nativefs.mio#L251)。
+
+## 最小示例与验证范围
+
+保存为 `main.mio`，使用本版本的 `mio check main.mio` 与 `mio run main.mio`；输出逐字节记录。此例只验证下面使用的接口，不覆盖本包所有编码或 Runtime 分支。
+
+```mio title="main.mio"
+yobu "kiso/aot/lower/nativefs";
+kaku op = nativefs.operation("not-a-native-signature");
+chant(op == nativefs.op_none);
+```
+
+```text title="output"
+hai
+```
+
+完整输入哈希、命令及输出见仓库 `verification/v2.0.0/results.json`。声明资料与执行覆盖分别记录；没有在此证明原生代码执行或 Compiler A→B 验收。

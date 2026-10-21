@@ -1,0 +1,99 @@
+---
+title: V1 → V2 Migration Guide
+description: 在 RC4 上运行 V1 程序，并按需迁移到 Native。
+---
+
+## 先保留 V1，再安装完整候选
+
+V1 基线为正式标签 v1.0.0；不要编辑已冻结的 V1 正文来完成升级。分别保存旧版 CLI/Bunko 和 RC4 包目录，使用绝对路径。不要让两个版本共享不匹配的 MIO_BUNKO。
+
+```sh
+export MIO_V2=/absolute/path/to/mio-2.0.0-darwin-arm64
+export MIO_BUNKO="$MIO_V2/bunko"
+"$MIO_V2/mio" version
+```
+
+预期 `Mio 2.0.0`。安装与平台限制见 [Getting Started](/docs/v2.0.0/getting-started)。
+
+## V1 源程序先留在 VM
+
+此完整程序在正式 V1 标签源码 CLI 与 RC4 CLI 分别执行，stdout 相同。保存为 migration.mio：
+
+```mio title="migration.mio"
+waza twice(value: int64) -> int64 { kaesu value * 2; }
+chant(twice(21));
+```
+
+```text title="output"
+42
+```
+
+```sh
+"$MIO_V2/mio" check migration.mio
+"$MIO_V2/mio" run migration.mio
+"$MIO_V2/mio" build -o migration.mochi migration.mio
+"$MIO_V2/mio" exec migration.mochi
+```
+
+`check` 输出 check passed；run/exec 输出 42。保留应用测试，重建旧字节码，再核对错误与输出。Mochi v14 和解码 v1–v14 不是 V2 新增格式。Map 等程序可先保持 VM 路径。
+
+## 可选：将已支持的 Mochi 编译为 Native
+
+先运行上一步生成 migration.mochi，再使用 Go-built AOT：
+
+```sh
+"$MIO_V2/mochi-aot" -o migration-go-native -target darwin-arm64 -heap-mib 1 migration.mochi
+codesign --force --sign - migration-go-native
+codesign --verify --strict migration-go-native
+./migration-go-native
+```
+
+预期输出 42。参数必须在输入路径前；默认 1 MiB heap 适用于此小程序，不代表自举协议。
+
+使用纯 Mio Stage 4 编译器时，工作目录中两个 config 必须是 UTF-8 路径且无末尾换行。目标路径必须不存在：
+
+```sh
+set -eu
+test ! -e migration-pure-native
+printf '%s' "$PWD/migration.mochi" > input.config
+printf '%s' "$PWD/migration-pure-native" > output.config
+"$MIO_V2/native-aot" > native-build.log
+# 下行必须匹配成功标记，同时确认全新目标存在。
+grep '^native-aot: ok' native-build.log
+test -s migration-pure-native
+chmod +x migration-pure-native
+codesign --force --sign - migration-pure-native
+codesign --verify --strict migration-pure-native
+./migration-pure-native
+```
+
+预期输出 42。失败可能 exit 0，不能只检查进程退出码。原生编译器不提供通用命令行参数；不能把 shell 参数传给用户程序当成语言 argv 支持。输出需系统签名；当前为 ad-hoc，没有公证承诺。
+
+## 保留共享捕获行为
+
+V1 已有闭包；V2 新增 Native 路径需要单独验证捕获行为。此例在 V1 VM、RC4 VM、Go AOT 和纯 Mio AOT 均实测。保存为 counter.mio，重复前面的 build 和两种 Native 命令，并使用全新的输出路径：
+
+```mio title="counter.mio"
+waza counter() -> () -> int64 {
+    kaku n = 0;
+    kaesu waza () -> int64 { n = n + 1; kaesu n; };
+}
+kaku next = counter();
+chant(next());
+chant(next());
+```
+
+```text title="output"
+1
+2
+```
+
+## Development 用户的内部 API 调整
+
+相对旧 V2 Development，`compile_with_heap(file, capacity, gc_stress)` 新增，capacity 用 bytes，范围 64..1073741824 且 16 字节对齐。无效容量返回 InvalidOperand(1)；仍应先检查 LowerResult.error。
+
+LowerError 增加 BranchOutOfRange(int64)，error_code=10，detail 是生成后机器 word 位置。穷尽匹配需补分支。Assembler 增加 label_index；TypeArena / TypeAnalysis 增加追踪、nullable 来源与捕获等字段。请通过库构造器生成这些内部值，避免继续复制旧字段布局。完整变化见 API 差异记录。
+
+## 升级核对
+
+使用应用自己的测试确认 VM 行为，再逐程序试 Native；失败诊断不能通过修改编译器或删掉断言来绕过。维护者尚未固定最终候选提交，最终发行后需用新资产再次运行本指南。IDE 配置指向新 CLI 与其 Bunko；本次没有 IDE 端到端认证。

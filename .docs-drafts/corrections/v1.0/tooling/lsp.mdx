@@ -1,0 +1,16 @@
+---
+title: V1 语言服务支持边界
+description: 正式标签未包含 MioCore LSP，不提供 V2 命令和能力承诺。
+---
+
+V1.0 Stable 固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106` 没有 `internal/lsp` 包，CLI 不识别 `mio lsp`。
+
+## 实际行为
+
+执行 `mio lsp --stdio` 会输出 CLI 用法并退出 2，不能与编辑器建立 stdio 语言服务连接。本轮验证器保存此命令的实际结果。V1 可以使用 `mio check`、`run`、`build` 和 `test` 等本版命令，见 [CLI](/docs/v1.0/tooling/cli)。
+
+## 与开发版的区别
+
+MioCore LSP 是 V2 固定开发快照中的实现，不属于这个正式标签的能力保证。需要查看开发版时，应显式切换文档与核心源码，不能把 V2 的语言服务说明倒写到 V1。
+
+[编辑器接入边界](/docs/v1.0/tooling/editors) · [验证记录](/docs/v1.0/tooling/verification)。

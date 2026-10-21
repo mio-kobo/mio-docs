@@ -1,0 +1,10 @@
+{
+  "title": "Tooling",
+  "pages": [
+    "index",
+    "cli",
+    "editors",
+    "lsp",
+    "verification"
+  ]
+}

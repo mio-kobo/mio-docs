@@ -1,0 +1,46 @@
+---
+title: VS Code 与 JetBrains
+description: 本地插件源码配置、CLI 接入及未验证边界。
+---
+
+此页是独立编辑器仓库的接入资料，**核心版本兼容性未实测**。插件源码来源见 `verification/editor-sources.json`；核心固定提交不能证明插件版本适配。
+
+本页审计独立仓库源码，不推断 Marketplace 当前发布版本。版本维度和源码提交见 [验证与来源](/docs/v2.0.0/tooling/verification)。本轮没有启动 VS Code Extension Host 或 JetBrains IDE，也没有重新打包、安装或发布插件。
+
+## VS Code
+
+源码 package.json 声明 `mio-language-support`、publisher `exmikupro`、版本 `0.3.0`，VS Code 引擎 `^1.85.0`。`.mio` 被注册为 Mio，语法着色由 TextMate grammar 提供，内置 LSP 通过 CLI 启动。
+
+| 设置 | 默认值与作用 |
+| --- | --- |
+| `mio.executablePath` | 空；显式 CLI 优先，否则仅查 PATH |
+| `mio.languageServer.enabled` | true；启动 MioCore LSP |
+| `mio.diagnostics.enabled` | true；诊断总开关 |
+| `mio.diagnostics.onSave` | true；CLI 回退保存诊断 |
+| `mio.outputDirectory` | 空；生成字节码的输出目录配置 |
+
+配置 CLI 的示例（路径需替换为本机真实二进制）：
+
+```json
+{ "mio.executablePath": "/absolute/path/to/mio", "mio.languageServer.enabled": true }
+```
+
+命令 ID：`mio.checkCurrentFile`、`mio.runCurrentFile`、`mio.buildCurrentFile`、`mio.showCompilerVersion`、`mio.openOutput`。LSP 拥有诊断时关闭 CLI 重复诊断；禁用或失效时按源码状态回退。源码测试构建使用 core-source.json 的固定核心 SHA `29746a65692c73d637510cbc3f4463e68a49d05c`，不应误写成本页 CLI 快照 SHA。
+
+CLI 发现不自动运行项目目录同名文件。Bunko 路径通过启动环境 MIO_BUNKO 传给服务器；这不是新增的 `mio.bunkoPath` 设置。
+
+## JetBrains
+
+源码 build.gradle.kts 声明 `0.6.1`，IntelliJ Platform sinceBuild 为 `253`，构建依赖 IntelliJ IDEA `2025.3.2` 与 Java 21。插件 id 是 `com.exmikupro.mio`，仅依赖通用 IntelliJ Platform 模块。
+
+进入 **Settings → Languages & Frameworks → Mio SDK** 管理 SDK、CLI 与 Bunko。运行配置显式 CLI 优先，其后为项目 SDK、兼容设置、PATH；所选 Bunko 通过 `MIO_BUNKO` 传给检查和运行。
+
+实现包含轻量 PSI、补全、跳转、Find Usages、Quick Documentation、Bunko 导入、JSON CLI 后台诊断和 Run Configuration。它使用自有 PSI 与 CLI，不是 MioCore LSP 客户端。当前没有安全重命名、完整表达式推断、Debugger 或持久 StubIndex 的完成承诺。
+
+Run Configuration 支持源文件或包目录；虽然 UI 保留程序参数字段，当前 CLI 不接受 run 目标后的程序参数，插件会拒绝不支持的参数，而非静默忽略。
+
+源码构建入口为 `./gradlew test`、`./gradlew buildPlugin`、`./gradlew verifyPlugin`；ZIP 位于 build/distributions，通过 IDE 的 Install Plugin from Disk 安装。此处只核对源码入口，未把这些 Gradle 命令标记为本轮通过。
+
+## 来源
+
+VS Code：`package.json`、`core-source.json`、`src/extension.ts`、`src/cli/cliResolver.ts`、`src/lsp/serverOptions.ts`。JetBrains：`build.gradle.kts`、`src/main/resources/META-INF/plugin.xml`、SDK/诊断/运行实现与 README。准确版本及审计文件哈希记录于 `verification/editor-sources.json`。

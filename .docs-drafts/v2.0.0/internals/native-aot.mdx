@@ -1,0 +1,24 @@
+---
+title: Native AOT 与 M18 固定点
+description: RC4 的三条执行路径和既有自举证据。
+---
+
+## 三条执行路径
+
+| 路径 | 实现与边界 |
+| --- | --- |
+| mio check/run/build/exec | Go 源码前端与 VM；build 输出 Mochi |
+| mochi-aot | 预编译 Go AOT 对照，Mochi → Darwin ARM64 Mach-O |
+| native-aot | 纯 Mio Stage 4 原生编译器，Mochi → Mach-O，使用 config 文件 |
+
+M18 正式链为 Go 前端生成共同 `native-aot.mochi`，Go AOT 仅生成 Seed；Seed 运行生成 Stage 1，Stage 1→2→3→4→5 均为纯 Mio 原生后端。Seed 与 Stage 1–4 已实际执行；Stage 5 已生成并解析、签名验证，不计作正式链已执行代次。
+
+Stage 1–5 未签名完整字节相同，SHA256 `1fe684077b0e0aba6a9e8f73cb062b5f0b1e94e35f36da683cf0fc94d9fedb2d`。Seed 与 Stage 不相同。原生生成进程禁止 fork/exec，反向探针确认策略生效。输入 Mochi v14 SHA256 `a07ee129a44938ab276806be30bc06a85a477ad74c0b4064489ed592b1b0da13`。
+
+## 来源与验证范围
+
+上述是既有 `build/v2.0.0-preparation/m18/provenance.json` 的核心验收，本轮文档验证不冒充重新执行整条 M18。文档本轮使用 RC4 包重跑示例与 Native 迁移例，命令见 `verification/v2.0.0/results.json`。源码前端的字节码自编译与 Mochi→Native 自举是两条不同链。
+
+## Native 子集
+
+已有 nullable/array、struct、enum、共享捕获 Cell、12 参数 ABI、typed Storage、NativeFS 与 GC 回归。Map、任意 MMA、任意多态函数值、通用 argv 不可据 VM 支持推断为 Native 支持。不可证明安全的表示仍拒绝。失败处理与安装见 [迁移](/docs/v2.0.0/migration)。

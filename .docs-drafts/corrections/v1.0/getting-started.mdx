@@ -1,0 +1,88 @@
+---
+title: Getting Started · 安装与运行
+description: 从源码构建 Mio CLI，在本地检查并运行第一个程序。
+---
+
+## 本章目标与操作约定
+
+完成后，你将拥有固定提交构建的 CLI，能够区分类型检查、源码执行和 Mochi 文件执行。本章不要求已有 Mio 知识；需要能在终端切换目录和用编辑器保存文本。
+
+下面 `sh` 命令按 POSIX Shell 编写。除单独说明外，始终在新克隆的 `mio-tutorial` 目录运行命令；`./mio` 是这个目录里的二进制。命令前没有需要输入的提示符。首次构建可能由 Go 下载依赖，需要可用网络。`go.mod` 的最低声明与验证机实际版本分别记录，不把本机通过推广到所有 Go/OS 组合。
+
+## 准备环境
+
+需要 Git、Go 1.22.2 或兼容版本，以及终端。当前步骤使用 Go 引导工具链与 Mochi VM，不需要也不会生成独立 Native AOT 程序。
+
+本教程验证快照为核心提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`，对应正式发布标签 `v1.0.0`。下面固定检出该提交。不要在已有且含改动的核心仓库直接执行检出；新安装请使用独立目录。
+
+```sh
+git clone --branch v1.0.0 https://github.com/mio-kobo/mio.git mio-tutorial
+cd mio-tutorial
+git checkout --detach 51f1ba883767c1fc08ba415fbb0075316ff03106
+git rev-parse HEAD
+go version
+go build -o mio ./cmd/mio
+./mio version
+```
+
+本页从正式发布标签 `v1.0.0` 的提交构建。该提交源码默认的版本字符串仍为 `Mio 1.0.0-beta.2`；正式发布身份以 GitHub Release 记录为准，不依据字符串猜测。此处不宣称 Native AOT 已发布。
+
+## 第一个程序
+
+在 `mio-tutorial` 目录新建 `hello.mio`，保存为 UTF-8：
+
+```mio title="hello.mio"
+chant("Hello, Mio!");
+```
+
+`hello.mio` 是文件名，不是终端命令；先在编辑器里保存代码。检查语法与类型，再运行：
+
+```sh
+./mio check hello.mio
+./mio run hello.mio
+```
+
+`check` 成功输出 `check passed`，只说明编译前检查通过；它不执行程序。`run` 进一步编译并在 VM 执行。`run` 的标准输出为：
+
+```text title="output"
+Hello, Mio!
+```
+
+`chant` 输出一个值并换行；字符串用双引号包围，语句以分号结束。程序可直接书写顶层语句，不需要额外编写 `main` 函数。
+
+## 生成并执行 Mochi 字节码
+
+```sh
+./mio build hello.mio
+./mio exec hello.mochi
+./mio disasm hello.mochi
+```
+
+`exec` 同样输出 `Hello, Mio!`。`build` 生成 `.mochi` 字节码；`disasm` 用于查看指令。这个流程仍依赖 Mochi VM。
+
+## 标准库放在哪里
+
+请保留核心仓库中的 `bunko/` 目录。源程序通过 `yobu "kiso/math";` 导入，不加 `bunko/` 前缀。如果从其他工作目录调用 CLI，可以显式指定标准库根目录：
+
+```sh
+# 在 mio-tutorial 目录执行；之后可在此终端切换工作目录
+export MIO_BUNKO="$PWD/bunko"
+```
+
+Windows 用户可在相应 Shell 设置同名环境变量，二进制通常命名为 `mio.exe`。本站示例命令在 macOS 上实测，尚未进行 Windows 实机验证。
+
+## 练习
+
+把问候语改为你的名字，再执行一次 `check` 与 `run`。预期只有引号中的文本改变，命令本身不变。
+
+## 常见错误
+
+- 找不到 `./mio`：确认已经完成 `go build`，且当前目录含生成的可执行文件。
+- 语法诊断：检查半角双引号、末尾分号和文件扩展名 `.mio`。
+- 导入失败：检查导入路径与 `MIO_BUNKO`，不要写成 `bunko/kiso/math`。
+- 把 `.mochi` 当成系统可执行文件：使用 `./mio exec`，而不是直接执行它。
+
+下一步：[按顺序学习 Mio](/docs/v1.0/learn)。
+
+
+构建失败时先核对 `git rev-parse HEAD` 与本页提交是否相同，再保留完整 Go 报错；不要通过换到未锁定开发分支来“修复”教程。各步真实命令及本机工具版本见 [验证说明](/docs/v1.0/tooling/verification)。

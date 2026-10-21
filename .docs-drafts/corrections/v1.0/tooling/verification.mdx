@@ -1,0 +1,43 @@
+---
+title: 内容验证与版本证据
+description: 重现固定提交上的程序、反例、测试包及 API 声明核对。
+---
+
+本版本来源为 `51f1ba883767c1fc08ba415fbb0075316ff03106`，文档状态 **Stable**。CLI 应输出 `Mio 1.0.0-beta.2`；CLI 字符串和正式发布身份分别记录。
+
+## 本轮复跑
+
+在 mio-docs 根目录执行，需 Python 3.12+（tarfile 安全过滤）、Git、Go 和 Node.js；核心仓库只用于读取已存在的提交对象：
+
+```sh
+python3 scripts/check-content-quality.py --core /absolute/path/to/mio
+npm run check:versions
+npm run check:links
+```
+
+验证器用 `git archive` 分别取 V1/V2 精确提交，在系统临时目录构建 CLI，设置指向该归档的 `MIO_BUNKO`。不读取工作树未提交编译器改动，不更新历史冻结锁。已有的技术验证器 `check-reference.py` 对应另一份来源，不能用其工作树结果替代这里的版本证据。
+
+## 检查对象与判定
+
+- 普通完整 Mio 代码块：依次执行 check、run、build、exec、disasm。run/exec 与页面期望 stdout 逐字节匹配，包括末尾换行。
+- 标记 `mode="test"` 的测试代码块：保存 `_test.mio`，执行 mio test，读取结构化数量与状态。动态 duration 不假装固定输出。
+- 练习：原五课变换及新增练习独立运行；故意失败的断言另验证退出码与 failed 数量。
+- 拒绝/运行时失败反例：按 fixture 的实际退出码、JSON 诊断和消息片段检查；预期失败与验证器故障分开。
+- API：遍历固定提交公开声明，逐条核对本版本页面里的原始签名。声明一致不是全部参数组合或所有错误分支已通过。
+
+## 证据文件
+
+| 文件（仓库相对路径） | 内容 |
+| --- | --- |
+| `verification/content-quality/AUDIT.md` | 修改前审计与优先级 |
+| `verification/content-quality/baseline.json` | 修改前逐页内容哈希与清单 |
+| `verification/content-quality/compatibility-baseline.json` | 两版本旧 fixture 的真实兼容性执行 |
+| `verification/content-quality/results.json` | 本轮完整命令、环境、源码哈希、二进制哈希、stdout/stderr、退出码与预期 |
+| `verification/content-quality/RESULT.md` | 最终结果、失败与保留问题 |
+| `content/QUALITY_SOURCES.json` | 修订页面与版本来源的映射 |
+
+V1 公开正文仍受历史锁保护；待审勘误只放在 `.docs-drafts/corrections/v1.0`，验证草稿通过也不代表维护者已批准发布。V2 是开发预览，验证不产生新的语言 Release。
+
+## 未覆盖范围
+
+本轮不重跑完整 Compiler A→B、自举固定点、Native AOT/GC 专项、IDE 客户端或全平台测试。此前验证记录的 Go AOT/GC 结果保留其原始来源和时间，不改标为本轮执行。M17e 尚未验收，M18 尚未启动。

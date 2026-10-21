@@ -1,0 +1,17 @@
+{
+  "title": "V2.0.0 · Release Review Draft",
+  "description": "RC4 独立审阅快照",
+  "root": "version",
+  "pages": [
+    "index",
+    "getting-started",
+    "learn",
+    "reference",
+    "kiso",
+    "tooling",
+    "internals",
+    "development",
+    "release-notes",
+    "migration"
+  ]
+}

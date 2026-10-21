@@ -1,0 +1,816 @@
+---
+title: kiso/aot/arm64
+description: V2.0.0 RC4的签名、输入单位、结果与错误协议。
+---
+
+**V2.0.0 RC4 审阅快照（尚未发布）**，来源锁见 `verification/v2.0.0/rc4-source-manifest.json`。**V1.0 不提供本包**。公开声明不代表稳定 API；本页仅承诺此快照已有声明及明确列出的验证。
+
+把受限 AArch64 指令编码为 `Instruction`，并以 Assembler 记录标签与 fixup。它只构造指令，不会在 VM 内执行 ARM64 指令。寄存器编号范围为 0..31；编码错误保存在返回值 error 中，error 非空时不得发射 word。
+
+## 导入与检索
+
+导入路径为 `kiso/aot/arm64`。以下签名不是可执行程序，参数名和类型逐字保留源码；函数行为与错误分开查阅。
+
+`EncodeError` · `Instruction` · [movz_x](#movz_x) · [movk_x](#movk_x) · [movn_x](#movn_x) · [movz_w](#movz_w) · [add_x](#add_x) · [sub_x](#sub_x) · [adds_x](#adds_x) · [subs_x](#subs_x) · [and_x](#and_x) · [orr_x](#orr_x) · [eor_x](#eor_x) · [mul_x](#mul_x) · [sdiv_x](#sdiv_x) · [udiv_x](#udiv_x) · [msub_x](#msub_x) · [cmp_x](#cmp_x) · [add_imm_x](#add_imm_x) · [sub_imm_x](#sub_imm_x) · [cmp_imm_x](#cmp_imm_x) · [add_imm_w](#add_imm_w) · [cset_w](#cset_w) · [lsl_x](#lsl_x) · [lsr_x](#lsr_x) · [asr_x](#asr_x) · [lsrv_x](#lsrv_x) · [ldr_x](#ldr_x) · [str_x](#str_x) · [ldrb_w](#ldrb_w) · [strb_w](#strb_w) · [ldrh_w](#ldrh_w) · [stp_x](#stp_x) · [ldp_x](#ldp_x) · [stp_pre_x](#stp_pre_x) · [ldp_post_x](#ldp_post_x) · [b](#b) · [bl](#bl) · [b_cond](#b_cond) · [cbz_x](#cbz_x) · [cbnz_x](#cbnz_x) · [br_x](#br_x) · [blr_x](#blr_x) · [ret_x](#ret_x) · [ret](#ret) · [adr](#adr) · [adrp_offset](#adrp_offset) · [svc](#svc) · [fadd_d](#fadd_d) · [fsub_d](#fsub_d) · [fmul_d](#fmul_d) · [fdiv_d](#fdiv_d) · [fcmp_d](#fcmp_d) · [scvtf_d](#scvtf_d) · [fcvtzs_x](#fcvtzs_x) · `Label` · `Fixup` · `Assembler` · `AssembleResult` · [assembler](#assembler) · [assembler_emit](#assembler_emit) · [assembler_label](#assembler_label) · [assembler_b](#assembler_b) · [assembler_bl](#assembler_bl) · [assembler_b_cond](#assembler_b_cond) · [assembler_cbz_x](#assembler_cbz_x) · [assembler_cbnz_x](#assembler_cbnz_x) · [assembler_assemble](#assembler_assemble)
+
+## 类型与常量
+
+```text
+koukai sentaku EncodeError {
+    InvalidRegister;
+    InvalidImmediate;
+    InvalidCondition;
+    MisalignedOffset;
+    BranchOutOfRange;
+    DuplicateLabel(string);
+    UndefinedLabel(string);
+    InvalidPatch;
+}
+
+koukai kata Instruction { word: uint32; error: EncodeError?; }
+
+koukai kata Label { name: string; word: int64; }
+
+koukai kata Fixup { at_word: int64; target: string; kind: int64; operand: int64; }
+
+koukai kata Assembler { words: []uint32; labels: []Label; label_index: [][]int64; fixups: []Fixup; errors: []EncodeError; }
+
+koukai kata AssembleResult { words: []uint32; error: EncodeError?; }
+```
+
+类型字段为实际公开布局；复制含数组字段的值仍共享数组。不得把公开字段解释为可安全伪造内部状态的许可。
+
+## 函数
+
+### movz_x
+
+```text
+koukai waza movz_x(rd: int64, immediate: int64, shift: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`immediate`：待编码立即数；范围按具体编码检查；`shift`：MOV-wide 的 16 位半字选择，0..3。
+
+构造 MOVZ_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 immediate 为 0..65535，shift 是 0..3 的半字选择，超范围返回 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### movk_x
+
+```text
+koukai waza movk_x(rd: int64, immediate: int64, shift: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`immediate`：待编码立即数；范围按具体编码检查；`shift`：MOV-wide 的 16 位半字选择，0..3。
+
+构造 MOVK_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 immediate 为 0..65535，shift 是 0..3 的半字选择，超范围返回 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### movn_x
+
+```text
+koukai waza movn_x(rd: int64, immediate: int64, shift: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`immediate`：待编码立即数；范围按具体编码检查；`shift`：MOV-wide 的 16 位半字选择，0..3。
+
+构造 MOVN_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 immediate 为 0..65535，shift 是 0..3 的半字选择，超范围返回 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### movz_w
+
+```text
+koukai waza movz_w(rd: int64, immediate: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`immediate`：待编码立即数；范围按具体编码检查。
+
+构造 MOVZ_W 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 immediate 为 0..65535，超范围返回 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### add_x
+
+```text
+koukai waza add_x(rd: int64, rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 ADD_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### sub_x
+
+```text
+koukai waza sub_x(rd: int64, rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 SUB_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### adds_x
+
+```text
+koukai waza adds_x(rd: int64, rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 ADDS_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### subs_x
+
+```text
+koukai waza subs_x(rd: int64, rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 SUBS_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### and_x
+
+```text
+koukai waza and_x(rd: int64, rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 AND_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### orr_x
+
+```text
+koukai waza orr_x(rd: int64, rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 ORR_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### eor_x
+
+```text
+koukai waza eor_x(rd: int64, rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 EOR_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### mul_x
+
+```text
+koukai waza mul_x(rd: int64, rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 MUL_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### sdiv_x
+
+```text
+koukai waza sdiv_x(rd: int64, rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 SDIV_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### udiv_x
+
+```text
+koukai waza udiv_x(rd: int64, rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 UDIV_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### msub_x
+
+```text
+koukai waza msub_x(rd: int64, rn: int64, rm: int64, ra: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）；`ra`：累加寄存器编号（0..31）。
+
+构造 MSUB_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### cmp_x
+
+```text
+koukai waza cmp_x(rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 CMP_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### add_imm_x
+
+```text
+koukai waza add_imm_x(rd: int64, rn: int64, immediate: int64, shift12: bool) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`immediate`：待编码立即数；范围按具体编码检查；`shift12`：是否将 ADD-immediate 左移 12 位。
+
+构造 ADD_IMM_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 immediate 为 0..4095；shift12 表示额外左移 12 位（有此参数时）。超范围为 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### sub_imm_x
+
+```text
+koukai waza sub_imm_x(rd: int64, rn: int64, immediate: int64, shift12: bool) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`immediate`：待编码立即数；范围按具体编码检查；`shift12`：是否将 ADD-immediate 左移 12 位。
+
+构造 SUB_IMM_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 immediate 为 0..4095；shift12 表示额外左移 12 位（有此参数时）。超范围为 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### cmp_imm_x
+
+```text
+koukai waza cmp_imm_x(rn: int64, immediate: int64, shift12: bool) -> Instruction
+```
+
+参数：`rn`：第一源/基址寄存器编号（0..31）；`immediate`：待编码立即数；范围按具体编码检查；`shift12`：是否将 ADD-immediate 左移 12 位。
+
+构造 CMP_IMM_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 immediate 为 0..4095；shift12 表示额外左移 12 位（有此参数时）。超范围为 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### add_imm_w
+
+```text
+koukai waza add_imm_w(rd: int64, rn: int64, immediate: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`immediate`：待编码立即数；范围按具体编码检查。
+
+构造 ADD_IMM_W 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 immediate 为 0..4095；shift12 表示额外左移 12 位（有此参数时）。超范围为 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### cset_w
+
+```text
+koukai waza cset_w(rd: int64, condition: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`condition`：ARM64 条件编码（0..15）。
+
+构造 CSET_W 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 condition 为 0..15，超范围为 InvalidCondition。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### lsl_x
+
+```text
+koukai waza lsl_x(rd: int64, rn: int64, shift: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`shift`：按位计的移位量，0..63。
+
+构造 LSL_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 shift 按位计为 0..63，超范围返回 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### lsr_x
+
+```text
+koukai waza lsr_x(rd: int64, rn: int64, shift: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`shift`：按位计的移位量，0..63。
+
+构造 LSR_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 shift 按位计为 0..63，超范围返回 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### asr_x
+
+```text
+koukai waza asr_x(rd: int64, rn: int64, shift: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`shift`：按位计的移位量，0..63。
+
+构造 ASR_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 shift 按位计为 0..63，超范围返回 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### lsrv_x
+
+```text
+koukai waza lsrv_x(rd: int64, rn: int64, rm: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`rm`：第二源寄存器编号（0..31）。
+
+构造 LSRV_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### ldr_x
+
+```text
+koukai waza ldr_x(rt: int64, rn: int64, byte_offset: int64) -> Instruction
+```
+
+参数：`rt`：装载/存储寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`byte_offset`：以字节计的访存位移；对齐与范围见下文。
+
+构造 LDR_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 byte_offset 非负且按元素宽度对齐（X 为 8，B 为 1，H 为 2 字节）；缩放后不超过 4095。负数/未对齐为 MisalignedOffset，过大为 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### str_x
+
+```text
+koukai waza str_x(rt: int64, rn: int64, byte_offset: int64) -> Instruction
+```
+
+参数：`rt`：装载/存储寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`byte_offset`：以字节计的访存位移；对齐与范围见下文。
+
+构造 STR_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 byte_offset 非负且按元素宽度对齐（X 为 8，B 为 1，H 为 2 字节）；缩放后不超过 4095。负数/未对齐为 MisalignedOffset，过大为 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### ldrb_w
+
+```text
+koukai waza ldrb_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction
+```
+
+参数：`rt`：装载/存储寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`byte_offset`：以字节计的访存位移；对齐与范围见下文。
+
+构造 LDRB_W 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 byte_offset 非负且按元素宽度对齐（X 为 8，B 为 1，H 为 2 字节）；缩放后不超过 4095。负数/未对齐为 MisalignedOffset，过大为 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### strb_w
+
+```text
+koukai waza strb_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction
+```
+
+参数：`rt`：装载/存储寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`byte_offset`：以字节计的访存位移；对齐与范围见下文。
+
+构造 STRB_W 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 byte_offset 非负且按元素宽度对齐（X 为 8，B 为 1，H 为 2 字节）；缩放后不超过 4095。负数/未对齐为 MisalignedOffset，过大为 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### ldrh_w
+
+```text
+koukai waza ldrh_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction
+```
+
+参数：`rt`：装载/存储寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`byte_offset`：以字节计的访存位移；对齐与范围见下文。
+
+构造 LDRH_W 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 byte_offset 非负且按元素宽度对齐（X 为 8，B 为 1，H 为 2 字节）；缩放后不超过 4095。负数/未对齐为 MisalignedOffset，过大为 InvalidImmediate。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### stp_x
+
+```text
+koukai waza stp_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction
+```
+
+参数：`rt`：装载/存储寄存器编号（0..31）；`rt2`：第二装载/存储寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`byte_offset`：以字节计的访存位移；对齐与范围见下文。
+
+构造 STP_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 byte_offset 范围 -512..504 且为 8 的倍数；范围错误为 InvalidImmediate，对齐错误为 MisalignedOffset。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### ldp_x
+
+```text
+koukai waza ldp_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction
+```
+
+参数：`rt`：装载/存储寄存器编号（0..31）；`rt2`：第二装载/存储寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`byte_offset`：以字节计的访存位移；对齐与范围见下文。
+
+构造 LDP_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 byte_offset 范围 -512..504 且为 8 的倍数；范围错误为 InvalidImmediate，对齐错误为 MisalignedOffset。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### stp_pre_x
+
+```text
+koukai waza stp_pre_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction
+```
+
+参数：`rt`：装载/存储寄存器编号（0..31）；`rt2`：第二装载/存储寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`byte_offset`：以字节计的访存位移；对齐与范围见下文。
+
+构造 STP_PRE_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 byte_offset 范围 -512..504 且为 8 的倍数；范围错误为 InvalidImmediate，对齐错误为 MisalignedOffset。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### ldp_post_x
+
+```text
+koukai waza ldp_post_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction
+```
+
+参数：`rt`：装载/存储寄存器编号（0..31）；`rt2`：第二装载/存储寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）；`byte_offset`：以字节计的访存位移；对齐与范围见下文。
+
+构造 LDP_POST_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 byte_offset 范围 -512..504 且为 8 的倍数；范围错误为 InvalidImmediate，对齐错误为 MisalignedOffset。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### b
+
+```text
+koukai waza b(delta_words: int64) -> Instruction
+```
+
+参数：`delta_words`：相对分支位移，单位为 4 字节指令字。
+
+构造 B 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 delta_words 范围 -33554432..33554431，超范围为 BranchOutOfRange。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### bl
+
+```text
+koukai waza bl(delta_words: int64) -> Instruction
+```
+
+参数：`delta_words`：相对分支位移，单位为 4 字节指令字。
+
+构造 BL 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 delta_words 范围 -33554432..33554431，超范围为 BranchOutOfRange。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### b_cond
+
+```text
+koukai waza b_cond(condition: int64, delta_words: int64) -> Instruction
+```
+
+参数：`condition`：ARM64 条件编码（0..15）；`delta_words`：相对分支位移，单位为 4 字节指令字。
+
+构造 B_COND 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 delta_words 范围 -262144..262143；条件编号（如有）0..15，分别返回 BranchOutOfRange 或 InvalidCondition。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### cbz_x
+
+```text
+koukai waza cbz_x(rt: int64, delta_words: int64) -> Instruction
+```
+
+参数：`rt`：装载/存储寄存器编号（0..31）；`delta_words`：相对分支位移，单位为 4 字节指令字。
+
+构造 CBZ_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 delta_words 范围 -262144..262143；条件编号（如有）0..15，分别返回 BranchOutOfRange 或 InvalidCondition。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### cbnz_x
+
+```text
+koukai waza cbnz_x(rt: int64, delta_words: int64) -> Instruction
+```
+
+参数：`rt`：装载/存储寄存器编号（0..31）；`delta_words`：相对分支位移，单位为 4 字节指令字。
+
+构造 CBNZ_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 delta_words 范围 -262144..262143；条件编号（如有）0..15，分别返回 BranchOutOfRange 或 InvalidCondition。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### br_x
+
+```text
+koukai waza br_x(rn: int64) -> Instruction
+```
+
+参数：`rn`：第一源/基址寄存器编号（0..31）。
+
+构造 BR_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### blr_x
+
+```text
+koukai waza blr_x(rn: int64) -> Instruction
+```
+
+参数：`rn`：第一源/基址寄存器编号（0..31）。
+
+构造 BLR_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### ret_x
+
+```text
+koukai waza ret_x(rn: int64) -> Instruction
+```
+
+参数：`rn`：第一源/基址寄存器编号（0..31）。
+
+构造 RET_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### ret
+
+```text
+koukai waza ret() -> Instruction
+```
+
+参数：无。
+
+构造 RET 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### adr
+
+```text
+koukai waza adr(rd: int64, delta_bytes: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`delta_bytes`：相对地址位移，单位为字节。
+
+构造 ADR 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 delta_bytes 为 -1048576..1048575，超范围为 BranchOutOfRange。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### adrp_offset
+
+```text
+koukai waza adrp_offset(rd: int64, pc_offset: int64, target_offset: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`pc_offset`：当前指令字节地址/偏移；`target_offset`：目标字节地址/偏移。
+
+构造 ADRP_OFFSET 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 两偏移从同一 4 KiB 对齐基址起算且非负；页差为有符号 21 位。负偏移为 InvalidImmediate，页差越界为 BranchOutOfRange。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### svc
+
+```text
+koukai waza svc(immediate: int64) -> Instruction
+```
+
+参数：`immediate`：待编码立即数；范围按具体编码检查。
+
+构造 SVC 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 immediate 为 0..65535，超范围返回 InvalidImmediate。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### fadd_d
+
+```text
+koukai waza fadd_d(vd: int64, vn: int64, vm: int64) -> Instruction
+```
+
+参数：`vd`：浮点目的寄存器编号（0..31）；`vn`：第一浮点源寄存器编号（0..31）；`vm`：第二浮点源寄存器编号（0..31）。
+
+构造 FADD_D 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### fsub_d
+
+```text
+koukai waza fsub_d(vd: int64, vn: int64, vm: int64) -> Instruction
+```
+
+参数：`vd`：浮点目的寄存器编号（0..31）；`vn`：第一浮点源寄存器编号（0..31）；`vm`：第二浮点源寄存器编号（0..31）。
+
+构造 FSUB_D 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### fmul_d
+
+```text
+koukai waza fmul_d(vd: int64, vn: int64, vm: int64) -> Instruction
+```
+
+参数：`vd`：浮点目的寄存器编号（0..31）；`vn`：第一浮点源寄存器编号（0..31）；`vm`：第二浮点源寄存器编号（0..31）。
+
+构造 FMUL_D 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### fdiv_d
+
+```text
+koukai waza fdiv_d(vd: int64, vn: int64, vm: int64) -> Instruction
+```
+
+参数：`vd`：浮点目的寄存器编号（0..31）；`vn`：第一浮点源寄存器编号（0..31）；`vm`：第二浮点源寄存器编号（0..31）。
+
+构造 FDIV_D 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### fcmp_d
+
+```text
+koukai waza fcmp_d(vn: int64, vm: int64) -> Instruction
+```
+
+参数：`vn`：第一浮点源寄存器编号（0..31）；`vm`：第二浮点源寄存器编号（0..31）。
+
+构造 FCMP_D 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### scvtf_d
+
+```text
+koukai waza scvtf_d(vd: int64, rn: int64) -> Instruction
+```
+
+参数：`vd`：浮点目的寄存器编号（0..31）；`rn`：第一源/基址寄存器编号（0..31）。
+
+构造 SCVTF_D 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### fcvtzs_x
+
+```text
+koukai waza fcvtzs_x(rd: int64, vn: int64) -> Instruction
+```
+
+参数：`rd`：目的寄存器编号（0..31）；`vn`：第一浮点源寄存器编号（0..31）。
+
+构造 FCVTZS_X 编码，返回 Instruction；成功 error=mu，失败 word 不可使用。 寄存器编号越界返回 InvalidRegister。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### assembler
+
+```text
+koukai waza assembler() -> Assembler
+```
+
+参数：无。
+
+创建空 Assembler，words/labels/fixups/errors 初始为空。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### assembler_emit
+
+```text
+koukai waza assembler_emit(value: Assembler, encoded: Instruction) -> EncodeError?
+```
+
+参数：`value`：当前函数要处理的值或对象，类型见签名；`encoded`：已编码的 Instruction，须先检查 error。
+
+若 encoded.error 非空则记录并返回错误；否则追加 word，成功返回 mu。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### assembler_label
+
+```text
+koukai waza assembler_label(value: Assembler, name: string) -> EncodeError?
+```
+
+参数：`value`：当前函数要处理的值或对象，类型见签名；`name`：标签名或完整签名名；具体匹配规则见本节。
+
+在当前位置定义 name；重复标签返回 DuplicateLabel。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### assembler_b
+
+```text
+koukai waza assembler_b(value: Assembler, target: string) -> EncodeError?
+```
+
+参数：`value`：当前函数要处理的值或对象，类型见签名；`target`：要查找的字节或分支目标，类型见签名。
+
+记录到标签的 B 分支 fixup，返回 EncodeError?；成功为 mu，错误累积在 Assembler，最终仍须检查 assembler_assemble。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### assembler_bl
+
+```text
+koukai waza assembler_bl(value: Assembler, target: string) -> EncodeError?
+```
+
+参数：`value`：当前函数要处理的值或对象，类型见签名；`target`：要查找的字节或分支目标，类型见签名。
+
+记录到标签的 BL 分支 fixup，返回 EncodeError?；成功为 mu，错误累积在 Assembler，最终仍须检查 assembler_assemble。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### assembler_b_cond
+
+```text
+koukai waza assembler_b_cond(value: Assembler, condition: int64, target: string) -> EncodeError?
+```
+
+参数：`value`：当前函数要处理的值或对象，类型见签名；`condition`：ARM64 条件编码（0..15）；`target`：要查找的字节或分支目标，类型见签名。
+
+记录到标签的 B_COND 分支 fixup，返回 EncodeError?；成功为 mu，错误累积在 Assembler，最终仍须检查 assembler_assemble。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### assembler_cbz_x
+
+```text
+koukai waza assembler_cbz_x(value: Assembler, reg: int64, target: string) -> EncodeError?
+```
+
+参数：`value`：当前函数要处理的值或对象，类型见签名；`reg`：待测试的寄存器编号（0..31）；`target`：要查找的字节或分支目标，类型见签名。
+
+记录到标签的 CBZ_X 分支 fixup，返回 EncodeError?；成功为 mu，错误累积在 Assembler，最终仍须检查 assembler_assemble。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### assembler_cbnz_x
+
+```text
+koukai waza assembler_cbnz_x(value: Assembler, reg: int64, target: string) -> EncodeError?
+```
+
+参数：`value`：当前函数要处理的值或对象，类型见签名；`reg`：待测试的寄存器编号（0..31）；`target`：要查找的字节或分支目标，类型见签名。
+
+记录到标签的 CBNZ_X 分支 fixup，返回 EncodeError?；成功为 mu，错误累积在 Assembler，最终仍须检查 assembler_assemble。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+### assembler_assemble
+
+```text
+koukai waza assembler_assemble(value: Assembler) -> AssembleResult
+```
+
+参数：`value`：当前函数要处理的值或对象，类型见签名。
+
+解析记录的标签 fixup，返回 AssembleResult；遇到已有编码错误、缺失标签、越界分支或无效补丁时返回 error。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。
+
+## 最小示例与验证范围
+
+保存为 `main.mio`，使用本版本的 `mio check main.mio` 与 `mio run main.mio`；输出逐字节记录。此例只验证下面使用的接口，不覆盖本包所有编码或 Runtime 分支。
+
+```mio title="main.mio"
+yobu "kiso/aot/arm64";
+kaku good = arm64.ret();
+chant(good.error == mu);
+kaku bad = arm64.movz_x(-1, 0, 0);
+chant(bad.error != mu);
+```
+
+```text title="output"
+hai
+hai
+```
+
+完整输入哈希、命令及输出见仓库 `verification/v2.0.0/results.json`。声明资料与执行覆盖分别记录；没有在此证明原生代码执行或 Compiler A→B 验收。
+
+## assembler_label_word
+
+```text
+koukai waza assembler_label_word(value: Assembler, name: string) -> int64
+```
+
+返回已绑定 label 的 word 位置；用于分支修补。只能查询本次 assembler 中的 label，未绑定路径以源码返回值判定。
+
+来源：`verification/v2.0.0/source/bunko/kiso/aot/arm64/arm64.mio`。

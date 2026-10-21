@@ -1,0 +1,38 @@
+---
+title: Kiso · 标准库参考
+description: 按真实导入路径查询签名、参数、返回值和错误约定。
+---
+
+本栏目固定到 **V2.0.0 RC4 审阅快照**。来源为包内 BUILD-INFO 与独立源码清单。Bunko 是物理 `bunko/` 根，Kiso 是公开导入路径；例如 `yobu "kiso/math";`，不要加入 `bunko/` 前缀。
+
+## 包索引
+
+| 导入路径 | 主要用途 | 声明数 |
+| --- | --- | ---: |
+| [kiso/aot/arm64](/docs/v2.0.0/kiso/aot-arm64) | ARM64 编码与 fixup（开发接口） | 68 |
+| [kiso/aot/lower](/docs/v2.0.0/kiso/aot-lower) | Mochi lowering（开发接口） | 6 |
+| [kiso/aot/lower/nativefs](/docs/v2.0.0/kiso/aot-lower-nativefs) | 宿主桥接发射（内部 ABI） | 21 |
+| [kiso/aot/lower/types](/docs/v2.0.0/kiso/aot-lower-types) | 内部表示分析（开发接口） | 20 |
+| [kiso/aot/macho](/docs/v2.0.0/kiso/aot-macho) | Darwin Mach-O 镜像（开发接口） | 14 |
+| [kiso/array](/docs/v2.0.0/kiso/array) | 动态数组与浅复制 | 8 |
+| [kiso/bytes](/docs/v2.0.0/kiso/bytes) | 字节数组与 ByteBuffer | 19 |
+| [kiso/convert](/docs/v2.0.0/kiso/convert) | 数值与字符串转换 | 10 |
+| [kiso/encoding/binary](/docs/v2.0.0/kiso/encoding-binary) | 定宽/变长二进制编码 | 76 |
+| [kiso/encoding/mochi](/docs/v2.0.0/kiso/encoding-mochi) | Mochi 解码验证与规范化 | 21 |
+| [kiso/fs](/docs/v2.0.0/kiso/fs) | 宿主文件、目录与状态 | 24 |
+| [kiso/io](/docs/v2.0.0/kiso/io) | Reader/Writer 函数值与流复制 | 13 |
+| [kiso/math](/docs/v2.0.0/kiso/math) | 数值泛型、舍入及 checked 运算 | 21 |
+| [kiso/path](/docs/v2.0.0/kiso/path) | 纯路径操作 | 9 |
+| [kiso/string](/docs/v2.0.0/kiso/string) | UTF-8 字节操作与 Builder | 18 |
+| [kiso/testing](/docs/v2.0.0/kiso/testing) | 测试专用断言 | 2 |
+| [kiso/utf8](/docs/v2.0.0/kiso/utf8) | UTF-8 验证、解码、编码 | 8 |
+
+共 17 个包、365 条公开声明（函数、类型与常量合计）。计数来自 RC4 源码快照，不是宣称每条 API 的全部分支已执行。aot 和 encoding/mochi 是工具链开发接口，公开可导入不表示 API 稳定或承诺任意程序可原生编译。
+
+## 如何读 API
+
+每个函数先列原始签名，再说明输入、返回、错误和存储共享。`unit` 表示没有普通返回值；`T?` 用 `mu` 表示缺失；`Error?` 返回 `mu` 通常表示成功，返回非空错误表示失败。带 `error` 的 Result 应先检查错误再读有效负载，不能把默认零值当成功结果。
+
+长度和偏移须看单位：数组按元素，字节与路径/字符串索引规则按各包说明。`clone` 的独立存储不必然意味着递归深复制。动态分配还受 VM 资源预算影响，返回错误值的 API 不保证能捕获一切资源错误。
+
+[模块教程](/docs/v2.0.0/learn/modules) 展示最小导入；[类型参考](/docs/v2.0.0/reference/types) 解释约束和可空类型；[验证说明](/docs/v2.0.0/tooling/verification) 列实际执行范围。

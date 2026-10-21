@@ -1,0 +1,18 @@
+---
+title: Native GC 与对象表示
+description: 精确 Mark-Sweep、Shadow Frame、managed arena 与内存协议。
+---
+
+## 两种内存管理
+
+VM 对象由 Go 宿主管理。Native 使用精确 Mark-Sweep：类型描述与 root map 标记引用，Shadow Frame 与全局根保活对象，sweep 回收不可达对象；不把任意整数当作引用。对象头与载荷 16 字节对齐，Array Descriptor/Storage、Struct、Enum、Closure Environment/Cell、Nullable box 各有布局。
+
+RC4 的纯 Mio lowering 已包含共享 Cell、nullable array 类型追踪、远分支修复、typed Storage 与 mmap managed arena。数组截断必须清理尾部引用。Native 内部布局不承诺稳定 ABI。
+
+## 容量与证据
+
+正式 M18 使用 1 GiB managed arena。256 MiB GC 自编译见证由 LLDB 实测 gc_count=1、shadow_frame=0、exit_argument=0，GC 后仍重建固定点；见既有 `build/v2.0.0-preparation/m18/gc-observation.json`。128 MiB OOM 是历史压力诊断，本轮没有重跑。
+
+`mochi-aot -heap-mib` 为 1..1024、默认 1 MiB；纯 Mio `compile_with_heap` 用 bytes，正式入口固定 1073741824。两者不能混用。GC stress 用于验证根安全，不能当作性能基准；没有发布性能倍数承诺。
+
+M19 分代 GC 尚未启动；High/Balanced/Low 三档没有实现。本轮文档例不重新测 GC 统计；核心既有全量/race/GCStress 证据另列于最终报告。

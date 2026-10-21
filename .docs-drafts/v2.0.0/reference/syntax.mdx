@@ -1,0 +1,102 @@
+---
+title: 语法与表达式
+description: 关键字、字面量、运算符与控制语句。
+---
+
+**版本范围：V2.0.0 · RC4 审阅快照（尚未发布）**。来源为 RC4 的 source-manifest 与包内 BUILD-INFO；HEAD 加未提交来源共同构成候选，不能只检出 HEAD。正文示例默认走包内 CLI / VM。
+
+## 词法
+
+源文件使用 UTF-8。标识符以 ASCII 字母或 `_` 开头，后续允许 ASCII 字母、数字和 `_`，区分大小写。注释使用 `//` 或 `/* ... */`。变量、赋值、表达式、导入、返回、break/continue 等语句以 `;` 结束；函数和控制流代码块不追加分号。
+
+整数为十进制，除 `0` 外不允许前导零。浮点字面量支持小数和 `e`/`E` 指数。字符串为双引号，不能直接跨行，支持 `\n`、`\r`、`\t`、`\"` 和 `\\`。单引号 rune 必须是一个 Unicode 标量值，支持字符转义及 `\xNN`、`\uNNNN`、`\UNNNNNNNN`。
+
+```mio fixture="lexical"
+// ASCII 标识符，Unicode 文本与 rune
+/* block comment */
+kaku text = "澪\nMio";
+chant(text);
+chant('A');
+chant(2.5e1);
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+澪
+Mio
+65
+25
+```
+
+## 关键字
+
+| 拼写 | 用途 |
+| --- | --- |
+| `kaku` / `teisu` | 变量 / 编译期常量 |
+| `waza` / `kaesu` | 函数或闭包 / 返回 |
+| `moshi` / `sore` | 条件 / 否则 |
+| `aida` / `nukeru` / `tsuzuku` | 循环 / 退出当前循环 / 继续当前循环 |
+| `hai` / `iie` / `mu` | 真 / 假 / 空值 |
+| `kata` / `sentaku` | 结构体 / 枚举 |
+| `awase` / `baai` | 枚举匹配 / 分支 |
+| `yobu` / `koukai` | 导入 / 导出 |
+
+以上 18 个词来自 CLI 使用的 `token.V05` 关键字表；类型名和 `chant`、`len` 不属于关键字。
+
+## 表达式与优先级
+
+表达式包括字面量、名称、分组、一元/二元运算、调用、索引、字段、数组/结构体构造和闭包。赋值是语句，不是可嵌套的赋值表达式。
+
+解析器优先级由高到低：`.` → `[]` → `()` → 一元 `-`/`!` → `*`/`/` → `+`/`-` → `<`/`<=`/`>`/`>=` → `==`/`!=` → `&&` → `||`。二元运算符左结合；后缀成员、索引与调用可连续组合。
+
+算术两侧必须是同一数值类型；`!`、`&&`、`||` 要求 `bool`，后两者短路。整数除法向零截断。无 `%`、`++`、`+=`、位运算或字符串 `+` 运算符。
+
+```mio fixture="operators"
+chant(2 + 3 * 4);
+chant(7 / 2);
+chant(!iie && (hai || iie));
+kaku calls = 0;
+waza touch() -> bool { calls = calls + 1; kaesu hai; }
+chant(iie && touch());
+chant(hai || touch());
+chant(calls);
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+14
+3
+hai
+iie
+hai
+0
+```
+
+## 控制语句
+
+`moshi (condition) { ... } sore { ... }` 中 `sore` 可省略；条件必须是 `bool`。`aida (condition) { ... }` 也是 bool 条件；`nukeru;` 和 `tsuzuku;` 只能出现在循环中。枚举使用 [awase](/docs/v2.0.0/reference/collections)，没有 C 风格 `for` 语法。
+
+```mio fixture="control"
+kaku i = 0;
+kaku sum = 0;
+aida (i < 5) {
+    i = i + 1;
+    moshi (i == 2) { tsuzuku; }
+    moshi (i == 5) { nukeru; }
+    sum = sum + i;
+}
+chant(sum);
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+8
+```
+
+证据：`internal/parser/precedence.go`、`parser.go`，`internal/lexer/lexer.go` 与 `internal/token/token.go`。
+
+
+相关规则：[语法](/docs/v2.0.0/reference/syntax) · [类型](/docs/v2.0.0/reference/types) · [函数](/docs/v2.0.0/reference/functions) · [集合](/docs/v2.0.0/reference/collections) · [模块](/docs/v2.0.0/reference/modules)。

@@ -1,0 +1,50 @@
+---
+title: 编写测试与完成学习路线
+description: 用真实测试发现规则和断言记录程序的约定。
+---
+
+## 目标、动机与前置
+
+前置：[模块与数学库](/docs/v2.0.0/learn/modules)。完成后你能创建可被 CLI 发现的测试包，运行它并读懂通过数量。手工看输出适合最初观察；测试把预期写成可重复的检查，后续修改时不必靠记忆核对。
+
+## 创建隔离测试目录
+
+在 `项目` 源码根执行以下命令，再用编辑器创建 `lesson-tests/example_test.mio`。使用独立目录可避免前几课同名顶层声明被一起加载。
+
+```sh
+mkdir -p lesson-tests
+export MIO_BUNKO="$PWD/bunko"
+```
+
+```mio mode="test" title="example_test.mio"
+yobu "kiso/testing";
+waza test_answer() -> unit {
+    testing.expect(6 * 7 == 42, "answer");
+}
+```
+
+运行测试包：
+
+```sh
+mio test ./lesson-tests --format=json --lang=en-US
+```
+
+真实输出是 JSON 报告，duration 等时间字段随执行变化。验证器实际检查 `summary.passed=1`、`summary.failed=0`、`summary.status="passed"` 及退出码 0；完整原始 JSON 保存在仓库 `verification/v2.0.0/results.json`。这里不把带动态时间的报告伪造成固定 stdout。
+
+## 发现规则与断言
+
+`_test.mio` 后缀让 CLI 把文件识别为测试文件。顶层 `test_` 函数须零参数、非泛型、返回 `unit`，否则不能据函数名称推断它会运行。`testing.expect` 的第一个参数是布尔条件，第二个参数是在失败时记录的信息。
+
+`expect` 记录失败后继续执行当前函数；它不抛异常，也不返回布尔值供 `chant` 使用。`kiso/testing` 依赖 `mio test` 专用宿主接口，不能把此包当作普通 `mio run` 程序。退出码 0 还可能表示没有发现测试，必须一起读数量和状态。
+
+## 练习与陷阱
+
+把计算改为 `7 * 6 == 42` 并重跑；仍应恰好有一个通过测试。然后把预期常量改为 41，观察失败信息，再恢复原文件。后一项是故意失败的反例，验证器单独断言 failed=1 和非零退出，不计为成功程序。
+
+如果是 `no_tests`，先检查文件后缀、函数签名和命令目标。若是导入错误，核对 `MIO_BUNKO` 是否指向本版包含 `kiso/` 的目录。
+
+## 后续学习
+
+你已从变量走到数据模型、闭包、泛型、标准库和测试。接下来用 [Reference](/docs/v2.0.0/reference) 精确查规则，按导入路径查 [Kiso](/docs/v2.0.0/kiso)，用 [Tooling](/docs/v2.0.0/tooling) 查询诊断与执行方式。每次换文档版本时同时换 CLI 和标准库。
+
+上一课：[模块与数学库](/docs/v2.0.0/learn/modules)。验证边界见 [验证说明](/docs/v2.0.0/tooling/verification)。

@@ -1,0 +1,80 @@
+---
+title: 模块与数学库
+description: 通过 yobu 引入 kiso/math，组合自己的函数与标准库。
+---
+
+## 学习目标与前置
+
+完成后，你能按公开路径导入包、使用限定名调用泛型数学函数，并定位标准库根。前置：[泛型与约束](/docs/v2.0.0/learn/generics)，以及安装页的 `MIO_BUNKO` 设置。
+
+平方可以自行实现，平方根适合复用经过项目测试的标准库。导入把外部名称放到明确的包限定名下，避免与自己的函数混淆。
+
+## 保存与运行
+
+在安装页创建的项目目录，把下面程序保存为 `modules.mio`；保持 `MIO_BUNKO` 指向包内 `bunko/`。在同一目录执行：
+
+```sh
+mio check modules.mio
+mio run modules.mio
+```
+
+`check` 成功报告 `check passed`；后面的 output 仅列 `run` 的标准输出，每行末尾包含换行。
+
+## 完整程序
+
+```mio title="modules.mio"
+yobu "kiso/math";
+
+waza square(value: float64) -> float64 {
+    kaesu value * value;
+}
+
+kaku area = square(12.0);
+chant(area);
+chant(math.sqrt(area));
+```
+
+```text title="output"
+144
+12
+```
+
+
+## 数据与类型如何跨调用传递
+
+本例的 `square` 是当前包自己的函数，`math.sqrt` 是导入包的公开成员。`12.0` 在 `float64` 参数上下文中检查；返回的面积仍为 `float64`，平方根的类型参数可由这个实参推断，结果也是 `float64`。
+
+注意输出 `144` 和 `12` 没有小数点，但它们不是整数类型。若已经有一个 `int64` 变量，传入此函数前要显式转换，不能把字面量上下文与变量隐式转换混为一谈。
+
+`yobu "kiso/math";` 的默认限定名取路径末段，因此调用写成 `math.sqrt(area)`。Bunko 是物理标准库根，公开导入从 `kiso/` 开始。
+
+## 包边界
+
+导入包或以目录为入口时，同目录普通 `.mio` 文件共享包级声明，子目录不会自动合并。教程明确传入单个文件路径，因此只执行这个文件及其显式依赖；不要改成 `mio run .` 来运行混放的各课例子。包级函数、类型和常量只有声明为 `koukai` 才能被其他包使用，包变量不能导出。`yobu` 是显式依赖，不会自动搜索任意第三方下载地址。
+
+本章使用已随源码提供的 `kiso/math`，没有要求你创建或发布新库。需要多文件布局、导入限制或循环依赖规则时，查模块参考；需要平方根的负数行为或类型约束时，查数学 API。
+
+## 练习
+
+把 `square(12.0)` 改为 `square(5.0)`，再运行一次。
+
+预期输出 `25` 和 `5`。保留小数形式使参数符合 `float64` 上下文；不要依赖普通数值变量之间的隐式转换。
+
+## 常见错误
+
+- 调用 `sqrt(area)`：导入成员需要包限定名，这里是 `math.sqrt`。
+- 导入路径带 `bunko/`：公开路径从 `kiso/` 开始。
+- 找不到模块：检查 `bunko/` 是否完整，必要时设置 `MIO_BUNKO` 为标准库根目录。
+
+## 接下来
+
+你已经用过变量、分支、循环、函数、数组、可空类型与导入。继续通过 [Reference](/docs/v2.0.0/reference) 理解精确规则，通过 [Kiso](/docs/v2.0.0/kiso) 查找标准库，再到 [Tooling](/docs/v2.0.0/tooling) 了解开发工具。
+
+本课没有构建原生独立程序，也没有浏览器内运行步骤。Native AOT 的边界见 [Internals](/docs/v2.0.0/internals)。
+
+
+## 延伸阅读
+
+精确规则见 [语言参考](/docs/v2.0.0/reference)。本章输出对应本版本 RC4 包内 CLI / Mochi VM，验证命令与原始输出见 [验证说明](/docs/v2.0.0/tooling/verification)。
+
+上一课：[泛型与约束](/docs/v2.0.0/learn/generics)。下一课：[编写测试](/docs/v2.0.0/learn/testing)。

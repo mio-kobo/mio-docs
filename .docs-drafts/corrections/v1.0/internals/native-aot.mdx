@@ -1,0 +1,18 @@
+---
+title: V1 原生执行支持边界
+description: 正式标签只有本页能证明的 VM 路径，不倒写后续 AOT 功能。
+---
+
+V1.0 Stable 固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106` 不含 `cmd/mochi-aot`、`internal/aot`、`kiso/aot` 或 `kiso/encoding/mochi`。
+
+## 本版执行方式
+
+`mio run` 在 Go VM 内执行字节码；`mio build` 把字节码保存为 Mochi 文件，仍需 `mio exec` 加载和运行。Mochi 容器不是 ARM64 Mach-O，也不是独立原生可执行文件。
+
+## 版本边界
+
+Go AOT、纯 Mio lowering 和原生 GC 是后续开发快照中的实现。源码目录、阶段记录和测试均须查对应版本，不能因为后续开发仓库已有这些文件就声称 V1 已提供它们。M17e 尚未验收，M18 尚未启动；本页不发布未来功能承诺。
+
+本轮按精确提交取归档并验证 VM 程序，未执行原生程序或自举。源文件存在与否也保存在完整归档清单；没有把不在此版本中的命令列为未完成安装步骤。
+
+[Mochi 格式与 VM](/docs/v1.0/internals/mochi) · [VM 内存管理](/docs/v1.0/internals/gc) · [验证说明](/docs/v1.0/tooling/verification)。

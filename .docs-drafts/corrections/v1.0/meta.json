@@ -1,0 +1,14 @@
+{
+  "title": "V1.0 · Stable",
+  "description": "正式发布文档",
+  "root": "version",
+  "pages": [
+    "index",
+    "getting-started",
+    "learn",
+    "reference",
+    "kiso",
+    "tooling",
+    "internals"
+  ]
+}

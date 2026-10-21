@@ -1,0 +1,3942 @@
+--- a/content/docs/v1.0/getting-started.mdx
++++ b/content/docs/v1.0/getting-started.mdx
+@@ -2,6 +2,12 @@
+ title: Getting Started · 安装与运行
+ description: 从源码构建 Mio CLI，在本地检查并运行第一个程序。
+ ---
++
++## 本章目标与操作约定
++
++完成后，你将拥有固定提交构建的 CLI，能够区分类型检查、源码执行和 Mochi 文件执行。本章不要求已有 Mio 知识；需要能在终端切换目录和用编辑器保存文本。
++
++下面 `sh` 命令按 POSIX Shell 编写。除单独说明外，始终在新克隆的 `mio-tutorial` 目录运行命令；`./mio` 是这个目录里的二进制。命令前没有需要输入的提示符。首次构建可能由 Go 下载依赖，需要可用网络。`go.mod` 的最低声明与验证机实际版本分别记录，不把本机通过推广到所有 Go/OS 组合。
+ 
+ ## 准备环境
+ 
+@@ -13,6 +19,8 @@
+ git clone --branch v1.0.0 https://github.com/mio-kobo/mio.git mio-tutorial
+ cd mio-tutorial
+ git checkout --detach 51f1ba883767c1fc08ba415fbb0075316ff03106
++git rev-parse HEAD
++go version
+ go build -o mio ./cmd/mio
+ ./mio version
+ ```
+@@ -27,14 +35,14 @@
+ chant("Hello, Mio!");
+ ```
+ 
+-检查语法与类型，再运行：
++`hello.mio` 是文件名，不是终端命令；先在编辑器里保存代码。检查语法与类型，再运行：
+ 
+ ```sh
+ ./mio check hello.mio
+ ./mio run hello.mio
+ ```
+ 
+-程序的标准输出为：
++`check` 成功输出 `check passed`，只说明编译前检查通过；它不执行程序。`run` 进一步编译并在 VM 执行。`run` 的标准输出为：
+ 
+ ```text title="output"
+ Hello, Mio!
+@@ -75,3 +83,6 @@
+ - 把 `.mochi` 当成系统可执行文件：使用 `./mio exec`，而不是直接执行它。
+ 
+ 下一步：[按顺序学习 Mio](/docs/v1.0/learn)。
++
++
++构建失败时先核对 `git rev-parse HEAD` 与本页提交是否相同，再保留完整 Go 报错；不要通过换到未锁定开发分支来“修复”教程。各步真实命令及本机工具版本见 [验证说明](/docs/v1.0/tooling/verification)。
+--- a/content/docs/v1.0/index.mdx
++++ b/content/docs/v1.0/index.mdx
+@@ -20,6 +20,6 @@
+ 
+ ## 文档范围
+ 
+-当前提供已运行验证的安装页与五课基础教程。版本化语言规范与 API 正文由 Codex B 负责；栏目入口中的未版本化历史链接不应当作本版 API 保证。
++本版本提供安装页、十一课学习路线，以及独立的 Reference、Kiso、Tooling 和 Internals 正文。所有规范和 API 固定到上述提交；例子与签名的实际验证范围见 [验证说明](/docs/v1.0/tooling/verification)。
+ 
+ [查看版本状态与来源](/docs/versions)。当前仅发布中文，不生成英文或日文的假翻译。
+--- /dev/null
++++ b/content/docs/v1.0/internals/gc.mdx
+@@ -0,0 +1,20 @@
++---
++title: V1 VM 对象与内存管理
++description: Go 宿主的对象生命周期与语言层共享语义。
++---
++
++版本范围：V1.0 Stable，提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`。来源为 `internal/value`、`internal/vm/vm.go`，没有后续 Native Runtime 源码。
++
++## 宿主管理的值
++
++VM 执行 Mio 字节码并使用 Go 对象保存值、数组和调用状态，对象生命周期由 Go 宿主管理。Mio 数组和 Map 的共享可变语义是语言可观察行为，不能由“Go 管理内存”推断赋值会深复制。闭包保存捕获状态，多个闭包捕获同一可变局部变量时共享 Cell。
++
++## 与 Native GC 的区别
++
++此标签没有 `internal/aot`。后续原生后端使用的对象头、精确根、Shadow Frame、mark/sweep 或 Heap 容量不能直接套到 V1 VM 上；本版也没有因此自动获得相关 CLI 参数。
++
++## 可以验证的边界
++
++数组别名、嵌套数组和闭包示例只观察语言结果。VM 的值栈、调用深度和指令预算是执行限制，见 [函数参考](/docs/v1.0/reference/functions)。这些示例不测量 GC 次数、峰值存活字节或原生根协议，未测统计不能填为 0。
++
++本轮程序与语义测试结果见 [验证说明](/docs/v1.0/tooling/verification)。文件句柄仍应按 [fs API](/docs/v1.0/kiso/fs) 的关闭约定处理，不能把宿主对象回收当作显式资源关闭的替代品。
+--- a/content/docs/v1.0/internals/index.mdx
++++ b/content/docs/v1.0/internals/index.mdx
+@@ -1,16 +1,16 @@
+ ---
+-title: Internals · 内部实现
+-description: 了解 Mochi 执行路径与 Native AOT 的研发边界。
++title: Internals · 执行系统与内部实现
++description: 按容器、虚拟机、原生后端和内存管理区分实现边界。
+ ---
+ 
+-- [Mochi 字节码与 VM](/docs/mochi)
+-- [Native AOT 研发资料](/docs/native-aot)
++本栏目解释 **v1.0 · Stable** 固定提交的实现。API 用户优先查询 [Reference](/docs/v1.0/reference) 和 [Kiso](/docs/v1.0/kiso)，后端开发再阅读内部布局。
+ 
+-## 当前边界
++| 层次 | 内容 |
++| --- | --- |
++| 序列化与 VM | [Mochi 文件格式、版本门槛和验证](/docs/v1.0/internals/mochi) |
++| 原生执行 | [V1 未提供原生后端的边界](/docs/v1.0/internals/native-aot) |
++| 内存生命周期 | [VM 对象与宿主管理的内存](/docs/v1.0/internals/gc) |
+ 
+-当前教程通过 Go 引导 CLI 和 Mochi VM 执行。Mochi 字节码自编译与原生独立执行属于不同的验收范围。
++Mochi 字节码文件不是原生可执行文件。Go VM 的内存由宿主管理；本标签没有后续开发版的 Native Runtime。本教程的 VM 程序通过不证明 Native 后端接受相同程序。
+ 
+-**M17e 尚未验收，M18 尚未启动。** 不应从设计文档、实验代码或局部测试推断纯 Mio 原生自举已发布。WebAssembly Playground 尚未发布，本站不提供在线运行入口。
+-
+-
+-> 参考边界：本页链接的旧技术正文仍是未版本化迁移资料，不构成本版本的规范或 API 签名。版本化技术参考由 Codex B 单独核验后补入。
++M17e 尚未验收，M18 尚未启动；没有本版本已发布纯 Mio 原生自举或 WebAssembly Playground 的结论。每项状态都须结合具体后端、提交和实际执行证据。
+--- a/content/docs/v1.0/internals/meta.json
++++ b/content/docs/v1.0/internals/meta.json
+@@ -1,6 +1,9 @@
+ {
+   "title": "Internals",
+   "pages": [
+-    "index"
++    "index",
++    "gc",
++    "mochi",
++    "native-aot"
+   ]
+ }
+--- /dev/null
++++ b/content/docs/v1.0/internals/mochi.mdx
+@@ -0,0 +1,175 @@
++---
++title: Mochi v14 格式与 VM
++description: 格式、操作码、版本门槛与实际编码策略。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++Mochi 是 Mio 的二进制字节码容器。所有多字节整数使用大端字节序，文件不包含填充、校验和或尾随数据。
++
++Mochi v14 增加受限数据复制转换指令。解码器和 VM 可以读取 Mochi v1 至 v14。`Version = 14` 是实现支持上限；Go 编码器的 `encodedVersion` 按实际常量与指令选择输出版本，并非每次 build 都写 14。含 `OpDataConvert` 的程序写 v14。
++
++## 公共头部和主指令流
++
++| 字段 | 大小 | 说明 |
++| --- | ---: | --- |
++| 签名 | 5 字节 | ASCII `MOCHI` |
++| 版本 | `uint16` | `1` 至 `14` |
++| 常量数量 | `uint32` | 后续常量条目数 |
++| 常量表 | 可变 | 见下节 |
++| 全局槽位数量 | `uint32` | VM 启动时分配的槽位数 |
++| 主指令长度 | `uint32` | 指令字节数 |
++| 主指令 | 可变 | 编码后的 Opcode 与操作数 |
++
++Mochi v1 在主指令后结束。Mochi v2 至 v14 继续写入函数表。
++
++## 常量表
++
++每个常量以一个 `uint8` 类型标签开始：
++
++| 标签 | 数据 |
++| ---: | --- |
++| `1` | 一个按位保存的 `int64`，占 8 字节 |
++| `2` | `uint32` UTF-8 字节长度，随后是字符串数据 |
++| `3` | 一个 IEEE 754 binary64 位模式，占 8 字节，Mochi v3 及后续版本允许 |
++| `4` | 一个 IEEE 754 binary32 位模式，占 4 字节，Mochi v10 起允许 |
++| `5` / `8` | `int8` / `uint8` 位模式，占 1 字节，Mochi v11 起允许 |
++| `6` / `9` | `int16` / `uint16` 位模式，占 2 字节，Mochi v11 起允许 |
++| `7` / `10` | `int32` / `uint32` 位模式，占 4 字节，Mochi v11 起允许 |
++
++布尔值和 `mu` 不进入常量表，分别由 `OpTrue`、`OpFalse` 和 `OpNil` 产生。
++
++## Mochi v2 至 v14 函数表
++
++主指令后先写入 `uint32` 函数数量，每个函数依次包含：
++
++| 字段 | 大小 | 说明 |
++| --- | ---: | --- |
++| FunctionID | `uint16` | 从 0 开始，必须与函数表索引一致 |
++| 名称长度 | `uint16` | UTF-8 名称的字节数 |
++| 名称 | 可变 | 非空 UTF-8 文本 |
++| 参数数量 | `uint32` | 函数参数槽位数 |
++| 局部槽位数量 | `uint32` | 包含参数槽位，不能少于参数数量 |
++| 标志 | `uint8` | bit 0 表示函数返回值，其余位必须为 0 |
++| 捕获数量及捕获项 | 可变 | v9 起：`uint32` 数量，每项为 `uint8` 来源和 `uint32` 索引 |
++| 指令长度 | `uint32` | 函数指令字节数 |
++| 指令 | 可变 | 独立函数指令流 |
++
++## Opcode
++
++Opcode 占 1 字节。表中的 `u16` 操作数使用大端字节序，`u8` 操作数直接占一个字节。
++
++| 编号 | 名称 | 操作数 |
++| ---: | --- | --- |
++| 1 | `OpConstant` | 常量索引 `u16` |
++| 2 | `OpAdd` | 无 |
++| 3 | `OpPop` | 无 |
++| 4 | `OpSub` | 无 |
++| 5 | `OpMul` | 无 |
++| 6 | `OpDiv` | 无 |
++| 7 | `OpNeg` | 无 |
++| 8 | `OpTrue` | 无 |
++| 9 | `OpFalse` | 无 |
++| 10 | `OpNot` | 无 |
++| 11 | `OpEqual` | 无 |
++| 12 | `OpNotEqual` | 无 |
++| 13 | `OpLess` | 无 |
++| 14 | `OpLessEqual` | 无 |
++| 15 | `OpGreater` | 无 |
++| 16 | `OpGreaterEqual` | 无 |
++| 17 | `OpJump` | 目标字节偏移 `u16` |
++| 18 | `OpJumpIfFalse` | 目标字节偏移 `u16` |
++| 19 | `OpSetGlobal` | 全局槽位 `u16` |
++| 20 | `OpGetGlobal` | 全局槽位 `u16` |
++| 21 | `OpNil` | 无 |
++| 22 | `OpChant` | 无 |
++| 23 | `OpSetLocal` | 局部槽位 `u16` |
++| 24 | `OpGetLocal` | 局部槽位 `u16` |
++| 25 | `OpCall` | FunctionID `u16` |
++| 26 | `OpReturn` | 无 |
++| 27 | `OpReturnValue` | 无 |
++| 28 | `OpIntToFloat` | 无，Mochi v4 起允许 |
++| 29 | `OpFloatToInt` | 无，Mochi v4 起允许 |
++| 30 | `OpArray` | 元素数量 `u16`，Mochi v5 起允许 |
++| 31 | `OpIndex` | 无，Mochi v5 起允许 |
++| 32 | `OpLen` | 无，Mochi v6 起允许 |
++| 33 | `OpSetIndex` | 无，Mochi v6 起允许 |
++| 34 | `OpIsNil` | 无，Mochi v7 起允许 |
++| 35 | `OpSetNullableIndex` | 无，Mochi v7 起允许 |
++| 36 | `OpStruct` | 字段数量 `u16`，Mochi v8 起允许 |
++| 37 | `OpGetField` | 字段索引 `u16`，Mochi v8 起允许 |
++| 38 | `OpEnum` | 变体编号 `u16`、关联值数量 `u16`，Mochi v8 起允许 |
++| 39 | `OpEnumTag` | 无，Mochi v8 起允许 |
++| 40 | `OpGetEnumValue` | 关联值索引 `u16`，Mochi v8 起允许 |
++| 41 | `OpMap` | 无，Mochi v8 起允许 |
++| 42 | `OpMapGet` | 无，Mochi v8 起允许 |
++| 43 | `OpMapSet` | 无，Mochi v8 起允许 |
++| 44 | `OpFunction` | FunctionID `u16`，Mochi v8 起允许 |
++| 45 | `OpCallValue` | 实参数量 `u16`，Mochi v8 起允许 |
++| 46 | `OpClosure` | FunctionID `u16`，Mochi v9 起允许 |
++| 47 | `OpGetUpvalue` | Upvalue 索引 `u16`，Mochi v9 起允许 |
++| 48 | `OpSetUpvalue` | Upvalue 索引 `u16`，Mochi v9 起允许 |
++| 49 | `OpDefineLocal` | 局部槽位 `u16`，Mochi v9 起允许 |
++| 50 | `OpIntToFloat32` | 无，Mochi v10 起允许 |
++| 51 | `OpFloat32ToInt` | 无，Mochi v10 起允许 |
++| 52 | `OpFloat32ToFloat64` | 无，Mochi v10 起允许 |
++| 53 | `OpFloat64ToFloat32` | 无，Mochi v10 起允许 |
++| 54 | `OpMath` | 原语编号 `u8`、实参数量 `u8`，Mochi v10 起允许 |
++| 55 | `OpIntegerConvert` | 目标整数类型编号 `u8`，Mochi v11 起允许 |
++| 56 | `OpArrayTyped` | 元素数量 `u16`、元素描述符 `u8`，Mochi v12 起允许 |
++| 57 | `OpArrayMake` | 元素描述符 `u8`，Mochi v12 起允许 |
++| 58 | `OpArrayWithCapacity` | 元素描述符 `u8`，Mochi v12 起允许 |
++| 59 | `OpArrayPush` | 无，Mochi v12 起允许 |
++| 60 | `OpArrayCapacity` | 无，Mochi v12 起允许 |
++| 61 | `OpArrayReserve` | 无，Mochi v12 起允许 |
++| 62 | `OpArrayClone` | 无，Mochi v12 起允许 |
++| 63 | `OpArrayTruncate` | 无，Mochi v13 起允许 |
++| 64 | `OpArrayAppendAll` | 无，Mochi v13 起允许 |
++| 65 | `OpDataConvert` | 数据转换编号 `u8`，Mochi v14 起允许 |
++
++Opcode 编号是 v1/v2 兼容面的一部分。未知 Opcode、截断操作数和跳入操作数字节的目标都会被拒绝。
++
++## 验证限制
++
++| 项目 | 上限 |
++| --- | ---: |
++| 文件 | 64 MiB |
++| 常量 | 65,536 |
++| 全局槽位 | 65,536 |
++| 单个字符串 | 16 MiB |
++| 主指令或单个函数指令 | 16 MiB |
++| 函数 | 65,536 |
++| 函数名称 | 65,535 字节 |
++| 单个函数的参数或局部槽位 | 65,536 |
++
++解码器还会检查 UTF-8、索引范围、函数元数据、返回指令种类和跳转边界。文件末尾不允许额外数据。VM 会继续检查运行时类型、Value Stack、局部槽位初始化、调用深度和指令预算。
++
++## 兼容性
++
++- v1 文件没有函数表，只能表达主指令流。
++- v2 保留完整的 v1 前缀，并在末尾增加函数表。
++- v3 只新增常量标签 `3`，函数表与 v2 一致。v1/v2 解码严格拒绝该标签。
++- v4 只新增 Opcode 28 和 29，二进制布局与 v3 一致。v1/v2/v3 解码严格拒绝这两个 Opcode。
++- v5 只新增 Opcode 30 和 31，二进制布局与 v4 一致。v1 至 v4 解码严格拒绝这两个 Opcode。
++- v6 只新增 Opcode 32 和 33，二进制布局与 v5 一致。v1 至 v5 解码严格拒绝这两个 Opcode。
++- v7 只新增 Opcode 34 和 35，二进制布局与 v6 一致。v1 至 v6 解码严格拒绝这两个 Opcode。
++- v8 只追加 Opcode 36 至 45，二进制布局与 v7 一致。v1 至 v7 解码严格拒绝这些 Opcode。
++- v9 在函数项中加入闭包捕获元数据，并追加 Opcode 46 至 49。
++- v10 新增 binary32 常量标签 `4`，并追加 Opcode 50 至 54。旧版本严格拒绝这些标签和指令。
++- v11 增加固定宽度整数常量标签与 `OpIntegerConvert`。
++- v12 增加 Opcode 56 至 62，用于通用动态数组操作。
++- v13 增加 Opcode 63 和 64，用于数组截断与批量追加。
++- v14 增加 `OpDataConvert`。当前只允许 `string` 与紧凑 `[]uint8` 的复制转换。
++- 不使用新能力的既有程序保持原二进制语义；解码器继续接受合法 v1 至 v13。
++- 格式没有校验和或签名。加载不可信文件时必须经过 `mochi.Decode`，不能绕过验证直接执行原始字节。
++
++后续格式若需要不兼容变更，应使用新的版本号，不能改变已有字段或 Opcode 编号。
++
++
++## 执行系统与验证范围
++
++Go VM 对解码后的字节码运行共享 Value Stack 与调用帧；Mochi 容器不是 ARM64 可执行文件。`build → exec` 可验证序列化后执行行为，`disasm` 列出字节码结构。相关源码为 `internal/mochi/mochi.go`、`validate.go`、`internal/code/code.go` 与 `internal/vm/vm.go`。
++
++本轮验证器为全部普通成功 fixtures 执行 check、run、build、exec、disasm，逐字节比较 run/exec 输出，并记录实际头部版本；对含字符串复制转换的例子断言 v14。完整限制与来源见 [报告](/docs/v1.0/tooling/verification)。
++
++Go VM 的对象生命周期由 Go 宿主管理；本标签没有 Native 精确 GC 实现，不引入后续版本的资源上限或验收结论，见 [GC](/docs/v1.0/internals/gc)。
+--- /dev/null
++++ b/content/docs/v1.0/internals/native-aot.mdx
+@@ -0,0 +1,18 @@
++---
++title: V1 原生执行支持边界
++description: 正式标签只有本页能证明的 VM 路径，不倒写后续 AOT 功能。
++---
++
++V1.0 Stable 固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106` 不含 `cmd/mochi-aot`、`internal/aot`、`kiso/aot` 或 `kiso/encoding/mochi`。
++
++## 本版执行方式
++
++`mio run` 在 Go VM 内执行字节码；`mio build` 把字节码保存为 Mochi 文件，仍需 `mio exec` 加载和运行。Mochi 容器不是 ARM64 Mach-O，也不是独立原生可执行文件。
++
++## 版本边界
++
++Go AOT、纯 Mio lowering 和原生 GC 是后续开发快照中的实现。源码目录、阶段记录和测试均须查对应版本，不能因为后续开发仓库已有这些文件就声称 V1 已提供它们。M17e 尚未验收，M18 尚未启动；本页不发布未来功能承诺。
++
++本轮按精确提交取归档并验证 VM 程序，未执行原生程序或自举。源文件存在与否也保存在完整归档清单；没有把不在此版本中的命令列为未完成安装步骤。
++
++[Mochi 格式与 VM](/docs/v1.0/internals/mochi) · [VM 内存管理](/docs/v1.0/internals/gc) · [验证说明](/docs/v1.0/tooling/verification)。
+--- /dev/null
++++ b/content/docs/v1.0/kiso/array.mdx
+@@ -0,0 +1,135 @@
++---
++title: kiso/array
++description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++通用动态数组，遵守共享引用语义。VM 的数组分配有资源上限，容量不是无限承诺。普通源码不能直接调用私有 intrinsic。
++
++支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
++
++## 函数索引
++
++[make](#make) · [with_capacity](#with_capacity) · [push](#push) · [capacity](#capacity) · [reserve](#reserve) · [clone](#clone) · [truncate](#truncate) · [append_all](#append_all)
++
++## 函数
++
++签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
++
++### make
++
++```text
++koukai waza make<T>(length: int64, initial: T) -> []T
++```
++
++参数：`length`：初始元素数量；`initial`：每个元素的初始值；引用值仍共享。
++
++`length` 个元素，均初始化为 `initial`。若 initial 含引用，各元素仍共享该引用。负长度、容量溢出或资源不足报运行时错误。
++
++### with_capacity
++
++```text
++koukai waza with_capacity<T>(capacity: int64) -> []T
++```
++
++参数：`capacity`：预留容量；字节容器按字节，普通数组按元素。
++
++为元素类型 T 创建长度 0、预留 capacity 的数组；类型不能推断时用 `[T]`。负容量或超限报错。
++
++### push
++
++```text
++koukai waza push<T>(values: []T, value: T) -> unit
++```
++
++参数：`values`：待操作数组；是否修改见本函数说明；`value`：本次操作的输入值，返回语义及限制如下。
++
++向 values 原地追加 value，返回 unit；别名可见，必要时扩容。资源不足报错。
++
++### capacity
++
++```text
++koukai waza capacity<T>(values: []T) -> int64
++```
++
++参数：`values`：待操作数组；是否修改见本函数说明。
++
++返回 values 已分配元素容量，不是长度。
++
++### reserve
++
++```text
++koukai waza reserve<T>(values: []T, additional: int64) -> unit
++```
++
++参数：`values`：待操作数组；是否修改见本函数说明；`additional`：额外需要容纳的元素数量。
++
++确保可额外容纳 additional 个元素，不改变长度与已有内容；additional 不能为负，溢出或超限报错。
++
++### clone
++
++```text
++koukai waza clone<T>(values: []T) -> []T
++```
++
++参数：`values`：待操作数组；是否修改见本函数说明。
++
++返回独立后备数组，浅复制元素；嵌套引用仍共享，分配受资源上限约束。
++
++### truncate
++
++```text
++koukai waza truncate<T>(values: []T, new_length: int64) -> unit
++```
++
++参数：`values`：待操作数组；是否修改见本函数说明；`new_length`：截断后的元素数量。
++
++将共享长度缩到 new_length，保留容量；必须在 0 与原长度之间，否则报错。
++
++### append_all
++
++```text
++koukai waza append_all<T>(destination: []T, source: []T) -> unit
++```
++
++参数：`destination`：接收写入的现有目标数组；`source`：读取或追加的来源数组。
++
++向 destination 批量追加 source 当前元素；支持自追加，按追加前长度处理，溢出或资源不足报错。
++
++## 完整示例
++
++```mio fixture="arrays"
++yobu "kiso/array";
++kaku original = [1, 2];
++kaku alias = original;
++alias[0] = 9;
++array.push(alias, 3);
++chant(original[0]);
++chant(len(original));
++kaku copied = array.clone(original);
++copied[0] = 7;
++chant(original[0]);
++array.append_all(original, original);
++chant(len(original));
++array.truncate(alias, 1);
++chant(len(original));
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++9
++3
++9
++6
++1
++```
++
++## 源码
++
++- `bunko/kiso/array/array.mio`
++
++公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
++
++精确来源：[bunko/kiso/array/array.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/array/array.mio)。
+--- /dev/null
++++ b/content/docs/v1.0/kiso/bytes.mdx
+@@ -0,0 +1,241 @@
++---
++title: kiso/bytes
++description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++紧凑 []uint8 的字节操作与 ByteBuffer。ByteBuffer 值复制共享 data；buffer_bytes / buffer_clone 提供独立副本。公开字段当前无私有保护。
++
++支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
++
++## 公开类型与常量
++
++以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
++
++```text
++koukai kata ByteBuffer { data: []uint8; }
++```
++
++## 函数索引
++
++[equal](#equal) · [compare](#compare) · [index](#index) · [contains](#contains) · [has_prefix](#has_prefix) · [has_suffix](#has_suffix) · [copy](#copy) · [fill](#fill) · [clone](#clone) · [new_buffer](#new_buffer) · [buffer_with_capacity](#buffer_with_capacity) · [write_byte](#write_byte) · [write](#write) · [buffer_len](#buffer_len) · [buffer_capacity](#buffer_capacity) · [reset](#reset) · [buffer_clone](#buffer_clone) · [buffer_bytes](#buffer_bytes)
++
++## 函数
++
++签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
++
++### equal
++
++```text
++koukai waza equal(left: []uint8, right: []uint8) -> bool
++```
++
++参数：`left`：左侧输入；`right`：右侧输入。
++
++比较 left/right 字节内容与长度，返回是否相等。
++
++### compare
++
++```text
++koukai waza compare(left: []uint8, right: []uint8) -> int64
++```
++
++参数：`left`：左侧输入；`right`：右侧输入。
++
++按无符号字节字典序比较 left/right，返回 -1、0、1。
++
++### index
++
++```text
++koukai waza index(values: []uint8, target: uint8) -> int64
++```
++
++参数：`values`：待操作数组；是否修改见本函数说明；`target`：要查找的字节或分支目标，类型见签名。
++
++返回 values 中 target 第一次出现的字节索引；缺失返回 -1。
++
++### contains
++
++```text
++koukai waza contains(values: []uint8, target: uint8) -> bool
++```
++
++参数：`values`：待操作数组；是否修改见本函数说明；`target`：要查找的字节或分支目标，类型见签名。
++
++返回 values 是否含 target 字节。
++
++### has_prefix
++
++```text
++koukai waza has_prefix(values: []uint8, prefix: []uint8) -> bool
++```
++
++参数：`values`：待操作数组；是否修改见本函数说明；`prefix`：待匹配前缀。
++
++返回 values 是否以 prefix 开头；空 prefix 为真。
++
++### has_suffix
++
++```text
++koukai waza has_suffix(values: []uint8, suffix: []uint8) -> bool
++```
++
++参数：`values`：待操作数组；是否修改见本函数说明；`suffix`：待匹配后缀。
++
++返回 values 是否以 suffix 结尾；空 suffix 为真。
++
++### copy
++
++```text
++koukai waza copy(destination: []uint8, source: []uint8) -> int64
++```
++
++参数：`destination`：接收写入的现有目标数组；`source`：读取或追加的来源数组。
++
++向 destination 现有元素复制 source，返回两者长度的较小值；不扩容。
++
++### fill
++
++```text
++koukai waza fill(values: []uint8, value: uint8) -> unit
++```
++
++参数：`values`：待操作数组；是否修改见本函数说明；`value`：本次操作的输入值，返回语义及限制如下。
++
++将 values 的全部现有元素写为 value，返回 unit。
++
++### clone
++
++```text
++koukai waza clone(values: []uint8) -> []uint8
++```
++
++参数：`values`：待操作数组；是否修改见本函数说明。
++
++浅复制字节数组，返回独立存储。
++
++### new_buffer
++
++```text
++koukai waza new_buffer() -> ByteBuffer
++```
++
++参数：无。
++
++创建长度为 0 的 ByteBuffer。
++
++### buffer_with_capacity
++
++```text
++koukai waza buffer_with_capacity(capacity: int64) -> ByteBuffer
++```
++
++参数：`capacity`：预留容量；字节容器按字节，普通数组按元素。
++
++创建长度 0 并预留 capacity 的 ByteBuffer；负容量或资源不足报错。
++
++### write_byte
++
++```text
++koukai waza write_byte(buffer: ByteBuffer, value: uint8) -> unit
++```
++
++参数：`buffer`：待操作共享字节缓冲区；`value`：本次操作的输入值，返回语义及限制如下。
++
++向 buffer 共享 data 追加 value，返回 unit。
++
++### write
++
++```text
++koukai waza write(buffer: ByteBuffer, source: []uint8) -> int64
++```
++
++参数：`buffer`：待操作共享字节缓冲区；`source`：读取或追加的来源数组。
++
++将 source 追加到 buffer，返回 source 的原长度。
++
++### buffer_len
++
++```text
++koukai waza buffer_len(buffer: ByteBuffer) -> int64
++```
++
++参数：`buffer`：待操作共享字节缓冲区。
++
++返回 buffer.data 长度。
++
++### buffer_capacity
++
++```text
++koukai waza buffer_capacity(buffer: ByteBuffer) -> int64
++```
++
++参数：`buffer`：待操作共享字节缓冲区。
++
++返回 buffer.data 容量。
++
++### reset
++
++```text
++koukai waza reset(buffer: ByteBuffer) -> unit
++```
++
++参数：`buffer`：待操作共享字节缓冲区。
++
++将 buffer 长度归零，保留容量；别名可见。
++
++### buffer_clone
++
++```text
++koukai waza buffer_clone(buffer: ByteBuffer) -> ByteBuffer
++```
++
++参数：`buffer`：待操作共享字节缓冲区。
++
++返回具有独立字节存储的 ByteBuffer。
++
++### buffer_bytes
++
++```text
++koukai waza buffer_bytes(buffer: ByteBuffer) -> []uint8
++```
++
++参数：`buffer`：待操作共享字节缓冲区。
++
++返回 buffer 当前内容的独立数组副本。
++
++## 完整示例
++
++```mio fixture="bytes"
++yobu "kiso/bytes";
++kaku buffer = bytes.new_buffer();
++bytes.write_byte(buffer, uint8(65));
++kaku source: []uint8 = [66, 67];
++chant(bytes.write(buffer, source));
++chant(bytes.buffer_len(buffer));
++kaku copied = bytes.buffer_bytes(buffer);
++copied[0] = 90;
++chant(buffer.data[0]);
++chant(bytes.compare(source, source));
++bytes.reset(buffer);
++chant(bytes.buffer_len(buffer));
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++2
++3
++65
++0
++0
++```
++
++## 源码
++
++- `bunko/kiso/bytes/bytes.mio`
++
++公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
++
++精确来源：[bunko/kiso/bytes/bytes.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/bytes/bytes.mio)。
+--- /dev/null
++++ b/content/docs/v1.0/kiso/convert.mdx
+@@ -0,0 +1,150 @@
++---
++title: kiso/convert
++description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++严格 ASCII 文本转换，不清理空白。浮点接受十进制、小数、指数及 NaN、Infinity、+Infinity、-Infinity，使用 roundTiesToEven，允许下溢到带符号零。
++
++支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
++
++## 函数索引
++
++[parse_int](#parse_int) · [parse_uint](#parse_uint) · [format_int](#format_int) · [format_uint](#format_uint) · [parse_bool](#parse_bool) · [format_bool](#format_bool) · [parse_float64](#parse_float64) · [parse_float32](#parse_float32) · [format_float64](#format_float64) · [format_float32](#format_float32)
++
++## 函数
++
++签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
++
++### parse_int
++
++```text
++koukai waza parse_int(value: string) -> int64?
++```
++
++参数：`value`：待解析的 ASCII 文本，不预先裁剪空白。
++
++解析 value 的 ASCII 十进制 int64，可带 + 或 -；空白、非法字符或越界返回 mu。
++
++### parse_uint
++
++```text
++koukai waza parse_uint(value: string) -> uint32?
++```
++
++参数：`value`：待解析的 ASCII 文本，不预先裁剪空白。
++
++解析 value 的 ASCII 十进制 uint32，可带 +，拒绝 -；非法或越界返回 mu。
++
++### format_int
++
++```text
++koukai waza format_int(value: int64) -> string
++```
++
++参数：`value`：需要格式化为文本的数值或布尔值。
++
++返回 value 的十进制文本，覆盖 MinInt64。
++
++### format_uint
++
++```text
++koukai waza format_uint(value: uint32) -> string
++```
++
++参数：`value`：需要格式化为文本的数值或布尔值。
++
++返回 value 的无符号十进制文本。
++
++### parse_bool
++
++```text
++koukai waza parse_bool(value: string) -> bool?
++```
++
++参数：`value`：待解析的 ASCII 文本，不预先裁剪空白。
++
++只接受 value 为 hai 或 iie，其他文本返回 mu。
++
++### format_bool
++
++```text
++koukai waza format_bool(value: bool) -> string
++```
++
++参数：`value`：需要格式化为文本的数值或布尔值。
++
++返回 hai 或 iie。
++
++### parse_float64
++
++```text
++koukai waza parse_float64(value: string) -> float64?
++```
++
++参数：`value`：待解析的 ASCII 文本，不预先裁剪空白。
++
++将 value 舍入为 binary64；非法、上溢或输入超过 10000 字节返回 mu。
++
++### parse_float32
++
++```text
++koukai waza parse_float32(value: string) -> float32?
++```
++
++参数：`value`：待解析的 ASCII 文本，不预先裁剪空白。
++
++直接将 value 舍入为 binary32；非法、上溢或输入超过 10000 字节返回 mu。
++
++### format_float64
++
++```text
++koukai waza format_float64(value: float64) -> string
++```
++
++参数：`value`：需要格式化为文本的数值或布尔值。
++
++返回 value 最短往返十进制，保留负零文本；NaN 文本不保留 payload。
++
++### format_float32
++
++```text
++koukai waza format_float32(value: float32) -> string
++```
++
++参数：`value`：需要格式化为文本的数值或布尔值。
++
++返回 value 最短往返十进制，保留负零文本；NaN 文本不保留 payload。
++
++## 完整示例
++
++```mio fixture="convert"
++yobu "kiso/convert";
++kaku number = convert.parse_int("-42");
++moshi (number != mu) { chant(number); }
++chant(convert.parse_uint("-1") == mu);
++chant(convert.parse_bool("true") == mu);
++chant(convert.format_bool(hai));
++kaku value = convert.parse_float32("1.25");
++moshi (value != mu) { chant(convert.format_float32(value)); }
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++-42
++hai
++hai
++hai
++1.25
++```
++
++## 源码
++
++- `bunko/kiso/convert/convert.mio`
++- `bunko/kiso/convert/float.mio`
++
++公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
++
++精确来源：[bunko/kiso/convert/convert.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/convert/convert.mio) · [bunko/kiso/convert/float.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/convert/float.mio)。
+--- /dev/null
++++ b/content/docs/v1.0/kiso/encoding-binary.mdx
+@@ -0,0 +1,363 @@
++---
++title: kiso/encoding/binary
++description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++固定宽度大小端与 LEB128 编码；使用 []uint8。本版本没有游标 Reader、Writer 和 U64。失败先检查 error；结果 value 可能是占位值，不能忽略错误。
++
++支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
++
++## 公开类型与常量
++
++以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
++
++```text
++koukai sentaku BinaryError {
++    InvalidOffset;
++    InsufficientData;
++    Overflow;
++    MalformedVarint;
++}
++
++koukai kata U8Result { value: uint8; error: BinaryError?; }
++
++koukai kata U16Result { value: uint16; error: BinaryError?; }
++
++koukai kata U32Result { value: uint32; error: BinaryError?; }
++
++koukai kata I8Result { value: int8; error: BinaryError?; }
++
++koukai kata I16Result { value: int16; error: BinaryError?; }
++
++koukai kata I32Result { value: int32; error: BinaryError?; }
++
++koukai kata I64Result { value: int64; error: BinaryError?; }
++
++koukai kata BytesResult { data: []uint8; error: BinaryError?; }
++
++koukai kata VarU32Result { value: uint32; count: int64; error: BinaryError?; }
++
++koukai kata VarI64Result { value: int64; count: int64; error: BinaryError?; }
++```
++
++## 函数索引
++
++[read_u8](#read_u8) · [read_u16_le](#read_u16_le) · [read_u16_be](#read_u16_be) · [read_u32_le](#read_u32_le) · [read_u32_be](#read_u32_be) · [read_i8](#read_i8) · [read_i16_le](#read_i16_le) · [read_i16_be](#read_i16_be) · [read_i32_le](#read_i32_le) · [read_i32_be](#read_i32_be) · [read_i64_le](#read_i64_le) · [read_i64_be](#read_i64_be) · [write_u8](#write_u8) · [write_u16_le](#write_u16_le) · [write_u16_be](#write_u16_be) · [write_u32_le](#write_u32_le) · [write_u32_be](#write_u32_be) · [write_i8](#write_i8) · [write_i16_le](#write_i16_le) · [write_i16_be](#write_i16_be) · [write_i32_le](#write_i32_le) · [write_i32_be](#write_i32_be) · [write_i64_le](#write_i64_le) · [write_i64_be](#write_i64_be) · [write_var_u32](#write_var_u32) · [read_var_u32](#read_var_u32) · [write_var_i64](#write_var_i64) · [read_var_i64](#read_var_i64)
++
++## 函数
++
++签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
++
++### read_u8
++
++```text
++koukai waza read_u8(data: []uint8, offset: int64) -> U8Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### read_u16_le
++
++```text
++koukai waza read_u16_le(data: []uint8, offset: int64) -> U16Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### read_u16_be
++
++```text
++koukai waza read_u16_be(data: []uint8, offset: int64) -> U16Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### read_u32_le
++
++```text
++koukai waza read_u32_le(data: []uint8, offset: int64) -> U32Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### read_u32_be
++
++```text
++koukai waza read_u32_be(data: []uint8, offset: int64) -> U32Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### read_i8
++
++```text
++koukai waza read_i8(data: []uint8, offset: int64) -> I8Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### read_i16_le
++
++```text
++koukai waza read_i16_le(data: []uint8, offset: int64) -> I16Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### read_i16_be
++
++```text
++koukai waza read_i16_be(data: []uint8, offset: int64) -> I16Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### read_i32_le
++
++```text
++koukai waza read_i32_le(data: []uint8, offset: int64) -> I32Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### read_i32_be
++
++```text
++koukai waza read_i32_be(data: []uint8, offset: int64) -> I32Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### read_i64_le
++
++```text
++koukai waza read_i64_le(data: []uint8, offset: int64) -> I64Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### read_i64_be
++
++```text
++koukai waza read_i64_be(data: []uint8, offset: int64) -> I64Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
++
++### write_u8
++
++```text
++koukai waza write_u8(destination: []uint8, offset: int64, value: uint8) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_u16_le
++
++```text
++koukai waza write_u16_le(destination: []uint8, offset: int64, value: uint16) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_u16_be
++
++```text
++koukai waza write_u16_be(destination: []uint8, offset: int64, value: uint16) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_u32_le
++
++```text
++koukai waza write_u32_le(destination: []uint8, offset: int64, value: uint32) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_u32_be
++
++```text
++koukai waza write_u32_be(destination: []uint8, offset: int64, value: uint32) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_i8
++
++```text
++koukai waza write_i8(destination: []uint8, offset: int64, value: int8) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_i16_le
++
++```text
++koukai waza write_i16_le(destination: []uint8, offset: int64, value: int16) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_i16_be
++
++```text
++koukai waza write_i16_be(destination: []uint8, offset: int64, value: int16) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_i32_le
++
++```text
++koukai waza write_i32_le(destination: []uint8, offset: int64, value: int32) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_i32_be
++
++```text
++koukai waza write_i32_be(destination: []uint8, offset: int64, value: int32) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_i64_le
++
++```text
++koukai waza write_i64_le(destination: []uint8, offset: int64, value: int64) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_i64_be
++
++```text
++koukai waza write_i64_be(destination: []uint8, offset: int64, value: int64) -> BinaryError?
++```
++
++参数：`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`value`：本次操作的输入值，返回语义及限制如下。
++
++把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
++
++### write_var_u32
++
++```text
++koukai waza write_var_u32(value: uint32) -> BytesResult
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++将 value 编码为新 LEB128 数组并包装为 BytesResult（data 为编码、error=mu）；u32 为无符号、i64 为 DWARF 有符号，不是 ZigZag。
++
++### read_var_u32
++
++```text
++koukai waza read_var_u32(data: []uint8, offset: int64) -> VarU32Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 解码规范 LEB128，返回 value、实际 count、error。u32 最多 5 字节，i64 最多 10 字节；拒绝截断、溢出、超长与非规范编码。
++
++### write_var_i64
++
++```text
++koukai waza write_var_i64(value: int64) -> BytesResult
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++将 value 编码为新 LEB128 数组并包装为 BytesResult（data 为编码、error=mu）；u32 为无符号、i64 为 DWARF 有符号，不是 ZigZag。
++
++### read_var_i64
++
++```text
++koukai waza read_var_i64(data: []uint8, offset: int64) -> VarI64Result
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的 offset 解码规范 LEB128，返回 value、实际 count、error。u32 最多 5 字节，i64 最多 10 字节；拒绝截断、溢出、超长与非规范编码。
++
++## 完整示例
++
++```mio title="binary.mio"
++yobu "kiso/array";
++yobu "kiso/encoding/binary";
++kaku data = array.make[uint8](8, uint8(0));
++kaku error = binary.write_i64_be(data, 0, -42);
++chant(error == mu);
++kaku result = binary.read_i64_be(data, 0);
++chant(result.value);
++kaku bad = binary.read_u32_le(data, 6);
++chant(bad.error != mu);
++```
++
++预期 stdout：
++
++```text title="output"
++hai
++-42
++hai
++```
++
++读取 Result 时应先判断 error；本例已知写入成功，再读同一有效范围。V1 只含本页列出的固定宽度和变长编码，不含 V2 的流式 Reader/Writer。
++
++## 源码
++
++- `bunko/kiso/encoding/binary/binary.mio`
++
++公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
++
++精确来源：[bunko/kiso/encoding/binary/binary.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/encoding/binary/binary.mio)。
+--- /dev/null
++++ b/content/docs/v1.0/kiso/fs.mdx
+@@ -0,0 +1,254 @@
++---
++title: kiso/fs
++description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++同步宿主文件系统 API。CLI 默认注册 NativeFS，权限与进程相同。File 使用受信任 resource；错误通过结果字段返回，不使用异常。流偏移单位均为字节。
++
++支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
++
++## 公开类型与常量
++
++以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
++
++```text
++koukai sentaku FsError {
++    NotFound(string);
++    PermissionDenied(string);
++    Closed(string);
++    InvalidArgument(string);
++    NoSpace(string);
++    InvalidPath(string);
++    IOFailure(string);
++}
++
++koukai kata File { handle: resource; }
++
++koukai kata FileResult { file: File?; error: FsError?; }
++
++koukai kata ReadAllResult { data: []uint8; error: FsError?; }
++
++koukai kata UnitResult { error: FsError?; }
++
++koukai kata StatResult { exists: bool; is_file: bool; is_dir: bool; error: FsError?; }
++
++koukai kata DirEntry { name: string; is_file: bool; is_dir: bool; }
++
++koukai kata DirResult { entries: []DirEntry; error: FsError?; }
++```
++
++## 函数索引
++
++[open_read](#open_read) · [open_write](#open_write) · [open_append](#open_append) · [read](#read) · [write](#write) · [close](#close) · [reader](#reader) · [writer](#writer) · [read_all](#read_all) · [write_all](#write_all) · [stat](#stat) · [exists](#exists) · [is_file](#is_file) · [is_dir](#is_dir) · [create_dir](#create_dir) · [read_dir](#read_dir)
++
++## 函数
++
++签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
++
++### open_read
++
++```text
++koukai waza open_read(path: string) -> FileResult
++```
++
++参数：`path`：宿主文件系统路径字符串。
++
++按 path 只读打开，返回 FileResult；失败 file=mu。
++
++### open_write
++
++```text
++koukai waza open_write(path: string) -> FileResult
++```
++
++参数：`path`：宿主文件系统路径字符串。
++
++按 path 创建或截断写入，返回 FileResult。
++
++### open_append
++
++```text
++koukai waza open_append(path: string) -> FileResult
++```
++
++参数：`path`：宿主文件系统路径字符串。
++
++按 path 创建或追加写入，返回 FileResult。
++
++### read
++
++```text
++koukai waza read(file: File, destination: []uint8, offset: int64, length: int64) -> io.ReadResult
++```
++
++参数：`file`：由本包成功打开且仍有效的 File 句柄；`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`length`：本次读写的字节数量。
++
++读取到 destination 的 offset/length 区间，返回 io.ReadResult；非法区间返回 InvalidArgument，关闭句柄返回 Closed，其他宿主错误映射为 Other(message)。
++
++### write
++
++```text
++koukai waza write(file: File, source: []uint8, offset: int64, length: int64) -> io.WriteResult
++```
++
++参数：`file`：由本包成功打开且仍有效的 File 句柄；`source`：读取或追加的来源数组；`offset`：从起点计数的字节偏移，起点为 0；`length`：本次读写的字节数量。
++
++将 source 的 offset/length 区间写入 file，返回 io.WriteResult；允许部分写，错误映射同 read。
++
++### close
++
++```text
++koukai waza close(file: File) -> UnitResult
++```
++
++参数：`file`：由本包成功打开且仍有效的 File 句柄。
++
++关闭 file，返回 UnitResult；复制的 File 共享关闭状态，重复关闭返回 Closed。
++
++### reader
++
++```text
++koukai waza reader(file: File) -> io.Reader
++```
++
++参数：`file`：由本包成功打开且仍有效的 File 句柄。
++
++将 file 适配为 io.Reader，不转移/自动关闭句柄。
++
++### writer
++
++```text
++koukai waza writer(file: File) -> io.Writer
++```
++
++参数：`file`：由本包成功打开且仍有效的 File 句柄。
++
++将 file 适配为 io.Writer，不转移/自动关闭句柄。
++
++### read_all
++
++```text
++koukai waza read_all(path: string) -> ReadAllResult
++```
++
++参数：`path`：宿主文件系统路径字符串。
++
++按 path 打开、32768 字节分块读并关闭，返回 data/error；读取错误可带已读前缀，成功后关闭错误也返回。
++
++### write_all
++
++```text
++koukai waza write_all(path: string, data: []uint8) -> UnitResult
++```
++
++参数：`path`：宿主文件系统路径字符串；`data`：输入字节数组；是否复制见返回语义。
++
++按 path 创建或截断，完整写入 data 并关闭；写入错误优先，否则返回关闭结果。
++
++### stat
++
++```text
++koukai waza stat(path: string) -> StatResult
++```
++
++参数：`path`：宿主文件系统路径字符串。
++
++返回 path 的 exists/is_file/is_dir；NotFound 转为 exists=iie 且 error=mu，其他错误保留。
++
++### exists
++
++```text
++koukai waza exists(path: string) -> bool
++```
++
++参数：`path`：宿主文件系统路径字符串。
++
++返回 stat(path).exists；便捷 bool 会丢弃详细错误，需区分失败时用 stat。
++
++### is_file
++
++```text
++koukai waza is_file(path: string) -> bool
++```
++
++参数：`path`：宿主文件系统路径字符串。
++
++返回 stat(path).is_file；详细错误需用 stat。
++
++### is_dir
++
++```text
++koukai waza is_dir(path: string) -> bool
++```
++
++参数：`path`：宿主文件系统路径字符串。
++
++返回 stat(path).is_dir；详细错误需用 stat。
++
++### create_dir
++
++```text
++koukai waza create_dir(path: string) -> UnitResult
++```
++
++参数：`path`：宿主文件系统路径字符串。
++
++为 path 创建单级目录，返回 UnitResult；不递归创建父目录。
++
++### read_dir
++
++```text
++koukai waza read_dir(path: string) -> DirResult
++```
++
++参数：`path`：宿主文件系统路径字符串。
++
++返回 path 目录项数组与错误，使用资源迭代器并关闭；不要依赖未承诺的排序。
++
++## 完整示例
++
++此程序会创建或截断当前目录的 `sample.txt`。在新的空练习目录保存为 `main.mio`，设置 `MIO_BUNKO` 指向本版标准库，并使用本版 CLI 的绝对路径执行 `check main.mio` 和 `run main.mio`。验证器也在独立临时目录执行，避免与已有文件混用。
++
++
++```mio fixture="fs"
++yobu "kiso/fs";
++yobu "kiso/string";
++kaku written = fs.write_all("sample.txt", string.to_bytes("Mio"));
++chant(written.error == mu);
++kaku loaded = fs.read_all("sample.txt");
++chant(loaded.error == mu);
++chant(len(loaded.data));
++chant(fs.is_file("sample.txt"));
++kaku opened = fs.open_read("sample.txt");
++kaku file = opened.file;
++moshi (file != mu) {
++    kaku active = file;
++    kaku first = fs.close(active);
++    chant(first.error == mu);
++    kaku second = fs.close(active);
++    chant(second.error != mu);
++}
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++hai
++hai
++3
++hai
++hai
++hai
++```
++
++文件例子以验证器的独立临时工作目录执行，创建 sample.txt，不会覆盖用户文件。fs 不提供本页未列出的递归建目录、删除、监听或异步 API。
++
++## 源码
++
++- `bunko/kiso/fs/fs.mio`
++
++公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
++
++精确来源：[bunko/kiso/fs/fs.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/fs/fs.mio)。
+--- a/content/docs/v1.0/kiso/index.mdx
++++ b/content/docs/v1.0/kiso/index.mdx
+@@ -1,11 +1,32 @@
+ ---
+-title: Kiso · 基础库
+-description: 通过 kiso/ 路径探索 Bunko 标准库。
++title: Kiso · 标准库参考
++description: 按真实导入路径查询签名、参数、返回值和错误约定。
+ ---
+ 
+-[Bunko 标准库说明](/docs/bunko) 是现有技术参考入口。Bunko 是标准库物理根目录，Kiso 对应公开的 `kiso/` 导入路径。
++本栏目固定到 **v1.0 · Stable**，提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`。Bunko 是物理 `bunko/` 根，Kiso 是公开导入路径；例如 `yobu "kiso/math";`，不要加入 `bunko/` 前缀。
+ 
+-从 [导入数学模块](/docs/v1.0/learn/modules) 开始实践。具体模块能力与限制以参考正文和核心仓库为准。
++## 包索引
+ 
++| 导入路径 | 主要用途 | 声明数 |
++| --- | --- | ---: |
++| [kiso/array](/docs/v1.0/kiso/array) | 动态数组与浅复制 | 8 |
++| [kiso/bytes](/docs/v1.0/kiso/bytes) | 字节数组与 ByteBuffer | 19 |
++| [kiso/convert](/docs/v1.0/kiso/convert) | 数值与字符串转换 | 10 |
++| [kiso/encoding/binary](/docs/v1.0/kiso/encoding-binary) | 定宽/变长二进制编码 | 39 |
++| [kiso/fs](/docs/v1.0/kiso/fs) | 宿主文件、目录与状态 | 24 |
++| [kiso/io](/docs/v1.0/kiso/io) | Reader/Writer 函数值与流复制 | 13 |
++| [kiso/math](/docs/v1.0/kiso/math) | 数值泛型、舍入及 checked 运算 | 21 |
++| [kiso/path](/docs/v1.0/kiso/path) | 纯路径操作 | 9 |
++| [kiso/string](/docs/v1.0/kiso/string) | UTF-8 字节操作与 Builder | 18 |
++| [kiso/testing](/docs/v1.0/kiso/testing) | 测试专用断言 | 2 |
++| [kiso/utf8](/docs/v1.0/kiso/utf8) | UTF-8 验证、解码、编码 | 8 |
+ 
+-> 参考边界：本页链接的旧技术正文仍是未版本化迁移资料，不构成本版本的规范或 API 签名。版本化技术参考由 Codex B 单独核验后补入。
++共 11 个包、171 条公开声明（函数、类型与常量合计）。计数来自本提交实际源码，不是宣称每条 API 的全部分支已执行。V1 没有 V2 新增的 Mochi/AOT 包，也没有 binary Reader/Writer/U64。
++
++## 如何读 API
++
++每个函数先列原始签名，再说明输入、返回、错误和存储共享。`unit` 表示没有普通返回值；`T?` 用 `mu` 表示缺失；`Error?` 返回 `mu` 通常表示成功，返回非空错误表示失败。带 `error` 的 Result 应先检查错误再读有效负载，不能把默认零值当成功结果。
++
++长度和偏移须看单位：数组按元素，字节与路径/字符串索引规则按各包说明。`clone` 的独立存储不必然意味着递归深复制。动态分配还受 VM 资源预算影响，返回错误值的 API 不保证能捕获一切资源错误。
++
++[模块教程](/docs/v1.0/learn/modules) 展示最小导入；[类型参考](/docs/v1.0/reference/types) 解释约束和可空类型；[验证说明](/docs/v1.0/tooling/verification) 列实际执行范围。
+--- /dev/null
++++ b/content/docs/v1.0/kiso/io.mdx
+@@ -0,0 +1,142 @@
++---
++title: kiso/io
++description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++同步字节流，通过 Reader/Writer 函数字段组合，不需要 trait。error=mu 表示成功；失败保留已完成 count。自定义回调必须遵守 count 范围和读写约定。
++
++支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
++
++## 公开类型与常量
++
++以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
++
++```text
++koukai sentaku IoError {
++    Closed;
++    InvalidArgument;
++    NoProgress;
++    UnexpectedEOF;
++    Other(string);
++}
++
++koukai kata ReadResult { count: int64; eof: bool; error: IoError?; }
++
++koukai kata WriteResult { count: int64; error: IoError?; }
++
++koukai kata CopyResult { count: int64; error: IoError?; }
++
++koukai kata Reader { read: ([]uint8, int64, int64) -> ReadResult; }
++
++koukai kata Writer { write: ([]uint8, int64, int64) -> WriteResult; }
++```
++
++## 函数索引
++
++[read](#read) · [write](#write) · [read_full](#read_full) · [write_all](#write_all) · [copy_stream](#copy_stream) · [reader_from_bytes](#reader_from_bytes) · [writer_to_buffer](#writer_to_buffer)
++
++## 函数
++
++签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
++
++### read
++
++```text
++koukai waza read(reader: Reader, destination: []uint8, offset: int64, length: int64) -> ReadResult
++```
++
++参数：`reader`：提供读取回调的 Reader；`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`length`：本次读写的字节数量。
++
++检查 destination 的 offset/length 后调用 reader.read；非法区间返回 InvalidArgument。count 是读取字节数，可同时 eof=hai。
++
++### write
++
++```text
++koukai waza write(writer: Writer, source: []uint8, offset: int64, length: int64) -> WriteResult
++```
++
++参数：`writer`：提供写入回调的 Writer；`source`：读取或追加的来源数组；`offset`：从起点计数的字节偏移，起点为 0；`length`：本次读写的字节数量。
++
++检查 source 的 offset/length 后调用 writer.write；非法区间返回 InvalidArgument，允许部分写入。
++
++### read_full
++
++```text
++koukai waza read_full(reader: Reader, destination: []uint8, offset: int64, length: int64) -> ReadResult
++```
++
++参数：`reader`：提供读取回调的 Reader；`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`length`：本次读写的字节数量。
++
++反复读取直到 length；保留已读取 count，提前 EOF 返回 UnexpectedEOF，无进展返回 NoProgress，非法 count 返回 InvalidArgument。长度 0 不调用 Reader，eof=iie。
++
++### write_all
++
++```text
++koukai waza write_all(writer: Writer, source: []uint8, offset: int64, length: int64) -> WriteResult
++```
++
++参数：`writer`：提供写入回调的 Writer；`source`：读取或追加的来源数组；`offset`：从起点计数的字节偏移，起点为 0；`length`：本次读写的字节数量。
++
++反复写完 source 指定区间；保留 count，无进展返回 NoProgress，非法区间/回调 count 返回 InvalidArgument；长度 0 成功。
++
++### copy_stream
++
++```text
++koukai waza copy_stream(reader: Reader, writer: Writer) -> CopyResult
++```
++
++参数：`reader`：提供读取回调的 Reader；`writer`：提供写入回调的 Writer。
++
++使用固定 32768 字节 buffer 从 reader 复制到 writer；返回已写 count 与错误，内存与执行成本受资源限制。
++
++### reader_from_bytes
++
++```text
++koukai waza reader_from_bytes(source: []uint8) -> Reader
++```
++
++参数：`source`：读取或追加的来源数组。
++
++返回共享 source 存储、独立游标的 Reader；后续外部修改可见，读取推进游标，到末尾 eof=hai。
++
++### writer_to_buffer
++
++```text
++koukai waza writer_to_buffer(buffer: bytes.ByteBuffer) -> Writer
++```
++
++参数：`buffer`：待操作共享字节缓冲区。
++
++返回将 source 指定区间追加到 buffer 的 Writer；返回追加字节数，外部 buffer 别名可见。
++
++## 完整示例
++
++```mio fixture="io"
++yobu "kiso/io";
++yobu "kiso/bytes";
++kaku source: []uint8 = [65, 66, 67];
++kaku reader = io.reader_from_bytes(source);
++kaku buffer = bytes.new_buffer();
++kaku result = io.copy_stream(reader, io.writer_to_buffer(buffer));
++chant(result.count);
++chant(result.error == mu);
++chant(bytes.equal(buffer.data, source));
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++3
++hai
++hai
++```
++
++## 源码
++
++- `bunko/kiso/io/io.mio`
++
++公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
++
++精确来源：[bunko/kiso/io/io.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/io/io.mio)。
+--- /dev/null
++++ b/content/docs/v1.0/kiso/math.mdx
+@@ -0,0 +1,236 @@
++---
++title: kiso/math
++description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++数值泛型约束见语言参考。浮点 API 同时支持 float32 / float64，无隐式转换；pi/tau 的 32/64 常量类型按声明区分，编译期折叠。
++
++支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
++
++## 公开类型与常量
++
++以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
++
++```text
++koukai teisu pi32: float32 = 3.14159265358979323846264338327950288419716939937510;
++
++koukai teisu pi64: float64 = 3.14159265358979323846264338327950288419716939937510;
++
++koukai teisu tau32: float32 = 6.28318530717958647692528676655900576839433879875021;
++
++koukai teisu tau64: float64 = 6.28318530717958647692528676655900576839433879875021;
++```
++
++## 函数索引
++
++[min](#min) · [max](#max) · [checked_abs](#checked_abs) · [abs](#abs) · [clamp](#clamp) · [sqrt](#sqrt) · [floor](#floor) · [ceil](#ceil) · [round](#round) · [trunc](#trunc) · [is_nan](#is_nan) · [is_inf](#is_inf) · [is_finite](#is_finite) · [checked_gcd](#checked_gcd) · [gcd](#gcd) · [checked_lcm](#checked_lcm) · [lcm](#lcm)
++
++## 函数
++
++签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
++
++### min
++
++```text
++koukai waza min<T: Number>(left: T, right: T) -> T
++```
++
++参数：`left`：左侧输入；`right`：右侧输入。
++
++返回 left/right 较小值；传播 NaN，相等零选择负零。
++
++### max
++
++```text
++koukai waza max<T: Number>(left: T, right: T) -> T
++```
++
++参数：`left`：左侧输入；`right`：右侧输入。
++
++返回 left/right 较大值；传播 NaN，相等零选择正零。
++
++### checked_abs
++
++```text
++koukai waza checked_abs<T: Signed>(value: T) -> T?
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回 value 的绝对值；有符号整数最小值无法表示时返回 mu。
++
++### abs
++
++```text
++koukai waza abs<T: Signed>(value: T) -> T
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回 value 的绝对值；无法表示时运行时错误。无符号类型不满足 Signed。
++
++### clamp
++
++```text
++koukai waza clamp<T: Number>(value: T, lower: T, upper: T) -> T
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下；`lower`：下界（含）；`upper`：上界（含）。
++
++返回 value 限制到 lower..upper 的值；lower > upper 报运行时错误。
++
++### sqrt
++
++```text
++koukai waza sqrt<T: Float>(value: T) -> T
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回 value 平方根；负输入按浮点语义产生 NaN。
++
++### floor
++
++```text
++koukai waza floor<T: Float>(value: T) -> T
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++向负无穷取整，返回同一浮点类型。
++
++### ceil
++
++```text
++koukai waza ceil<T: Float>(value: T) -> T
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++向正无穷取整，返回同一浮点类型。
++
++### round
++
++```text
++koukai waza round<T: Float>(value: T) -> T
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回最接近整数的同类型浮点数，正中间使用 ties-to-even。
++
++### trunc
++
++```text
++koukai waza trunc<T: Float>(value: T) -> T
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++向零截断，返回同一浮点类型。
++
++### is_nan
++
++```text
++koukai waza is_nan<T: Float>(value: T) -> bool
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回 value 是否 NaN。
++
++### is_inf
++
++```text
++koukai waza is_inf<T: Float>(value: T) -> bool
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回 value 是否任一符号 Infinity。
++
++### is_finite
++
++```text
++koukai waza is_finite<T: Float>(value: T) -> bool
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回 value 是否有限。
++
++### checked_gcd
++
++```text
++koukai waza checked_gcd(left: int64, right: int64) -> int64?
++```
++
++参数：`left`：左侧输入；`right`：右侧输入。
++
++同 gcd，但结果无法表示返回 mu。
++
++### gcd
++
++```text
++koukai waza gcd(left: int64, right: int64) -> int64
++```
++
++参数：`left`：左侧输入；`right`：右侧输入。
++
++返回 left/right 非负最大公约数；结果无法用 int64 表示时报错。
++
++### checked_lcm
++
++```text
++koukai waza checked_lcm(left: int64, right: int64) -> int64?
++```
++
++参数：`left`：左侧输入；`right`：右侧输入。
++
++零输入返回 0；绝对值、中间 gcd 或乘积无法表示则返回 mu。
++
++### lcm
++
++```text
++koukai waza lcm(left: int64, right: int64) -> int64
++```
++
++参数：`left`：左侧输入；`right`：右侧输入。
++
++返回 left/right 非负最小公倍数；溢出报运行时错误。
++
++## 完整示例
++
++```mio fixture="math"
++yobu "kiso/math";
++chant(math.gcd(54, 24));
++chant(math.lcm(6, 8));
++chant(math.clamp(12, 0, 10));
++chant(math.sqrt[float64](9.0));
++chant(math.round[float32](2.5));
++chant(math.checked_abs[int8](-128) == mu);
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++6
++24
++10
++3
++2
++hai
++```
++
++## 源码
++
++- `bunko/kiso/math/compare.mio`
++- `bunko/kiso/math/constants.mio`
++- `bunko/kiso/math/float.mio`
++- `bunko/kiso/math/integer.mio`
++
++公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
++
++精确来源：[bunko/kiso/math/compare.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/math/compare.mio) · [bunko/kiso/math/constants.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/math/constants.mio) · [bunko/kiso/math/float.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/math/float.mio) · [bunko/kiso/math/integer.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/math/integer.mio)。
+--- a/content/docs/v1.0/kiso/meta.json
++++ b/content/docs/v1.0/kiso/meta.json
+@@ -1,6 +1,17 @@
+ {
+   "title": "Kiso",
+   "pages": [
+-    "index"
++    "index",
++    "array",
++    "bytes",
++    "convert",
++    "encoding-binary",
++    "fs",
++    "io",
++    "math",
++    "path",
++    "string",
++    "testing",
++    "utf8"
+   ]
+ }
+--- /dev/null
++++ b/content/docs/v1.0/kiso/path.mdx
+@@ -0,0 +1,138 @@
++---
++title: kiso/path
++description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++固定 / 的逻辑路径处理，全部在 Mio 中实现，不访问文件系统、不解析符号链接。不识别 Windows 盘符、UNC 或反斜杠。
++
++支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
++
++## 公开类型与常量
++
++以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
++
++```text
++koukai kata SplitResult { dir: string; base: string; }
++```
++
++## 函数索引
++
++[clean](#clean) · [join](#join) · [join_all](#join_all) · [is_abs](#is_abs) · [base](#base) · [dir](#dir) · [ext](#ext) · [split](#split)
++
++## 函数
++
++签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
++
++### clean
++
++```text
++koukai waza clean(value: string) -> string
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++清理 value 的重复 /、. 与可抵消的 ..；空输入返回 .，绝对路径不越根。
++
++### join
++
++```text
++koukai waza join(left: string, right: string) -> string
++```
++
++参数：`left`：左侧输入；`right`：右侧输入。
++
++用 / 连接 left/right 后 clean；right 的前导 / 不会丢弃 left。
++
++### join_all
++
++```text
++koukai waza join_all(parts: []string) -> string
++```
++
++参数：`parts`：按顺序拼接的路径段字符串数组。
++
++用 / 连接 parts 后 clean；无元素返回 .。
++
++### is_abs
++
++```text
++koukai waza is_abs(value: string) -> bool
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回 value 是否以 / 开头。
++
++### base
++
++```text
++koukai waza base(value: string) -> string
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回清理后最后路径段；/、.、.. 保留自身。
++
++### dir
++
++```text
++koukai waza dir(value: string) -> string
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回清理后目录部分；无分隔符返回 .。
++
++### ext
++
++```text
++koukai waza ext(value: string) -> string
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回 base 最后一个非首位点及其后缀；.env 无扩展名。
++
++### split
++
++```text
++koukai waza split(value: string) -> SplitResult
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回 clean 后的 dir/base 组合，不保留原始尾斜线。
++
++## 完整示例
++
++```mio fixture="path"
++yobu "kiso/path";
++chant(path.clean("/a//b/../c/"));
++chant(path.clean(""));
++chant(path.join("a", "/b"));
++chant(path.ext(".env"));
++kaku result = path.split("a/b.mio");
++chant(result.dir);
++chant(result.base);
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++/a/c
++.
++a/b
++
++a
++b.mio
++```
++
++## 源码
++
++- `bunko/kiso/path/path.mio`
++
++公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
++
++精确来源：[bunko/kiso/path/path.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/path/path.mio)。
+--- /dev/null
++++ b/content/docs/v1.0/kiso/string.mdx
+@@ -0,0 +1,229 @@
++---
++title: kiso/string
++description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++UTF-8 字节语义查找、转换及 StringBuilder。不处理 Unicode 规范化、大小写折叠或字素簇；索引与容量单位均为字节。Builder 值复制共享 buffer。
++
++支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
++
++## 公开类型与常量
++
++以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
++
++```text
++koukai kata StringBuilder { buffer: bytes.ByteBuffer; }
++```
++
++## 函数索引
++
++[to_bytes](#to_bytes) · [from_utf8](#from_utf8) · [byte_len](#byte_len) · [rune_count](#rune_count) · [has_prefix](#has_prefix) · [has_suffix](#has_suffix) · [index](#index) · [contains](#contains) · [concat](#concat) · [new_builder](#new_builder) · [builder_with_capacity](#builder_with_capacity) · [write_string](#write_string) · [write_rune](#write_rune) · [builder_len](#builder_len) · [builder_capacity](#builder_capacity) · [builder_reset](#builder_reset) · [builder_string](#builder_string)
++
++## 函数
++
++签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
++
++### to_bytes
++
++```text
++koukai waza to_bytes(value: string) -> []uint8
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++复制 value 的 UTF-8 字节到新数组，修改数组不会修改字符串。
++
++### from_utf8
++
++```text
++koukai waza from_utf8(data: []uint8) -> string?
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义。
++
++严格校验 data；合法时返回独立字符串副本，非法时返回 mu。
++
++### byte_len
++
++```text
++koukai waza byte_len(value: string) -> int64
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回 value 的字节数，O(1)。
++
++### rune_count
++
++```text
++koukai waza rune_count(value: string) -> int64
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回 Unicode 标量值数量；若宿主传入非法 UTF-8 字符串，产生运行时错误。
++
++### has_prefix
++
++```text
++koukai waza has_prefix(value: string, prefix: string) -> bool
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下；`prefix`：待匹配前缀。
++
++按字节比较 value 的 prefix。
++
++### has_suffix
++
++```text
++koukai waza has_suffix(value: string, suffix: string) -> bool
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下；`suffix`：待匹配后缀。
++
++按字节比较 value 的 suffix。
++
++### index
++
++```text
++koukai waza index(value: string, pattern: string) -> int64
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下；`pattern`：待查找的字符串模式。
++
++返回 pattern 首次出现的 UTF-8 字节偏移；未找到为 -1，空 pattern 为 0。
++
++### contains
++
++```text
++koukai waza contains(value: string, pattern: string) -> bool
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下；`pattern`：待查找的字符串模式。
++
++返回 value 是否包含 pattern，空模式为真。
++
++### concat
++
++```text
++koukai waza concat(left: string, right: string) -> string
++```
++
++参数：`left`：左侧输入；`right`：右侧输入。
++
++返回 left 与 right 拼接后的独立字符串。
++
++### new_builder
++
++```text
++koukai waza new_builder() -> StringBuilder
++```
++
++参数：无。
++
++返回空 StringBuilder。
++
++### builder_with_capacity
++
++```text
++koukai waza builder_with_capacity(capacity: int64) -> StringBuilder
++```
++
++参数：`capacity`：预留容量；字节容器按字节，普通数组按元素。
++
++创建空 Builder，capacity 按字节预留；负容量或资源不足报错。
++
++### write_string
++
++```text
++koukai waza write_string(builder: StringBuilder, value: string) -> unit
++```
++
++参数：`builder`：待操作共享字符串构造器；`value`：本次操作的输入值，返回语义及限制如下。
++
++将 value 的字节追加到 builder，返回 unit。
++
++### write_rune
++
++```text
++koukai waza write_rune(builder: StringBuilder, value: rune) -> unit
++```
++
++参数：`builder`：待操作共享字符串构造器；`value`：本次操作的输入值，返回语义及限制如下。
++
++将 value 编码并追加到 builder；非法 Unicode 标量值报运行时错误。
++
++### builder_len
++
++```text
++koukai waza builder_len(builder: StringBuilder) -> int64
++```
++
++参数：`builder`：待操作共享字符串构造器。
++
++返回当前 builder 字节长度。
++
++### builder_capacity
++
++```text
++koukai waza builder_capacity(builder: StringBuilder) -> int64
++```
++
++参数：`builder`：待操作共享字符串构造器。
++
++返回 builder 字节容量。
++
++### builder_reset
++
++```text
++koukai waza builder_reset(builder: StringBuilder) -> unit
++```
++
++参数：`builder`：待操作共享字符串构造器。
++
++将共享 buffer 长度置零并保留容量。
++
++### builder_string
++
++```text
++koukai waza builder_string(builder: StringBuilder) -> string
++```
++
++参数：`builder`：待操作共享字符串构造器。
++
++返回独立不可变字符串副本；外部若污染 buffer 为非法 UTF-8，报运行时错误。
++
++## 完整示例
++
++```mio fixture="string"
++yobu "kiso/string";
++chant(string.byte_len("澪A"));
++chant(string.rune_count("澪A"));
++chant(string.index("澪A", "A"));
++kaku builder = string.new_builder();
++string.write_string(builder, "Mio");
++string.write_rune(builder, '!');
++chant(string.builder_string(builder));
++kaku invalid: []uint8 = [255];
++chant(string.from_utf8(invalid) == mu);
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++4
++2
++3
++Mio!
++hai
++```
++
++## 源码
++
++- `bunko/kiso/string/string.mio`
++
++公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
++
++精确来源：[bunko/kiso/string/string.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/string/string.mio)。
+--- /dev/null
++++ b/content/docs/v1.0/kiso/testing.mdx
+@@ -0,0 +1,56 @@
++---
++title: kiso/testing
++description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++仅 mio test 注册测试报告 MMA 接口。普通 check/run 的注册表没有该接口，不能将 import 成功当作普通程序支持。测试文件名以 _test.mio 结束，顶层函数名以 test_ 开头，零参数、非泛型、返回 unit。
++
++支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
++
++## 函数索引
++
++[expect](#expect) · [fail](#fail)
++
++## 函数
++
++签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
++
++### expect
++
++```text
++koukai waza expect(condition: bool, message: string) -> unit
++```
++
++参数：`condition`：断言条件；`message`：失败时记录的说明。
++
++condition 为 iie 时记录 message 失败；不会通过异常中断当前函数。
++
++### fail
++
++```text
++koukai waza fail(message: string) -> unit
++```
++
++参数：`message`：失败时记录的说明。
++
++无条件记录 message 失败。
++
++## 完整示例
++
++保存为 `example_test.mio`，在该目录执行 `mio test . --format=json --lang=en-US`。测试发现并通过 `test_answer`。JSON 的 duration 字段随运行变化，报告以结构化 summary.passed=1、failed=0 验证；该代码是测试包，仅由 mio test 执行。
++
++```mio mode="test" title="example_test.mio"
++yobu "kiso/testing";
++waza test_answer() -> unit { testing.expect(6 * 7 == 42, "answer"); }
++```
++
++
++## 源码
++
++- `bunko/kiso/testing/testing.mio`
++
++公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
++
++精确来源：[bunko/kiso/testing/testing.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/testing/testing.mio)。
+--- /dev/null
++++ b/content/docs/v1.0/kiso/utf8.mdx
+@@ -0,0 +1,133 @@
++---
++title: kiso/utf8
++description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++严格 UTF-8 与 Unicode 标量编解码，不处理显示宽度、字素簇或规范化。U+FFFD 本身是合法标量，不能只看 value 判断解码失败，应看 valid。
++
++支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
++
++## 公开类型与常量
++
++以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
++
++```text
++koukai kata DecodeResult {
++    value: rune;
++    width: int64;
++    valid: bool;
++}
++```
++
++## 函数索引
++
++[is_valid_rune](#is_valid_rune) · [rune_width](#rune_width) · [decode_one](#decode_one) · [encode_rune](#encode_rune) · [append_rune](#append_rune) · [valid](#valid) · [rune_count](#rune_count)
++
++## 函数
++
++签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
++
++### is_valid_rune
++
++```text
++koukai waza is_valid_rune(value: rune) -> bool
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++检查 value 是否为 Unicode 标量值。
++
++### rune_width
++
++```text
++koukai waza rune_width(value: rune) -> int64
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++返回合法 value 的 1..4 字节编码长度；非法标量报运行时错误。
++
++### decode_one
++
++```text
++koukai waza decode_one(data: []uint8, offset: int64) -> DecodeResult
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
++
++从 data 的字节 offset 解码一个标量。成功 width=1..4、valid=hai；非法序列 value=U+FFFD、width=1、valid=iie；正好末尾 width=0；其他越界 offset 报运行时错误。
++
++### encode_rune
++
++```text
++koukai waza encode_rune(value: rune) -> []uint8
++```
++
++参数：`value`：本次操作的输入值，返回语义及限制如下。
++
++将 value 编码为新 UTF-8 字节数组；负值、代理区或大于 U+10FFFF 报运行时错误。
++
++### append_rune
++
++```text
++koukai waza append_rune(destination: []uint8, value: rune) -> unit
++```
++
++参数：`destination`：接收写入的现有目标数组；`value`：本次操作的输入值，返回语义及限制如下。
++
++将 value 编码追加至 destination；非法标量在修改目标前报错。
++
++### valid
++
++```text
++koukai waza valid(data: []uint8) -> bool
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义。
++
++返回 data 是否是严格合法的 UTF-8。
++
++### rune_count
++
++```text
++koukai waza rune_count(data: []uint8) -> int64?
++```
++
++参数：`data`：输入字节数组；是否复制见返回语义。
++
++合法 data 返回标量数量，非法数据返回 mu。
++
++## 完整示例
++
++```mio fixture="utf8"
++yobu "kiso/utf8";
++kaku data = utf8.encode_rune('澪');
++kaku result = utf8.decode_one(data, 0);
++chant(result.valid);
++chant(result.width);
++chant(result.value);
++kaku end = utf8.decode_one(data, len(data));
++chant(end.width);
++kaku invalid: []uint8 = [255];
++chant(utf8.rune_count(invalid) == mu);
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++hai
++3
++28586
++0
++hai
++```
++
++## 源码
++
++- `bunko/kiso/utf8/utf8.mio`
++
++公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
++
++精确来源：[bunko/kiso/utf8/utf8.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/utf8/utf8.mio)。
+--- /dev/null
++++ b/content/docs/v1.0/learn/closures.mdx
+@@ -0,0 +1,64 @@
++---
++title: 函数值与闭包
++description: 把行为存进变量，理解捕获变量的生命周期。
++---
++
++## 学习目标与前置
++
++把行为存进变量，理解捕获变量的生命周期。 前置：[上课：结构体、枚举与分支覆盖](/docs/v1.0/learn/models)。本章使用固定版本的 Go 引导 CLI / Mochi VM。
++
++## 为什么需要
++
++普通参数能给函数传数据；函数值让你保存或传递下一步要执行的行为。计数器需要跨多次调用保留状态，闭包把函数和它所捕获的环境联系起来。
++
++## 保存与运行
++
++在安装页的 `mio-tutorial` 目录保存为 `closures.mio`，使用该版本构建的 CLI 和同一份 `bunko/`：
++
++```sh
++./mio check closures.mio
++./mio run closures.mio
++```
++
++`check` 成功报告 `check passed`。下面是完整程序与 `run` 的标准输出，末尾包含换行。
++
++```mio title="closures.mio"
++waza counter() -> () -> int64 {
++    kaku n = 0;
++    kaesu waza () -> int64 { n = n + 1; kaesu n; };
++}
++kaku next = counter();
++chant(next());
++chant(next());
++```
++
++```text title="output"
++1
++2
++```
++
++## 逐段理解
++
++`counter` 的返回类型是 `() -> int64`，也就是“无参数、返回整数的函数”。第一次调用 `counter()` 先创建局部变量 `n=0`，再返回匿名 `waza`。返回的是函数值，此时并没有执行匿名函数体中的加一。
++
++`next()` 第一次执行闭包，把捕获的 `n` 更新到 1 并返回；第二次继续从 1 更新到 2。虽然外层调用已经结束，捕获的存储仍由闭包保留。另调用一次 `counter()` 会创建新的局部状态。
++
++闭包按词法作用域捕获。多个闭包捕获同一可变变量时共享 Cell，不能解释为创建时复制一次整数。具名函数只能在文件顶层声明；需要嵌套行为时使用匿名函数表达式。
++
++## 练习
++
++在两次输出后追加 `chant(next());`。 先预测再执行 `check` 与 `run`，预期逐行输出：
++
++```text title="exercise-output"
++1
++2
++3
++```
++
++## 常见陷阱与核对
++
++`next` 是函数值，`next()` 才执行调用；少写括号不是“读取最新计数”。共享捕获会观察后续修改，不能把返回闭包的环境当成创建时的独立数值快照。
++
++## 延伸阅读与下一章
++
++完整规则见 [Reference](/docs/v1.0/reference)，相关库的签名、错误约定和验证范围见 [Kiso](/docs/v1.0/kiso)。上一课：[结构体、枚举与分支覆盖](/docs/v1.0/learn/models)；下一课：[继续学习](/docs/v1.0/learn/generics)。
+--- a/content/docs/v1.0/learn/collections.mdx
++++ b/content/docs/v1.0/learn/collections.mdx
+@@ -2,6 +2,23 @@
+ title: 数组与空值
+ description: 访问一组值，理解共享引用与可空类型。
+ ---
++
++## 学习目标与前置
++
++完成后，你能按索引访问数组、解释别名修改，并在使用可空值前检查。前置：[函数与返回值](/docs/v1.0/learn/functions)。
++
++多条观测值需要一起保存，数组提供同类型的有序存储；读取结果也可能缺失，可空类型让这种情况在类型里显式出现。两者是独立概念，本例先展示共享数组，再展示可空整数。
++
++## 保存与运行
++
++在安装页的 `mio-tutorial` 源码根目录，把下面程序保存为 `collections.mio`；保持 `bunko/` 可用。在同一目录执行：
++
++```sh
++./mio check collections.mio
++./mio run collections.mio
++```
++
++`check` 成功报告 `check passed`；后面的 output 仅列 `run` 的标准输出，每行末尾包含换行。
+ 
+ ## 完整程序
+ 
+@@ -25,13 +42,18 @@
+ 11
+ ```
+ 
+-## 逐步理解
+ 
+-数组下标从 0 开始。`values[1]` 指向第二个元素，`len(values)` 返回元素数量。
++## 逐段观察存储
+ 
+-数组采用共享引用语义。`alias` 与 `values` 指向同一组元素，因此通过 `alias` 修改第二个元素后，从 `values` 读取也得到 25。赋值不会复制数组。
++第一段创建三个整数，得到 `[]int64`。`alias = values` 只复制对数组的引用；把第二个元素改为 25 后，两个名称读到同一位置。`len(values)` 仍为 3，元素写入没有改变数组长度。
+ 
+-`int64?` 表示整数或空值 `mu`。使用 `answer != mu` 检查后，在对应的真分支里，可靠变量引用被收窄为非空整数，才可以执行加法。不要把这里的收窄泛化为任何数组索引表达式都能持久收窄。
++第二段的 `answer` 是可空整数，不是数组的可空包装。它先为 `mu`，后接收第一个元素 10。条件为真时 `answer` 被收窄，`answer + 1` 才作为非空整数计算得到 11。不要把检查当作取出数组元素或复制数组的操作。
++
++## 规则边界
++
++同一数组的元素类型一致，下标要求 `int64` 且必须处于 `0 <= index < len(values)`。能通过类型检查的整数下标仍可能在运行时越界。动态追加和独立浅复制由 `kiso/array` 提供；本课赋值没有复制元素。
++
++`[]int64?` 表示元素可空的数组，`([]int64)?` 表示数组本身可空。检查一个局部变量不会证明另一个索引表达式非空；先读入局部变量再检查，尤其在中间有函数调用或共享修改时。
+ 
+ ## 练习
+ 
+@@ -45,4 +67,8 @@
+ - 在检查前直接计算 `answer + 1`：可空类型不能未经收窄参与普通整数运算。
+ - 写 `kaku answer = mu;`：无法仅凭空值推断目标类型，必须提供明确的可空类型。
+ 
+-上一课：[函数与返回值](/docs/v1.0/learn/functions)。下一课：[模块与数学库](/docs/v1.0/learn/modules)。
++上一课：[函数与返回值](/docs/v1.0/learn/functions)。下一课：[字符串、字节与 UTF-8](/docs/v1.0/learn/strings)。
++
++## 延伸阅读
++
++精确规则见 [语言参考](/docs/v1.0/reference)。本章输出对应本版本固定提交的 Go 引导 CLI / Mochi VM，验证命令与原始输出见 [验证说明](/docs/v1.0/tooling/verification)。
+--- a/content/docs/v1.0/learn/control-flow.mdx
++++ b/content/docs/v1.0/learn/control-flow.mdx
+@@ -2,6 +2,23 @@
+ title: 条件与循环
+ description: 用 moshi 作选择，用 aida 重复计算。
+ ---
++
++## 学习目标与前置
++
++完成后，你能写布尔条件、逐轮推演循环，并区分声明与赋值。前置：[变量与类型](/docs/v1.0/learn/variables)。
++
++同一程序需要处理不同输入：成绩决定是否通过，循环把多次相同计算合并成一段代码。先把条件写成明确比较，再讨论重复执行。
++
++## 保存与运行
++
++在安装页的 `mio-tutorial` 源码根目录，把下面程序保存为 `control-flow.mio`；保持 `bunko/` 可用。在同一目录执行：
++
++```sh
++./mio check control-flow.mio
++./mio run control-flow.mio
++```
++
++`check` 成功报告 `check passed`；后面的 output 仅列 `run` 的标准输出，每行末尾包含换行。
+ 
+ ## 完整程序
+ 
+@@ -27,13 +44,24 @@
+ 6
+ ```
+ 
+-## 逐步理解
+ 
+-`moshi` 检查括号里的布尔条件。72 大于等于 60，所以执行第一个代码块；`sore` 块不会执行。Mio 的布尔字面量写作 `hai` 与 `iie`，不能把整数当成布尔条件。
++## 跟踪循环状态
+ 
+-`aida` 在每轮开始时检查条件。这里依次把 1、2、3 加入 `total`，得到 6。每轮末尾更新 `n`，当它变为 4 时循环结束。
++分支只执行一边。进入循环前，`n=1`、`total=0`；每轮先检查 `n <= 3`，再按源代码顺序执行两条赋值：
+ 
+-每个花括号块创建词法作用域。循环中的赋值更新已有变量；如果再次写 `kaku total`，就可能在内层声明一个遮蔽外层的新变量。
++| 本轮开始的 n | 相加后的 total | 更新后的 n |
++| ---: | ---: | ---: |
++| 1 | 1 | 2 |
++| 2 | 3 | 3 |
++| 3 | 6 | 4 |
++
++下一次判断为假，控制流跳到 `chant(total)`。循环体可以一次也不执行：例如初始 `n` 大于上界时，`total` 仍为 0。
++
++## 条件、作用域与终止
++
++布尔字面量为 `hai` 与 `iie`。比较产生 `bool`，整数本身不是真假值。`&&` 与 `||` 短路；需要复合条件时按实际求值顺序思考。每个花括号建立作用域，内层声明会遮蔽外层同名变量。需要累计到外层时，使用赋值而非重新声明。
++
++本例因每轮 `n` 增加一且上界有限而终止。`tsuzuku;` 可跳过本轮剩余语句，`nukeru;` 退出最内层循环；两者的完整规则见语法参考。尤其不要在 `tsuzuku` 之前遗漏推进变量。
+ 
+ ## 练习
+ 
+@@ -48,3 +76,7 @@
+ - 把 `sore` 写成 `else`：关键字必须使用 Mio 拼写。
+ 
+ 上一课：[变量与类型](/docs/v1.0/learn/variables)。下一课：[函数与返回值](/docs/v1.0/learn/functions)。
++
++## 延伸阅读
++
++精确规则见 [语言参考](/docs/v1.0/reference)。本章输出对应本版本固定提交的 Go 引导 CLI / Mochi VM，验证命令与原始输出见 [验证说明](/docs/v1.0/tooling/verification)。
+--- a/content/docs/v1.0/learn/functions.mdx
++++ b/content/docs/v1.0/learn/functions.mdx
+@@ -2,6 +2,23 @@
+ title: 函数与返回值
+ description: 用 waza 封装计算，用 kaesu 返回结果。
+ ---
++
++## 学习目标与前置
++
++完成后，你能根据参数和返回值设计函数，并检查每条返回路径。前置：[条件与循环](/docs/v1.0/learn/control-flow)。
++
++重复粘贴一段计算容易让不同位置逐渐不一致。函数把实现集中到一个地方，用参数表达输入，用返回类型约束调用方能得到什么。
++
++## 保存与运行
++
++在安装页的 `mio-tutorial` 源码根目录，把下面程序保存为 `functions.mio`；保持 `bunko/` 可用。在同一目录执行：
++
++```sh
++./mio check functions.mio
++./mio run functions.mio
++```
++
++`check` 成功报告 `check passed`；后面的 output 仅列 `run` 的标准输出，每行末尾包含换行。
+ 
+ ## 完整程序
+ 
+@@ -27,13 +44,20 @@
+ 7
+ ```
+ 
+-## 逐步理解
+ 
+-`waza` 声明函数，参数使用 `名称: 类型`。箭头后写返回类型，`kaesu` 结束当前函数并返回一个值。
++## 调用如何执行
+ 
+-`square` 把参数乘以自身。`absolute` 在两个条件分支中都返回 `int64`，因此调用方总能得到所声明类型的结果。这里用小整数演示，不讨论最小有符号整数的回绕边界。
++`chant(square(6))` 先计算内层调用：整数 6 绑定到本次调用的参数 `value`，乘法得到 36，`kaesu` 把 36 返回调用点，再由 `chant` 输出。参数属于本次调用的局部作用域，与其他函数里同名参数无关。
+ 
+-顶层调用把函数返回值交给 `chant`。定义函数的花括号后不加分号，函数体中的返回语句仍需要分号。
++`absolute(-7)` 进入真分支，返回 7；若传入 7 则进入另一分支。返回会结束当前调用，不会继续执行函数剩余语句。这里没有把结果存入全局变量，后面的调用可以独立复用它。
++
++函数定义的花括号后不追加分号，函数体内 `kaesu` 语句仍须分号。
++
++## 参数与返回的边界
++
++`int64` 参数接受该类型的值；此例不自动把 `2.5` 转为整数。调用前应决定是否需要转换及是否接受截断。非 `unit` 函数的所有静态可见路径必须返回匹配类型；仅调用 `chant` 不会产生函数所需的返回值。
++
++计算过程和输出可以分开。只产生副作用的函数可返回 `unit`，而本课两个函数返回计算值。绝对值例子限定普通小整数；`int64` 最小值的正数不可表示，通用数值处理应查 `math.checked_abs` 的空值协议，不能据本例推断它对所有整数都安全。
+ 
+ ## 练习
+ 
+@@ -48,3 +72,7 @@
+ - 声明返回 `int64`，却在某条路径只输出而没有返回：`chant` 不能代替 `kaesu`。
+ 
+ 上一课：[条件与循环](/docs/v1.0/learn/control-flow)。下一课：[数组与空值](/docs/v1.0/learn/collections)。
++
++## 延伸阅读
++
++精确规则见 [语言参考](/docs/v1.0/reference)。本章输出对应本版本固定提交的 Go 引导 CLI / Mochi VM，验证命令与原始输出见 [验证说明](/docs/v1.0/tooling/verification)。
+--- /dev/null
++++ b/content/docs/v1.0/learn/generics.mdx
+@@ -0,0 +1,64 @@
++---
++title: 泛型与数值约束
++description: 在保留静态类型的同时复用同一算法。
++---
++
++## 学习目标与前置
++
++在保留静态类型的同时复用同一算法。 前置：[上课：函数值与闭包](/docs/v1.0/learn/closures)。本章使用固定版本的 Go 引导 CLI / Mochi VM。
++
++## 为什么需要
++
++取数组第一个元素的算法与元素究竟是整数还是字符串无关。泛型把这种不变的结构写一次，同时让调用点得到具体类型，而非丢失类型信息。
++
++## 保存与运行
++
++在安装页的 `mio-tutorial` 目录保存为 `generics.mio`，使用该版本构建的 CLI 和同一份 `bunko/`：
++
++```sh
++./mio check generics.mio
++./mio run generics.mio
++```
++
++`check` 成功报告 `check passed`。下面是完整程序与 `run` 的标准输出，末尾包含换行。
++
++```mio title="generics.mio"
++waza first<T>(values: []T) -> T? {
++    moshi (len(values) == 0) { kaesu mu; }
++    kaesu values[0];
++}
++waza plus<T: Number>(left: T, right: T) -> T { kaesu left + right; }
++kaku item = first[int64]([7, 8]);
++moshi (item != mu) { chant(item); }
++chant(plus[float32](1.5, 2.5));
++```
++
++```text title="output"
++7
++4
++```
++
++## 逐段理解
++
++`first<T>` 接收 `[]T`，返回 `T?`。空数组没有第一个元素，返回 `mu`；非空时返回索引 0。调用 `first[int64]` 明确选择元素类型，读取结果仍须检查非空。这把数组边界与可空类型合在一个可复用函数里。
++
++`plus<T: Number>` 则需要加法能力，因此声明数值约束。`plus[float32](1.5, 2.5)` 在 `float32` 上下文检查字面量，返回同类型的 4。不写约束的任意 T 不能直接拿来作数值运算。
++
++声明用尖括号 `<T>`，显式调用用方括号 `[T]`，类型标注如 `Pair<int64>` 又使用尖括号。`Number`、`Integer`、`Signed`、`Float` 是实现中的数值约束，不代表可以声明任意 trait。不同数值类型变量不会因为都满足 Number 就自动混合。
++
++## 练习
++
++把 `[7, 8]` 改为 `[9, 10]`。 先预测再执行 `check` 与 `run`，预期逐行输出：
++
++```text title="exercise-output"
++9
++4
++```
++
++## 常见陷阱与核对
++
++`first<T>` 是声明，`first[int64]` 是显式调用，两种括号不可互换。数组为空时会返回 `mu`，要在非空分支使用结果。不同数值类型都满足 Number，并不使它们可以直接相加。
++
++## 延伸阅读与下一章
++
++完整规则见 [Reference](/docs/v1.0/reference)，相关库的签名、错误约定和验证范围见 [Kiso](/docs/v1.0/kiso)。上一课：[函数值与闭包](/docs/v1.0/learn/closures)；下一课：[继续学习](/docs/v1.0/learn/modules)。
+--- a/content/docs/v1.0/learn/index.mdx
++++ b/content/docs/v1.0/learn/index.mdx
+@@ -1,19 +1,25 @@
+ ---
+ title: Learn · 学习 Mio
+-description: 用五个短小的程序，从变量走到模块与标准库。
++description: 从变量逐步走到数据模型、函数复用与测试。
+ ---
+ 
+-先完成 [安装与运行](/docs/v1.0/getting-started)。每课都有可独立运行的完整程序、实际输出、解释、练习与常见错误。
++先完成 [安装与运行](/docs/v1.0/getting-started)。前十课的普通程序可独立运行，最后一课使用 `mio test` 测试包。每课包含目标、前置、解释、练习及验证方式。
+ 
+ ## 学习路线
+ 
+-| 顺序 | 课程 | 你将学会 |
++| 顺序 | 课程 | 学习重点 |
+ | --- | --- | --- |
+-| 01 | [变量与类型](/docs/v1.0/learn/variables) | `kaku`、类型推断、显式数值转换 |
+-| 02 | [条件与循环](/docs/v1.0/learn/control-flow) | `moshi` / `sore`、`aida`、布尔条件 |
+-| 03 | [函数与返回值](/docs/v1.0/learn/functions) | `waza`、参数、返回类型、`kaesu` |
+-| 04 | [数组与空值](/docs/v1.0/learn/collections) | `[]T`、索引、共享引用、`T?` 收窄 |
+-| 05 | [模块与数学库](/docs/v1.0/learn/modules) | `yobu`、`kiso/math`、组合函数与库 |
++| 01 | [变量与类型](/docs/v1.0/learn/variables) | 命名、推断、转换 |
++| 02 | [条件与循环](/docs/v1.0/learn/control-flow) | 选择、重复、作用域 |
++| 03 | [函数与返回值](/docs/v1.0/learn/functions) | 参数、返回路径 |
++| 04 | [数组与空值](/docs/v1.0/learn/collections) | 索引、共享、可空收窄 |
++| 05 | [字符串与 UTF-8](/docs/v1.0/learn/strings) | 字节、Unicode 标量、Builder |
++| 06 | [Map 与缺失键](/docs/v1.0/learn/maps) | 键类型、共享修改、缺失值 |
++| 07 | [结构体与枚举](/docs/v1.0/learn/models) | 字段、变体、覆盖 |
++| 08 | [函数值与闭包](/docs/v1.0/learn/closures) | 函数类型、捕获环境 |
++| 09 | [泛型与数值约束](/docs/v1.0/learn/generics) | 类型参数、数值约束 |
++| 10 | [模块与数学库](/docs/v1.0/learn/modules) | 公开路径、限定名、库函数 |
++| 11 | [编写测试](/docs/v1.0/learn/testing) | 发现、断言、报告 |
+ 
+ ## 如何使用示例
+ 
+--- /dev/null
++++ b/content/docs/v1.0/learn/maps.mdx
+@@ -0,0 +1,63 @@
++---
++title: Map 与缺失键
++description: 用键值表保存命名数据，并处理查不到的结果。
++---
++
++## 学习目标与前置
++
++用键值表保存命名数据，并处理查不到的结果。 前置：[上课：字符串、字节与 UTF-8](/docs/v1.0/learn/strings)。本章使用固定版本的 Go 引导 CLI / Mochi VM。
++
++## 为什么需要
++
++数组适合按位置访问，Map 适合按名称查找。这里以字符串为键、整数为值，类型写成 `Map<string, int64>`；构造表达式 `Map[string, int64]()` 使用方括号。
++
++## 保存与运行
++
++在安装页的 `mio-tutorial` 目录保存为 `maps.mio`，使用该版本构建的 CLI 和同一份 `bunko/`：
++
++```sh
++./mio check maps.mio
++./mio run maps.mio
++```
++
++`check` 成功报告 `check passed`。下面是完整程序与 `run` 的标准输出，末尾包含换行。
++
++```mio title="maps.mio"
++kaku entries = Map[string, int64]();
++entries["answer"] = 42;
++kaku alias = entries;
++alias["answer"] = 43;
++kaku answer = entries["answer"];
++moshi (answer != mu) { chant(answer); }
++chant(entries["missing"] == mu);
++```
++
++```text title="output"
++43
++hai
++```
++
++## 逐段理解
++
++先写入 `answer=42`，再通过别名写成 43。Map 的赋值共享存储，原名称读回的也就是 43；它不会因为有键值类型参数就自动复制。
++
++索引读取总是产生 `int64?`。有键时返回值，没有键时返回 `mu`。因此先把读取保存到局部 `answer`，再在非空分支输出；第二条输出说明 `missing` 不存在，而不是它的值恰好为零。
++
++键可为支持的整数、`bool` 或 `string`，不能用数组或浮点数。不要把数组的 `len`、遍历或删除写法套用到 Map；本快照参考不承诺这些操作。
++
++## 练习
++
++把别名写入的值从 43 改为 99。 先预测再执行 `check` 与 `run`，预期逐行输出：
++
++```text title="exercise-output"
++99
++hai
++```
++
++## 常见陷阱与核对
++
++不存在的键返回 `mu`，不是 0。即使你确信键存在，类型仍是 `V?`，应先存入局部并检查。赋值给 Map 别名会共享修改；本快照没有可据数组写法推定的 Map 长度或遍历操作。
++
++## 延伸阅读与下一章
++
++完整规则见 [Reference](/docs/v1.0/reference)，相关库的签名、错误约定和验证范围见 [Kiso](/docs/v1.0/kiso)。上一课：[字符串、字节与 UTF-8](/docs/v1.0/learn/strings)；下一课：[继续学习](/docs/v1.0/learn/models)。
+--- a/content/docs/v1.0/learn/meta.json
++++ b/content/docs/v1.0/learn/meta.json
+@@ -6,6 +6,12 @@
+     "control-flow",
+     "functions",
+     "collections",
+-    "modules"
++    "strings",
++    "maps",
++    "models",
++    "closures",
++    "generics",
++    "modules",
++    "testing"
+   ]
+ }
+--- /dev/null
++++ b/content/docs/v1.0/learn/models.mdx
+@@ -0,0 +1,71 @@
++---
++title: 结构体、枚举与分支覆盖
++description: 把相关字段组合成数据，并显式表示多种结果。
++---
++
++## 学习目标与前置
++
++把相关字段组合成数据，并显式表示多种结果。 前置：[上课：Map 与缺失键](/docs/v1.0/learn/maps)。本章使用固定版本的 Go 引导 CLI / Mochi VM。
++
++## 为什么需要
++
++当多个值总是一起出现时，只用平行数组会让对应关系容易错位。结构体把命名字段装到一个类型里；枚举则表达一次结果只能属于其中一种情况。
++
++## 保存与运行
++
++在安装页的 `mio-tutorial` 目录保存为 `models.mio`，使用该版本构建的 CLI 和同一份 `bunko/`：
++
++```sh
++./mio check models.mio
++./mio run models.mio
++```
++
++`check` 成功报告 `check passed`。下面是完整程序与 `run` 的标准输出，末尾包含换行。
++
++```mio title="models.mio"
++kata Pair<T> { first: T; second: T; }
++sentaku Result<T, E> { Ok(T); Err(E); }
++waza get(result: Result<int64, string>) -> int64 {
++    awase (result) {
++        baai Ok(value) { kaesu value; }
++        baai Err(message) { chant(message); kaesu 0; }
++    }
++}
++kaku pair = Pair[int64] { second: 22, first: 20 };
++chant(pair.first + pair.second);
++kaku result: Result<int64, string> = Result.Ok(7);
++chant(get(result));
++```
++
++```text title="output"
++42
++7
++```
++
++## 逐段理解
++
++`Pair<T>` 把两个同类型值作为 `first`、`second` 字段保存。构造时显式选择 `int64`，字段按名字指定，因此写入顺序不必与声明相同。这里先读回两字段求和，输出 42。
++
++`Result<T, E>` 是本程序自行声明的示例类型，不是内置或承诺存在的 Kiso API。它的 `Ok` 携带一个值，`Err` 携带错误信息。目标标注 `Result<int64, string>` 给构造器提供完整类型上下文。
++
++`get` 对枚举进行 `awase`，每个 `baai` 绑定对应载荷。必须覆盖所有变体；此例 `Ok` 直接返回整数，`Err` 输出信息后返回示例约定的 0。这个约定只属于本程序；生产代码应根据调用方需要设计错误处理，而不是把 0 普遍视为错误。
++
++用户类型名以 ASCII 大写字母开头，结构体字段不能重新赋值。字段内若含共享数组或 Map，仍能通过集合修改存储，因此字段不可赋值不代表深不可变。泛型的具体推断规则留到后续课程。
++
++## 练习
++
++把 `Result.Ok(7)` 改为 `Result.Err("missing")`。 先预测再执行 `check` 与 `run`，预期逐行输出：
++
++```text title="exercise-output"
++42
++missing
++0
++```
++
++## 常见陷阱与核对
++
++字段名不能缺失、重复或凭空增加；字段声明不允许事后重新赋值。`awase` 分支必须覆盖所有枚举变体，每个分支绑定的载荷数量须正确。示例的 Result 是用户类型，不要按内置错误处理机制使用它。
++
++## 延伸阅读与下一章
++
++完整规则见 [Reference](/docs/v1.0/reference)，相关库的签名、错误约定和验证范围见 [Kiso](/docs/v1.0/kiso)。上一课：[Map 与缺失键](/docs/v1.0/learn/maps)；下一课：[继续学习](/docs/v1.0/learn/closures)。
+--- a/content/docs/v1.0/learn/modules.mdx
++++ b/content/docs/v1.0/learn/modules.mdx
+@@ -2,6 +2,23 @@
+ title: 模块与数学库
+ description: 通过 yobu 引入 kiso/math，组合自己的函数与标准库。
+ ---
++
++## 学习目标与前置
++
++完成后，你能按公开路径导入包、使用限定名调用泛型数学函数，并定位标准库根。前置：[泛型与约束](/docs/v1.0/learn/generics)，以及安装页的 `MIO_BUNKO` 设置。
++
++平方可以自行实现，平方根适合复用经过项目测试的标准库。导入把外部名称放到明确的包限定名下，避免与自己的函数混淆。
++
++## 保存与运行
++
++在安装页的 `mio-tutorial` 源码根目录，把下面程序保存为 `modules.mio`；保持 `bunko/` 可用。在同一目录执行：
++
++```sh
++./mio check modules.mio
++./mio run modules.mio
++```
++
++`check` 成功报告 `check passed`；后面的 output 仅列 `run` 的标准输出，每行末尾包含换行。
+ 
+ ## 完整程序
+ 
+@@ -22,13 +39,20 @@
+ 12
+ ```
+ 
+-## 逐步理解
+ 
+-`yobu "kiso/math";` 显式导入数学包。默认限定名来自路径末段，因此通过 `math.sqrt` 调用平方根函数。
++## 数据与类型如何跨调用传递
+ 
+-`square` 接收 `float64`，计算 12 的平方，得到 144。再把面积交给 `math.sqrt`，得到边长 12。这也是首页展示的完整代码。
++本例的 `square` 是当前包自己的函数，`math.sqrt` 是导入包的公开成员。`12.0` 在 `float64` 参数上下文中检查；返回的面积仍为 `float64`，平方根的类型参数可由这个实参推断，结果也是 `float64`。
+ 
+-**Bunko** 是标准库物理根目录；**Kiso** 对应公开的 `kiso/` 导入路径。不要写成 `yobu "bunko/kiso/math";`。只有公开的包成员可跨包访问，完整规则见 [语言参考](/docs/language)。
++注意输出 `144` 和 `12` 没有小数点，但它们不是整数类型。若已经有一个 `int64` 变量，传入此函数前要显式转换，不能把字面量上下文与变量隐式转换混为一谈。
++
++`yobu "kiso/math";` 的默认限定名取路径末段，因此调用写成 `math.sqrt(area)`。Bunko 是物理标准库根，公开导入从 `kiso/` 开始。
++
++## 包边界
++
++导入包或以目录为入口时，同目录普通 `.mio` 文件共享包级声明，子目录不会自动合并。教程明确传入单个文件路径，因此只执行这个文件及其显式依赖；不要改成 `mio run .` 来运行混放的各课例子。包级函数、类型和常量只有声明为 `koukai` 才能被其他包使用，包变量不能导出。`yobu` 是显式依赖，不会自动搜索任意第三方下载地址。
++
++本章使用已随源码提供的 `kiso/math`，没有要求你创建或发布新库。需要多文件布局、导入限制或循环依赖规则时，查模块参考；需要平方根的负数行为或类型约束时，查数学 API。
+ 
+ ## 练习
+ 
+@@ -49,4 +73,8 @@
+ 本课没有构建原生独立程序，也没有浏览器内运行步骤。Native AOT 的边界见 [Internals](/docs/v1.0/internals)。
+ 
+ 
+-> 参考边界：本页链接的旧技术正文仍是未版本化迁移资料，不构成本版本的规范或 API 签名。版本化技术参考由 Codex B 单独核验后补入。
++## 延伸阅读
++
++精确规则见 [语言参考](/docs/v1.0/reference)。本章输出对应本版本固定提交的 Go 引导 CLI / Mochi VM，验证命令与原始输出见 [验证说明](/docs/v1.0/tooling/verification)。
++
++上一课：[泛型与约束](/docs/v1.0/learn/generics)。下一课：[编写测试](/docs/v1.0/learn/testing)。
+--- /dev/null
++++ b/content/docs/v1.0/learn/strings.mdx
+@@ -0,0 +1,74 @@
++---
++title: 字符串、字节与 UTF-8
++description: 区分字节长度、Unicode 标量值和字符串构造。
++---
++
++## 学习目标与前置
++
++区分字节长度、Unicode 标量值和字符串构造。 前置：[上课：数组与空值](/docs/v1.0/learn/collections)。本章使用固定版本的 Go 引导 CLI / Mochi VM。
++
++## 为什么需要
++
++一个汉字和三个 ASCII 字母看起来是四个字符，但 UTF-8 字节数为六。文件、网络或二进制接口处理字节，文本界面往往关心 Unicode 标量值；混用这两个单位会造成索引错误。
++
++## 保存与运行
++
++在安装页的 `mio-tutorial` 目录保存为 `strings.mio`，使用该版本构建的 CLI 和同一份 `bunko/`：
++
++```sh
++./mio check strings.mio
++./mio run strings.mio
++```
++
++`check` 成功报告 `check passed`。下面是完整程序与 `run` 的标准输出，末尾包含换行。
++
++```mio title="strings.mio"
++yobu "kiso/string";
++yobu "kiso/utf8";
++kaku text = "澪Mio";
++chant(string.byte_len(text));
++chant(string.rune_count(text));
++kaku data = string.to_bytes(text);
++chant(len(data));
++chant(utf8.valid(data));
++kaku builder = string.new_builder();
++string.write_string(builder, text);
++string.write_string(builder, "!");
++chant(string.builder_string(builder));
++```
++
++```text title="output"
++6
++4
++6
++hai
++澪Mio!
++```
++
++## 逐段理解
++
++前两条输出分别是字节数与标量值数。`string.to_bytes` 复制字符串内容为独立 `[]uint8`，因此可以用数组内置 `len`。`utf8.valid` 检查字节序列是否合法，返回 `bool`，打印为 `hai`。
++
++Builder 收集两段字符串，再生成字符串结果。字符串不可变，拼接不能使用 `+`；本例通过真实库接口构造。Builder 的副本共享内部缓冲区，不能当作独立副本随意修改。
++
++`rune_count` 数的是 Unicode 标量值，不是用户感知的字素簇；组合音符与 emoji 可能含多个标量。`len(text)` 不接收字符串，字节偏移也不能直接当作第几个汉字。
++
++## 练习
++
++把字符串改为 `"Mio"`，保留其余代码。 先预测再执行 `check` 与 `run`，预期逐行输出：
++
++```text title="exercise-output"
++3
++3
++3
++hai
++Mio!
++```
++
++## 常见陷阱与核对
++
++`len` 只接受数组，字符串请用 `string.byte_len`；`rune_count` 不等于字素簇数量。Builder 的别名共享缓冲区，独立文本结果须通过 `builder_string` 取得。将字节转回文本时应使用 `from_utf8` 并检查可空结果。
++
++## 延伸阅读与下一章
++
++完整规则见 [Reference](/docs/v1.0/reference)，相关库的签名、错误约定和验证范围见 [Kiso](/docs/v1.0/kiso)。上一课：[数组与空值](/docs/v1.0/learn/collections)；下一课：[继续学习](/docs/v1.0/learn/maps)。
+--- /dev/null
++++ b/content/docs/v1.0/learn/testing.mdx
+@@ -0,0 +1,50 @@
++---
++title: 编写测试与完成学习路线
++description: 用真实测试发现规则和断言记录程序的约定。
++---
++
++## 目标、动机与前置
++
++前置：[模块与数学库](/docs/v1.0/learn/modules)。完成后你能创建可被 CLI 发现的测试包，运行它并读懂通过数量。手工看输出适合最初观察；测试把预期写成可重复的检查，后续修改时不必靠记忆核对。
++
++## 创建隔离测试目录
++
++在 `mio-tutorial` 源码根执行以下命令，再用编辑器创建 `lesson-tests/example_test.mio`。使用独立目录可避免前几课同名顶层声明被一起加载。
++
++```sh
++mkdir -p lesson-tests
++export MIO_BUNKO="$PWD/bunko"
++```
++
++```mio mode="test" title="example_test.mio"
++yobu "kiso/testing";
++waza test_answer() -> unit {
++    testing.expect(6 * 7 == 42, "answer");
++}
++```
++
++运行测试包：
++
++```sh
++./mio test ./lesson-tests --format=json --lang=en-US
++```
++
++真实输出是 JSON 报告，duration 等时间字段随执行变化。验证器实际检查 `summary.passed=1`、`summary.failed=0`、`summary.status="passed"` 及退出码 0；完整原始 JSON 保存在仓库 `verification/content-quality/results.json`。这里不把带动态时间的报告伪造成固定 stdout。
++
++## 发现规则与断言
++
++`_test.mio` 后缀让 CLI 把文件识别为测试文件。顶层 `test_` 函数须零参数、非泛型、返回 `unit`，否则不能据函数名称推断它会运行。`testing.expect` 的第一个参数是布尔条件，第二个参数是在失败时记录的信息。
++
++`expect` 记录失败后继续执行当前函数；它不抛异常，也不返回布尔值供 `chant` 使用。`kiso/testing` 依赖 `mio test` 专用宿主接口，不能把此包当作普通 `mio run` 程序。退出码 0 还可能表示没有发现测试，必须一起读数量和状态。
++
++## 练习与陷阱
++
++把计算改为 `7 * 6 == 42` 并重跑；仍应恰好有一个通过测试。然后把预期常量改为 41，观察失败信息，再恢复原文件。后一项是故意失败的反例，验证器单独断言 failed=1 和非零退出，不计为成功程序。
++
++如果是 `no_tests`，先检查文件后缀、函数签名和命令目标。若是导入错误，核对 `MIO_BUNKO` 是否指向本版包含 `kiso/` 的目录。
++
++## 后续学习
++
++你已从变量走到数据模型、闭包、泛型、标准库和测试。接下来用 [Reference](/docs/v1.0/reference) 精确查规则，按导入路径查 [Kiso](/docs/v1.0/kiso)，用 [Tooling](/docs/v1.0/tooling) 查询诊断与执行方式。每次换文档版本时同时换 CLI 和标准库。
++
++上一课：[模块与数学库](/docs/v1.0/learn/modules)。验证边界见 [验证说明](/docs/v1.0/tooling/verification)。
+--- a/content/docs/v1.0/learn/variables.mdx
++++ b/content/docs/v1.0/learn/variables.mdx
+@@ -2,6 +2,23 @@
+ title: 变量与类型
+ description: 用 kaku 命名数据，理解静态类型与显式转换。
+ ---
++
++## 学习目标与前置
++
++完成后，你能声明和更新变量、区分推断与显式标注，并为整数与浮点混合计算选择转换。前置知识是安装页的文件保存、`check` 与 `run`。
++
++如果每次计算都直接写数值，修改输入时就要在多处查找。变量给数据一个名字；静态类型则让编译器在运行前发现把单价当成计数等不合法操作。
++
++## 保存与运行
++
++在安装页的 `mio-tutorial` 源码根目录，把下面程序保存为 `variables.mio`；保持 `bunko/` 可用。在同一目录执行：
++
++```sh
++./mio check variables.mio
++./mio run variables.mio
++```
++
++`check` 成功报告 `check passed`；后面的 output 仅列 `run` 的标准输出，每行末尾包含换行。
+ 
+ ## 完整程序
+ 
+@@ -19,13 +36,20 @@
+ 10
+ ```
+ 
+-## 逐步理解
+ 
+-`kaku count = 3;` 从整数初始化表达式推断出 `int64`。变量可以重新赋值，但类型不能改变。执行第二行后，`count` 从 3 变为 4。
++## 从输入推导到输出
+ 
+-冒号用于显式标注类型。`price` 是 `float64`；在计算总价之前，`float64(count)` 把整数转换为浮点数。Mio 不会在整数与浮点数之间隐式转换。
++前两行处理数量：初始化给 `count` 类型 `int64`，重新赋值读取旧值 3，加一后写回 4。等号左侧是已有变量，右侧是计算，第二行不再写 `kaku`。
+ 
+-输出中的 `10` 是数值的文本表示，不表示 `total` 变成了整数。它仍然是 `float64`。
++中间两行计算总价：`price` 明确为 `float64`；`float64(count)` 创建浮点值，原来的 `count` 仍是整数。乘法两端现在同为 `float64`，推断出的 `total` 也是浮点。
++
++最后两行只负责观察结果。输出 `10` 是格式化后的文本，类型由声明与表达式决定，不能从是否出现小数点反推。
++
++## 类型规则
++
++整数字面量在没有目标类型时默认 `int64`，浮点默认 `float64`。有目标类型的字面量可以按上下文检查，例如单价的显式标注；已声明的不同数值类型变量相运算则需要转换。显式转换不是任意安全：转窄整数可能越界，整数转浮点也可能损失精度。此课只使用可精确表示的小值。
++
++本例的 `count` 不断更新，适合变量。若一个值在编译时确定且不应改写，可以在后续参考中查 `teisu` 常量。
+ 
+ ## 练习
+ 
+@@ -39,7 +63,9 @@
+ - 写成 `count * price`：两侧类型不同，必须显式转换。
+ - 使用 `let` 或 `var`：Mio 的变量声明关键字是 `kaku`。
+ 
+-精确规则见 [语言参考](/docs/language)。下一课：[条件与循环](/docs/v1.0/learn/control-flow)。
++精确规则见 [语言参考](/docs/v1.0/reference/types)。下一课：[条件与循环](/docs/v1.0/learn/control-flow)。
+ 
+ 
+-> 参考边界：本页链接的旧技术正文仍是未版本化迁移资料，不构成本版本的规范或 API 签名。版本化技术参考由 Codex B 单独核验后补入。
++## 延伸阅读
++
++精确规则见 [语言参考](/docs/v1.0/reference)。本章输出对应本版本固定提交的 Go 引导 CLI / Mochi VM，验证命令与原始输出见 [验证说明](/docs/v1.0/tooling/verification)。
+--- /dev/null
++++ b/content/docs/v1.0/reference/collections.mdx
+@@ -0,0 +1,108 @@
++---
++title: 数组、结构体、枚举与 Map
++description: 共享集合与不可变字段的精确边界。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++## 数组
++
++`[]T` 为同质数组，`[a, b]` 从左到右求值。空字面量 `[]` 需要目标类型。索引必须是 `int64`，负数或越界为运行时错误。变量赋值、传参、返回共享后备数组，元素写入及长度变化对别名可见。动态操作由 [kiso/array](/docs/v1.0/kiso/array) 提供，数组没有切片语法或相等运算。
++
++```mio fixture="arrays"
++yobu "kiso/array";
++kaku original = [1, 2];
++kaku alias = original;
++alias[0] = 9;
++array.push(alias, 3);
++chant(original[0]);
++chant(len(original));
++kaku copied = array.clone(original);
++copied[0] = 7;
++chant(original[0]);
++array.append_all(original, original);
++chant(len(original));
++array.truncate(alias, 1);
++chant(len(original));
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++9
++3
++9
++6
++1
++```
++
++当前类型系统与 VM 支持数组嵌套；旧 LANGUAGE.md 的“不支持多维数组”已过时。嵌套使用数组的数组，共享内层引用，不承诺矩阵连续布局或 Native 后端完整支持。
++
++```mio fixture="nested-array"
++kaku values: [][]int64 = [[1], [2]];
++kaku inner = values[0];
++inner[0] = 9;
++chant(values[0][0]);
++chant(len(values));
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++9
++2
++```
++
++## 结构体与枚举
++
++用户类型名须以 ASCII 大写字母开头。`kata` 字段在声明中以 `;` 或 `,` 分隔；构造字段可以任意顺序，但不能缺失、重复或增加字段。已有字段不能通过赋值修改。若字段本身是数组或 Map，该集合仍具有共享可变语义；字段不可重新赋值不等于递归深不可变。当前无字段级私有可见性。
++
++`sentaku` 变体可无数据或带数据。`awase` 必须完整覆盖每个变体且不重复；`baai` 绑定数量与关联数据一致，不支持通用模式匹配猜测。
++
++```mio fixture="composites"
++kata Pair<T> { first: T; second: T; }
++sentaku Result<T, E> { Ok(T); Err(E); }
++waza get(result: Result<int64, string>) -> int64 {
++    awase (result) {
++        baai Ok(value) { kaesu value; }
++        baai Err(message) { chant(message); kaesu 0; }
++    }
++}
++kaku pair = Pair[int64] { second: 22, first: 20 };
++chant(pair.first + pair.second);
++kaku result: Result<int64, string> = Result.Ok(7);
++chant(get(result));
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++42
++7
++```
++
++## Map
++
++类型写作 `Map<K, V>`，构造写作 `Map[K, V]()`；目标类型明确时可用 `Map()`。键只支持整数、`bool` 和 `string`；浮点、数组和复合对象不能作为键。Map 赋值和传参共享修改。`map[key] = value;` 插入或更新；读取返回 `V?`，缺键为 `mu`。当前此参考不承诺不存在于源码的遍历、删除或长度 API。
++
++```mio fixture="maps"
++kaku entries = Map[string, int64]();
++entries["answer"] = 42;
++kaku alias = entries;
++alias["answer"] = 43;
++kaku answer = entries["answer"];
++moshi (answer != mu) { chant(answer); }
++chant(entries["missing"] == mu);
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++43
++hai
++```
++
++证据：`internal/typecheck/type.go` 的 `ArrayOf`、`definitions.go`、`checker.go` 与 `internal/value/`、`internal/vm/`；拒绝字段赋值和嵌套数组成功均有 fixture。
++
++
++相关规则：[语法](/docs/v1.0/reference/syntax) · [类型](/docs/v1.0/reference/types) · [函数](/docs/v1.0/reference/functions) · [集合](/docs/v1.0/reference/collections) · [模块](/docs/v1.0/reference/modules)。
+--- /dev/null
++++ b/content/docs/v1.0/reference/functions.mdx
+@@ -0,0 +1,77 @@
++---
++title: 作用域、函数与闭包
++description: 名称解析、返回路径、递归与共享捕获。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++## 变量与词法作用域
++
++`kaku name[: T] = expression;` 必须初始化，可从表达式推断类型。后续赋值保持静态类型。每个代码块建立词法作用域，内层可遮蔽外层，同一作用域不能重复声明名称；变量必须先声明再使用。
++
++```mio fixture="scope"
++kaku value = 10;
++moshi (hai) { kaku value = 20; chant(value); }
++chant(value);
++value = value + 1;
++chant(value);
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++20
++10
++11
++```
++
++## 具名函数
++
++函数声明只能位于文件顶层。每个参数必须注明类型，返回类型使用 `-> T`。支持先调用后声明、递归和相互递归。非 `unit` 函数必须在所有静态可见路径返回正确类型；`unit` 可写 `kaesu;`，到达函数末尾也会返回。
++
++```mio fixture="functions"
++waza factorial(n: int64) -> int64 {
++    moshi (n <= 1) { kaesu 1; }
++    kaesu n * factorial(n - 1);
++}
++waza show(value: int64) -> unit { chant(value); kaesu; }
++show(factorial(5));
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++120
++```
++
++函数可读取和修改可见全局变量。因此调用之后全局 Nullable 的已有收窄可能失效；不要把“函数不会修改它”作为类型检查器会接受的假设。
++
++## 闭包与函数值
++
++闭包写作 `waza (参数) -> 返回类型 { ... }`，可以嵌套，按词法作用域捕获变量。多个闭包捕获同一可变局部变量时共享 Cell，后续赋值彼此可见。函数值可保存、传参、返回和调用；普通具名函数不能嵌套声明。
++
++```mio fixture="closures"
++waza counter() -> () -> int64 {
++    kaku n = 0;
++    kaesu waza () -> int64 { n = n + 1; kaesu n; };
++}
++kaku next = counter();
++chant(next());
++chant(next());
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++1
++2
++```
++
++## VM 资源边界
++
++`MaxValueStack = 65536`，用户调用深度最多 `1024`，单次执行默认 `10000000` 条指令。Go 嵌入 API 可提供执行选项和 context；CLI 没有由此自动获得同名命令行参数。超过限制产生错误。Native Runtime 的 Heap/调用边界需单独核验。
++
++证据：`internal/resolver/resolver.go`、`internal/typecheck/program.go`、`calls.go`、`internal/vm/vm.go`；相关目录测试的本轮执行状态见验证说明。
++
++
++相关规则：[语法](/docs/v1.0/reference/syntax) · [类型](/docs/v1.0/reference/types) · [函数](/docs/v1.0/reference/functions) · [集合](/docs/v1.0/reference/collections) · [模块](/docs/v1.0/reference/modules)。
+--- a/content/docs/v1.0/reference/index.mdx
++++ b/content/docs/v1.0/reference/index.mdx
+@@ -1,11 +1,22 @@
+ ---
+ title: Reference · 语言参考
+-description: 查询 Mio 的语法与静态类型规则。
++description: 按问题查语法、类型、调用、集合与包边界。
+ ---
+ 
+-[语言规则](/docs/language) 覆盖类型、作用域、函数、泛型与模块。
++本栏目描述 **v1.0 · Stable** 固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106` 的 Go 引导 CLI / Mochi VM 规则。规范查询不按教学顺序展开；首次学习请读 [Learn](/docs/v1.0/learn)。
+ 
+-第一次接触这些概念时，建议先阅读 [Learn 教程](/docs/v1.0/learn)；本栏目用于精确查阅。
++| 要查的问题 | 规则页 |
++| --- | --- |
++| 关键字、字面量、优先级、条件/循环 | [语法与表达式](/docs/v1.0/reference/syntax) |
++| 数值范围、显式转换、可空收窄、unit | [类型与可空类型](/docs/v1.0/reference/types) |
++| 名称与作用域、参数、返回路径、捕获 | [作用域、函数与闭包](/docs/v1.0/reference/functions) |
++| 索引、别名、字段、变体、缺失键 | [数组、结构体、枚举与 Map](/docs/v1.0/reference/collections) |
++| 类型参数、数值约束、编译期常量、导入 | [泛型、常量与模块](/docs/v1.0/reference/modules) |
+ 
++## 阅读规则
+ 
+-> 参考边界：本页链接的旧技术正文仍是未版本化迁移资料，不构成本版本的规范或 API 签名。版本化技术参考由 Codex B 单独核验后补入。
++语法资料中的方括号表示可选部分时会明确说明；完整程序使用 Mio 代码块并给出实际 stdout，签名资料不是独立程序。静态错误表示 `check` 阶段拒绝；运行时错误表示实际执行失败，不把二者混为语法错误。
++
++本文档统一使用“可空类型（Nullable）”“包（按目录组织的导入单元）”“Bunko（标准库物理根）”“Kiso（公开 kiso/ 路径）”。Mochi 文件格式版本与 Mio 语言版本独立，VM 与原生后端规则分开。
++
++验证依据与未覆盖范围见 [验证说明](/docs/v1.0/tooling/verification)。
+--- a/content/docs/v1.0/reference/meta.json
++++ b/content/docs/v1.0/reference/meta.json
+@@ -1,6 +1,11 @@
+ {
+   "title": "Reference",
+   "pages": [
+-    "index"
++    "index",
++    "collections",
++    "functions",
++    "modules",
++    "syntax",
++    "types"
+   ]
+ }
+--- /dev/null
++++ b/content/docs/v1.0/reference/modules.mdx
+@@ -0,0 +1,49 @@
++---
++title: 泛型、常量与模块
++description: 类型参数、数值约束、包加载与公开成员。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++## 泛型
++
++函数、结构体和枚举声明使用 `<T>`，函数调用/构造显式参数使用 `[T]`。静态类型标注如 `Pair<int64>` 使用尖括号。参数通常可从实参、字段或目标类型推断。
++
++函数可声明 `T: Number`、`Integer`、`Signed`、`Float` 约束：Number 是全部整数和浮点，Integer 是整数，Signed 是有符号整数与浮点，Float 是两种浮点。约束不提供隐式转换。不支持 HKT、型变或用户 trait 约束。
++
++```mio fixture="generics"
++waza first<T>(values: []T) -> T? {
++    moshi (len(values) == 0) { kaesu mu; }
++    kaesu values[0];
++}
++waza plus<T: Number>(left: T, right: T) -> T { kaesu left + right; }
++kaku item = first[int64]([7, 8]);
++moshi (item != mu) { chant(item); }
++chant(plus[float32](1.5, 2.5));
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++7
++4
++```
++
++Go 引导编译器采用泛型运行时擦除，每个泛型函数保留一份字节码，调用点静态替换类型。不要将其解释为 Native 全部泛型表示均已验收。
++
++## 编译期常量
++
++`teisu name[: T] = expression;` 只接受可折叠的字面量、常量引用、纯运算和显式数值转换。常量不可赋值，在编译期折叠，不占运行时全局槽。`koukai teisu` 可导出。
++
++## 包和导入
++
++以目录为入口或导入包时，同目录普通 `.mio` 文件合并并共享包级声明，子目录是独立包；以单个文件为入口时只加载该文件及显式导入依赖，不自动合并旁边的练习文件。加载顺序按文件名稳定排序。入口可为源文件或包目录。依赖必须显式 `yobu "kiso/math";`，限定名默认取路径末段，如 `math.sqrt(...)`。
++
++只有 `koukai` 函数、类型、常量可供包外访问，不能导出变量。标准库路径以公开命名空间 `kiso/` 开始；一般导入路径相对于 Bunko 根定位，不能加物理 `bunko/` 前缀。加载器拒绝绝对路径、路径回退、越过 Bunko 根的符号链接和循环导入，同一路径只编译一次。`mio/fs/runtime` 是注册宿主模块，不代表可任意导入 Go 包。
++
++Bunko 根查找与 `MIO_BUNKO` 见 [CLI](/docs/v1.0/tooling/cli)。`_test.mio` 与测试函数发现规则见 [kiso/testing](/docs/v1.0/kiso/testing)。
++
++证据：`internal/parser/parser.go`、`internal/typecheck/signature.go`、`definitions.go`、`internal/bunko/`、`internal/constant/` 与 `cmd/mio/main.go`。
++
++
++相关规则：[语法](/docs/v1.0/reference/syntax) · [类型](/docs/v1.0/reference/types) · [函数](/docs/v1.0/reference/functions) · [集合](/docs/v1.0/reference/collections) · [模块](/docs/v1.0/reference/modules)。
+--- /dev/null
++++ b/content/docs/v1.0/reference/syntax.mdx
+@@ -0,0 +1,102 @@
++---
++title: 语法与表达式
++description: 关键字、字面量、运算符与控制语句。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++## 词法
++
++源文件使用 UTF-8。标识符以 ASCII 字母或 `_` 开头，后续允许 ASCII 字母、数字和 `_`，区分大小写。注释使用 `//` 或 `/* ... */`。变量、赋值、表达式、导入、返回、break/continue 等语句以 `;` 结束；函数和控制流代码块不追加分号。
++
++整数为十进制，除 `0` 外不允许前导零。浮点字面量支持小数和 `e`/`E` 指数。字符串为双引号，不能直接跨行，支持 `\n`、`\r`、`\t`、`\"` 和 `\\`。单引号 rune 必须是一个 Unicode 标量值，支持字符转义及 `\xNN`、`\uNNNN`、`\UNNNNNNNN`。
++
++```mio fixture="lexical"
++// ASCII 标识符，Unicode 文本与 rune
++/* block comment */
++kaku text = "澪\nMio";
++chant(text);
++chant('A');
++chant(2.5e1);
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++澪
++Mio
++65
++25
++```
++
++## 关键字
++
++| 拼写 | 用途 |
++| --- | --- |
++| `kaku` / `teisu` | 变量 / 编译期常量 |
++| `waza` / `kaesu` | 函数或闭包 / 返回 |
++| `moshi` / `sore` | 条件 / 否则 |
++| `aida` / `nukeru` / `tsuzuku` | 循环 / 退出当前循环 / 继续当前循环 |
++| `hai` / `iie` / `mu` | 真 / 假 / 空值 |
++| `kata` / `sentaku` | 结构体 / 枚举 |
++| `awase` / `baai` | 枚举匹配 / 分支 |
++| `yobu` / `koukai` | 导入 / 导出 |
++
++以上 18 个词来自 CLI 使用的 `token.V05` 关键字表；类型名和 `chant`、`len` 不属于关键字。
++
++## 表达式与优先级
++
++表达式包括字面量、名称、分组、一元/二元运算、调用、索引、字段、数组/结构体构造和闭包。赋值是语句，不是可嵌套的赋值表达式。
++
++解析器优先级由高到低：`.` → `[]` → `()` → 一元 `-`/`!` → `*`/`/` → `+`/`-` → `<`/`<=`/`>`/`>=` → `==`/`!=` → `&&` → `||`。二元运算符左结合；后缀成员、索引与调用可连续组合。
++
++算术两侧必须是同一数值类型；`!`、`&&`、`||` 要求 `bool`，后两者短路。整数除法向零截断。无 `%`、`++`、`+=`、位运算或字符串 `+` 运算符。
++
++```mio fixture="operators"
++chant(2 + 3 * 4);
++chant(7 / 2);
++chant(!iie && (hai || iie));
++kaku calls = 0;
++waza touch() -> bool { calls = calls + 1; kaesu hai; }
++chant(iie && touch());
++chant(hai || touch());
++chant(calls);
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++14
++3
++hai
++iie
++hai
++0
++```
++
++## 控制语句
++
++`moshi (condition) { ... } sore { ... }` 中 `sore` 可省略；条件必须是 `bool`。`aida (condition) { ... }` 也是 bool 条件；`nukeru;` 和 `tsuzuku;` 只能出现在循环中。枚举使用 [awase](/docs/v1.0/reference/collections)，没有 C 风格 `for` 语法。
++
++```mio fixture="control"
++kaku i = 0;
++kaku sum = 0;
++aida (i < 5) {
++    i = i + 1;
++    moshi (i == 2) { tsuzuku; }
++    moshi (i == 5) { nukeru; }
++    sum = sum + i;
++}
++chant(sum);
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++8
++```
++
++证据：`internal/parser/precedence.go`、`parser.go`，`internal/lexer/lexer.go` 与 `internal/token/token.go`。
++
++
++相关规则：[语法](/docs/v1.0/reference/syntax) · [类型](/docs/v1.0/reference/types) · [函数](/docs/v1.0/reference/functions) · [集合](/docs/v1.0/reference/collections) · [模块](/docs/v1.0/reference/modules)。
+--- /dev/null
++++ b/content/docs/v1.0/reference/types.mdx
+@@ -0,0 +1,84 @@
++---
++title: 类型与 Nullable
++description: 精度、转换、可空值和受信任资源类型。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++## 数值类型
++
++| 类型 | 表示 |
++| --- | --- |
++| `int8` / `int16` / `int32` / `int64` | 对应位宽的有符号整数 |
++| `uint8` / `uint16` / `uint32` | 对应位宽的无符号整数 |
++| `rune` | `int32` 别名，字符字面量默认类型 |
++| `float32` / `float64` | IEEE 754 binary32 / binary64 |
++
++没有公开 `uint64` 类型；本版本二进制库没有 V2 的 `U64`、Reader 或 Writer API。没有类型上下文的整数字面量默认 `int64`，浮点默认 `float64`。目标整数上下文进行字面量范围检查，目标 `float32` 上下文直接舍入到 binary32。
++
++整数加减乘和有符号取负按位宽回绕，最小有符号值除 `-1` 仍为最小值；整数除零是运行时错误。整数与浮点、不同位宽/符号之间均无隐式转换。`int8(...)` 等显式整数转换检查范围；浮点转整数向零截断，NaN、Infinity 和越界会报错。整数转浮点可能丢失精度。
++
++浮点每步按自身精度舍入。浮点除零可产生 Infinity 或 NaN；NaN 与自身也不相等，除 `!=` 外数值比较均为假。正负零相等。
++
++```mio fixture="numbers"
++kaku small: int8 = 127;
++chant(small + int8(1));
++kaku f: float32 = 1.5;
++chant(float64(f));
++chant(int64(-2.75));
++teisu answer: int64 = 6 * 7;
++chant(answer);
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++-128
++1.5
++-2
++42
++```
++
++## bool 与 string
++
++`bool` 使用 `hai` / `iie`。`string` 为不可变 UTF-8 字符串，语言运算符只支持字符串 `==` / `!=`。字节转换、拼接、查找、Builder 见 [kiso/string](/docs/v1.0/kiso/string)。字符输出是整数，文本输出应使用字符串或 UTF-8 编码 API。
++
++## 可空类型
++
++`T?` 接受 `T` 或 `mu`；`T` 可以赋给 `T?`，反向必须先收窄。`kaku value = mu;` 无法推断类型。`unit?` 和重复可空 `T??` 不合法。
++
++`value != mu` 真分支及 `value == mu` 假分支可收窄可靠的变量引用。赋值会使相关事实失效；函数调用使可能受副作用影响的全局事实失效。数组索引/可变字段引用不能当作持久事实，应先读入局部变量再检查。
++
++`[]T?` 是非空数组、可空元素；`([]T)?` 是可空数组、非空元素。
++
++```mio fixture="nullable"
++kaku age: int64? = mu;
++chant(age == mu);
++age = 18;
++moshi (age != mu) { chant(age + 1); }
++kaku values: []int64? = [10, mu];
++kaku item = values[0];
++moshi (item != mu) { chant(item); }
++kaku optional: ([]int64)? = [7];
++moshi (optional != mu) { chant(len(optional)); }
++```
++
++预期 stdout（逐字节匹配，末尾有换行）：
++
++```text title="output"
++hai
++19
++10
++1
++```
++
++## unit、函数和资源
++
++`unit` 是无返回值函数的返回类型，不能保存、作为参数或传给 `chant`。函数类型写作 `(T, U) -> R`，见 [函数与闭包](/docs/v1.0/reference/functions)。
++
++`resource` 是 MMA 的不透明宿主句柄类型。`kiso/fs.File.handle` 使用此类型；普通 Mio 源码不能构造受信任资源。它不是任意地址或可手工创建的文件描述符。`[]resource` 被类型检查器拒绝。
++
++证据：`internal/typecheck/type.go`、`signature.go`、`definitions.go`、`nullable.go`、`builtin.go`，`internal/vm/vm.go` 与 `mma/resource.go`。
++
++
++相关规则：[语法](/docs/v1.0/reference/syntax) · [类型](/docs/v1.0/reference/types) · [函数](/docs/v1.0/reference/functions) · [集合](/docs/v1.0/reference/collections) · [模块](/docs/v1.0/reference/modules)。
+--- /dev/null
++++ b/content/docs/v1.0/tooling/cli.mdx
+@@ -0,0 +1,80 @@
++---
++title: Mio CLI 与编译流程
++description: 实际命令、诊断选项、Bunko 发现与退出码。
++---
++
++**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
++
++本页描述快照中的 Go 引导 CLI，版本字符串为 `Mio 1.0.0-beta.2`。命令由 `cmd/mio/main.go`、`test_command.go` 解析，不据帮助标题推断未实现参数。
++
++## 命令
++
++| 命令 | 行为 |
++| --- | --- |
++| `mio version` | 输出版本字符串 |
++| `mio help`、`mio -h`、`mio --help` | 输出用法 |
++| `mio check <file-or-directory>` | 加载包、折叠常量、解析名称、检查类型；成功输出 `check passed` |
++| `mio run <file-or-directory>` | 同上，再生成字节码并在 VM 中运行 |
++| `mio build <source> [-o <file.mochi>]` | 验证并原子写入 Mochi 文件，成功无 stdout；也接受 `build -o <output> <source>` |
++| `mio exec <file.mochi>` | 解码验证并在 VM 执行 |
++| `mio disasm <file.mochi>` | 解码验证，输出 globals、constants、instructions、functions/captures |
++| `mio test <directory-or-./...>` | 发现并运行 Mio 测试包 |
++
++build 不指定 -o 时，用入口路径去掉扩展名后加 `.mochi`。输出目录必须存在。这里的 build 生成字节码；生成 ARM64 Mach-O 使用下文独立工具。
++
++run/exec 除 chant 外，还会打印 VM 最后保存的普通表达式值；不要把任意表达式语句当作完全没有 stdout 的操作。run 不接受入口之后的程序参数。没有 `mio native`、`--release`、`--watch`、`--heap-mib` 等推断出的主 CLI 参数。
++
++本版未提供 `mio lsp` 命令；以该命令启动会输出用法并退出 2。语言服务来自后续开发线，不能按 V2 文档配置为 V1 内置能力。
++
++## 诊断
++
++check/run 支持以下精确写法，可放在路径前后：
++
++```sh
++mio check --format=json --color=never main.mio
++mio run main.mio --format=short --verbose
++```
++
++- `--color=auto|always|never`
++- `--format=human|short|json`
++- `--verbose`
++
++这是 `--name=value` 形式，不能擅自改为两个参数。build/exec/disasm 没有接入这些选项。诊断写 stderr，正常输出写 stdout。JSON 含 code、severity、message、location，以及存在时的 path、labels、notes、helps、expected/actual；当前只报告第一条失败，不能假定总有可靠成员源文件位置。
++
++主 CLI：成功 exit 0，编译/加载/执行错误 exit 1，未知命令、缺参数或不合法命令结构 exit 2。test 发现不到测试可 exit 0 且 summary.status=no_tests；因此不能只凭 exit 0 声称测试执行过。
++
++## 测试
++
++```sh
++mio test ./bunko/kiso/math --run='^test_' --lang=en-US --format=json
++```
++
++参数支持 `--run=<regexp>`、`--lang=zh-CN|ja-JP|en-US` 及上述诊断选项；recursive 目标使用 `./...`。函数发现与测试专用宿主接口见 [kiso/testing](/docs/v1.0/kiso/testing)。JSON 报告含 schema_version、packages 与 summary；duration 随执行变化。实际命中数量、failed 和 status 必须共同检查。
++
++## Bunko 根目录
++
++优先使用环境变量 `MIO_BUNKO`。否则从入口路径所在目录向祖先查找存在的 `bunko/`；没有则使用工作目录相对路径 `bunko`。导入始终写 `kiso/...`，环境变量应指向包含 kiso 的物理根。
++
++```sh
++MIO_BUNKO=/absolute/path/to/mio/bunko mio run main.mio
++```
++
++## 从源码构建
++
++在对应 Mio 核心源码目录执行：
++
++```sh
++go build -o /tmp/mio ./cmd/mio
++/tmp/mio version
++/tmp/mio check examples/recursion.mio
++```
++
++go.mod 声明 `go 1.22.2`；本轮实际使用的 Go/OS/架构及二进制 SHA256 见 [验证报告](/docs/v1.0/tooling/verification)。这是构建所核验的源码，不代表所有发布资产具有相同文件布局。
++
++## 原生工具链支持边界
++
++本正式标签没有 `cmd/mochi-aot`、`internal/aot` 或 `kiso/aot`。不要执行 V2 开发文档中的 Go AOT 构建命令，也不要把 `mio build` 生成的 Mochi 文件当作系统可执行文件。V1 的可重现执行路径是 `mio run` 或 `build → exec`，均使用 Go 引导 CLI / Mochi VM。
++
++## 来源
++
++`cmd/mio/main.go`、`cmd/mio/test_command.go`、`internal/tester/tester.go`。shell 片段是调用说明；验证器另以参数数组执行等价命令并记录结果，不把说明本身作为实测证据。
+--- /dev/null
++++ b/content/docs/v1.0/tooling/editors.mdx
+@@ -0,0 +1,18 @@
++---
++title: V1 编辑器接入边界
++description: 区分编辑器语法支持、CLI 诊断与未提供的内置语言服务。
++---
++
++本版语言工具链固定到 `51f1ba883767c1fc08ba415fbb0075316ff03106`。独立 VS Code / JetBrains 项目的源码资料见仓库 `verification/editor-sources.json`，但本轮未运行其 IDE 客户端、安装包或针对 V1 的兼容性测试。
++
++## 可重现的开发方式
++
++用支持 UTF-8 的编辑器保存 `.mio`，在终端使用本版 `mio check main.mio` 和 `mio run main.mio`。诊断格式和执行步骤见 [CLI](/docs/v1.0/tooling/cli)。语法着色和文件关联属于编辑器配置，不能据此推断语义补全、引用或跨文件分析可用。
++
++## 语言服务限制
++
++V1 CLI 没有 `mio lsp`。配置一个调用该命令的编辑器服务器不会使服务出现，不能用 V2 的能力列表承诺 V1 用户会得到相同体验。也不能把插件当前版本与核心 CLI 的版本字符串视为同一版本。
++
++若使用独立插件，应依据其真实说明核对核心要求。此页不提供未经实测的 Marketplace 版本或兼容安装承诺；手工 CLI 流程不依赖插件。
++
++[语言服务支持边界](/docs/v1.0/tooling/lsp) · [验证说明](/docs/v1.0/tooling/verification)。
+--- a/content/docs/v1.0/tooling/index.mdx
++++ b/content/docs/v1.0/tooling/index.mdx
+@@ -1,13 +1,16 @@
+ ---
+ title: Tooling · 开发工具
+-description: 找到 CLI、编辑器与语言服务的使用资料。
++description: 查询 CLI、诊断、测试、语言服务与验证流程。
+ ---
+ 
+-- [安装与 CLI 基础流程](/docs/v1.0/getting-started)
+-- [编辑器集成](/docs/editors)
+-- [MioCore LSP 技术资料](/docs/lsp)
++使用与 **v1.0 · Stable** 固定提交一致的 CLI 和 Bunko。首次安装见 [Getting Started](/docs/v1.0/getting-started)。
+ 
+-编辑器与 LSP 页面记录项目资料；存在技术资料不代表插件或特定能力已经发布。安装与兼容性应以相应仓库的发布记录为准。
++| 任务 | 资料 |
++| --- | --- |
++| check/run/build/exec/disasm、诊断、退出码 | [CLI](/docs/v1.0/tooling/cli) |
++| 编写并运行测试包 | [测试教程](/docs/v1.0/learn/testing)、[testing API](/docs/v1.0/kiso/testing) |
++| 确认本版未提供内置语言服务 | [V1 语言服务边界](/docs/v1.0/tooling/lsp) |
++| VS Code / JetBrains 源码接入及兼容限制 | [编辑器](/docs/v1.0/tooling/editors) |
++| 重跑示例、查看来源及未覆盖范围 | [验证说明](/docs/v1.0/tooling/verification) |
+ 
+-
+-> 参考边界：本页链接的旧技术正文仍是未版本化迁移资料，不构成本版本的规范或 API 签名。版本化技术参考由 Codex B 单独核验后补入。
++编辑器是独立项目，其源码版本不等于核心版本。此轮未运行 IDE 客户端验收或查询插件市场发布状态，不能据此推荐一个已验证兼容的插件版本。
+--- /dev/null
++++ b/content/docs/v1.0/tooling/lsp.mdx
+@@ -0,0 +1,16 @@
++---
++title: V1 语言服务支持边界
++description: 正式标签未包含 MioCore LSP，不提供 V2 命令和能力承诺。
++---
++
++V1.0 Stable 固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106` 没有 `internal/lsp` 包，CLI 不识别 `mio lsp`。
++
++## 实际行为
++
++执行 `mio lsp --stdio` 会输出 CLI 用法并退出 2，不能与编辑器建立 stdio 语言服务连接。本轮验证器保存此命令的实际结果。V1 可以使用 `mio check`、`run`、`build` 和 `test` 等本版命令，见 [CLI](/docs/v1.0/tooling/cli)。
++
++## 与开发版的区别
++
++MioCore LSP 是 V2 固定开发快照中的实现，不属于这个正式标签的能力保证。需要查看开发版时，应显式切换文档与核心源码，不能把 V2 的语言服务说明倒写到 V1。
++
++[编辑器接入边界](/docs/v1.0/tooling/editors) · [验证记录](/docs/v1.0/tooling/verification)。
+--- a/content/docs/v1.0/tooling/meta.json
++++ b/content/docs/v1.0/tooling/meta.json
+@@ -1,6 +1,10 @@
+ {
+   "title": "Tooling",
+   "pages": [
+-    "index"
++    "index",
++    "cli",
++    "editors",
++    "lsp",
++    "verification"
+   ]
+ }
+--- /dev/null
++++ b/content/docs/v1.0/tooling/verification.mdx
+@@ -0,0 +1,43 @@
++---
++title: 内容验证与版本证据
++description: 重现固定提交上的程序、反例、测试包及 API 声明核对。
++---
++
++本版本来源为 `51f1ba883767c1fc08ba415fbb0075316ff03106`，文档状态 **Stable**。CLI 应输出 `Mio 1.0.0-beta.2`；CLI 字符串和正式发布身份分别记录。
++
++## 本轮复跑
++
++在 mio-docs 根目录执行，需 Python 3.12+（tarfile 安全过滤）、Git、Go 和 Node.js；核心仓库只用于读取已存在的提交对象：
++
++```sh
++python3 scripts/check-content-quality.py --core /absolute/path/to/mio
++npm run check:versions
++npm run check:links
++```
++
++验证器用 `git archive` 分别取 V1/V2 精确提交，在系统临时目录构建 CLI，设置指向该归档的 `MIO_BUNKO`。不读取工作树未提交编译器改动，不更新历史冻结锁。已有的技术验证器 `check-reference.py` 对应另一份来源，不能用其工作树结果替代这里的版本证据。
++
++## 检查对象与判定
++
++- 普通完整 Mio 代码块：依次执行 check、run、build、exec、disasm。run/exec 与页面期望 stdout 逐字节匹配，包括末尾换行。
++- 标记 `mode="test"` 的测试代码块：保存 `_test.mio`，执行 mio test，读取结构化数量与状态。动态 duration 不假装固定输出。
++- 练习：原五课变换及新增练习独立运行；故意失败的断言另验证退出码与 failed 数量。
++- 拒绝/运行时失败反例：按 fixture 的实际退出码、JSON 诊断和消息片段检查；预期失败与验证器故障分开。
++- API：遍历固定提交公开声明，逐条核对本版本页面里的原始签名。声明一致不是全部参数组合或所有错误分支已通过。
++
++## 证据文件
++
++| 文件（仓库相对路径） | 内容 |
++| --- | --- |
++| `verification/content-quality/AUDIT.md` | 修改前审计与优先级 |
++| `verification/content-quality/baseline.json` | 修改前逐页内容哈希与清单 |
++| `verification/content-quality/compatibility-baseline.json` | 两版本旧 fixture 的真实兼容性执行 |
++| `verification/content-quality/results.json` | 本轮完整命令、环境、源码哈希、二进制哈希、stdout/stderr、退出码与预期 |
++| `verification/content-quality/RESULT.md` | 最终结果、失败与保留问题 |
++| `content/QUALITY_SOURCES.json` | 修订页面与版本来源的映射 |
++
++V1 公开正文仍受历史锁保护；待审勘误只放在 `.docs-drafts/corrections/v1.0`，验证草稿通过也不代表维护者已批准发布。V2 是开发预览，验证不产生新的语言 Release。
++
++## 未覆盖范围
++
++本轮不重跑完整 Compiler A→B、自举固定点、Native AOT/GC 专项、IDE 客户端或全平台测试。此前验证记录的 Go AOT/GC 结果保留其原始来源和时间，不改标为本轮执行。M17e 尚未验收，M18 尚未启动。

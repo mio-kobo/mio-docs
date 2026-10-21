@@ -1,0 +1,236 @@
+---
+title: kiso/math
+description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+---
+
+**版本范围：V2.0.0 · RC4 审阅快照（尚未发布）**。来源为 RC4 的 source-manifest 与包内 BUILD-INFO；HEAD 加未提交来源共同构成候选，不能只检出 HEAD。正文示例默认走包内 CLI / VM。
+
+数值泛型约束见语言参考。浮点 API 同时支持 float32 / float64，无隐式转换；pi/tau 的 32/64 常量类型按声明区分，编译期折叠。
+
+支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v2.0.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v2.0.0/internals/native-aot) 单独评估。
+
+## 公开类型与常量
+
+以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
+
+```text
+koukai teisu pi32: float32 = 3.14159265358979323846264338327950288419716939937510;
+
+koukai teisu pi64: float64 = 3.14159265358979323846264338327950288419716939937510;
+
+koukai teisu tau32: float32 = 6.28318530717958647692528676655900576839433879875021;
+
+koukai teisu tau64: float64 = 6.28318530717958647692528676655900576839433879875021;
+```
+
+## 函数索引
+
+[min](#min) · [max](#max) · [checked_abs](#checked_abs) · [abs](#abs) · [clamp](#clamp) · [sqrt](#sqrt) · [floor](#floor) · [ceil](#ceil) · [round](#round) · [trunc](#trunc) · [is_nan](#is_nan) · [is_inf](#is_inf) · [is_finite](#is_finite) · [checked_gcd](#checked_gcd) · [gcd](#gcd) · [checked_lcm](#checked_lcm) · [lcm](#lcm)
+
+## 函数
+
+签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
+
+### min
+
+```text
+koukai waza min<T: Number>(left: T, right: T) -> T
+```
+
+参数：`left`：左侧输入；`right`：右侧输入。
+
+返回 left/right 较小值；传播 NaN，相等零选择负零。
+
+### max
+
+```text
+koukai waza max<T: Number>(left: T, right: T) -> T
+```
+
+参数：`left`：左侧输入；`right`：右侧输入。
+
+返回 left/right 较大值；传播 NaN，相等零选择正零。
+
+### checked_abs
+
+```text
+koukai waza checked_abs<T: Signed>(value: T) -> T?
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+返回 value 的绝对值；有符号整数最小值无法表示时返回 mu。
+
+### abs
+
+```text
+koukai waza abs<T: Signed>(value: T) -> T
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+返回 value 的绝对值；无法表示时运行时错误。无符号类型不满足 Signed。
+
+### clamp
+
+```text
+koukai waza clamp<T: Number>(value: T, lower: T, upper: T) -> T
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下；`lower`：下界（含）；`upper`：上界（含）。
+
+返回 value 限制到 lower..upper 的值；lower > upper 报运行时错误。
+
+### sqrt
+
+```text
+koukai waza sqrt<T: Float>(value: T) -> T
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+返回 value 平方根；负输入按浮点语义产生 NaN。
+
+### floor
+
+```text
+koukai waza floor<T: Float>(value: T) -> T
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+向负无穷取整，返回同一浮点类型。
+
+### ceil
+
+```text
+koukai waza ceil<T: Float>(value: T) -> T
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+向正无穷取整，返回同一浮点类型。
+
+### round
+
+```text
+koukai waza round<T: Float>(value: T) -> T
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+返回最接近整数的同类型浮点数，正中间使用 ties-to-even。
+
+### trunc
+
+```text
+koukai waza trunc<T: Float>(value: T) -> T
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+向零截断，返回同一浮点类型。
+
+### is_nan
+
+```text
+koukai waza is_nan<T: Float>(value: T) -> bool
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+返回 value 是否 NaN。
+
+### is_inf
+
+```text
+koukai waza is_inf<T: Float>(value: T) -> bool
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+返回 value 是否任一符号 Infinity。
+
+### is_finite
+
+```text
+koukai waza is_finite<T: Float>(value: T) -> bool
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+返回 value 是否有限。
+
+### checked_gcd
+
+```text
+koukai waza checked_gcd(left: int64, right: int64) -> int64?
+```
+
+参数：`left`：左侧输入；`right`：右侧输入。
+
+同 gcd，但结果无法表示返回 mu。
+
+### gcd
+
+```text
+koukai waza gcd(left: int64, right: int64) -> int64
+```
+
+参数：`left`：左侧输入；`right`：右侧输入。
+
+返回 left/right 非负最大公约数；结果无法用 int64 表示时报错。
+
+### checked_lcm
+
+```text
+koukai waza checked_lcm(left: int64, right: int64) -> int64?
+```
+
+参数：`left`：左侧输入；`right`：右侧输入。
+
+零输入返回 0；绝对值、中间 gcd 或乘积无法表示则返回 mu。
+
+### lcm
+
+```text
+koukai waza lcm(left: int64, right: int64) -> int64
+```
+
+参数：`left`：左侧输入；`right`：右侧输入。
+
+返回 left/right 非负最小公倍数；溢出报运行时错误。
+
+## 完整示例
+
+```mio fixture="math"
+yobu "kiso/math";
+chant(math.gcd(54, 24));
+chant(math.lcm(6, 8));
+chant(math.clamp(12, 0, 10));
+chant(math.sqrt[float64](9.0));
+chant(math.round[float32](2.5));
+chant(math.checked_abs[int8](-128) == mu);
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+6
+24
+10
+3
+2
+hai
+```
+
+## 源码
+
+- `bunko/kiso/math/compare.mio`
+- `bunko/kiso/math/constants.mio`
+- `bunko/kiso/math/float.mio`
+- `bunko/kiso/math/integer.mio`
+
+公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/v2.0.0/results.json`。声明一致性不代表全部行为分支已经执行。
+
+精确来源：[bunko/kiso/math/compare.mio](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/math/compare.mio) · [bunko/kiso/math/constants.mio](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/math/constants.mio) · [bunko/kiso/math/float.mio](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/math/float.mio) · [bunko/kiso/math/integer.mio](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/math/integer.mio)。

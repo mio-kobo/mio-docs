@@ -1,0 +1,18 @@
+---
+title: V1 编辑器接入边界
+description: 区分编辑器语法支持、CLI 诊断与未提供的内置语言服务。
+---
+
+本版语言工具链固定到 `51f1ba883767c1fc08ba415fbb0075316ff03106`。独立 VS Code / JetBrains 项目的源码资料见仓库 `verification/editor-sources.json`，但本轮未运行其 IDE 客户端、安装包或针对 V1 的兼容性测试。
+
+## 可重现的开发方式
+
+用支持 UTF-8 的编辑器保存 `.mio`，在终端使用本版 `mio check main.mio` 和 `mio run main.mio`。诊断格式和执行步骤见 [CLI](/docs/v1.0/tooling/cli)。语法着色和文件关联属于编辑器配置，不能据此推断语义补全、引用或跨文件分析可用。
+
+## 语言服务限制
+
+V1 CLI 没有 `mio lsp`。配置一个调用该命令的编辑器服务器不会使服务出现，不能用 V2 的能力列表承诺 V1 用户会得到相同体验。也不能把插件当前版本与核心 CLI 的版本字符串视为同一版本。
+
+若使用独立插件，应依据其真实说明核对核心要求。此页不提供未经实测的 Marketplace 版本或兼容安装承诺；手工 CLI 流程不依赖插件。
+
+[语言服务支持边界](/docs/v1.0/tooling/lsp) · [验证说明](/docs/v1.0/tooling/verification)。

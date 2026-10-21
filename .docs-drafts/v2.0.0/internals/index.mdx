@@ -1,0 +1,16 @@
+---
+title: Internals · 执行系统与内部实现
+description: 按容器、虚拟机、原生后端和内存管理区分实现边界。
+---
+
+本栏目解释 **V2.0.0 RC4**的实现。API 用户优先查询 [Reference](/docs/v2.0.0/reference) 和 [Kiso](/docs/v2.0.0/kiso)，后端开发再阅读内部布局。
+
+| 层次 | 内容 |
+| --- | --- |
+| 序列化与 VM | [Mochi 文件格式、版本门槛和验证](/docs/v2.0.0/internals/mochi) |
+| 原生执行 | [Go AOT 与纯 Mio lowering 的边界](/docs/v2.0.0/internals/native-aot) |
+| 内存生命周期 | [对象表示、精确根与 GC](/docs/v2.0.0/internals/gc) |
+
+Mochi 字节码文件不是原生可执行文件。Go VM 的内存由宿主管理；Native Runtime 的 Heap、根协议和 GC 是另一套执行环境。本教程的 VM 程序通过不证明 Native 后端接受相同程序。
+
+M17e / M18 已有本地核心验收证据，尚未正式发布。WebAssembly Playground 无发布支持证据。每项状态都须结合具体后端、提交和实际执行证据。

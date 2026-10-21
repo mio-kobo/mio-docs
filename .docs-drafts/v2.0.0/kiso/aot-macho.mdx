@@ -1,0 +1,127 @@
+---
+title: kiso/aot/macho
+description: V2.0.0 RC4的签名、输入单位、结果与错误协议。
+---
+
+**V2.0.0 RC4 审阅快照（尚未发布）**，来源锁见 `verification/v2.0.0/rc4-source-manifest.json`。**V1.0 不提供本包**。公开声明不代表稳定 API；本页仅承诺此快照已有声明及明确列出的验证。
+
+按当前 Darwin ARM64 镜像布局规划和生成未签名 Mach-O 字节。它不是跨平台系统链接器；调用方仍须检查 ImageResult.error 并处理落盘和签名。code_size/const_size 是字节数，globals 是槽数。
+
+## 导入与检索
+
+导入路径为 `kiso/aot/macho`。以下签名不是可执行程序，参数名和类型逐字保留源码；函数行为与错误分开查阅。
+
+`MachOError` · `AddressTarget` · [text_target](#text_target) · [const_target](#const_target) · [data_target](#data_target) · `AddressPatch` · `Section` · `Symbol` · `Relocation` · `Layout` · `ImageSpec` · `ImageResult` · [plan](#plan) · [executable](#executable)
+
+## 类型与常量
+
+```text
+koukai sentaku MachOError {
+    EmptyText;
+    TooManyGlobals;
+    ImageTooLarge;
+    LoadCommandsTooLarge;
+    InvalidPatch;
+    EncodeFailure;
+    WriteFailure;
+}
+
+koukai kata AddressTarget { kind: int64; }
+
+koukai kata AddressPatch { at_word: int64; add_at_word: int64; target: AddressTarget; target_offset: int64; register: int64; }
+
+koukai kata Section { segment: string; name: string; file_offset: int64; vm_offset: int64; size: int64; alignment: int64; }
+
+koukai kata Symbol { name: string; section: int64; value: int64; }
+
+koukai kata Relocation { section: int64; offset: int64; symbol: int64; pc_relative: bool; width: int64; }
+
+koukai kata Layout { text_size: int64; const_offset: int64; data_offset: int64; linkedit_offset: int64; file_size: int64; sections: []Section; }
+
+koukai kata ImageSpec { words: []uint32; constants: []uint8; globals: int64; patches: []AddressPatch; }
+
+koukai kata ImageResult { bytes: []uint8; layout: Layout; error: MachOError?; }
+```
+
+类型字段为实际公开布局；复制含数组字段的值仍共享数组。不得把公开字段解释为可安全伪造内部状态的许可。
+
+## 函数
+
+### text_target
+
+```text
+koukai waza text_target() -> AddressTarget
+```
+
+参数：无。
+
+返回 kind=0 的文本段地址目标。
+
+[源码：macho.mio:19](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/macho/macho.mio#L19)。
+
+### const_target
+
+```text
+koukai waza const_target() -> AddressTarget
+```
+
+参数：无。
+
+返回 kind=1 的常量区地址目标。
+
+[源码：macho.mio:20](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/macho/macho.mio#L20)。
+
+### data_target
+
+```text
+koukai waza data_target() -> AddressTarget
+```
+
+参数：无。
+
+返回 kind=2 的数据段地址目标。
+
+[源码：macho.mio:21](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/macho/macho.mio#L21)。
+
+### plan
+
+```text
+koukai waza plan(code_size: int64, const_size: int64, globals: int64) -> Layout
+```
+
+参数：`code_size`：代码字节数；`const_size`：常量区字节数；`globals`：全局槽位数量。
+
+根据代码/常量字节数和全局槽数计算 Layout；这是布局规划，不是可执行文件验证或写入。调用方应给出有效非负大小并让 executable 完成检查。
+
+[源码：macho.mio:40](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/macho/macho.mio#L40)。
+
+### executable
+
+```text
+koukai waza executable(spec: ImageSpec) -> ImageResult
+```
+
+参数：`spec`：镜像输入：指令、常量、全局槽与地址补丁。
+
+按 ImageSpec 生成 ImageResult，成功 bytes 为未签名镜像；EmptyText、TooManyGlobals、ImageTooLarge、LoadCommandsTooLarge、InvalidPatch、EncodeFailure 等通过 error 返回。
+
+[源码：macho.mio:149](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/macho/macho.mio#L149)。
+
+## 最小示例与验证范围
+
+保存为 `main.mio`，使用本版本的 `mio check main.mio` 与 `mio run main.mio`；输出逐字节记录。此例只验证下面使用的接口，不覆盖本包所有编码或 Runtime 分支。
+
+```mio title="main.mio"
+yobu "kiso/aot/macho";
+chant(macho.text_target().kind);
+chant(macho.const_target().kind);
+chant(macho.data_target().kind);
+```
+
+```text title="output"
+0
+1
+2
+```
+
+完整输入哈希、命令及输出见仓库 `verification/v2.0.0/results.json`。声明资料与执行覆盖分别记录；没有在此证明原生代码执行或 Compiler A→B 验收。

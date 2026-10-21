@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "version": "v1.0",
+  "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+  "review": {
+    "status": "pending",
+    "approved": false,
+    "evidence": "verification/content-quality/results.json"
+  },
+  "frozenLockSha256": "2b42a267287c36c733ad27d995c53e9336d3db0c07017d361658f1335757cf20",
+  "files": [
+    {
+      "target": "content/docs/v1.0/getting-started.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/getting-started.mdx",
+      "operation": "modify",
+      "beforeSha256": "355506ad448dc2cc855f5f7e8dab02ac35e817aea8bfc9ad5357e637602bd1e8",
+      "afterSha256": "7ef1ea313aad523484f451e520b83c8bac268e80d4a3ef6dc8bdfe3d9326928c"
+    },
+    {
+      "target": "content/docs/v1.0/index.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/index.mdx",
+      "operation": "modify",
+      "beforeSha256": "8e831a365592583090951bf4b0572b3d986423e315e271e2c8b6742f7bbaf68d",
+      "afterSha256": "6f19e16966e3b4f967dce79bab9910047e8c4f257af954973de8f680208d26e0"
+    },
+    {
+      "target": "content/docs/v1.0/internals/gc.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/internals/gc.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "fbf7a222a951b6c6ac9730a80df7cfe413bf3da28b473db1e9b75433ac26662b"
+    },
+    {
+      "target": "content/docs/v1.0/internals/index.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/internals/index.mdx",
+      "operation": "modify",
+      "beforeSha256": "b2cba1494623f50eeef65c2570cfb75439715b52b86774c5a5e22f5903653cc6",
+      "afterSha256": "e405c4c3848adf4329c72bd0b4900d2e8baedde4c6b83a1259e0e6ff95bebdea"
+    },
+    {
+      "target": "content/docs/v1.0/internals/meta.json",
+      "draft": ".docs-drafts/corrections/v1.0/internals/meta.json",
+      "operation": "modify",
+      "beforeSha256": "afb5753d9600594fda27d56ee23cbaa1b110511930f0f64115e7a48881d66d3a",
+      "afterSha256": "0953e2db7dcc10286e479d59b40ec49639a2c58e25d43b478e37c6523ca49298"
+    },
+    {
+      "target": "content/docs/v1.0/internals/mochi.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/internals/mochi.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "f2e1118438e4227ac3999bc91c2f9167acfafb333afb8f5c0b23f98dc9db93d9"
+    },
+    {
+      "target": "content/docs/v1.0/internals/native-aot.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/internals/native-aot.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "6ef0a3d8ec719ad17ed39cd77359bba5e4fbf045bb201da7293a2325ab3283fd"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/array.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/array.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "ef7ac567701899420793acf66fbcc31aa457903abd6bbeee1d9d0c0c37e3b4d3"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/bytes.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/bytes.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "81ccfbeb047e9013be7bc2cf4bf3420e227351244f7f01a8b2db35940eee06f4"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/convert.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/convert.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "108197bd5fd7868664932d1025d3d8de634130486ece2a418c4aa0f269f7efca"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/encoding-binary.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/encoding-binary.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "aa30015b2f70fbb3e35575db2c0d01f18d99c5d41945ce5fd1b89e5ca84658bc"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/fs.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/fs.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "452b0abb8760a60bb6794603af73d51831164b55a884123f54b2c5a1a9f7c431"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/index.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/index.mdx",
+      "operation": "modify",
+      "beforeSha256": "52b6d995150ceb6d1a8896f07a317193da6ba5b1188b1aacf645d0735696cd2f",
+      "afterSha256": "ac3ecbd833ffb1490df5c7af3f7509211913baccc404572aec888b49f8824c06"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/io.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/io.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "005285eb9962357fba54715437965dcc7fb2cad8c435101077f0b1f32b99bcef"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/math.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/math.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "fb57e0e9271334e427dc3900b6d4757edea0faa6605caba6688506227a1ddf1c"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/meta.json",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/meta.json",
+      "operation": "modify",
+      "beforeSha256": "bec915c46220ae760a6c5d7ce31a22f1720e3797dd1e0a3ba474c6a78d98f48b",
+      "afterSha256": "1728588f4e894579e8a7f6443a5436e536dbc560444b8f00b891c606e52c8e6e"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/path.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/path.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "272437b51b40b6a3247247938c3d18ae54a5eb75b5c5838d53c97ed3e696b9bb"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/string.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/string.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "ef02500f2d5d87abede802fdd783e8fd008f2b3c3e2bd5d0232030800f5ff75b"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/testing.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/testing.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "a9e6e5296e46f90553ed44147b999b65c2668924c05957f00f61b163ce867911"
+    },
+    {
+      "target": "content/docs/v1.0/kiso/utf8.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/kiso/utf8.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "780c8bd7e097a5c466437cf9ee0edceaa5e9b9698f12cbc9f249d0a0ff0f3b5f"
+    },
+    {
+      "target": "content/docs/v1.0/learn/closures.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/closures.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "aecee2aee0313f47ba5848d9075739f24146e48a56eb0f637952542393dc7184"
+    },
+    {
+      "target": "content/docs/v1.0/learn/collections.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/collections.mdx",
+      "operation": "modify",
+      "beforeSha256": "83a75e628503e80ad421b5e30927a954f19621dcecd2a930446ee8a7073db1b9",
+      "afterSha256": "0678e553aadc8a51abb8dbb7dc14b4c45bdcbeec9c403c99f914593b9b370fe7"
+    },
+    {
+      "target": "content/docs/v1.0/learn/control-flow.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/control-flow.mdx",
+      "operation": "modify",
+      "beforeSha256": "891947a8526523437653ce5002a2fc10466cf665839a11f59af9e9c812ae73d1",
+      "afterSha256": "2b7795772cc8510d635109583d1a843b5e2fe881090c6a5e4f06521a6a59bd3f"
+    },
+    {
+      "target": "content/docs/v1.0/learn/functions.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/functions.mdx",
+      "operation": "modify",
+      "beforeSha256": "1723a512882a1638c04186d41d6a28f3d975d96080e2cb005541793dedafd982",
+      "afterSha256": "c9372a17398f984e95d399fa48762ec51cf2c4d6665d77720b524d6415c78284"
+    },
+    {
+      "target": "content/docs/v1.0/learn/generics.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/generics.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "4435ce3c499f90ed41bc4506e9e4eb4c945f2dcc7a48793dbe1539b0318e696a"
+    },
+    {
+      "target": "content/docs/v1.0/learn/index.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/index.mdx",
+      "operation": "modify",
+      "beforeSha256": "c62fe955c3358c5cd88113e111d671457f72abc7af5f01f2765c9faedac74b5f",
+      "afterSha256": "d3cca64a657585ed754f5b99b7757149d6f4e627e6e41d136a8d27196f290c9f"
+    },
+    {
+      "target": "content/docs/v1.0/learn/maps.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/maps.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "798435616f66fd172b7aa5317e20d4cc7f850ffc447a9505c8b7f7eab2560532"
+    },
+    {
+      "target": "content/docs/v1.0/learn/meta.json",
+      "draft": ".docs-drafts/corrections/v1.0/learn/meta.json",
+      "operation": "modify",
+      "beforeSha256": "7317d88628771f3688cd0041615cffec5f6983a7f1ccd47fde5e7d1feb45286c",
+      "afterSha256": "619f165adb8caabc86bd4142e807d5b0784f1637a63325f8876c1eea3e3e6467"
+    },
+    {
+      "target": "content/docs/v1.0/learn/models.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/models.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "033b420f089b6abfeeb299dbfc23864666931031be54640b2f80403ec2796237"
+    },
+    {
+      "target": "content/docs/v1.0/learn/modules.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/modules.mdx",
+      "operation": "modify",
+      "beforeSha256": "f7e3b2d5e1d4c7174d9d2a54a8592d942bf01db3febfb8bf332524efb15ada10",
+      "afterSha256": "431725333c26f9bfbbe943c3adda4372b85c74ad4f21dc543d1bb500502668b3"
+    },
+    {
+      "target": "content/docs/v1.0/learn/strings.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/strings.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "49138c5c82076ffc4ba818656f2e13c907dcbea94054bf7e95990a4dd43676be"
+    },
+    {
+      "target": "content/docs/v1.0/learn/testing.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/testing.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "21189a81173ad52ff8ab0e0b1816e76005e771e8b4fa365707913da22b5a1256"
+    },
+    {
+      "target": "content/docs/v1.0/learn/variables.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/learn/variables.mdx",
+      "operation": "modify",
+      "beforeSha256": "05cbeb7bbd4bc0bf3424ab333ba14914fad2e2c29122b238a7717d63f70e7dc8",
+      "afterSha256": "0974b1d7dd2831af22a1b944cab093618b235d3514d850affe51633cdc39c706"
+    },
+    {
+      "target": "content/docs/v1.0/reference/collections.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/reference/collections.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "c4cf504c6d4f512d91341c06b0b560a287fc05c653abf64e05d098b58bee0965"
+    },
+    {
+      "target": "content/docs/v1.0/reference/functions.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/reference/functions.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "71ab02315a2a4a1dcb9cda2765d86e25b3a25d5facc4490d3d1a4bcddcfc9d07"
+    },
+    {
+      "target": "content/docs/v1.0/reference/index.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/reference/index.mdx",
+      "operation": "modify",
+      "beforeSha256": "a5a9b531562e5102569b4429c7a161d295d90a572928b69e9876b06dfc9ee6da",
+      "afterSha256": "7d775ba6bc4a41032d0398806f55b03998c36578af2a20ae737095966272d620"
+    },
+    {
+      "target": "content/docs/v1.0/reference/meta.json",
+      "draft": ".docs-drafts/corrections/v1.0/reference/meta.json",
+      "operation": "modify",
+      "beforeSha256": "5f43c9a051bfe84da505e6b1d20a30b3b3bc6a33ba418797eae64d66f389449e",
+      "afterSha256": "6089caf2da88d9ff66635eb2c0b654ceb4ed15db40a9c67ca389f91cbe53e2f7"
+    },
+    {
+      "target": "content/docs/v1.0/reference/modules.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/reference/modules.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "5d26280bfbedb9395b26b6e11f92feae8b9ab58328ba26949182056dc960a589"
+    },
+    {
+      "target": "content/docs/v1.0/reference/syntax.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/reference/syntax.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "24f4b561325129b8f8913da3a812a5c5c88ec14103066c7b83a6365dfe8752bc"
+    },
+    {
+      "target": "content/docs/v1.0/reference/types.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/reference/types.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "a487a9b529da8aaa8ed9129568fa3d1ce607bf253d7b6b0d4031f29827bc83aa"
+    },
+    {
+      "target": "content/docs/v1.0/tooling/cli.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/tooling/cli.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "7a9963e615a19ad5db3abe8c08955ac9c5c2f3f29122e67999dc448ed5cd1f18"
+    },
+    {
+      "target": "content/docs/v1.0/tooling/editors.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/tooling/editors.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "77711801d13c0b9a6093ebd43c45582cd696bc0745c39e0164f195ae57be3238"
+    },
+    {
+      "target": "content/docs/v1.0/tooling/index.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/tooling/index.mdx",
+      "operation": "modify",
+      "beforeSha256": "77bcf9e17b3e8cf1f3b09779f188582ffa897e2b7a6e921be30d625fe2bb735a",
+      "afterSha256": "465c5588157ca0ec61b9bb6bd08f17140df4ad94d8a6b185eec7f2570b319965"
+    },
+    {
+      "target": "content/docs/v1.0/tooling/lsp.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/tooling/lsp.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "cd8f2f24d7707fe5f4e542cfac5e0e4b5fc9c19326018b1a4493238041eff8ff"
+    },
+    {
+      "target": "content/docs/v1.0/tooling/meta.json",
+      "draft": ".docs-drafts/corrections/v1.0/tooling/meta.json",
+      "operation": "modify",
+      "beforeSha256": "597303e4cc962c44a4bee118ba6487ba983d36cb0f0d12106e265d481f8d29b8",
+      "afterSha256": "f62bb3e924b05155f9abca93992ed4a8895f0509b433a7191a67f1e2e7d434ae"
+    },
+    {
+      "target": "content/docs/v1.0/tooling/verification.mdx",
+      "draft": ".docs-drafts/corrections/v1.0/tooling/verification.mdx",
+      "operation": "add",
+      "beforeSha256": null,
+      "afterSha256": "c2b6219052bb1a02b723d3e8ea9816c5296b8734f4d09420a78ce1dc56cdecac"
+    }
+  ]
+}

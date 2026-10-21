@@ -1,0 +1,208 @@
+---
+title: kiso/aot/lower/types
+description: V2.0.0 RC4的签名、输入单位、结果与错误协议。
+---
+
+**V2.0.0 RC4 审阅快照（尚未发布）**，来源锁见 `verification/v2.0.0/rc4-source-manifest.json`。**V1.0 不提供本包**。公开声明不代表稳定 API；本页仅承诺此快照已有声明及明确列出的验证。
+
+内部表示分析，不是用户级反射接口。TypeAnalysis 保存分析 arena、槽位及控制流块的表示约束。节点编号必须来自该次分析，查询函数不会为任意编号提供安全包装。
+
+## 导入与检索
+
+导入路径为 `kiso/aot/lower/types`。以下签名不是可执行程序，参数名和类型逐字保留源码；函数行为与错误分开查阅。
+
+`type_unknown` · `type_integer` · `type_float32` · `type_float64` · `type_bool` · `type_string_id` · `type_array_ref` · `type_struct_ref` · `type_enum_ref` · `type_function_ref` · `type_nil` · `type_float_any` · `TypeArena` · `TypeBlock` · `TypeAnalysis` · [type_kind](#type_kind) · [type_nullable](#type_nullable) · [type_is_heap_reference](#type_is_heap_reference) · [type_instruction_width](#type_instruction_width) · [analyze_types](#analyze_types)
+
+## 类型与常量
+
+```text
+koukai teisu type_unknown = 0;
+
+koukai teisu type_integer = 1;
+
+koukai teisu type_float32 = 2;
+
+koukai teisu type_float64 = 3;
+
+koukai teisu type_bool = 4;
+
+koukai teisu type_string_id = 5;
+
+koukai teisu type_array_ref = 6;
+
+koukai teisu type_struct_ref = 7;
+
+koukai teisu type_enum_ref = 8;
+
+koukai teisu type_function_ref = 9;
+
+koukai teisu type_nil = 10;
+
+koukai teisu type_float_any = 11;
+
+koukai kata TypeArena {
+    parent: []int64;
+    revision: []int64;
+    kind: []int64;
+    nullable: []bool;
+    struct_arity: []int64;
+    struct_exact: []bool;
+    fields: [][]int64;
+    array_width: []int64;
+    integer_descriptor: []int64;
+    targets: [][]int64;
+    variants: [][][]int64;
+    trace: []bool;
+    context: []int64;
+    nullable_origins: [][]int64;
+}
+
+koukai kata TypeBlock {
+    data: []uint8;
+    function_id: int64;
+    entry: [][]int64;
+    reachable: []bool;
+}
+
+koukai kata TypeAnalysis {
+    arena: TypeArena;
+    globals: []int64;
+    locals: [][]int64;
+    returns: []int64;
+    upvalues: [][]int64;
+    cells: [][]bool;
+    blocks: []TypeBlock;
+    error_detail: int64;
+}
+```
+
+类型字段为实际公开布局；复制含数组字段的值仍共享数组。不得把公开字段解释为可安全伪造内部状态的许可。
+
+## 函数
+
+### type_kind
+
+```text
+koukai waza type_kind(analysis: TypeAnalysis, node: int64) -> int64
+```
+
+参数：`analysis`：同一次分析产生的 TypeAnalysis；`node`：该分析内部有效节点索引，不是任意用户编号。
+
+返回节点根的表示类别整数，对照本页 type_* 常量。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/lower/types/types.mio`。
+
+### type_nullable
+
+```text
+koukai waza type_nullable(analysis: TypeAnalysis, node: int64) -> bool
+```
+
+参数：`analysis`：同一次分析产生的 TypeAnalysis；`node`：该分析内部有效节点索引，不是任意用户编号。
+
+返回节点根是否可空。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/lower/types/types.mio`。
+
+### type_is_heap_reference
+
+```text
+koukai waza type_is_heap_reference(analysis: TypeAnalysis, node: int64) -> bool
+```
+
+参数：`analysis`：同一次分析产生的 TypeAnalysis；`node`：该分析内部有效节点索引，不是任意用户编号。
+
+按表示类别与可空标记返回是否属于需根追踪的类别；不是动态指针合法性测试。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/lower/types/types.mio`。
+
+### type_instruction_width
+
+```text
+koukai waza type_instruction_width(opcode: int64) -> int64
+```
+
+参数：`opcode`：Mochi 操作码整数编号。
+
+返回内部分析使用的 opcode 编码宽度；未知 opcode 的处理按源码，不据此绕过 Mochi Validator。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/lower/types/types.mio`。
+
+### analyze_types
+
+```text
+koukai waza analyze_types(file: mochi.File) -> TypeAnalysis
+```
+
+参数：`file`：经 Mochi 解码验证的 File。
+
+建立并返回 TypeAnalysis；调用方须结合 error_detail 和后续 LowerResult 检查拒绝路径。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
+
+`RC4 源码：verification/v2.0.0/source/bunko/kiso/aot/lower/types/types.mio`。
+
+## 最小示例与验证范围
+
+保存为 `main.mio`，使用本版本的 `mio check main.mio` 与 `mio run main.mio`；输出逐字节记录。此例只验证下面使用的接口，不覆盖本包所有编码或 Runtime 分支。
+
+```mio title="main.mio"
+yobu "kiso/aot/lower/types";
+chant(types.type_unknown);
+chant(types.type_integer);
+```
+
+```text title="output"
+0
+1
+```
+
+完整输入哈希、命令及输出见仓库 `verification/v2.0.0/results.json`。声明资料与执行覆盖分别记录；没有在此证明原生代码执行或 Compiler A→B 验收。
+
+## enum_read_tag
+
+```text
+koukai waza enum_read_tag(file: mochi.File, data: []uint8, at: int64) -> int64
+```
+
+从给定 Mochi 指令字节位置读取枚举 tag；调用者负责传入经验证的指令边界，不是任意字节缓冲解析接口。
+
+来源：`verification/v2.0.0/source/bunko/kiso/aot/lower/types/types.mio`。
+
+## reachable_functions
+
+```text
+koukai waza reachable_functions(file: mochi.File) -> []bool
+```
+
+分析由入口可达的函数，结果按函数编号索引；用于避免不可达函数的不安全表示影响 Native 编译。
+
+来源：`verification/v2.0.0/source/bunko/kiso/aot/lower/types/types.mio`。
+
+## array_forward_opcode
+
+```text
+koukai waza array_forward_opcode(function: mochi.Function) -> int64
+```
+
+识别数组转发函数的原语模式；返回值是内部 opcode 分类，不承诺所有数组函数均可原生编译。
+
+来源：`verification/v2.0.0/source/bunko/kiso/aot/lower/types/types.mio`。
+
+## is_float_predicate
+
+```text
+koukai waza is_float_predicate(function: mochi.Function) -> bool
+```
+
+识别浮点谓词包装函数，供 lowering 的类型分析使用。
+
+来源：`verification/v2.0.0/source/bunko/kiso/aot/lower/types/types.mio`。
+
+## analyze_types_traced
+
+```text
+koukai waza analyze_types_traced(file: mochi.File, trace: bool) -> TypeAnalysis
+```
+
+trace 为真时保留分析追踪；返回 TypeAnalysis，必须检查 error_detail 并随后检查 LowerResult.error。该内部调试接口不构成稳定 ABI。
+
+来源：`verification/v2.0.0/source/bunko/kiso/aot/lower/types/types.mio`。

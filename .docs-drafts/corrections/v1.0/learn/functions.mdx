@@ -1,0 +1,78 @@
+---
+title: 函数与返回值
+description: 用 waza 封装计算，用 kaesu 返回结果。
+---
+
+## 学习目标与前置
+
+完成后，你能根据参数和返回值设计函数，并检查每条返回路径。前置：[条件与循环](/docs/v1.0/learn/control-flow)。
+
+重复粘贴一段计算容易让不同位置逐渐不一致。函数把实现集中到一个地方，用参数表达输入，用返回类型约束调用方能得到什么。
+
+## 保存与运行
+
+在安装页的 `mio-tutorial` 源码根目录，把下面程序保存为 `functions.mio`；保持 `bunko/` 可用。在同一目录执行：
+
+```sh
+./mio check functions.mio
+./mio run functions.mio
+```
+
+`check` 成功报告 `check passed`；后面的 output 仅列 `run` 的标准输出，每行末尾包含换行。
+
+## 完整程序
+
+```mio title="functions.mio"
+waza square(value: int64) -> int64 {
+    kaesu value * value;
+}
+
+waza absolute(value: int64) -> int64 {
+    moshi (value < 0) {
+        kaesu -value;
+    } sore {
+        kaesu value;
+    }
+}
+
+chant(square(6));
+chant(absolute(-7));
+```
+
+```text title="output"
+36
+7
+```
+
+
+## 调用如何执行
+
+`chant(square(6))` 先计算内层调用：整数 6 绑定到本次调用的参数 `value`，乘法得到 36，`kaesu` 把 36 返回调用点，再由 `chant` 输出。参数属于本次调用的局部作用域，与其他函数里同名参数无关。
+
+`absolute(-7)` 进入真分支，返回 7；若传入 7 则进入另一分支。返回会结束当前调用，不会继续执行函数剩余语句。这里没有把结果存入全局变量，后面的调用可以独立复用它。
+
+函数定义的花括号后不追加分号，函数体内 `kaesu` 语句仍须分号。
+
+## 参数与返回的边界
+
+`int64` 参数接受该类型的值；此例不自动把 `2.5` 转为整数。调用前应决定是否需要转换及是否接受截断。非 `unit` 函数的所有静态可见路径必须返回匹配类型；仅调用 `chant` 不会产生函数所需的返回值。
+
+计算过程和输出可以分开。只产生副作用的函数可返回 `unit`，而本课两个函数返回计算值。绝对值例子限定普通小整数；`int64` 最小值的正数不可表示，通用数值处理应查 `math.checked_abs` 的空值协议，不能据本例推断它对所有整数都安全。
+
+## 练习
+
+新增 `waza double(value: int64) -> int64`，返回参数的两倍，然后运行 `chant(double(square(3)));`。
+
+预期新增一行 `18`。先调用内层 `square(3)` 得到 9，再把 9 传给 `double`。
+
+## 常见错误
+
+- 传入 `square(2.5)`：参数要求 `int64`，浮点数不会隐式转换。
+- 把 `kaesu` 写成 `return`：使用 Mio 的函数返回关键字。
+- 声明返回 `int64`，却在某条路径只输出而没有返回：`chant` 不能代替 `kaesu`。
+
+上一课：[条件与循环](/docs/v1.0/learn/control-flow)。下一课：[数组与空值](/docs/v1.0/learn/collections)。
+
+## 延伸阅读
+
+精确规则见 [语言参考](/docs/v1.0/reference)。本章输出对应本版本固定提交的 Go 引导 CLI / Mochi VM，验证命令与原始输出见 [验证说明](/docs/v1.0/tooling/verification)。

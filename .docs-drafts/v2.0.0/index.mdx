@@ -1,0 +1,16 @@
+---
+title: Mio V2.0.0 文档审阅快照
+description: 绑定 RC4 的独立文档，尚未发布。
+---
+
+本快照面向本地 **V2.0.0 RC4**，尚未发布为 Stable。CLI 为 `Mio 2.0.0`；来源是 HEAD `8b53a25142b0da1192a6c4868e807385d7bb50f9` 加 RC4 的未提交源码清单，单独检出 HEAD 无法重建。
+
+## 阅读路线
+
+Getting Started → Learn → Reference → Kiso → Tooling → Internals。文件保存在独立目录，不读取 Development 正文。依据最新 DOCS_CONTRACT.md，最终采用独立 `/docs/v2.0.0/...` URL，保留旧 `/docs/v2.0` Development。当前快照未激活，公共路由由 Codex A 接入。
+
+新增 [Release Notes](/docs/v2.0.0/release-notes)、[V1 → V2 迁移](/docs/v2.0.0/migration)、[平台与安装限制](/docs/v2.0.0/tooling/platforms)。本快照仅提供中文。
+
+## 验收边界
+
+M18 的纯 Mio Mochi→Native 自编译固定点已有本地证据；源码前端、VM 与 LSP 仍为 Go 实现。文档本轮复跑与既有核心验收分开记录于 `verification/v2.0.0/REPORT.md`。WebAssembly Playground、分代 GC 与三档 GC 配置没有发布支持证据。

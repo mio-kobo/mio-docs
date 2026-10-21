@@ -1,0 +1,51 @@
+---
+title: Getting Started · 安装与运行
+description: 使用真实 RC4 预编译包检查并运行程序。
+---
+
+## 安装范围
+
+本地候选仅验证 macOS Apple Silicon ARM64，构建记录主机为 macOS 15.6.1。准备阶段使用维护者提供的本地 RC4；没有可承诺的正式下载地址。预编译包无需安装 Go。请保留完整目录及 Bunko。
+
+下面在包含候选 tar.gz 和 SHA256SUMS 的目录执行，解压目标目录必须不存在：
+
+```sh
+shasum -a 256 -c SHA256SUMS
+tar -xzf mio-2.0.0-darwin-arm64.tar.gz
+export MIO_HOME="$PWD/mio-2.0.0-darwin-arm64"
+export PATH="$MIO_HOME:$PATH"
+export MIO_BUNKO="$MIO_HOME/bunko"
+mio version
+```
+
+预期版本 `Mio 2.0.0`。RC4 归档 SHA256 为 `fe6c90b3887ff6e64841317a50a1be38f785e20b3b7def4ad80b848cc66f03b8`。当前 ad-hoc 签名，未 Developer ID 签名或公证；互联网下载的 Gatekeeper 首次运行尚未验证。
+
+## 第一个程序
+
+新建项目目录，把下面程序保存为 UTF-8 `hello.mio`：
+
+```mio title="hello.mio"
+chant("Hello, Mio!");
+```
+
+```text title="output"
+Hello, Mio!
+```
+
+```sh
+mio check hello.mio
+mio run hello.mio
+mio build -o hello.mochi hello.mio
+mio exec hello.mochi
+mio disasm hello.mochi
+```
+
+`check` 输出 `check passed`，不执行程序。`run` 与 `exec` 输出上述问候。`build` 生成 Mochi 字节码；`exec` 使用包内 Go VM。独立 Native 路径见 [迁移指南](/docs/v2.0.0/migration)。
+
+## 练习与常见错误
+
+把问候改为 `Hello, Mio 2!`，重新 check/run，预期只输出修改后的文本。找不到 mio 时检查 PATH；导入失败时 MIO_BUNKO 应指向包含 kiso 的 bunko 根；不能直接把 `.mochi` 当作 Mach-O 执行。
+
+Learn 中统一使用 PATH 上的 `mio`；在任意项目目录保存代码。不要按旧 Development 教程检出 HEAD 来重建 RC4。源码重建需要完整 RC4 来源、Go（go.mod 声明 1.22.2，本次构建实测 1.25.9）及 AOT 验收工具，最终提交尚待维护者固定。
+
+下一步：[Learn](/docs/v2.0.0/learn)。

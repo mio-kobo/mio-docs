@@ -1,0 +1,150 @@
+---
+title: kiso/convert
+description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+---
+
+**版本范围：v1.0 · Stable**，固定提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
+
+严格 ASCII 文本转换，不清理空白。浮点接受十进制、小数、指数及 NaN、Infinity、+Infinity、-Infinity，使用 roundTiesToEven，允许下溢到带符号零。
+
+支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v1.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v1.0/internals/native-aot) 单独评估。
+
+## 函数索引
+
+[parse_int](#parse_int) · [parse_uint](#parse_uint) · [format_int](#format_int) · [format_uint](#format_uint) · [parse_bool](#parse_bool) · [format_bool](#format_bool) · [parse_float64](#parse_float64) · [parse_float32](#parse_float32) · [format_float64](#format_float64) · [format_float32](#format_float32)
+
+## 函数
+
+签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
+
+### parse_int
+
+```text
+koukai waza parse_int(value: string) -> int64?
+```
+
+参数：`value`：待解析的 ASCII 文本，不预先裁剪空白。
+
+解析 value 的 ASCII 十进制 int64，可带 + 或 -；空白、非法字符或越界返回 mu。
+
+### parse_uint
+
+```text
+koukai waza parse_uint(value: string) -> uint32?
+```
+
+参数：`value`：待解析的 ASCII 文本，不预先裁剪空白。
+
+解析 value 的 ASCII 十进制 uint32，可带 +，拒绝 -；非法或越界返回 mu。
+
+### format_int
+
+```text
+koukai waza format_int(value: int64) -> string
+```
+
+参数：`value`：需要格式化为文本的数值或布尔值。
+
+返回 value 的十进制文本，覆盖 MinInt64。
+
+### format_uint
+
+```text
+koukai waza format_uint(value: uint32) -> string
+```
+
+参数：`value`：需要格式化为文本的数值或布尔值。
+
+返回 value 的无符号十进制文本。
+
+### parse_bool
+
+```text
+koukai waza parse_bool(value: string) -> bool?
+```
+
+参数：`value`：待解析的 ASCII 文本，不预先裁剪空白。
+
+只接受 value 为 hai 或 iie，其他文本返回 mu。
+
+### format_bool
+
+```text
+koukai waza format_bool(value: bool) -> string
+```
+
+参数：`value`：需要格式化为文本的数值或布尔值。
+
+返回 hai 或 iie。
+
+### parse_float64
+
+```text
+koukai waza parse_float64(value: string) -> float64?
+```
+
+参数：`value`：待解析的 ASCII 文本，不预先裁剪空白。
+
+将 value 舍入为 binary64；非法、上溢或输入超过 10000 字节返回 mu。
+
+### parse_float32
+
+```text
+koukai waza parse_float32(value: string) -> float32?
+```
+
+参数：`value`：待解析的 ASCII 文本，不预先裁剪空白。
+
+直接将 value 舍入为 binary32；非法、上溢或输入超过 10000 字节返回 mu。
+
+### format_float64
+
+```text
+koukai waza format_float64(value: float64) -> string
+```
+
+参数：`value`：需要格式化为文本的数值或布尔值。
+
+返回 value 最短往返十进制，保留负零文本；NaN 文本不保留 payload。
+
+### format_float32
+
+```text
+koukai waza format_float32(value: float32) -> string
+```
+
+参数：`value`：需要格式化为文本的数值或布尔值。
+
+返回 value 最短往返十进制，保留负零文本；NaN 文本不保留 payload。
+
+## 完整示例
+
+```mio fixture="convert"
+yobu "kiso/convert";
+kaku number = convert.parse_int("-42");
+moshi (number != mu) { chant(number); }
+chant(convert.parse_uint("-1") == mu);
+chant(convert.parse_bool("true") == mu);
+chant(convert.format_bool(hai));
+kaku value = convert.parse_float32("1.25");
+moshi (value != mu) { chant(convert.format_float32(value)); }
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+-42
+hai
+hai
+hai
+1.25
+```
+
+## 源码
+
+- `bunko/kiso/convert/convert.mio`
+- `bunko/kiso/convert/float.mio`
+
+公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
+
+精确来源：[bunko/kiso/convert/convert.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/convert/convert.mio) · [bunko/kiso/convert/float.mio](https://github.com/mio-kobo/mio/blob/51f1ba883767c1fc08ba415fbb0075316ff03106/bunko/kiso/convert/float.mio)。

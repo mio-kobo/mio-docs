@@ -1,0 +1,17 @@
+{
+  "title": "Kiso",
+  "pages": [
+    "index",
+    "array",
+    "bytes",
+    "convert",
+    "encoding-binary",
+    "fs",
+    "io",
+    "math",
+    "path",
+    "string",
+    "testing",
+    "utf8"
+  ]
+}

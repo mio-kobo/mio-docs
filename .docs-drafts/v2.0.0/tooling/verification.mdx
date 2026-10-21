@@ -1,0 +1,24 @@
+---
+title: V2.0.0 验证与来源
+description: RC4 包内工具实测与核心历史验收分开记录。
+---
+
+## 复现
+
+在 mio-docs 根目录执行：
+
+```sh
+python3 scripts/check-release-docs.py --rc /absolute/path/to/mio/build/v2.0.0-rc4
+```
+
+验证器先验证归档和包内清单，再在临时目录解压真实候选；不用工作树构建 CLI。所有普通完整 Mio 块执行 check/run/build/exec/disasm，并逐字节比较输出；测试块检查 JSON summary；练习、反例与两种 AOT 迁移独立执行。V1 迁移基线从正式标签 archive 构建，既有 V1 文档和锁保持不变。
+
+## 来源与覆盖
+
+`verification/v2.0.0/results.json` 保存本轮 argv、cwd、exit、stdout/stderr、例子哈希、实际期望与结果；`api.json` / `api-diff.json` 核对 17 包全部公开签名；`rc4-source-manifest.json` / `BUILD-INFO.json` 区分 HEAD、dirty 来源和产物。
+
+既有核心 full/race/M18/GC 记录属于发布准备验收，不冒充文档本轮重跑；对应清单和哈希在 `upstream-evidence.json`。本轮不重跑完整 M18、全部 Go 测试、IDE 或全平台。最终结论见 `verification/v2.0.0/REPORT.md`。
+
+## 网站交接
+
+快照尚在 `.docs-drafts/v2.0.0`，不生成公共路由。最新契约允许 2.0 与 2.0.0 数字排序相等、URL 身份独立；由 Codex A 新增 /docs/v2.0.0，保留 /docs/v2.0 Development。本站首页、配置、全局样式、注册表与 V1 锁未因本任务更改。候选文档冻结清单只用于审阅，不激活 Stable。

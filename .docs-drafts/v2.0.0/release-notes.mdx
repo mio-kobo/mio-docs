@@ -1,0 +1,37 @@
+---
+title: Mio V2.0.0 Release Notes
+description: 相对正式 V1.0.0 的候选功能、修复、兼容性与限制。
+---
+
+本文描述 **本地 RC4**，尚无正式发布日期或 Stable 声明。比较基线为 V1.0.0 标签提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`，不是 beta 更新日志。候选来自 HEAD `8b53a25142b0da1192a6c4868e807385d7bb50f9` 加已锁定工作树；来源见 `verification/v2.0.0/BUILD-INFO.json`。
+
+## 新增与改进
+
+- Darwin ARM64 Native AOT 与 Mach-O 输出，独立运行时包含精确 Mark-Sweep、Shadow Frame、typed Storage、mmap managed arena 和 NativeFS syscall bridge。历史依据：`85a0e21` 到 `78487fd` 的 AOT 实现提交；完整比较清单见 `verification/v2.0.0/history.json`。
+- M18 纯 Mio Decoder / Lowering / ARM64 Encoder / Mach-O Writer 完成 Mochi→Native 自编译。Stage 1–5 未签名机器码字节相同；Go AOT 仅生成 Seed。M18 属于 RC4 未提交来源，不能归入已提交 HEAD；既有验收记录已锁定。
+- 内置 MioCore stdio LSP，提供语义诊断、hover、definition/references、completion、signature help 与 UTF-16 位置转换（`a77ecc1`）。插件独立版本，未宣称 IDE 全面认证。
+- 新增公开 `kiso/encoding/mochi`、`kiso/aot/*` 工具链接口，以及 `kiso/encoding/binary` 中的流式工具；具体相对 V1 的声明差异由源码逐条提取，见 `verification/v2.0.0/api-diff.json`。
+- CLI/help/LSP 核心版本为 `2.0.0`。预编译包增加 `mochi-aot`、`mochi-aot-audit`、纯 Mio `native-aot`、来源与许可清单，安装运行无需系统 Go。
+
+## 修复与可靠性
+
+- 原生自举内存、闭包共享捕获与精确根处理（`096891b`、`1810b24`），B/C/D 源码编译器 Mochi 固定点验收（`a1dc0ba`、`8b53a25`）。
+- RC4 相对 Development 固定 HEAD：补齐 nullable 数组表示、共享 Cell / typed Storage、远分支处理及 label 索引，增加可配置 lowering heap；依据 `rc4-source.diff`、新增测试与本地验收，不能写成独立已提交变更。
+- Mach-O 实机测试补充平台检查（`c235756`），避免在非 macOS ARM64 上把不能执行的测试计为通过。
+- 候选准备中 RC1 安装测试曾缺少 NativeFS 输出执行位；RC2–RC4 安装验证加入 chmod，保留失败记录。属于打包 smoke 修复，用户仍需对纯 Mio 输出显式 chmod。
+
+## Breaking Changes 与兼容性
+
+未在本次 V1 标签至 RC4 的源码比较中发现刻意引入的新语言语法破坏；这不等于所有 V1 应用无修改兼容认证。泛型、闭包、数组、Map、Mochi v14 在 V1 已存在，不能写成 V2 新增语言特性。
+
+- Native 是新增执行目标，支持集合小于 VM。V1 VM 程序不能直接承诺可 Native；Map、任意 MMA、任意函数值及通用 argv 需单独审查。
+- 纯 Mio AOT 的 Assembler / TypeArena / TypeAnalysis 字段和 LowerError 变体相对 Development 改变；直接构造类型、完整枚举匹配或绑定错误码的开发用户需要更新。内部原生布局与这些 AOT API 不保证稳定 ABI。
+- 版本检测脚本应接受 `Mio 2.0.0`；V1 标签源码默认报告 `Mio 1.0.0-beta.2`。插件版本不跟随核心号变化。
+- V2 候选支持证据仅为 macOS Apple Silicon。V1 历史多平台构建不可作为 V2 平台保证。
+- `mio build` 仍生成 Mochi；不是 Native 默认构建。升级应重建字节码并复测；解码器保留 v1–v14 回归。
+
+## 限制与发布条件
+
+源码前端、VM、LSP 仍为 Go 实现；源码重建及 Seed 需要 Go。纯 Mio入口使用无换行 config，失败可能 exit 0，必须检查成功标记及新产物。当前 ad-hoc 签名，未公证；最低 macOS 版本、互联网下载 Gatekeeper、Intel/Linux/Windows、真实 IDE 全面兼容未验收。M19 分代 GC、三档 GC 与 WebAssembly Playground 未实现或未发布。
+
+远端 Tag CI 的工作流修改发生在 RC4 之后，不能描述成 RC4 包内已验证功能。最终提交、远端验收、签名策略、正式 Release 和 Codex A 的站点接入仍待完成。详见 [迁移](/docs/v2.0.0/migration) 与 [验证](/docs/v2.0.0/tooling/verification)。

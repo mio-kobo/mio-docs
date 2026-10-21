@@ -1,0 +1,20 @@
+---
+title: V1 VM 对象与内存管理
+description: Go 宿主的对象生命周期与语言层共享语义。
+---
+
+版本范围：V1.0 Stable，提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`。来源为 `internal/value`、`internal/vm/vm.go`，没有后续 Native Runtime 源码。
+
+## 宿主管理的值
+
+VM 执行 Mio 字节码并使用 Go 对象保存值、数组和调用状态，对象生命周期由 Go 宿主管理。Mio 数组和 Map 的共享可变语义是语言可观察行为，不能由“Go 管理内存”推断赋值会深复制。闭包保存捕获状态，多个闭包捕获同一可变局部变量时共享 Cell。
+
+## 与 Native GC 的区别
+
+此标签没有 `internal/aot`。后续原生后端使用的对象头、精确根、Shadow Frame、mark/sweep 或 Heap 容量不能直接套到 V1 VM 上；本版也没有因此自动获得相关 CLI 参数。
+
+## 可以验证的边界
+
+数组别名、嵌套数组和闭包示例只观察语言结果。VM 的值栈、调用深度和指令预算是执行限制，见 [函数参考](/docs/v1.0/reference/functions)。这些示例不测量 GC 次数、峰值存活字节或原生根协议，未测统计不能填为 0。
+
+本轮程序与语义测试结果见 [验证说明](/docs/v1.0/tooling/verification)。文件句柄仍应按 [fs API](/docs/v1.0/kiso/fs) 的关闭约定处理，不能把宿主对象回收当作显式资源关闭的替代品。

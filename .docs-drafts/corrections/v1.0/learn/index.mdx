@@ -1,0 +1,50 @@
+---
+title: Learn · 学习 Mio
+description: 从变量逐步走到数据模型、函数复用与测试。
+---
+
+先完成 [安装与运行](/docs/v1.0/getting-started)。前十课的普通程序可独立运行，最后一课使用 `mio test` 测试包。每课包含目标、前置、解释、练习及验证方式。
+
+## 学习路线
+
+| 顺序 | 课程 | 学习重点 |
+| --- | --- | --- |
+| 01 | [变量与类型](/docs/v1.0/learn/variables) | 命名、推断、转换 |
+| 02 | [条件与循环](/docs/v1.0/learn/control-flow) | 选择、重复、作用域 |
+| 03 | [函数与返回值](/docs/v1.0/learn/functions) | 参数、返回路径 |
+| 04 | [数组与空值](/docs/v1.0/learn/collections) | 索引、共享、可空收窄 |
+| 05 | [字符串与 UTF-8](/docs/v1.0/learn/strings) | 字节、Unicode 标量、Builder |
+| 06 | [Map 与缺失键](/docs/v1.0/learn/maps) | 键类型、共享修改、缺失值 |
+| 07 | [结构体与枚举](/docs/v1.0/learn/models) | 字段、变体、覆盖 |
+| 08 | [函数值与闭包](/docs/v1.0/learn/closures) | 函数类型、捕获环境 |
+| 09 | [泛型与数值约束](/docs/v1.0/learn/generics) | 类型参数、数值约束 |
+| 10 | [模块与数学库](/docs/v1.0/learn/modules) | 公开路径、限定名、库函数 |
+| 11 | [编写测试](/docs/v1.0/learn/testing) | 发现、断言、报告 |
+
+## 如何使用示例
+
+把每一课的完整代码分别保存为一个 `.mio` 文件，然后执行：
+
+```sh
+./mio check path/to/lesson.mio
+./mio run path/to/lesson.mio
+```
+
+不要把多课程序同时粘贴到同一文件里。包级声明可能重名；每个示例应独立运行。
+
+教程基于核心提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`。示例使用 Go 引导 CLI 执行，输出由本地实测获得。验证使用该提交的隔离、无本地改动源码快照，不包含相邻工作树的 M17e 改动；未对原生自举、WebAssembly 或性能作发布结论。
+
+## 关键词速查
+
+| Mio | 本教程术语 |
+| --- | --- |
+| `kaku` | 声明变量 |
+| `waza` | 声明函数 |
+| `moshi` / `sore` | 如果 / 否则 |
+| `aida` | 条件循环 |
+| `kaesu` | 返回 |
+| `hai` / `iie` | 真 / 假 |
+| `mu` | 空值 |
+| `yobu` | 导入包 |
+
+完成之后，使用 [Reference](/docs/v1.0/reference) 查精确规则，用 [Kiso](/docs/v1.0/kiso) 查标准库资料。

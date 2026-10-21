@@ -1,0 +1,241 @@
+---
+title: kiso/bytes
+description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+---
+
+**版本范围：V2.0.0 · RC4 审阅快照（尚未发布）**。来源为 RC4 的 source-manifest 与包内 BUILD-INFO；HEAD 加未提交来源共同构成候选，不能只检出 HEAD。正文示例默认走包内 CLI / VM。
+
+紧凑 []uint8 的字节操作与 ByteBuffer。ByteBuffer 值复制共享 data；buffer_bytes / buffer_clone 提供独立副本。公开字段当前无私有保护。
+
+支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v2.0.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v2.0.0/internals/native-aot) 单独评估。
+
+## 公开类型与常量
+
+以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
+
+```text
+koukai kata ByteBuffer { data: []uint8; }
+```
+
+## 函数索引
+
+[equal](#equal) · [compare](#compare) · [index](#index) · [contains](#contains) · [has_prefix](#has_prefix) · [has_suffix](#has_suffix) · [copy](#copy) · [fill](#fill) · [clone](#clone) · [new_buffer](#new_buffer) · [buffer_with_capacity](#buffer_with_capacity) · [write_byte](#write_byte) · [write](#write) · [buffer_len](#buffer_len) · [buffer_capacity](#buffer_capacity) · [reset](#reset) · [buffer_clone](#buffer_clone) · [buffer_bytes](#buffer_bytes)
+
+## 函数
+
+签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
+
+### equal
+
+```text
+koukai waza equal(left: []uint8, right: []uint8) -> bool
+```
+
+参数：`left`：左侧输入；`right`：右侧输入。
+
+比较 left/right 字节内容与长度，返回是否相等。
+
+### compare
+
+```text
+koukai waza compare(left: []uint8, right: []uint8) -> int64
+```
+
+参数：`left`：左侧输入；`right`：右侧输入。
+
+按无符号字节字典序比较 left/right，返回 -1、0、1。
+
+### index
+
+```text
+koukai waza index(values: []uint8, target: uint8) -> int64
+```
+
+参数：`values`：待操作数组；是否修改见本函数说明；`target`：要查找的字节或分支目标，类型见签名。
+
+返回 values 中 target 第一次出现的字节索引；缺失返回 -1。
+
+### contains
+
+```text
+koukai waza contains(values: []uint8, target: uint8) -> bool
+```
+
+参数：`values`：待操作数组；是否修改见本函数说明；`target`：要查找的字节或分支目标，类型见签名。
+
+返回 values 是否含 target 字节。
+
+### has_prefix
+
+```text
+koukai waza has_prefix(values: []uint8, prefix: []uint8) -> bool
+```
+
+参数：`values`：待操作数组；是否修改见本函数说明；`prefix`：待匹配前缀。
+
+返回 values 是否以 prefix 开头；空 prefix 为真。
+
+### has_suffix
+
+```text
+koukai waza has_suffix(values: []uint8, suffix: []uint8) -> bool
+```
+
+参数：`values`：待操作数组；是否修改见本函数说明；`suffix`：待匹配后缀。
+
+返回 values 是否以 suffix 结尾；空 suffix 为真。
+
+### copy
+
+```text
+koukai waza copy(destination: []uint8, source: []uint8) -> int64
+```
+
+参数：`destination`：接收写入的现有目标数组；`source`：读取或追加的来源数组。
+
+向 destination 现有元素复制 source，返回两者长度的较小值；不扩容。
+
+### fill
+
+```text
+koukai waza fill(values: []uint8, value: uint8) -> unit
+```
+
+参数：`values`：待操作数组；是否修改见本函数说明；`value`：本次操作的输入值，返回语义及限制如下。
+
+将 values 的全部现有元素写为 value，返回 unit。
+
+### clone
+
+```text
+koukai waza clone(values: []uint8) -> []uint8
+```
+
+参数：`values`：待操作数组；是否修改见本函数说明。
+
+浅复制字节数组，返回独立存储。
+
+### new_buffer
+
+```text
+koukai waza new_buffer() -> ByteBuffer
+```
+
+参数：无。
+
+创建长度为 0 的 ByteBuffer。
+
+### buffer_with_capacity
+
+```text
+koukai waza buffer_with_capacity(capacity: int64) -> ByteBuffer
+```
+
+参数：`capacity`：预留容量；字节容器按字节，普通数组按元素。
+
+创建长度 0 并预留 capacity 的 ByteBuffer；负容量或资源不足报错。
+
+### write_byte
+
+```text
+koukai waza write_byte(buffer: ByteBuffer, value: uint8) -> unit
+```
+
+参数：`buffer`：待操作共享字节缓冲区；`value`：本次操作的输入值，返回语义及限制如下。
+
+向 buffer 共享 data 追加 value，返回 unit。
+
+### write
+
+```text
+koukai waza write(buffer: ByteBuffer, source: []uint8) -> int64
+```
+
+参数：`buffer`：待操作共享字节缓冲区；`source`：读取或追加的来源数组。
+
+将 source 追加到 buffer，返回 source 的原长度。
+
+### buffer_len
+
+```text
+koukai waza buffer_len(buffer: ByteBuffer) -> int64
+```
+
+参数：`buffer`：待操作共享字节缓冲区。
+
+返回 buffer.data 长度。
+
+### buffer_capacity
+
+```text
+koukai waza buffer_capacity(buffer: ByteBuffer) -> int64
+```
+
+参数：`buffer`：待操作共享字节缓冲区。
+
+返回 buffer.data 容量。
+
+### reset
+
+```text
+koukai waza reset(buffer: ByteBuffer) -> unit
+```
+
+参数：`buffer`：待操作共享字节缓冲区。
+
+将 buffer 长度归零，保留容量；别名可见。
+
+### buffer_clone
+
+```text
+koukai waza buffer_clone(buffer: ByteBuffer) -> ByteBuffer
+```
+
+参数：`buffer`：待操作共享字节缓冲区。
+
+返回具有独立字节存储的 ByteBuffer。
+
+### buffer_bytes
+
+```text
+koukai waza buffer_bytes(buffer: ByteBuffer) -> []uint8
+```
+
+参数：`buffer`：待操作共享字节缓冲区。
+
+返回 buffer 当前内容的独立数组副本。
+
+## 完整示例
+
+```mio fixture="bytes"
+yobu "kiso/bytes";
+kaku buffer = bytes.new_buffer();
+bytes.write_byte(buffer, uint8(65));
+kaku source: []uint8 = [66, 67];
+chant(bytes.write(buffer, source));
+chant(bytes.buffer_len(buffer));
+kaku copied = bytes.buffer_bytes(buffer);
+copied[0] = 90;
+chant(buffer.data[0]);
+chant(bytes.compare(source, source));
+bytes.reset(buffer);
+chant(bytes.buffer_len(buffer));
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+2
+3
+65
+0
+0
+```
+
+## 源码
+
+- `bunko/kiso/bytes/bytes.mio`
+
+公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/v2.0.0/results.json`。声明一致性不代表全部行为分支已经执行。
+
+精确来源：[bunko/kiso/bytes/bytes.mio](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/bytes/bytes.mio)。
