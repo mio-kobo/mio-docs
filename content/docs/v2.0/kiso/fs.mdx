@@ -3,7 +3,9 @@ title: kiso/fs
 description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
 ---
 
-**版本范围：v2.0 · Development**，固定提交 `8b53a25142b0da1192a6c4868e807385d7bb50f9`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
+**版本范围：Mio v2.0.0 正式版**，源码提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`；Go 引导 CLI / Mochi VM。
+
+完整索引见 [Bunko API 参考](/docs/v2.0/kiso/api)；本页保留逐函数签名、参数、返回值、错误与示例。
 
 同步宿主文件系统 API。CLI 默认注册 NativeFS，权限与进程相同。File 使用受信任 resource；错误通过结果字段返回，不使用异常。流偏移单位均为字节。
 
@@ -251,4 +253,4 @@ hai
 
 公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
 
-精确来源：[bunko/kiso/fs/fs.mio](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/fs/fs.mio)。
+精确来源：[bunko/kiso/fs/fs.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/fs/fs.mio)。

@@ -2,6 +2,7 @@
   "title": "Kiso",
   "pages": [
     "index",
+    "api",
     "aot-arm64",
     "aot-lower-nativefs",
     "aot-lower-types",

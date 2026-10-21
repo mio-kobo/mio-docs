@@ -1,0 +1,201 @@
+---
+title: 内置函数参考
+description: Built-in Functions — Mio v2.0.0 的 chant、len、Map 构造与显式数值转换；含签名、类型限制、错误和可运行示例。
+---
+
+> **兼容入口：** 本页保留 `content/docs/builtins.mdx` 路径，并与 [v2.0.0 版本化内置函数参考](/docs/v2.0/reference/builtins) 保持同一内容。日常查阅优先使用版本化页面。
+
+
+**版本范围：Mio v2.0.0 正式版**，源码提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`。本页只记录语言层面的公开调用入口；Bunko 标准库函数见 [Bunko API 参考](/docs/v2.0/kiso/api)。
+
+## 分类
+
+| 类别 | 公开名称 | 说明 |
+| --- | --- | --- |
+| 内置函数 | `chant`、`len` | 由语言运行时直接提供，不需要 `yobu`。 |
+| 内置类型构造 | `Map[K, V]()` | 构造共享可变 Map；不是普通函数值。 |
+| 显式数值转换 | `int8(...)` 至 `float64(...)`、`rune(...)` | 语法层面的转换表达式，不是内置函数。 |
+| 编译器私有 Intrinsic | `$math.*`、`$array.*`、`$data.*` | 只供 Bunko 源码包装，不属于用户可调用 API。 |
+
+## 函数总表
+
+| 函数 | 签名 | 作用 | 返回类型 |
+| --- | --- | --- | --- |
+| [`chant`](#chant) | `chant(value: int8 \| int16 \| int32 \| int64 \| uint8 \| uint16 \| uint32 \| float32 \| float64 \| bool \| string \| mu) -> unit` | 输出一个基础值并追加换行 | `unit` |
+| [`len`](#len) | `len(values: []T) -> int64` | 返回数组当前长度 | `int64` |
+| [`Map`](#map) | `Map[K, V]() -> Map<K, V>` | 创建共享可变键值 Map | `Map<K, V>` |
+
+## chant
+
+```text
+chant(value: int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | float32 | float64 | bool | string | mu) -> unit
+```
+
+参数：
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `value` | 整数、浮点数、`bool`、`string` 或字面量 `mu` | 输出值；`rune` 是 `int32` 类型别名，按整数输出。 |
+
+返回值：`unit`。函数本身没有可继续使用的值；输出追加一个换行。`chant(mu)` 输出 `mu`。
+
+类型限制与错误：
+
+- 只接受一个参数；参数数量错误返回 `E0303`。
+- 数组、结构体、枚举、Map、函数、`resource` 和 `unit` 不能直接传给 `chant`。
+- 可空值必须先通过 `!= mu` 或 `== mu` 收窄；未收窄的 `T?` 不能直接传给 `chant`。
+- 有效基础值的正常输出不产生异常；无效参数在 `check` 阶段被拒绝。
+
+```mio
+chant(42);
+chant(7);
+chant("Mio");
+chant('A');
+chant(hai);
+chant(mu);
+```
+
+前面的字符字面量按 `rune`/`int32` 输出为 `65`；`chant(mu)` 输出 `mu`。
+
+错误示例，点击「检查」可看到真实诊断：
+
+```mio
+kaku values = [1, 2, 3];
+chant(values);
+```
+
+## len
+
+```text
+len(values: []T) -> int64
+```
+
+参数：
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `values` | `[]T` | 一维数组；可以保存可空元素（`[]T?`），但整个数组不能是 `([]T)?`。 |
+
+返回值：当前元素数量，类型为 `int64`。这不是字节长度；字符串请使用 `string.byte_len`，UTF-8 码点数量请使用 `string.rune_count`。
+
+类型限制与错误：
+
+- 只接受一个参数；参数数量错误返回 `E0303`。
+- 参数必须是数组；字符串、Map、可空数组或非数组值返回 `E0305`。
+- `len` 不读取索引，不改变数组。
+
+```mio
+kaku values = [10, 20, 30];
+chant(len(values));
+```
+
+错误示例，点击「检查」可看到真实诊断：
+
+```mio
+chant(len("Mio"));
+```
+
+## Map
+
+```text
+Map[K, V]() -> Map<K, V>
+```
+
+参数与类型参数：
+
+| 项 | 说明 |
+| --- | --- |
+| `K` | 键类型；必须是整数、`bool` 或 `string`，且不能是 Nullable、浮点、数组、结构体、枚举、Map 或函数。`rune` 作为 `int32` 可以使用。 |
+| `V` | 值类型；可以是源码支持的值类型。读取结果始终带可空性。 |
+| 实参 | 构造函数不接受普通实参；类型参数可显式写在 `Map[K, V]()` 中，或由目标类型上下文提供。 |
+
+返回值：一个新的、共享可变的 `Map<K, V>`。变量赋值和参数传递共享同一个 Map，任一别名的更新对其他别名可见。
+
+索引语义：
+
+- `map[key]` 读取返回 `V?`；键不存在时返回 `mu`，必须收窄后才能当 `V` 使用。
+- `map[key] = value;` 插入或更新，类型必须匹配 `V`。
+- 当前没有 Map 字面量、`len(Map)`、删除或清空内置操作。
+- VM 会拒绝不可哈希的键和明显不一致的运行时键/值类型。
+
+```mio
+kaku entries = Map[string, int64]();
+entries["answer"] = 42;
+kaku answer = entries["answer"];
+moshi (answer != mu) {
+    chant(answer);
+}
+chant(entries["missing"] == mu);
+```
+
+使用目标类型上下文构造：
+
+```mio
+kaku entries: Map<string, int64> = Map();
+entries["count"] = 2;
+kaku count = entries["count"];
+moshi (count != mu) { chant(count); }
+```
+
+错误示例，浮点键不可哈希，点击「检查」可看到真实诊断：
+
+```mio
+kaku entries = Map[float64, int64]();
+```
+
+## 显式类型转换
+
+显式转换是语言语法，不是内置函数值，不能作为参数传递。转换目标来自数值类型名；每个转换恰好接收一个数值参数。
+
+| 目标 | 允许的源类型 | 结果 | 运行时规则 |
+| --- | --- | --- | --- |
+| `int8`、`int16`、`int32`、`rune`、`uint8`、`uint16`、`uint32` | 任意不同的数值类型 | 目标整数类型 | 浮点先向零截断；越界或负数转无符号产生运行时错误。 |
+| `int64` | 任意不同的数值类型 | `int64` | 浮点向零截断；NaN、Infinity 或超出 `int64` 范围产生运行时错误。 |
+| `float32` | 任意整数或 `float64` | `float32` | 按 IEEE 754 binary32 舍入。 |
+| `float64` | 任意整数或 `float32` | `float64` | 按 IEEE 754 binary64 舍入。 |
+| `rune` | 任意不同的数值类型 | `int32` 别名（`rune`） | 与 `int32(...)` 相同；字符字面量默认是 `rune`。 |
+
+补充规则：
+
+- 源和目标必须是不同数值类型；`int64(1)`、`float64(1.0)` 这类同类型转换在 `check` 阶段被拒绝。
+- `bool`、`string`、数组、Map 等非数值类型不能转换。
+- 整数转浮点可能损失精度；浮点转整数向零截断，不进行四舍五入。
+- 类型检查通过不代表范围检查通过；范围错误发生在运行时。
+
+```mio
+chant(int64(3.9));
+chant(float64(42));
+chant(uint8(65));
+chant(rune(9731));
+chant(float32(1.5));
+```
+
+数值越界示例，点击「运行」可看到真实运行时错误：
+
+```mio
+chant(uint8(256));
+```
+
+## 非公共 Intrinsic
+
+以下名称存在于编译器内部，但不是普通用户 API：
+
+| 私有类别 | 示例 | 公开访问 |
+| --- | --- | --- |
+| 数学原语 | `$math.sqrt`、`$math.floor`、`$math.round_even`、`$math.error` | 否；通过 `kiso/math` 的 `koukai` 函数使用 |
+| 数组原语 | `$array.make`、`$array.push`、`$array.capacity` | 否；通过 `kiso/array` 的 `koukai` 函数使用 |
+| 数据转换原语 | `$data.string_to_bytes`、`$data.bytes_to_string`、`$data.string_byte_len` | 否；通过 `kiso/string` 等公开包装使用 |
+| AOT/工具链内部 | `kiso/aot/*` 的实现细节 | 不属于稳定公共 ABI |
+
+标准库源码中的 `__...` 名称只在包加载时映射到这些内部入口；普通程序不能声明、导入或直接调用 `$...` 名称。公开 Bunko 函数必须带 `koukai`。
+
+## 源码依据
+
+- `internal/resolver/resolver.go`：注册 `chant`、`len`、`Map` 和私有 intrinsic 符号。
+- `internal/typecheck/builtin.go`：`chant`、`len` 和底层数学/数据内置的参数与返回类型检查。
+- `internal/typecheck/calls.go`：`Map` 构造、键可哈希约束与类型参数规则。
+- `internal/typecheck/checker.go`：显式数值转换的静态规则。
+- `internal/compiler/builtin.go` 与 `internal/compiler/compiler.go`：内置调用和转换的字节码生成。
+- `docs/LANGUAGE.md`：语言层面对 `chant`、`Map` 和数值转换的说明。
+
+对应源码提交：[`0ce04dd`](https://github.com/mio-kobo/mio/tree/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a)。完整标准库函数索引见 [Bunko API 参考](/docs/v2.0/kiso/api)。

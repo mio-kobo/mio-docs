@@ -3,6 +3,8 @@ title: Bunko 与 Kiso API
 description: Bunko 的物理布局、包规则、完整公开模块列表，以及可运行的导入与调用示例。
 ---
 
+完整的公开函数、类型、常量与环境支持范围见 [Bunko API 参考](/docs/v2.0/kiso/api)。
+
 ## Bunko 与 Kiso 的关系
 
 - **Bunko** 是标准库的物理根目录 `bunko/`。

@@ -2,6 +2,7 @@
   "title": "Reference",
   "pages": [
     "index",
+    "builtins",
     "collections",
     "functions",
     "modules",

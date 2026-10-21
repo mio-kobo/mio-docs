@@ -23,6 +23,8 @@ Mio CLI 版本字符串 `2.0.0`、内部 Token 版本 `V05`、Mochi 格式版本
 
 ## 内置调用
 
+完整的公开内置函数、`Map` 构造与显式数值转换规则见 [内置函数参考](/docs/v2.0/reference/builtins)。
+
 `chant(value) -> unit` 接受一个整数、浮点数、`bool`、`string` 或字面量 `mu`，输出后追加换行。可空变量必须先收窄，不能直接输出。数组、结构体、枚举、Map、函数和 `resource` 不能直接传给 `chant`。`rune` 按整数输出。
 
 `len(values: []T) -> int64` 返回数组长度。字符串字节长度和码点数分别使用 `kiso/string.byte_len` 与 `rune_count`。
