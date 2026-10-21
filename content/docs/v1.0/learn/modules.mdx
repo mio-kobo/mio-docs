@@ -1,0 +1,52 @@
+---
+title: 模块与数学库
+description: 通过 yobu 引入 kiso/math，组合自己的函数与标准库。
+---
+
+## 完整程序
+
+```mio title="modules.mio"
+yobu "kiso/math";
+
+waza square(value: float64) -> float64 {
+    kaesu value * value;
+}
+
+kaku area = square(12.0);
+chant(area);
+chant(math.sqrt(area));
+```
+
+```text title="output"
+144
+12
+```
+
+## 逐步理解
+
+`yobu "kiso/math";` 显式导入数学包。默认限定名来自路径末段，因此通过 `math.sqrt` 调用平方根函数。
+
+`square` 接收 `float64`，计算 12 的平方，得到 144。再把面积交给 `math.sqrt`，得到边长 12。这也是首页展示的完整代码。
+
+**Bunko** 是标准库物理根目录；**Kiso** 对应公开的 `kiso/` 导入路径。不要写成 `yobu "bunko/kiso/math";`。只有公开的包成员可跨包访问，完整规则见 [语言参考](/docs/language)。
+
+## 练习
+
+把 `square(12.0)` 改为 `square(5.0)`，再运行一次。
+
+预期输出 `25` 和 `5`。保留小数形式使参数符合 `float64` 上下文；不要依赖普通数值变量之间的隐式转换。
+
+## 常见错误
+
+- 调用 `sqrt(area)`：导入成员需要包限定名，这里是 `math.sqrt`。
+- 导入路径带 `bunko/`：公开路径从 `kiso/` 开始。
+- 找不到模块：检查 `bunko/` 是否完整，必要时设置 `MIO_BUNKO` 为标准库根目录。
+
+## 接下来
+
+你已经用过变量、分支、循环、函数、数组、可空类型与导入。继续通过 [Reference](/docs/v1.0/reference) 理解精确规则，通过 [Kiso](/docs/v1.0/kiso) 查找标准库，再到 [Tooling](/docs/v1.0/tooling) 了解开发工具。
+
+本课没有构建原生独立程序，也没有浏览器内运行步骤。Native AOT 的边界见 [Internals](/docs/v1.0/internals)。
+
+
+> 参考边界：本页链接的旧技术正文仍是未版本化迁移资料，不构成本版本的规范或 API 签名。版本化技术参考由 Codex B 单独核验后补入。

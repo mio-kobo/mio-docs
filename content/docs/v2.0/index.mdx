@@ -1,0 +1,52 @@
+---
+title: Mio V2.0.0 文档
+description: Mio v2.0.0 正式发行版的安装、语言、标准库、工具链与实现边界。
+---
+
+**Mio v2.0.0 已正式发布。** 正式 Tag 为 [`v2.0.0`](https://github.com/mio-kobo/mio/releases/tag/v2.0.0)，发布时间为 2026-10-21，对应源码提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`。
+
+本目录的文档已按该正式发行版核对。站点默认的稳定文档入口仍由版本注册表管理；无论从哪个入口阅读，请以页面标注的版本、CLI 字符串和平台边界为准。
+
+## 这个版本包含什么
+
+- **Mochi VM 与 Mochi v14**：源码前端、编译器、VM 和 LSP。
+- **Native AOT**：面向 macOS Apple Silicon / ARM64 的 Mach-O 生成。
+- **M18 验收**：纯 Mio Native AOT 完成 Mochi → Native 的多代自编译；Go AOT 在正式链中只生成初始 Seed。
+- **精确 Mark-Sweep GC**：Shadow Frame、typed Storage、有界 managed arena 与 NativeFS。
+- **Bunko / Kiso**：按需导入的标准库模块，以及公开的工具链开发接口。
+
+## 阅读入口
+
+| 目标 | 入口 |
+| --- | --- |
+| 安装并运行 | [Getting Started](/docs/v2.0/getting-started) |
+| 顺序学习 | [Learn](/docs/v2.0/learn) |
+| 查精确规则 | [Reference](/docs/v2.0/reference) |
+| 查标准库 | [Kiso](/docs/v2.0/kiso) |
+| 找开发工具 | [Tooling](/docs/v2.0/tooling) |
+| 看实现边界 | [Internals](/docs/v2.0/internals) |
+| 遇到失败 | [故障排查](/docs/v2.0/tooling/troubleshooting) |
+
+## 平台与能力边界
+
+| 能力 | v2.0.0 状态 |
+| --- | --- |
+| macOS Apple Silicon / ARM64 | 唯一正式验证平台 |
+| Intel Mac、Linux、Windows | 没有 v2.0.0 正式支持认证 |
+| Mochi VM | 已发布 |
+| Go AOT（`mochi-aot`） | 已发布，独立原生后端 |
+| 纯 Mio Native AOT（`native-aot`） | 已发布，基于 M18 Stage 4 |
+| 精确 Mark-Sweep GC | 已实现 |
+| 分代 GC、High/Balanced/Low 三档 | 未实现，不属于 v2.0.0 |
+| 从 `.mio` 到 Native 完全摆脱 Go | 未完成；源码前端/VM/LSP 仍为 Go |
+| WebAssembly Playground | 未发布 |
+
+Native 支持集合小于 VM。Map、通用 CLI argv、任意 MMA 宿主桥接和任意函数值等能力不能仅凭 VM 支持推断为 Native 支持。详见 [Native AOT](/docs/v2.0/internals/native-aot)。
+
+## 文档范围
+
+本版本提供安装页、十一课学习路线，以及独立的 Reference、Kiso、Tooling 和 Internals 正文。安装、CLI、编辑器、Native AOT、GC、Bunko 概览与教程示例已按官方 `v2.0.0` 发行包核对；部分 Reference/Kiso 深度页面仍保留其 2026-10-20 开发快照的验证来源，页面内会标注具体提交。未在本轮重新执行的完整 M18 链、GC 见证、IDE 端到端和跨平台测试也会明确标注。
+
+官方发行包不需要 Go；从源码重建工具链和首次 Seed 需要 Go。发行包使用 ad-hoc 签名，没有 Developer ID 或 notarization。
+
+[查看版本状态与来源](/docs/versions)。当前只提供中文文档，不生成英文或日文的假翻译。

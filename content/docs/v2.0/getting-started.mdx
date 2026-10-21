@@ -1,0 +1,313 @@
+---
+title: Getting Started · 安装与运行
+description: 使用 Mio v2.0.0 官方发行包安装、校验并运行第一个程序；另附从源码构建的开发者路径。
+---
+
+## 本章目标与平台范围
+
+完成后，你将拥有一个可用的 `mio` 命令，能够区分类型检查、VM 执行和 Mochi 字节码执行，并能导入 `kiso/` 标准库模块。
+
+本章提供两条安装路线：
+
+| 路线 | 适合对象 | 是否需要 Go |
+| --- | --- | --- |
+| 官方发行包 | 使用 Mio 编写程序的普通用户 | 不需要 |
+| 从源码构建 | 参与工具链开发、需要调试编译器的人 | 需要 Go |
+
+**官方 v2.0.0 发行包只提供 macOS Apple Silicon（ARM64）构建。** 本项目没有宣布 Intel Mac、Linux 或 Windows 的 v2.0.0 正式支持认证；这些平台可以尝试从源码构建，但不在本章的支持承诺内。
+
+发行包中的 `mio`、`mochi-aot`、`mochi-aot-audit` 带有 Go runtime；`native-aot` 是纯 Mio 生成的程序。使用发行包不需要系统安装 Go。
+
+## 路线一：安装官方发行包
+
+### 1. 下载并校验
+
+打开 [Mio v2.0.0 Release](https://github.com/mio-kobo/mio/releases/tag/v2.0.0)，下载以下两个文件：
+
+- `mio-2.0.0-darwin-arm64.tar.gz`
+- `SHA256SUMS`
+
+也可以在一个新的安装目录中通过命令行下载：
+
+```sh
+mkdir -p "$HOME/.local/share/mio-2.0.0"
+cd "$HOME/.local/share/mio-2.0.0"
+curl -fLO https://github.com/mio-kobo/mio/releases/download/v2.0.0/mio-2.0.0-darwin-arm64.tar.gz
+curl -fLO https://github.com/mio-kobo/mio/releases/download/v2.0.0/SHA256SUMS
+shasum -a 256 -c SHA256SUMS
+```
+
+预期输出：
+
+```text title="output"
+mio-2.0.0-darwin-arm64.tar.gz: OK
+```
+
+本次正式发布的归档大小为 `3645944` bytes，SHA256 为：
+
+```text
+15a7a65c048e4bac4dc1e792c2106df979d7e68ca28b36e213343c8d1e3dde2e
+```
+
+校验失败时不要解压或运行该文件。重新下载仍失败时，应核对下载地址确实指向 `mio-kobo/mio` 的 `v2.0.0` Release。
+
+### 2. 解压与配置
+
+```sh
+cd "$HOME/.local/share/mio-2.0.0"
+tar -xzf mio-2.0.0-darwin-arm64.tar.gz
+export MIO_HOME="$PWD/mio-2.0.0-darwin-arm64"
+export PATH="$MIO_HOME:$PATH"
+export MIO_BUNKO="$MIO_HOME/bunko"
+mio version
+```
+
+预期输出：
+
+```text title="output"
+Mio 2.0.0
+```
+
+解压后的目录至少包含：
+
+```text
+mio-2.0.0-darwin-arm64/
+  mio
+  mochi-aot
+  mochi-aot-audit
+  native-aot
+  native-aot.mochi
+  bunko/
+  examples/
+  docs/
+  LICENSE
+  MANIFEST.json
+  BUILD-INFO.json
+```
+
+`MIO_BUNKO` 必须指向包含 `kiso/` 的物理标准库根，也就是包内的 `bunko` 目录。导入语句仍然写 `kiso/...`，不要写 `bunko/kiso/...`。
+
+把下面三行写入你的 shell 配置（zsh 为 `~/.zshrc`，bash 为 `~/.bashrc`），并把路径替换成实际安装位置，之后新终端会自动生效：
+
+```sh
+export MIO_HOME="$HOME/.local/share/mio-2.0.0/mio-2.0.0-darwin-arm64"
+export PATH="$MIO_HOME:$PATH"
+export MIO_BUNKO="$MIO_HOME/bunko"
+```
+
+### 3. 检查签名与 Gatekeeper
+
+可以确认可执行文件的结构和签名：
+
+```sh
+file "$MIO_HOME/mio"
+codesign --verify --strict "$MIO_HOME/mio"
+```
+
+`file` 应报告 `Mach-O 64-bit executable arm64`。`codesign --verify --strict` 成功时不输出内容并以退出码 0 结束。
+
+v2.0.0 使用 **ad-hoc 签名**，没有 Apple Developer ID，也没有经过 notarization。`codesign --verify` 通过只表示镜像结构与 ad-hoc 签名自洽，不表示 Apple 已认可发布者。通过浏览器下载后，Gatekeeper 的首次运行体验尚未完成认证；如果系统阻止打开，请按 macOS 的“隐私与安全性”提示处理，不要从不可信来源获取所谓“绕过”脚本。
+
+## 第一个程序
+
+在任意项目目录中新建 `hello.mio`，保存为 UTF-8：
+
+```mio title="hello.mio"
+chant("Hello, Mio!");
+```
+
+先做静态检查，再运行：
+
+```sh
+mio check hello.mio
+mio run hello.mio
+```
+
+`check` 成功时输出：
+
+```text
+check passed
+```
+
+`run` 的标准输出：
+
+```text title="output"
+Hello, Mio!
+```
+
+`check` 只做读取、包加载、常量折叠、名称解析和类型检查，不执行程序；成功时输出 `check passed`。`run` 在检查通过后生成字节码并在 Mochi VM 中执行。
+
+`chant(value)` 输出一个值并追加换行。语句以分号结束；Mio 允许直接书写顶层语句，不需要额外的 `main` 函数。
+
+## 生成与执行 Mochi 字节码
+
+```sh
+mio build -o hello.mochi hello.mio
+mio exec hello.mochi
+mio disasm hello.mochi
+```
+
+`build` 成功时没有标准输出，并在当前目录写出 `hello.mochi`。`exec` 使用 VM 执行该文件，输出与 `run` 相同：
+
+```text title="output"
+Hello, Mio!
+```
+
+`disasm` 输出字节码结构。上面的程序会得到类似内容：
+
+```text title="output"
+Globals: 0
+Constants (1):
+  [0] string "Hello, Mio!"
+Instructions:
+0000 OpConstant 0
+0003 OpChant
+Functions (0):
+```
+
+`.mochi` 不是 macOS 可执行文件，不能直接 `./hello.mochi`；应使用 `mio exec`。需要生成真正的 ARM64 原生程序时，参见 [Native AOT](/docs/v2.0/internals/native-aot)。
+
+## 导入 Bunko 模块
+
+下面的程序导入 `kiso/math`，并调用公开的 `sqrt` 与 `gcd`：
+
+```mio title="math.mio"
+yobu "kiso/math";
+
+kaku value: float64 = 144.0;
+chant(math.sqrt(value));
+chant(math.gcd(84, 30));
+```
+
+```sh
+mio check math.mio
+mio run math.mio
+```
+
+预期输出：
+
+```text title="output"
+12
+6
+```
+
+`yobu "kiso/math";` 的默认限定名是路径最后一段 `math`，所以调用写作 `math.sqrt(...)`。`sqrt` 是浮点泛型函数，本例从 `float64` 实参推断类型；输出 `12` 不带小数点，但它仍是 `float64` 值。
+
+动态数组操作需要显式导入 `kiso/array`：
+
+```mio title="arrays.mio"
+yobu "kiso/array";
+
+kaku numbers = [10, 20];
+array.push(numbers, 30);
+chant(len(numbers));
+chant(numbers[2]);
+```
+
+预期输出：
+
+```text title="output"
+3
+30
+```
+
+数组采用共享引用语义；`array.push` 修改的是同一个数组，不会返回新数组。
+
+## 变量、函数与返回
+
+```mio title="functions.mio"
+waza add(a: int64, b: int64) -> int64 {
+    kaesu a + b;
+}
+
+kaku result = add(20, 22);
+chant(result);
+```
+
+预期输出：
+
+```text title="output"
+42
+```
+
+参数必须带类型，函数必须声明返回类型。非 `unit` 函数用 `kaesu value;` 返回值；`unit` 函数可以使用 `kaesu;` 或直接结束。
+
+## 运行测试
+
+测试文件以 `_test.mio` 结尾，测试函数以 `test_` 开头、无参数、返回 `unit`。在项目目录中创建：
+
+```mio mode="test" title="example_test.mio"
+yobu "kiso/testing";
+
+waza test_add() -> unit {
+    testing.expect(1 + 1 == 2, "addition should work");
+}
+```
+
+```sh
+mio test .
+```
+
+预期输出包含通过数量：
+
+```text title="output"
+Starting tests .
+--- PASS: test_add (0.000s)
+Tests complete: 1 passed, 0 failed
+```
+
+最后一行的时间会随运行环境变化。`mio test` 的完整参数、JSON 报告和退出码见 [CLI](/docs/v2.0/tooling/cli)。
+
+## 路线二：从源码构建
+
+仅当你需要参与工具链开发，或要在未认证平台尝试构建时使用这条路线。发行包用户不需要 Go。
+
+```sh
+git clone --branch v2.0.0 https://github.com/mio-kobo/mio.git mio-source
+cd mio-source
+git checkout --detach 0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a
+go build -o mio ./cmd/mio
+./mio version
+```
+
+预期输出：
+
+```text output
+Mio 2.0.0
+```
+
+`go.mod` 声明的最低 Go 版本是 `1.22.2`。本次文档验证使用 Go `1.25.9` 在 macOS 15.6.1 ARM64 上完成构建；这不构成其他 Go 或操作系统组合的兼容性认证。
+
+源码树中的 `bunko/` 就是标准库根。若从其他目录调用 `./mio`，需要设置：
+
+```sh
+export MIO_BUNKO="$PWD/bunko"
+```
+
+源码构建与发行包的区别：
+
+| 项目 | 官方发行包 | 从源码构建 |
+| --- | --- | --- |
+| 需要 Go | 否 | 是 |
+| 需要 Git | 否 | 是 |
+| 版本来源 | Release `v2.0.0` | Tag/提交 `0ce04dd` |
+| 包含 `native-aot` | 是 | 需要按构建流程生成 |
+| 平台承诺 | macOS ARM64 | 仅限自行验证的平台 |
+
+## 常见错误
+
+- `mio: command not found`：`PATH` 没包含安装目录；在新终端重新加载 shell 配置，或使用 `$MIO_HOME/mio` 绝对路径。
+- `cannot execute binary file` 或 `bad CPU type`：下载了错误架构的包，或试图在 Intel Mac 上运行 ARM64 构建。
+- 导入 `kiso/math` 失败：`MIO_BUNKO` 没有指向包内 `bunko`，或写成了 `bunko/kiso/math`。
+- `check passed` 但 `run` 没有输出：程序没有调用 `chant`；检查是否只有声明而没有顶层执行语句。
+- 直接执行 `.mochi` 报权限或格式错误：`.mochi` 是字节码，必须使用 `mio exec`。
+- `native-aot` 相关失败：确认平台为 macOS ARM64，完整步骤与失败语义见 [Native AOT](/docs/v2.0/internals/native-aot) 和 [故障排查](/docs/v2.0/tooling/troubleshooting)。
+
+## 下一步
+
+- [Learn](/docs/v2.0/learn)：按顺序学习语言。
+- [CLI](/docs/v2.0/tooling/cli)：查精确命令、选项和退出码。
+- [Kiso](/docs/v2.0/kiso)：查标准库模块与 API。
+- [Native AOT](/docs/v2.0/internals/native-aot)：把受支持的 Mochi 编译为原生程序。
+
+本页命令与示例已在 macOS 15.6.1 ARM64 上使用官方 `v2.0.0` 发行包实际执行；源码构建路径也在同一主机使用 Go 1.25.9 验证。

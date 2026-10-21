@@ -1,0 +1,81 @@
+---
+title: 类型与 Nullable
+description: 精度、转换、可空值和受信任资源类型。
+---
+
+本页以 Go 引导 CLI / Mochi VM 为执行范围。源码与运行结果版本见 [验证与来源](/docs/tooling/verification)。Native 后端支持范围见 [Native AOT](/docs/native-aot)。
+
+## 数值类型
+
+| 类型 | 表示 |
+| --- | --- |
+| `int8` / `int16` / `int32` / `int64` | 对应位宽的有符号整数 |
+| `uint8` / `uint16` / `uint32` | 对应位宽的无符号整数 |
+| `rune` | `int32` 别名，字符字面量默认类型 |
+| `float32` / `float64` | IEEE 754 binary32 / binary64 |
+
+没有公开 `uint64` 类型；二进制库用 `U64 { high: uint32; low: uint32; }` 表示无符号 64 位模式。没有类型上下文的整数字面量默认 `int64`，浮点默认 `float64`。目标整数上下文进行字面量范围检查，目标 `float32` 上下文直接舍入到 binary32。
+
+整数加减乘和有符号取负按位宽回绕，最小有符号值除 `-1` 仍为最小值；整数除零是运行时错误。整数与浮点、不同位宽/符号之间均无隐式转换。`int8(...)` 等显式整数转换检查范围；浮点转整数向零截断，NaN、Infinity 和越界会报错。整数转浮点可能丢失精度。
+
+浮点每步按自身精度舍入。浮点除零可产生 Infinity 或 NaN；NaN 与自身也不相等，除 `!=` 外数值比较均为假。正负零相等。
+
+```mio fixture="numbers"
+kaku small: int8 = 127;
+chant(small + int8(1));
+kaku f: float32 = 1.5;
+chant(float64(f));
+chant(int64(-2.75));
+teisu answer: int64 = 6 * 7;
+chant(answer);
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+-128
+1.5
+-2
+42
+```
+
+## bool 与 string
+
+`bool` 使用 `hai` / `iie`。`string` 为不可变 UTF-8 字符串，语言运算符只支持字符串 `==` / `!=`。字节转换、拼接、查找、Builder 见 [kiso/string](/docs/kiso/string)。字符输出是整数，文本输出应使用字符串或 UTF-8 编码 API。
+
+## 可空类型
+
+`T?` 接受 `T` 或 `mu`；`T` 可以赋给 `T?`，反向必须先收窄。`kaku value = mu;` 无法推断类型。`unit?` 和重复可空 `T??` 不合法。
+
+`value != mu` 真分支及 `value == mu` 假分支可收窄可靠的变量引用。赋值会使相关事实失效；函数调用使可能受副作用影响的全局事实失效。数组索引/可变字段引用不能当作持久事实，应先读入局部变量再检查。
+
+`[]T?` 是非空数组、可空元素；`([]T)?` 是可空数组、非空元素。
+
+```mio fixture="nullable"
+kaku age: int64? = mu;
+chant(age == mu);
+age = 18;
+moshi (age != mu) { chant(age + 1); }
+kaku values: []int64? = [10, mu];
+kaku item = values[0];
+moshi (item != mu) { chant(item); }
+kaku optional: ([]int64)? = [7];
+moshi (optional != mu) { chant(len(optional)); }
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+hai
+19
+10
+1
+```
+
+## unit、函数和资源
+
+`unit` 是无返回值函数的返回类型，不能保存、作为参数或传给 `chant`。函数类型写作 `(T, U) -> R`，见 [函数与闭包](/docs/reference/functions)。
+
+`resource` 是 MMA 的不透明宿主句柄类型。`kiso/fs.File.handle` 使用此类型；普通 Mio 源码不能构造受信任资源。它不是任意地址或可手工创建的文件描述符。`[]resource` 被类型检查器拒绝。
+
+证据：`internal/typecheck/type.go`、`signature.go`、`definitions.go`、`nullable.go`、`builtin.go`，`internal/vm/vm.go` 与 `mma/resource.go`。

@@ -1,0 +1,74 @@
+---
+title: 数组与空值
+description: 访问一组值，理解共享引用与可空类型。
+---
+
+## 学习目标与前置
+
+完成后，你能按索引访问数组、解释别名修改，并在使用可空值前检查。前置：[函数与返回值](/docs/v2.0/learn/functions)。
+
+多条观测值需要一起保存，数组提供同类型的有序存储；读取结果也可能缺失，可空类型让这种情况在类型里显式出现。两者是独立概念，本例先展示共享数组，再展示可空整数。
+
+## 保存与运行
+
+在安装页的 `mio-tutorial` 源码根目录，把下面程序保存为 `collections.mio`；保持 `bunko/` 可用。在同一目录执行：
+
+```sh
+./mio check collections.mio
+./mio run collections.mio
+```
+
+`check` 成功报告 `check passed`；后面的 output 仅列 `run` 的标准输出，每行末尾包含换行。
+
+## 完整程序
+
+```mio title="collections.mio"
+kaku values = [10, 20, 30];
+kaku alias = values;
+alias[1] = 25;
+chant(values[1]);
+chant(len(values));
+
+kaku answer: int64? = mu;
+answer = values[0];
+moshi (answer != mu) {
+    chant(answer + 1);
+}
+```
+
+```text title="output"
+25
+3
+11
+```
+
+
+## 逐段观察存储
+
+第一段创建三个整数，得到 `[]int64`。`alias = values` 只复制对数组的引用；把第二个元素改为 25 后，两个名称读到同一位置。`len(values)` 仍为 3，元素写入没有改变数组长度。
+
+第二段的 `answer` 是可空整数，不是数组的可空包装。它先为 `mu`，后接收第一个元素 10。条件为真时 `answer` 被收窄，`answer + 1` 才作为非空整数计算得到 11。不要把检查当作取出数组元素或复制数组的操作。
+
+## 规则边界
+
+同一数组的元素类型一致，下标要求 `int64` 且必须处于 `0 <= index < len(values)`。能通过类型检查的整数下标仍可能在运行时越界。动态追加和独立浅复制由 `kiso/array` 提供；本课赋值没有复制元素。
+
+`[]int64?` 表示元素可空的数组，`([]int64)?` 表示数组本身可空。检查一个局部变量不会证明另一个索引表达式非空；先读入局部变量再检查，尤其在中间有函数调用或共享修改时。
+
+## 练习
+
+把 `alias[1] = 25;` 改为 `alias[0] = 40;`，其他代码不变。
+
+预期输出 `20`、`3`、`41`。第二个元素没有改变；最后一行使用的是第一个元素。
+
+## 常见错误
+
+- 读取 `values[3]`：长度为 3 的数组最大有效下标是 2，越界会产生运行时错误。
+- 在检查前直接计算 `answer + 1`：可空类型不能未经收窄参与普通整数运算。
+- 写 `kaku answer = mu;`：无法仅凭空值推断目标类型，必须提供明确的可空类型。
+
+上一课：[函数与返回值](/docs/v2.0/learn/functions)。下一课：[字符串、字节与 UTF-8](/docs/v2.0/learn/strings)。
+
+## 延伸阅读
+
+精确规则见 [语言参考](/docs/v2.0/reference)。本章输出对应本版本固定提交的 Go 引导 CLI / Mochi VM，验证命令与原始输出见 [验证说明](/docs/v2.0/tooling/verification)。

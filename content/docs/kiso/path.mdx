@@ -1,0 +1,114 @@
+---
+title: kiso/path
+description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+---
+
+固定 / 的逻辑路径处理，全部在 Mio 中实现，不访问文件系统、不解析符号链接。不识别 Windows 盘符、UNC 或反斜杠。
+
+支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/native-aot) 单独评估。
+
+## 公开类型与常量
+
+以下为源码声明，属于签名资料，不是完整可执行程序。
+
+```text
+koukai kata SplitResult { dir: string; base: string; }
+```
+
+## 函数
+
+签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
+
+### clean
+
+```text
+koukai waza clean(value: string) -> string
+```
+
+清理 value 的重复 /、. 与可抵消的 ..；空输入返回 .，绝对路径不越根。
+
+### join
+
+```text
+koukai waza join(left: string, right: string) -> string
+```
+
+用 / 连接 left/right 后 clean；right 的前导 / 不会丢弃 left。
+
+### join_all
+
+```text
+koukai waza join_all(parts: []string) -> string
+```
+
+用 / 连接 parts 后 clean；无元素返回 .。
+
+### is_abs
+
+```text
+koukai waza is_abs(value: string) -> bool
+```
+
+返回 value 是否以 / 开头。
+
+### base
+
+```text
+koukai waza base(value: string) -> string
+```
+
+返回清理后最后路径段；/、.、.. 保留自身。
+
+### dir
+
+```text
+koukai waza dir(value: string) -> string
+```
+
+返回清理后目录部分；无分隔符返回 .。
+
+### ext
+
+```text
+koukai waza ext(value: string) -> string
+```
+
+返回 base 最后一个非首位点及其后缀；.env 无扩展名。
+
+### split
+
+```text
+koukai waza split(value: string) -> SplitResult
+```
+
+返回 clean 后的 dir/base 组合，不保留原始尾斜线。
+
+## 完整示例
+
+```mio fixture="path"
+yobu "kiso/path";
+chant(path.clean("/a//b/../c/"));
+chant(path.clean(""));
+chant(path.join("a", "/b"));
+chant(path.ext(".env"));
+kaku result = path.split("a/b.mio");
+chant(result.dir);
+chant(result.base);
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+/a/c
+.
+a/b
+
+a
+b.mio
+```
+
+## 源码
+
+- `bunko/kiso/path/path.mio`
+
+文件哈希与版本记录见 `verification/source-lock.json`；公开声明清单可由验证脚本重新比较。

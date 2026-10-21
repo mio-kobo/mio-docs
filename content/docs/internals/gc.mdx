@@ -1,0 +1,34 @@
+---
+title: Native GC 与对象表示
+description: 精确根、对象布局、回收与两条 Native Runtime 的边界。
+---
+
+本页解释源码中的 Native Runtime。VM 由 Go 宿主管理内存，不能直接套用原生堆的 GC 统计、对象布局和 OOM 阈值。
+
+## Go AOT Runtime
+
+`internal/aot/darwinarm64/heap.go` 定义独立原生 Heap、16 字节对象头与 16 字节对齐。载荷指针前的头记录 typeID、flags、payloadSize。M8 文件顶部的早期说明不代表后续 M9–M16b 没有回收器；应结合 gc_roots、gc_sweep 与集成发射路径阅读。
+
+编译期类型布局与 root map 明确哪些槽为引用。运行时通过全局根和 Shadow Frame 中的精确根进行标记，按类型描述扫描对象引用，再 sweep 不可达对象并归入 free list；分配可触发回收后重试。不会把任意看似地址的整数当作引用保活。
+
+Array 的 Descriptor/Storage、Struct、Enum、Closure/Environment/Cell、Nullable box 等具有不同布局。共享可变捕获通过 Cell 表达，引用尾槽在截断等操作后必须清理，避免错误保活。
+
+## 纯 Mio Runtime
+
+M18 的纯 Mio lowering 发射原生 Runtime，包含有界 Heap、精确 Mark-Sweep、32-bin free list 与 Shadow Frame。Stage 4 生成的原生编译器已实际编译并运行闭包共享 Cell、12 参数 ABI、Enum payload、nullable 数组、大对象和 NativeFS 示例；256 MiB 受限堆见证触发了一次真实 GC。精确 GC 已实现，但分代 GC（M19）与 High/Balanced/Low 三档没有实现。
+
+这些回归证明对应 fixture 和路径，不表示所有对象表示、所有程序或所有平台都已验证。
+
+字符串可能使用 tagged 静态 ID 或动态对象描述；精确标记需跳过非 Heap 的 tagged ID。Nullable scalar box 和原始整数也必须区分，不能把整数位模式与指针启发式混为一谈。
+
+## 能验证什么
+
+既有回归覆盖不可达对象复用、嵌套对象图、递归帧、数组增长和不可达环；M18 还覆盖 nullable 数组、结构体、枚举、闭包共享 Cell、12 参数 ABI、GC 后存活对象、大对象与 NativeFS。测试在不支持的 OS/架构会 skip；skip 不算通过。实际平台和结果见 [验证与来源](/docs/v2.0/tooling/verification)。
+
+GC stress 使每个安全对象分配点额外触发收集，用于验证根协议；不是生产性能测量。Go AOT 的 `-gc-telemetry` 与纯 Mio 运行时导出的 GC 次数/时间是不同数据源。没有导出的统计应写“未导出”，不能填 0。
+
+v2.0.0 的正式托管堆协议为 1 GiB；256 MiB 见证在 `gc_count=1`、`shadow_frame=0` 后仍生成相同固定点。分代 GC（M19）和 High/Balanced/Low 三档未实现。GC 测试通过只证明其具体 fixture，不能表述成完整自举或全平台成功。
+
+## 来源
+
+`internal/aot/darwinarm64/heap.go`、`gc_roots.go`、`gc_sweep.go`、`gc_telemetry.go`，`internal/aot/m11_gc_test.go`、`m15b_closure_test.go`，`bunko/kiso/aot/lower/lower.mio` 与 `types/types.mio`。工作树来源及开发状态以 source-lock 和阶段记录为准。

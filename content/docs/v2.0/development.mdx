@@ -1,0 +1,50 @@
+---
+title: V2 发布状态与后续范围
+description: v2.0.0 已发布的内容、M18 验收结论，以及仍未完成的开发项。
+---
+
+## 已发布
+
+Mio **v2.0.0** 已于 2026-10-21 正式发布：
+
+- Tag：[`v2.0.0`](https://github.com/mio-kobo/mio/releases/tag/v2.0.0)
+- 源码提交：`0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`
+- 平台：macOS Apple Silicon / ARM64
+- CLI：`Mio 2.0.0`
+
+v2.0.0 的核心成果是 M18 纯 Mio Mochi → Native AOT 自托管，以及 Mochi VM、Native AOT、精确 GC、LSP 和 Bunko 标准库的正式工具链。
+
+## M18 结论
+
+M18 的正式链为：
+
+```text
+Go 源码前端 → native-aot.mochi
+Go AOT → Seed
+Seed → Native Stage 1 → 2 → 3 → 4 → 5
+```
+
+- Stage 1–4 实际执行并生成下一代；
+- Stage 1–5 未签名 Mach-O 完整字节一致；
+- Stage 5 已生成、解析、签名和 strict verify，但未计为已执行代次；
+- 正式链中 Go AOT 只生成 Seed，后续原生生成由纯 Mio 完成；
+- 256 MiB 受限堆见证触发了真实 GC，输出仍与固定点一致。
+
+**边界：** 这不表示从 `.mio` 源码开始的完整工具链已经摆脱 Go。源码前端、VM 和 LSP 仍为 Go 实现；从源码重建工具和首次 Seed 仍需要 Go。
+
+## 仍未完成
+
+| 项目 | 状态 |
+| --- | --- |
+| 分代 GC（M19） | 未启动 |
+| High / Balanced / Low 三档 GC | 未实现 |
+| Intel Mac、Linux、Windows 正式支持 | 未认证 |
+| 完整 `.mio` 源码工具链脱离 Go | 未完成 |
+| WebAssembly Playground | 未发布 |
+| IDE 插件与 v2.0.0 的全面端到端认证 | 未完成；仅有源码与协议层核对 |
+
+## 与站点版本入口的关系
+
+本目录是站点当前可读的 V2 文档，内容已按 v2.0.0 正式版核对。站点的默认稳定文档入口、V2.0.0 冻结快照与版本切换验收由文档站发布流程单独管理；这不影响 Mio 语言本身的正式发布事实。
+
+[查看版本状态](/docs/versions)。

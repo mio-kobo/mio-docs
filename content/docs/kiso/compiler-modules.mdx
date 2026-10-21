@@ -1,0 +1,389 @@
+---
+title: 编译工具链 Kiso 模块
+description: 开发中 ARM64、Mach-O、lowering 与表示分析接口清单。
+---
+
+这些是真实存在的工具链开发接口。M18 已于 v2.0.0 通过验收，但公开 koukai 不等于稳定 ABI，也不表示所有 VM 程序都能通过 Native 后端。本页只审计声明及错误协议，不将未执行的开发 API 标记为所有平台或所有输入均已验证。
+
+详细边界见 [V2.0 Native AOT](/docs/v2.0/internals/native-aot)。M18 证明的是 Mochi → Native 的纯 Mio 自编译；从 `.mio` 源码开始的完整工具链仍未完全摆脱 Go。`kiso/aot/*` 的公开声明不构成稳定 ABI 承诺。
+
+## kiso/aot/arm64
+
+编码器以 Instruction 返回 word/error，error 非空时不能发射 word。寄存器、立即数、移位、分支距离有范围检查；Assembler 另记录标签与 fixup，并可能报告重复/缺失标签与远分支错误。delta_words 是指令字数，adr/adrp 则依签名使用字节偏移。
+
+以下为声明资料（未作为独立程序运行）：
+
+```text
+koukai sentaku EncodeError {
+    InvalidRegister;
+    InvalidImmediate;
+    InvalidCondition;
+    MisalignedOffset;
+    BranchOutOfRange;
+    DuplicateLabel(string);
+    UndefinedLabel(string);
+    InvalidPatch;
+}
+
+koukai kata Instruction { word: uint32; error: EncodeError?; }
+
+koukai waza movz_x(rd: int64, immediate: int64, shift: int64) -> Instruction
+
+koukai waza movk_x(rd: int64, immediate: int64, shift: int64) -> Instruction
+
+koukai waza movn_x(rd: int64, immediate: int64, shift: int64) -> Instruction
+
+koukai waza movz_w(rd: int64, immediate: int64) -> Instruction
+
+koukai waza add_x(rd: int64, rn: int64, rm: int64) -> Instruction
+
+koukai waza sub_x(rd: int64, rn: int64, rm: int64) -> Instruction
+
+koukai waza adds_x(rd: int64, rn: int64, rm: int64) -> Instruction
+
+koukai waza subs_x(rd: int64, rn: int64, rm: int64) -> Instruction
+
+koukai waza and_x(rd: int64, rn: int64, rm: int64) -> Instruction
+
+koukai waza orr_x(rd: int64, rn: int64, rm: int64) -> Instruction
+
+koukai waza eor_x(rd: int64, rn: int64, rm: int64) -> Instruction
+
+koukai waza mul_x(rd: int64, rn: int64, rm: int64) -> Instruction
+
+koukai waza sdiv_x(rd: int64, rn: int64, rm: int64) -> Instruction
+
+koukai waza udiv_x(rd: int64, rn: int64, rm: int64) -> Instruction
+
+koukai waza msub_x(rd: int64, rn: int64, rm: int64, ra: int64) -> Instruction
+
+koukai waza cmp_x(rn: int64, rm: int64) -> Instruction
+
+koukai waza add_imm_x(rd: int64, rn: int64, immediate: int64, shift12: bool) -> Instruction
+
+koukai waza sub_imm_x(rd: int64, rn: int64, immediate: int64, shift12: bool) -> Instruction
+
+koukai waza cmp_imm_x(rn: int64, immediate: int64, shift12: bool) -> Instruction
+
+koukai waza add_imm_w(rd: int64, rn: int64, immediate: int64) -> Instruction
+
+koukai waza cset_w(rd: int64, condition: int64) -> Instruction
+
+koukai waza lsl_x(rd: int64, rn: int64, shift: int64) -> Instruction
+
+koukai waza lsr_x(rd: int64, rn: int64, shift: int64) -> Instruction
+
+koukai waza asr_x(rd: int64, rn: int64, shift: int64) -> Instruction
+
+koukai waza lsrv_x(rd: int64, rn: int64, rm: int64) -> Instruction
+
+koukai waza ldr_x(rt: int64, rn: int64, byte_offset: int64) -> Instruction
+
+koukai waza str_x(rt: int64, rn: int64, byte_offset: int64) -> Instruction
+
+koukai waza ldrb_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction
+
+koukai waza strb_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction
+
+koukai waza ldrh_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction
+
+koukai waza stp_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction
+
+koukai waza ldp_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction
+
+koukai waza stp_pre_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction
+
+koukai waza ldp_post_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction
+
+koukai waza b(delta_words: int64) -> Instruction
+
+koukai waza bl(delta_words: int64) -> Instruction
+
+koukai waza b_cond(condition: int64, delta_words: int64) -> Instruction
+
+koukai waza cbz_x(rt: int64, delta_words: int64) -> Instruction
+
+koukai waza cbnz_x(rt: int64, delta_words: int64) -> Instruction
+
+koukai waza br_x(rn: int64) -> Instruction
+
+koukai waza blr_x(rn: int64) -> Instruction
+
+koukai waza ret_x(rn: int64) -> Instruction
+
+koukai waza ret() -> Instruction
+
+koukai waza adr(rd: int64, delta_bytes: int64) -> Instruction
+
+koukai waza adrp_offset(rd: int64, pc_offset: int64, target_offset: int64) -> Instruction
+
+koukai waza svc(immediate: int64) -> Instruction
+
+koukai waza fadd_d(vd: int64, vn: int64, vm: int64) -> Instruction
+
+koukai waza fsub_d(vd: int64, vn: int64, vm: int64) -> Instruction
+
+koukai waza fmul_d(vd: int64, vn: int64, vm: int64) -> Instruction
+
+koukai waza fdiv_d(vd: int64, vn: int64, vm: int64) -> Instruction
+
+koukai waza fcmp_d(vn: int64, vm: int64) -> Instruction
+
+koukai waza scvtf_d(vd: int64, rn: int64) -> Instruction
+
+koukai waza fcvtzs_x(rd: int64, vn: int64) -> Instruction
+
+koukai kata Label { name: string; word: int64; }
+
+koukai kata Fixup { at_word: int64; target: string; kind: int64; operand: int64; }
+
+koukai kata Assembler { words: []uint32; labels: []Label; label_index: [][]int64; fixups: []Fixup; errors: []EncodeError; }
+
+koukai kata AssembleResult { words: []uint32; error: EncodeError?; }
+
+koukai waza assembler() -> Assembler
+
+koukai waza assembler_emit(value: Assembler, encoded: Instruction) -> EncodeError?
+
+koukai waza assembler_label(value: Assembler, name: string) -> EncodeError?
+
+koukai waza assembler_b(value: Assembler, target: string) -> EncodeError?
+
+koukai waza assembler_bl(value: Assembler, target: string) -> EncodeError?
+
+koukai waza assembler_b_cond(value: Assembler, condition: int64, target: string) -> EncodeError?
+
+koukai waza assembler_cbz_x(value: Assembler, reg: int64, target: string) -> EncodeError?
+
+koukai waza assembler_cbnz_x(value: Assembler, reg: int64, target: string) -> EncodeError?
+
+koukai waza assembler_assemble(value: Assembler) -> AssembleResult
+
+koukai waza assembler_label_word(value: Assembler, name: string) -> int64
+```
+
+来源：`bunko/kiso/aot/arm64/arm64.mio`。
+
+## kiso/aot/macho
+
+plan 的 code_size/const_size 是字节数，globals 是槽数；executable 以 ImageSpec 规划最终布局并返回 ImageResult。输出是未签名 Darwin ARM64 Mach-O 字节数组，须检查 error；不是跨平台系统链接器。
+
+以下为声明资料（未作为独立程序运行）：
+
+```text
+koukai sentaku MachOError {
+    EmptyText;
+    TooManyGlobals;
+    ImageTooLarge;
+    LoadCommandsTooLarge;
+    InvalidPatch;
+    EncodeFailure;
+    WriteFailure;
+}
+
+koukai kata AddressTarget { kind: int64; }
+
+koukai waza text_target() -> AddressTarget
+
+koukai waza const_target() -> AddressTarget
+
+koukai waza data_target() -> AddressTarget
+
+koukai kata AddressPatch { at_word: int64; add_at_word: int64; target: AddressTarget; target_offset: int64; register: int64; }
+
+koukai kata Section { segment: string; name: string; file_offset: int64; vm_offset: int64; size: int64; alignment: int64; }
+
+koukai kata Symbol { name: string; section: int64; value: int64; }
+
+koukai kata Relocation { section: int64; offset: int64; symbol: int64; pc_relative: bool; width: int64; }
+
+koukai kata Layout { text_size: int64; const_offset: int64; data_offset: int64; linkedit_offset: int64; file_size: int64; sections: []Section; }
+
+koukai kata ImageSpec { words: []uint32; constants: []uint8; globals: int64; patches: []AddressPatch; }
+
+koukai kata ImageResult { bytes: []uint8; layout: Layout; error: MachOError?; }
+
+koukai waza plan(code_size: int64, const_size: int64, globals: int64) -> Layout
+
+koukai waza executable(spec: ImageSpec) -> ImageResult
+```
+
+来源：`bunko/kiso/aot/macho/macho.mio`。
+
+## kiso/aot/lower
+
+compile 接受经验证的 mochi.File 并返回 LowerResult；compile_gc_stress 使用分配入口 GC stress。布局未知、操作数不合法或不支持的 opcode 必须返回 LowerError；error_code/error_detail 用于定位失败。目标 Heap 与执行 Builder 的 Seed Heap 不同。compile_with_heap 的 capacity 以字节计；不能据配置入口声称 A→B 通过。
+
+以下为声明资料（未作为独立程序运行）：
+
+```text
+koukai sentaku LowerError {
+    UnsupportedConstant;
+    UnsupportedOpcode(int64);
+    UnsupportedClosure;
+    InvalidFunction;
+    InvalidOperand(int64);
+    FrameTooLarge;
+    EncodeFailure;
+    UnsafeType(int64);
+    UnsupportedNative(int64);
+    BranchOutOfRange(int64);
+}
+
+koukai kata LowerResult {
+    words: []uint32;
+    constants: []uint8;
+    patches: []macho.AddressPatch;
+    globals: int64;
+    error: LowerError?;
+}
+
+koukai waza error_code(value: LowerError) -> int64
+
+koukai waza error_detail(value: LowerError) -> int64
+
+koukai waza compile(file: mochi.File) -> LowerResult
+
+koukai waza compile_gc_stress(file: mochi.File) -> LowerResult
+
+koukai waza compile_with_heap(file: mochi.File, capacity: int64, gc_stress: bool) -> LowerResult
+```
+
+来源：`bunko/kiso/aot/lower/lower.mio`。
+
+## kiso/aot/lower/types
+
+TypeAnalysis 建立栈、局部、调用、字段、数组与捕获的表示约束。查询接受该分析与 node 编号；analyze_types_traced 的 trace 控制诊断。它不是 Mio 用户级反射 API，不承诺任意整数 node 均有效。
+
+以下为声明资料（未作为独立程序运行）：
+
+```text
+koukai teisu type_unknown = 0;
+
+koukai teisu type_integer = 1;
+
+koukai teisu type_float32 = 2;
+
+koukai teisu type_float64 = 3;
+
+koukai teisu type_bool = 4;
+
+koukai teisu type_string_id = 5;
+
+koukai teisu type_array_ref = 6;
+
+koukai teisu type_struct_ref = 7;
+
+koukai teisu type_enum_ref = 8;
+
+koukai teisu type_function_ref = 9;
+
+koukai teisu type_nil = 10;
+
+koukai teisu type_float_any = 11;
+
+koukai kata TypeArena {
+    parent: []int64;
+    revision: []int64;
+    kind: []int64;
+    nullable: []bool;
+    struct_arity: []int64;
+    struct_exact: []bool;
+    fields: [][]int64;
+    array_width: []int64;
+    integer_descriptor: []int64;
+    targets: [][]int64;
+    variants: [][][]int64;
+    trace: []bool;
+    context: []int64;
+    nullable_origins: [][]int64;
+}
+
+koukai kata TypeBlock {
+    data: []uint8;
+    function_id: int64;
+    entry: [][]int64;
+    reachable: []bool;
+}
+
+koukai kata TypeAnalysis {
+    arena: TypeArena;
+    globals: []int64;
+    locals: [][]int64;
+    returns: []int64;
+    upvalues: [][]int64;
+    cells: [][]bool;
+    blocks: []TypeBlock;
+    error_detail: int64;
+}
+
+koukai waza type_kind(analysis: TypeAnalysis, node: int64) -> int64
+
+koukai waza type_nullable(analysis: TypeAnalysis, node: int64) -> bool
+
+koukai waza type_is_heap_reference(analysis: TypeAnalysis, node: int64) -> bool
+
+koukai waza type_instruction_width(opcode: int64) -> int64
+
+koukai waza enum_read_tag(file: mochi.File, data: []uint8, at: int64) -> int64
+
+koukai waza array_forward_opcode(function: mochi.Function) -> int64
+
+koukai waza is_float_inf_predicate(function: mochi.Function) -> bool
+
+koukai waza analyze_types(file: mochi.File) -> TypeAnalysis
+
+koukai waza analyze_types_traced(file: mochi.File, trace: bool) -> TypeAnalysis
+```
+
+来源：`bunko/kiso/aot/lower/types/types.mio`。
+
+## kiso/aot/lower/nativefs
+
+这是纯 Mio lowering 的 NativeFS MMA bridge，属于内部工具链 ABI。operation 依据包含签名指纹的完整名称识别操作，未识别返回 op_none；parameter_count、parameter_is_root、returns_reference 为发射调用及精确根提供参数/返回约定。entry_label 给出 Runtime 入口标签，emit_runtime 写入 arm64.Assembler，返回 unit；编码错误需结合 Assembler 的错误状态与最终组装结果检查。它不是文件操作的用户 API；用户应使用 kiso/fs。以下声明只核对源码，未作为完整 NativeFS API 验收。
+
+```text
+koukai teisu op_none = 0;
+
+koukai teisu op_close = 1;
+
+koukai teisu op_dir_close = 2;
+
+koukai teisu op_dir_is_dir = 3;
+
+koukai teisu op_dir_is_file = 4;
+
+koukai teisu op_dir_name = 5;
+
+koukai teisu op_dir_next = 6;
+
+koukai teisu op_dir_status = 7;
+
+koukai teisu op_file_status = 8;
+
+koukai teisu op_mkdir = 9;
+
+koukai teisu op_open = 10;
+
+koukai teisu op_open_dir = 11;
+
+koukai teisu op_read = 12;
+
+koukai teisu op_stat = 13;
+
+koukai teisu op_write = 14;
+
+koukai waza operation(name: string) -> int64
+
+koukai waza parameter_count(op: int64) -> int64
+
+koukai waza parameter_is_root(op: int64, index: int64) -> bool
+
+koukai waza returns_reference(op: int64) -> bool
+
+koukai waza entry_label(op: int64) -> string
+
+koukai waza emit_runtime(code: arm64.Assembler, empty_tagged: int64) -> unit
+```
+
+来源：`bunko/kiso/aot/lower/nativefs/nativefs.mio`；调用编号/根约定不能替代 A→B 验收。

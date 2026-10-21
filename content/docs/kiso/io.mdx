@@ -1,0 +1,120 @@
+---
+title: kiso/io
+description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+---
+
+同步字节流，通过 Reader/Writer 函数字段组合，不需要 trait。error=mu 表示成功；失败保留已完成 count。自定义回调必须遵守 count 范围和读写约定。
+
+支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/native-aot) 单独评估。
+
+## 公开类型与常量
+
+以下为源码声明，属于签名资料，不是完整可执行程序。
+
+```text
+koukai sentaku IoError {
+    Closed;
+    InvalidArgument;
+    NoProgress;
+    UnexpectedEOF;
+    Other(string);
+}
+
+koukai kata ReadResult { count: int64; eof: bool; error: IoError?; }
+
+koukai kata WriteResult { count: int64; error: IoError?; }
+
+koukai kata CopyResult { count: int64; error: IoError?; }
+
+koukai kata Reader { read: ([]uint8, int64, int64) -> ReadResult; }
+
+koukai kata Writer { write: ([]uint8, int64, int64) -> WriteResult; }
+```
+
+## 函数
+
+签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
+
+### read
+
+```text
+koukai waza read(reader: Reader, destination: []uint8, offset: int64, length: int64) -> ReadResult
+```
+
+检查 destination 的 offset/length 后调用 reader.read；非法区间返回 InvalidArgument。count 是读取字节数，可同时 eof=hai。
+
+### write
+
+```text
+koukai waza write(writer: Writer, source: []uint8, offset: int64, length: int64) -> WriteResult
+```
+
+检查 source 的 offset/length 后调用 writer.write；非法区间返回 InvalidArgument，允许部分写入。
+
+### read_full
+
+```text
+koukai waza read_full(reader: Reader, destination: []uint8, offset: int64, length: int64) -> ReadResult
+```
+
+反复读取直到 length；保留已读取 count，提前 EOF 返回 UnexpectedEOF，无进展返回 NoProgress，非法 count 返回 InvalidArgument。长度 0 不调用 Reader，eof=iie。
+
+### write_all
+
+```text
+koukai waza write_all(writer: Writer, source: []uint8, offset: int64, length: int64) -> WriteResult
+```
+
+反复写完 source 指定区间；保留 count，无进展返回 NoProgress，非法区间/回调 count 返回 InvalidArgument；长度 0 成功。
+
+### copy_stream
+
+```text
+koukai waza copy_stream(reader: Reader, writer: Writer) -> CopyResult
+```
+
+使用固定 32768 字节 buffer 从 reader 复制到 writer；返回已写 count 与错误，内存与执行成本受资源限制。
+
+### reader_from_bytes
+
+```text
+koukai waza reader_from_bytes(source: []uint8) -> Reader
+```
+
+返回共享 source 存储、独立游标的 Reader；后续外部修改可见，读取推进游标，到末尾 eof=hai。
+
+### writer_to_buffer
+
+```text
+koukai waza writer_to_buffer(buffer: bytes.ByteBuffer) -> Writer
+```
+
+返回将 source 指定区间追加到 buffer 的 Writer；返回追加字节数，外部 buffer 别名可见。
+
+## 完整示例
+
+```mio fixture="io"
+yobu "kiso/io";
+yobu "kiso/bytes";
+kaku source: []uint8 = [65, 66, 67];
+kaku reader = io.reader_from_bytes(source);
+kaku buffer = bytes.new_buffer();
+kaku result = io.copy_stream(reader, io.writer_to_buffer(buffer));
+chant(result.count);
+chant(result.error == mu);
+chant(bytes.equal(buffer.data, source));
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+3
+hai
+hai
+```
+
+## 源码
+
+- `bunko/kiso/io/io.mio`
+
+文件哈希与版本记录见 `verification/source-lock.json`；公开声明清单可由验证脚本重新比较。

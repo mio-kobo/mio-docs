@@ -1,0 +1,90 @@
+---
+title: Native GC 与对象表示
+description: Mio v2.0.0 的精确 Mark-Sweep GC、Shadow Frame、对象布局、托管 arena 与分代 GC 边界。
+---
+
+本页解释 **Mio v2.0.0** 的 Native Runtime 内存管理。Mochi VM 的内存由 Go 宿主管理，不能直接套用原生堆的 GC 统计、对象布局和 OOM 阈值。
+
+## 已实现：精确 Mark-Sweep
+
+Native Runtime 使用精确 Mark-Sweep GC：
+
+- **Shadow Frame**：编译器为每个栈帧生成根位图，运行时只扫描真实引用槽；
+- **全局根**：全局槽位按类型描述标记；
+- **对象位图**：nullable、closure 捕获、enum 关联值等引用位置有明确描述；
+- **typed Storage**：数组等容器按元素类型区分布局；
+- **大对象与跨页分配**：对象可跨越 arena 页面；
+- **空闲块管理**：不可达对象回收后进入 free list，可合并、拆分和尾部回收；
+- **独立托管 arena**：每进程独立 mmap，有界容量。
+
+GC 不会把任意看起来像地址的整数当作引用保活。引用类型在编译期布局与 root map 中静态可知；运行时按描述扫描。
+
+## 对象布局
+
+Array 的 Descriptor/Storage、Struct、Enum、Closure/Environment/Cell、Nullable box 等具有不同布局。共享可变捕获通过 Cell 表达；数组截断等操作必须清理引用尾槽，避免错误保活。
+
+原生对象头记录类型与 payload 信息，载荷按平台对齐。具体字段布局属于实现细节，不是稳定 ABI；应用代码不应依赖原生对象的内存偏移。
+
+## 托管堆容量
+
+- 正式 M18 自举协议使用 **1 GiB** managed arena。
+- 256 MiB 受限堆见证真实触发了 GC（`gc_count=1`、`shadow_frame=0`），输出仍与固定点一致。
+- 历史 128 MiB 试验返回 OOM，是压力诊断，不是正式协议失败。
+- `mochi-aot -heap-mib` 控制 Go AOT 生成程序的用户堆容量，合法范围 `1..1024` MiB；它的默认值 `1` 不是自举协议。
+- `native-aot` 当前没有通用堆参数，内部使用 1 GiB 协议。
+
+## GC 压力与遥测
+
+`mochi-aot` 提供两个诊断选项：
+
+| 选项 | 行为 |
+| --- | --- |
+| `-gc-stress` | 在每个安全对象分配点强制触发 GC，用于验证根协议与对象存活 |
+| `-gc-telemetry` | 把分配/GC 诊断写到 stderr |
+
+`-gc-stress` 与 `-m11-gc` 互斥。GC stress 不是生产性能测量；不能把它的耗时写成正常程序性能。
+
+M18 还使用 LLDB 在真实原生进程中读取 runtime metadata，验证 256 MiB 见证实际发生了一次 GC。该证据属于核心仓库的验收记录，本页不把它改标成本轮新执行。
+
+## 未实现：分代 GC
+
+v2.0.0 **没有**分代 GC，也没有 High / Balanced / Low 三档 GC 配置：
+
+- 分代 GC（M19）未启动；
+- 三档配置未实现；
+- 没有性能提升倍数、暂停时间或吞吐量承诺；
+- 不能根据 VM 的 Go 堆行为推断 Native GC 性能。
+
+## 两条 Runtime 的边界
+
+| 项目 | Mochi VM | Native Runtime |
+| --- | --- | --- |
+| 内存管理 | Go 宿主 | 独立 mmap arena |
+| GC | Go GC | 精确 Mark-Sweep |
+| 对象表示 | Go Value | 原生对象头 + typed Storage |
+| 根 | Go 栈/引用 | Shadow Frame + 全局根位图 |
+| 容量限制 | VM 资源预算 | managed arena 硬限制 |
+| 平台 | 运行 Go 工具的平台 | v2.0.0 仅 macOS ARM64 |
+
+VM 测试通过不等于 Native GC 路径通过；Native 固定点通过也不等于 VM 的所有对象类型和 API 都已覆盖。两者必须分别验收。
+
+## 验证范围
+
+已记录的 Native 回归覆盖：
+
+- 不可达对象复用、嵌套对象图、递归帧、数组增长与不可达环；
+- nullable 数组、结构体、枚举、closure 共享 Cell；
+- 12 参数 ABI、GC 后存活对象、大对象与跨页分配；
+- NativeFS 文件读写与缺失文件错误路径；
+- 256 MiB 受限堆自编译的真实 GC 见证。
+
+这些测试证明对应 fixture 和路径，不构成“所有程序、所有对象表示或所有平台”已经验证的声明。
+
+## 来源
+
+- `internal/aot/darwinarm64/heap.go`、`gc_roots.go`、`gc_sweep.go`、`gc_telemetry.go`、`m11_object_gc.go`；
+- `internal/aot/m11_gc_test.go`、`m15b_closure_test.go`、`m18_selfhost_test.go`；
+- `bunko/kiso/aot/lower/lower.mio`、`types/types.mio`；
+- `docs/NATIVE_AOT_M18.md`、`docs/releases/v2.0.0-platforms.md`。
+
+本页依据 v2.0.0 标签提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a` 与官方发行资料整理；完整 M18 与 GC 见证属于核心仓库既有验收，本轮文档没有重新执行整条链。

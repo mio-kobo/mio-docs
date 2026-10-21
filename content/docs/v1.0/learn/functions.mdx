@@ -1,0 +1,50 @@
+---
+title: 函数与返回值
+description: 用 waza 封装计算，用 kaesu 返回结果。
+---
+
+## 完整程序
+
+```mio title="functions.mio"
+waza square(value: int64) -> int64 {
+    kaesu value * value;
+}
+
+waza absolute(value: int64) -> int64 {
+    moshi (value < 0) {
+        kaesu -value;
+    } sore {
+        kaesu value;
+    }
+}
+
+chant(square(6));
+chant(absolute(-7));
+```
+
+```text title="output"
+36
+7
+```
+
+## 逐步理解
+
+`waza` 声明函数，参数使用 `名称: 类型`。箭头后写返回类型，`kaesu` 结束当前函数并返回一个值。
+
+`square` 把参数乘以自身。`absolute` 在两个条件分支中都返回 `int64`，因此调用方总能得到所声明类型的结果。这里用小整数演示，不讨论最小有符号整数的回绕边界。
+
+顶层调用把函数返回值交给 `chant`。定义函数的花括号后不加分号，函数体中的返回语句仍需要分号。
+
+## 练习
+
+新增 `waza double(value: int64) -> int64`，返回参数的两倍，然后运行 `chant(double(square(3)));`。
+
+预期新增一行 `18`。先调用内层 `square(3)` 得到 9，再把 9 传给 `double`。
+
+## 常见错误
+
+- 传入 `square(2.5)`：参数要求 `int64`，浮点数不会隐式转换。
+- 把 `kaesu` 写成 `return`：使用 Mio 的函数返回关键字。
+- 声明返回 `int64`，却在某条路径只输出而没有返回：`chant` 不能代替 `kaesu`。
+
+上一课：[条件与循环](/docs/v1.0/learn/control-flow)。下一课：[数组与空值](/docs/v1.0/learn/collections)。

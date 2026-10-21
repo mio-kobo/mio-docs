@@ -1,0 +1,133 @@
+---
+title: kiso/utf8
+description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+---
+
+**版本范围：v2.0 · Development**，固定提交 `8b53a25142b0da1192a6c4868e807385d7bb50f9`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
+
+严格 UTF-8 与 Unicode 标量编解码，不处理显示宽度、字素簇或规范化。U+FFFD 本身是合法标量，不能只看 value 判断解码失败，应看 valid。
+
+支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v2.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v2.0/internals/native-aot) 单独评估。
+
+## 公开类型与常量
+
+以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
+
+```text
+koukai kata DecodeResult {
+    value: rune;
+    width: int64;
+    valid: bool;
+}
+```
+
+## 函数索引
+
+[is_valid_rune](#is_valid_rune) · [rune_width](#rune_width) · [decode_one](#decode_one) · [encode_rune](#encode_rune) · [append_rune](#append_rune) · [valid](#valid) · [rune_count](#rune_count)
+
+## 函数
+
+签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
+
+### is_valid_rune
+
+```text
+koukai waza is_valid_rune(value: rune) -> bool
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+检查 value 是否为 Unicode 标量值。
+
+### rune_width
+
+```text
+koukai waza rune_width(value: rune) -> int64
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+返回合法 value 的 1..4 字节编码长度；非法标量报运行时错误。
+
+### decode_one
+
+```text
+koukai waza decode_one(data: []uint8, offset: int64) -> DecodeResult
+```
+
+参数：`data`：输入字节数组；是否复制见返回语义；`offset`：从起点计数的字节偏移，起点为 0。
+
+从 data 的字节 offset 解码一个标量。成功 width=1..4、valid=hai；非法序列 value=U+FFFD、width=1、valid=iie；正好末尾 width=0；其他越界 offset 报运行时错误。
+
+### encode_rune
+
+```text
+koukai waza encode_rune(value: rune) -> []uint8
+```
+
+参数：`value`：本次操作的输入值，返回语义及限制如下。
+
+将 value 编码为新 UTF-8 字节数组；负值、代理区或大于 U+10FFFF 报运行时错误。
+
+### append_rune
+
+```text
+koukai waza append_rune(destination: []uint8, value: rune) -> unit
+```
+
+参数：`destination`：接收写入的现有目标数组；`value`：本次操作的输入值，返回语义及限制如下。
+
+将 value 编码追加至 destination；非法标量在修改目标前报错。
+
+### valid
+
+```text
+koukai waza valid(data: []uint8) -> bool
+```
+
+参数：`data`：输入字节数组；是否复制见返回语义。
+
+返回 data 是否是严格合法的 UTF-8。
+
+### rune_count
+
+```text
+koukai waza rune_count(data: []uint8) -> int64?
+```
+
+参数：`data`：输入字节数组；是否复制见返回语义。
+
+合法 data 返回标量数量，非法数据返回 mu。
+
+## 完整示例
+
+```mio fixture="utf8"
+yobu "kiso/utf8";
+kaku data = utf8.encode_rune('澪');
+kaku result = utf8.decode_one(data, 0);
+chant(result.valid);
+chant(result.width);
+chant(result.value);
+kaku end = utf8.decode_one(data, len(data));
+chant(end.width);
+kaku invalid: []uint8 = [255];
+chant(utf8.rune_count(invalid) == mu);
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+hai
+3
+28586
+0
+hai
+```
+
+## 源码
+
+- `bunko/kiso/utf8/utf8.mio`
+
+公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
+
+精确来源：[bunko/kiso/utf8/utf8.mio](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/utf8/utf8.mio)。

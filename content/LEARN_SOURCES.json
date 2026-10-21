@@ -1,0 +1,79 @@
+{
+  "verifiedOn": "2026-10-21",
+  "repository": "https://github.com/mio-kobo/mio",
+  "verification": "V1 was validated from its clean v1.0.0 archive. V2 tutorial programs were re-run against the official v2.0.0 darwin-arm64 release package on macOS 15.6.1 ARM64; 15 complete programs, 5 exercises and Hello build/exec/disasm passed.",
+  "versions": {
+    "v1.0": {
+      "source": {
+        "commit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+        "ref": "v1.0.0",
+        "cliVersion": "Mio 1.0.0-beta.2"
+      },
+      "release": {
+        "tag": "v1.0.0",
+        "url": "https://github.com/mio-kobo/mio/releases/tag/v1.0.0",
+        "publishedAt": "2026-10-17T13:02:10Z",
+        "prerelease": false
+      },
+      "ownedContent": [
+        "content/docs/v1.0/getting-started.mdx",
+        "content/docs/v1.0/learn/**"
+      ],
+      "sources": [
+        "cmd/mio/main.go",
+        "go.mod",
+        "docs/LANGUAGE.md",
+        "examples/variables_and_conditionals.mio",
+        "examples/recursion.mio",
+        "bunko/kiso/math/README.md"
+      ]
+    },
+    "v2.0": {
+      "source": {
+        "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+        "ref": "v2.0.0",
+        "cliVersion": "Mio 2.0.0"
+      },
+      "release": {
+        "tag": "v2.0.0",
+        "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+        "publishedAt": "2026-10-21T08:31:25Z",
+        "prerelease": false
+      },
+      "docsStatus": "Development site snapshot; content re-checked against released v2.0.0",
+      "ownedContent": [
+        "content/docs/v2.0/getting-started.mdx",
+        "content/docs/v2.0/learn/**",
+        "content/docs/v2.0/tooling/cli.mdx",
+        "content/docs/v2.0/tooling/editors.mdx",
+        "content/docs/v2.0/tooling/troubleshooting.mdx",
+        "content/docs/v2.0/internals/native-aot.mdx"
+      ],
+      "sources": [
+        "cmd/mio/main.go",
+        "cmd/mio/test_command.go",
+        "cmd/mochi-aot/main.go",
+        "selfhost/native-aot/main.mio",
+        "go.mod",
+        "docs/LANGUAGE.md",
+        "docs/BUNKO.md",
+        "docs/NATIVE_AOT_M18.md",
+        "docs/releases/v2.0.0.md",
+        "docs/releases/v2.0.0-platforms.md",
+        "examples/variables_and_conditionals.mio",
+        "examples/recursion.mio",
+        "bunko/kiso/math/README.md"
+      ],
+      "verification": "verification/v2.0.0-release/results.json"
+    }
+  },
+  "releaseBoundary": {
+    "M17e": "historical backend/runtime evidence; not re-run for the v2.0.0 release package",
+    "M18": "accepted; Mochi -> Native multi-generation fixed point",
+    "nativeSelfHosting": "Mochi -> Native self-hosting accepted; .mio source front end, VM and LSP remain Go",
+    "fullSourceToNativeWithoutGo": "not completed",
+    "platform": "macOS Apple Silicon ARM64 only",
+    "generationalGC": "not implemented",
+    "wasmPlayground": "not released"
+  }
+}

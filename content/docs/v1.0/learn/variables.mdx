@@ -1,0 +1,45 @@
+---
+title: 变量与类型
+description: 用 kaku 命名数据，理解静态类型与显式转换。
+---
+
+## 完整程序
+
+```mio title="variables.mio"
+kaku count = 3;
+count = count + 1;
+kaku price: float64 = 2.5;
+kaku total = float64(count) * price;
+chant(count);
+chant(total);
+```
+
+```text title="output"
+4
+10
+```
+
+## 逐步理解
+
+`kaku count = 3;` 从整数初始化表达式推断出 `int64`。变量可以重新赋值，但类型不能改变。执行第二行后，`count` 从 3 变为 4。
+
+冒号用于显式标注类型。`price` 是 `float64`；在计算总价之前，`float64(count)` 把整数转换为浮点数。Mio 不会在整数与浮点数之间隐式转换。
+
+输出中的 `10` 是数值的文本表示，不表示 `total` 变成了整数。它仍然是 `float64`。
+
+## 练习
+
+把第一行改为 `kaku count = 5;`，保留后面的加一。运行前先计算预期结果。
+
+预期依次输出 `6` 和 `15`。如果仍输出旧结果，检查保存的文件与命令中的路径是否一致。
+
+## 常见错误
+
+- 写成 `count = 2.5;`：原变量类型是 `int64`，不能通过赋值变成 `float64`。
+- 写成 `count * price`：两侧类型不同，必须显式转换。
+- 使用 `let` 或 `var`：Mio 的变量声明关键字是 `kaku`。
+
+精确规则见 [语言参考](/docs/language)。下一课：[条件与循环](/docs/v1.0/learn/control-flow)。
+
+
+> 参考边界：本页链接的旧技术正文仍是未版本化迁移资料，不构成本版本的规范或 API 签名。版本化技术参考由 Codex B 单独核验后补入。

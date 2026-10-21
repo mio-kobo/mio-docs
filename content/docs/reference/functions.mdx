@@ -1,0 +1,74 @@
+---
+title: 作用域、函数与闭包
+description: 名称解析、返回路径、递归与共享捕获。
+---
+
+本页以 Go 引导 CLI / Mochi VM 为执行范围。源码与运行结果版本见 [验证与来源](/docs/tooling/verification)。Native 后端支持范围见 [Native AOT](/docs/native-aot)。
+
+## 变量与词法作用域
+
+`kaku name[: T] = expression;` 必须初始化，可从表达式推断类型。后续赋值保持静态类型。每个代码块建立词法作用域，内层可遮蔽外层，同一作用域不能重复声明名称；变量必须先声明再使用。
+
+```mio fixture="scope"
+kaku value = 10;
+moshi (hai) { kaku value = 20; chant(value); }
+chant(value);
+value = value + 1;
+chant(value);
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+20
+10
+11
+```
+
+## 具名函数
+
+函数声明只能位于文件顶层。每个参数必须注明类型，返回类型使用 `-> T`。支持先调用后声明、递归和相互递归。非 `unit` 函数必须在所有静态可见路径返回正确类型；`unit` 可写 `kaesu;`，到达函数末尾也会返回。
+
+```mio fixture="functions"
+waza factorial(n: int64) -> int64 {
+    moshi (n <= 1) { kaesu 1; }
+    kaesu n * factorial(n - 1);
+}
+waza show(value: int64) -> unit { chant(value); kaesu; }
+show(factorial(5));
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+120
+```
+
+函数可读取和修改可见全局变量。因此调用之后全局 Nullable 的已有收窄可能失效；不要把“函数不会修改它”作为类型检查器会接受的假设。
+
+## 闭包与函数值
+
+闭包写作 `waza (参数) -> 返回类型 { ... }`，可以嵌套，按词法作用域捕获变量。多个闭包捕获同一可变局部变量时共享 Cell，后续赋值彼此可见。函数值可保存、传参、返回和调用；普通具名函数不能嵌套声明。
+
+```mio fixture="closures"
+waza counter() -> () -> int64 {
+    kaku n = 0;
+    kaesu waza () -> int64 { n = n + 1; kaesu n; };
+}
+kaku next = counter();
+chant(next());
+chant(next());
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+1
+2
+```
+
+## VM 资源边界
+
+`MaxValueStack = 65536`，用户调用深度最多 `1024`，单次执行默认 `10000000` 条指令。Go 嵌入 API 可提供执行选项和 context；CLI 没有由此自动获得同名命令行参数。超过限制产生错误。Native Runtime 的 Heap/调用边界需单独核验。
+
+证据：`internal/resolver/resolver.go`、`internal/typecheck/program.go`、`calls.go`、`internal/vm/vm.go`；相关目录测试已运行，见验证报告。

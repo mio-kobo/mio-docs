@@ -1,0 +1,17 @@
+{
+  "title": "Learn",
+  "pages": [
+    "index",
+    "variables",
+    "control-flow",
+    "functions",
+    "collections",
+    "strings",
+    "maps",
+    "models",
+    "closures",
+    "generics",
+    "modules",
+    "testing"
+  ]
+}

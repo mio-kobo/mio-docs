@@ -1,0 +1,11 @@
+{
+  "title": "Learn",
+  "pages": [
+    "index",
+    "variables",
+    "control-flow",
+    "functions",
+    "collections",
+    "modules"
+  ]
+}

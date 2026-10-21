@@ -1,0 +1,148 @@
+---
+title: kiso/encoding/mochi
+description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+---
+
+工具链开发 API：纯 Mio Mochi v1–v14 Decoder/Validator。有效结构保存整数和浮点原始 U64 位模式，含 NaN payload 与负零。普通 VM 调用例子见下；不代表纯 Mio Native Compiler 自举通过。
+
+支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/native-aot) 单独评估。
+
+## 公开类型与常量
+
+以下为源码声明，属于签名资料，不是完整可执行程序。
+
+```text
+koukai teisu VERSION: int64 = 14;
+
+koukai teisu MAX_FILE_SIZE: int64 = 67108864;
+
+koukai teisu MAX_CONSTANTS: int64 = 65536;
+
+koukai teisu MAX_GLOBALS: int64 = 65536;
+
+koukai teisu MAX_STRING_BYTES: int64 = 16777216;
+
+koukai teisu MAX_INSTRUCTION_BYTES: int64 = 16777216;
+
+koukai teisu MAX_FUNCTIONS: int64 = 65536;
+
+koukai teisu MAX_FUNCTION_SLOTS: int64 = 65536;
+
+koukai sentaku DecodeErrorKind {
+    Truncated;
+    InvalidMagic;
+    UnsupportedVersion;
+    LimitExceeded;
+    InvalidConstant;
+    InvalidUtf8;
+    InvalidFunction;
+    InvalidInstruction;
+    InvalidIndex;
+    InvalidJump;
+    TrailingData;
+    IoFailure;
+}
+
+koukai kata DecodeError { kind: DecodeErrorKind; offset: int64; detail: int64; }
+
+koukai kata Constant { tag: uint8; bits: binary.U64; data: []uint8; }
+
+koukai kata Capture { local: bool; index: int64; }
+
+koukai kata Function {
+    id: int64;
+    name: string;
+    name_bytes: []uint8;
+    parameter_count: int64;
+    local_count: int64;
+    returns_value: bool;
+    captures: []Capture;
+    instructions: []uint8;
+}
+
+koukai kata File {
+    version: int64;
+    constants: []Constant;
+    global_count: int64;
+    instructions: []uint8;
+    functions: []Function;
+}
+
+koukai kata DecodeResult { value: File?; error: DecodeError?; }
+
+koukai kata Summary {
+    version: int64;
+    constants: int64;
+    functions: int64;
+    globals: int64;
+    instruction_bytes: int64;
+    canonical_size: int64;
+}
+```
+
+## 函数
+
+签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
+
+### decode
+
+```text
+koukai waza decode(data: []uint8) -> DecodeResult
+```
+
+解码并验证 data，不修改输入；失败返回 DecodeResult.error，成功返回 file。
+
+### error_code
+
+```text
+koukai waza error_code(error: DecodeError) -> int64
+```
+
+将 DecodeError.kind 映射为差分测试使用的稳定整数分类。
+
+### canonical_bytes
+
+```text
+koukai waza canonical_bytes(value: File) -> []uint8
+```
+
+对有效解码 File 确定性重编码；不承诺任意手工伪造 File 都能安全编码。
+
+### summarize
+
+```text
+koukai waza summarize(value: File) -> Summary
+```
+
+对有效 File 返回版本、全局/常量/函数数量、指令总字节数和规范化长度。
+
+### decode_file
+
+```text
+koukai waza decode_file(path: string) -> DecodeResult
+```
+
+按 path 分块读取并在增长前检查 64 MiB 上限；I/O 失败变成 DecodeErrorKind.IoFailure。
+
+## 完整示例
+
+```mio fixture="mochi"
+yobu "kiso/encoding/mochi";
+kaku input: []uint8 = [];
+kaku result = mochi.decode(input);
+chant(result.error != mu);
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+hai
+```
+
+## 源码
+
+- `bunko/kiso/encoding/mochi/decode.mio`
+- `bunko/kiso/encoding/mochi/encode.mio`
+- `bunko/kiso/encoding/mochi/file.mio`
+
+文件哈希与版本记录见 `verification/source-lock.json`；公开声明清单可由验证脚本重新比较。

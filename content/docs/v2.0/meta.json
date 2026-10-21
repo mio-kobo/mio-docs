@@ -1,0 +1,15 @@
+{
+  "title": "V2.0 · 正式版内容",
+  "description": "按 Mio v2.0.0 正式发行版核对",
+  "root": "version",
+  "pages": [
+    "index",
+    "getting-started",
+    "learn",
+    "reference",
+    "kiso",
+    "tooling",
+    "internals",
+    "development"
+  ]
+}

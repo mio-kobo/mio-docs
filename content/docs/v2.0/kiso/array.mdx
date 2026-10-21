@@ -1,0 +1,135 @@
+---
+title: kiso/array
+description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+---
+
+**版本范围：v2.0 · Development**，固定提交 `8b53a25142b0da1192a6c4868e807385d7bb50f9`；Go 引导 CLI / Mochi VM。此页不描述其他提交或未提交开发接口。
+
+通用动态数组，遵守共享引用语义。VM 的数组分配有资源上限，容量不是无限承诺。普通源码不能直接调用私有 intrinsic。
+
+支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v2.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v2.0/internals/native-aot) 单独评估。
+
+## 函数索引
+
+[make](#make) · [with_capacity](#with_capacity) · [push](#push) · [capacity](#capacity) · [reserve](#reserve) · [clone](#clone) · [truncate](#truncate) · [append_all](#append_all)
+
+## 函数
+
+签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
+
+### make
+
+```text
+koukai waza make<T>(length: int64, initial: T) -> []T
+```
+
+参数：`length`：初始元素数量；`initial`：每个元素的初始值；引用值仍共享。
+
+`length` 个元素，均初始化为 `initial`。若 initial 含引用，各元素仍共享该引用。负长度、容量溢出或资源不足报运行时错误。
+
+### with_capacity
+
+```text
+koukai waza with_capacity<T>(capacity: int64) -> []T
+```
+
+参数：`capacity`：预留容量；字节容器按字节，普通数组按元素。
+
+为元素类型 T 创建长度 0、预留 capacity 的数组；类型不能推断时用 `[T]`。负容量或超限报错。
+
+### push
+
+```text
+koukai waza push<T>(values: []T, value: T) -> unit
+```
+
+参数：`values`：待操作数组；是否修改见本函数说明；`value`：本次操作的输入值，返回语义及限制如下。
+
+向 values 原地追加 value，返回 unit；别名可见，必要时扩容。资源不足报错。
+
+### capacity
+
+```text
+koukai waza capacity<T>(values: []T) -> int64
+```
+
+参数：`values`：待操作数组；是否修改见本函数说明。
+
+返回 values 已分配元素容量，不是长度。
+
+### reserve
+
+```text
+koukai waza reserve<T>(values: []T, additional: int64) -> unit
+```
+
+参数：`values`：待操作数组；是否修改见本函数说明；`additional`：额外需要容纳的元素数量。
+
+确保可额外容纳 additional 个元素，不改变长度与已有内容；additional 不能为负，溢出或超限报错。
+
+### clone
+
+```text
+koukai waza clone<T>(values: []T) -> []T
+```
+
+参数：`values`：待操作数组；是否修改见本函数说明。
+
+返回独立后备数组，浅复制元素；嵌套引用仍共享，分配受资源上限约束。
+
+### truncate
+
+```text
+koukai waza truncate<T>(values: []T, new_length: int64) -> unit
+```
+
+参数：`values`：待操作数组；是否修改见本函数说明；`new_length`：截断后的元素数量。
+
+将共享长度缩到 new_length，保留容量；必须在 0 与原长度之间，否则报错。
+
+### append_all
+
+```text
+koukai waza append_all<T>(destination: []T, source: []T) -> unit
+```
+
+参数：`destination`：接收写入的现有目标数组；`source`：读取或追加的来源数组。
+
+向 destination 批量追加 source 当前元素；支持自追加，按追加前长度处理，溢出或资源不足报错。
+
+## 完整示例
+
+```mio fixture="arrays"
+yobu "kiso/array";
+kaku original = [1, 2];
+kaku alias = original;
+alias[0] = 9;
+array.push(alias, 3);
+chant(original[0]);
+chant(len(original));
+kaku copied = array.clone(original);
+copied[0] = 7;
+chant(original[0]);
+array.append_all(original, original);
+chant(len(original));
+array.truncate(alias, 1);
+chant(len(original));
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+9
+3
+9
+6
+1
+```
+
+## 源码
+
+- `bunko/kiso/array/array.mio`
+
+公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
+
+精确来源：[bunko/kiso/array/array.mio](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/array/array.mio)。

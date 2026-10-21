@@ -1,0 +1,241 @@
+---
+title: Native AOT · Mochi VM、Go AOT 与纯 Mio 后端
+description: 理解 Mio v2.0.0 的三条执行路径、M18 的真实成果、macOS ARM64 平台边界，以及 mochi-aot 和 native-aot 的可执行流程。
+---
+
+## 先区分三条执行路径
+
+Mio v2.0.0 同时提供三种执行方式。它们使用相同的语言前端和 Mochi 字节码，但后端不同，支持范围也不同。
+
+| 路径 | 输入 | 执行者 | 产物 | 当前定位 |
+| --- | --- | --- | --- | --- |
+| Mochi VM | `.mio` 源码 | `mio run` / `mio exec` | 无独立产物 | 默认开发与测试路径 |
+| Go AOT | `.mochi` | `mochi-aot`（Go 实现） | Darwin ARM64 Mach-O | 独立的原生后端与语义对照 |
+| 纯 Mio Native AOT | `.mochi` | `native-aot`（Mio 自举生成） | Darwin ARM64 Mach-O | M18 验证的纯 Mio 原生编译器 |
+
+关键事实：
+
+- `mio build` 只生成 Mochi 字节码，不生成原生可执行文件。
+- VM 能运行的程序不保证能被 Native 后端接受。Native 支持集合小于 VM。
+- Mochi 格式版本（当前最高 v14）与 Mio 语言版本（v1.0、v2.0）是两个独立维度。
+
+## M18 实际完成了什么
+
+M18 验收的是 **Mochi → Native 的原生自编译**，不是从 `.mio` 源码开始的完整工具链脱离 Go。
+
+正式来源链：
+
+```text
+Go 源码前端 → native-aot.mochi（Mochi v14）
+Go AOT(native-aot.mochi) → Seed          # 正式链中唯一一次 Go AOT
+Seed(native-aot.mochi) → Native Stage 1  # 此后全部由纯 Mio 实现
+Native Stage 1 → Native Stage 2
+Native Stage 2 → Native Stage 3
+Native Stage 3 → Native Stage 4
+Native Stage 4 → Native Stage 5         # 额外生成见证，未计为已执行
+```
+
+已记录的结果：
+
+- Stage 1、2、3、4 都实际运行并生成下一代；Stage 4 额外生成 Stage 5。
+- Stage 1–5 的**未签名 Mach-O 完整字节一致**；比较的是完整文件，不只是退出码或日志。
+- Seed 与 Stage 镜像不同，这是预期结果：Seed 由 Go 后端生成，Stage 由纯 Mio 后端生成。
+- 原生生成进程在 `sandbox-exec` 下运行，禁止 `process-fork` 和 `process-exec`，PATH 为空；反向探针确认策略生效。
+- 正式托管堆协议为 **1 GiB**。额外的 256 MiB 受限堆自编译实际触发了 GC（`gc_count=1`、`shadow_frame=0`），输出仍与固定点一致。
+- 历史 128 MiB 试验曾 OOM；它不是正式协议，也不代表 M18 失败。
+
+**没有完成的部分：**
+
+- 源码前端、VM 和 LSP 仍是 Go 实现；从 `.mio` 源码到原生程序的完整流程没有完全摆脱 Go。
+- 从源码重建 Go 工具和首次 Seed 仍需要 Go。
+- Stage 5 只完成生成、解析、签名和 strict verify，没有计入正式链的已执行代次。
+- 分代 GC（M19）没有启动，High / Balanced / Low 三档 GC 没有实现。
+- WebAssembly Playground 没有发布。
+
+## 平台与签名边界
+
+| 范围 | 状态 |
+| --- | --- |
+| macOS Apple Silicon / ARM64 | v2.0.0 唯一正式验证目标 |
+| 更早的 macOS 版本 | 未建立最低支持版本 |
+| Intel Mac | 没有 v2.0.0 支持认证 |
+| Linux、Windows | 没有 v2.0.0 支持认证，不生成正式支持包 |
+| 无 `codesign` 的环境 | 原生产物无法按本页流程完成签名与验证 |
+
+官方发行包使用 **ad-hoc 签名**，没有 Developer ID，也没有 notarization。`codesign --verify --strict` 通过表示镜像的结构与 ad-hoc 签名自洽，不代表 Apple 已认可发布者。互联网下载后的 Gatekeeper 首次运行体验尚未认证。
+
+## 使用 mochi-aot（Go AOT）
+
+`mochi-aot` 读取一个 Mochi 文件，输出未签名的 Darwin ARM64 Mach-O。
+
+### 基本流程
+
+```sh
+mio build -o hello.mochi hello.mio
+mochi-aot -o hello-go-native -target darwin-arm64 -heap-mib 1 hello.mochi
+codesign --force --sign - hello-go-native
+codesign --verify --strict hello-go-native
+./hello-go-native
+```
+
+预期输出：
+
+```text title="output"
+wrote hello-go-native (16384 bytes, unsigned Mach-O arm64)
+on macOS, run: codesign --force --sign - hello-go-native
+Hello, Mio!
+```
+
+第一条 `codesign` 可能没有输出；`codesign --verify --strict` 成功时也没有输出并以 `0` 退出。最后一行是生成的程序实际运行结果。
+
+### 选项
+
+| 选项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `-o <file>` | 无（必填） | 输出文件 |
+| `-target` | `darwin-arm64` | 当前只接受 `darwin-arm64` |
+| `-heap-mib` | `1` | 托管堆容量，合法范围 `1..1024` MiB |
+| `-gc-telemetry` | 关闭 | 把分配/GC 诊断写到 stderr |
+| `-gc-stress` | 关闭 | 在每个安全对象分配点强制 GC |
+| `-m11-gc` | 关闭 | M11 集成生命周期自测模式；与 `-gc-stress` 互斥 |
+
+选项是 Go `flag` 语法，必须在输入文件之前；第一个位置参数之后的参数不再作为选项解析。
+
+`-heap-mib 1` 是用户程序的默认值，不是自举协议。M18 正式链使用 1 GiB 托管堆；不要用 `-heap-mib` 的默认值推断自举容量。
+
+### 退出行为
+
+- 成功：输出 `wrote ...`，退出码 `0`。
+- 输入打不开、Mochi 解码失败、后端拒绝或写入失败：退出码 `1`。
+- `-heap-mib` 为 `0` 或大于 `1024`：退出码 `1`。
+- `-target` 不是 `darwin-arm64`、缺少 `-o` 或多个位置参数：用法错误，退出码 `1`。
+- `flag` 解析本身失败（例如未知选项）：退出码 `2`。
+
+`mochi-aot` 没有通用程序 argv 支持；生成程序的运行参数能力不属于当前发布承诺。
+
+## 使用 native-aot（纯 Mio 后端）
+
+`native-aot` 是 M18 Stage 4 生成的纯 Mio 编译器。它没有常规命令行选项，而是在**当前工作目录**读取两个配置文件：
+
+- `input.config`：输入 `.mochi` 的路径；
+- `output.config`：输出文件的路径。
+
+两个文件都必须：
+
+- 使用 UTF-8；
+- 只包含路径；
+- **没有末尾换行**。
+
+输出路径必须指向一个尚不存在的新文件。
+
+### 完整流程
+
+```sh
+set -eu
+test ! -e hello-pure-native
+
+printf '%s' "$PWD/hello.mochi" > input.config
+printf '%s' "$PWD/hello-pure-native" > output.config
+
+"$MIO_HOME/native-aot" > native-build.log
+
+grep '^native-aot: ok$' native-build.log
+test -s hello-pure-native
+
+chmod +x hello-pure-native
+codesign --force --sign - hello-pure-native
+codesign --verify --strict hello-pure-native
+./hello-pure-native
+```
+
+预期输出：
+
+```text title="output"
+Hello, Mio!
+```
+
+`native-build.log` 中应至少包含成功标记与产物统计：
+
+```text title="output"
+native-aot: ok
+176
+16384
+```
+
+后两行分别是生成的机器 word 数和字节数；具体数值随输入程序变化。
+
+### 成功判定
+
+`native-aot` 的一个关键限制是：**部分失败分支仍可能以操作系统退出码 0 结束**。不能只检查 `$?`。自动化流程必须同时确认：
+
+1. stdout 以精确的 `native-aot: ok` 行开始；
+2. 目标文件是本次新生成且非空；
+3. 文件已 `chmod +x`；
+4. `codesign --verify --strict` 通过；
+5. 实际执行输出符合预期。
+
+失败示例（输入不是有效 Mochi）：
+
+```text title="output"
+native-aot: decode failed
+```
+
+此时退出码仍可能是 `0`，并且不会生成目标文件。其他失败标记还包括 `native-aot: lowering failed`、`native-aot: writer failed`、`native-aot: write failed`、`native-aot: config unavailable` 和 `native-aot: invalid config`。
+
+`native-aot` 的输出是数据文件，不是自带执行位的程序；必须显式 `chmod +x`。
+
+## Native 子集与限制
+
+Native 后端不是 VM 的完整替代。当前明确不应假设可用的能力包括：
+
+- 完整 `Map` 路径；
+- 通用 CLI argv / 程序参数；
+- 任意 MMA 宿主桥接；
+- 任意多态函数值；
+- 所有 Kiso API 与所有 VM 指令组合。
+
+已通过回归覆盖的路径包括数组（含 nullable）、结构体、枚举、闭包共享 Cell、多参数 ABI、GC 后存活对象、大对象和 NativeFS 文件操作。具体边界以 `mochi-aot` / `native-aot` 的 lowering 诊断和对应版本测试为准。
+
+遇到不支持的程序时，正确做法是保留 VM 路径并检查诊断，而不是修改编译器、关闭 GC 或跳过断言。VM 与 Native 的支持范围不同，不能把 VM 的成功结果写成 Native 支持承诺。
+
+## 精确 GC 与内存模型
+
+Native Runtime 使用**精确 Mark-Sweep**：
+
+- Shadow Frame 根追踪；
+- 全局根；
+- nullable、closure、enum 等引用位图；
+- typed Storage；
+- 大对象与跨页分配；
+- 空闲块管理；
+- 独立 mmap 有界 managed arena。
+
+它**不是**分代 GC，也没有 High / Balanced / Low 三档配置。M19 分代 GC 未启动；本版本不提供性能提升倍数、GC 暂停时间或吞吐量承诺。
+
+每个进程拥有独立的 managed arena；进程终止后 NativeFS 句柄和映射随进程释放。正式自举协议容量为 1 GiB；`mochi-aot -heap-mib` 只控制该工具生成程序时的用户堆容量。
+
+## 输出验证清单
+
+对任何原生产物，至少检查：
+
+```sh
+file hello-native
+codesign --verify --strict hello-native
+./hello-native
+```
+
+- `file` 应报告 `Mach-O 64-bit executable arm64`；
+- `codesign --verify --strict` 应成功；
+- 实际执行输出应与 VM 路径逐字节一致。
+
+对 `native-aot` 还要检查成功标记与新产物。对自动化脚本，不要用文件存在、`exit 0` 或日志中任意一行代替全部检查。
+
+## 证据与来源
+
+- `docs/releases/v2.0.0.md`：v2.0.0 发布说明与 M18/Go 边界。
+- `docs/releases/v2.0.0-platforms.md`：平台承诺、依赖与已知限制。
+- `docs/NATIVE_AOT_M18.md`：M18 正式链、固定点、GC 见证与证据目录。
+- `cmd/mochi-aot/main.go`：Go AOT 选项、退出码与输出格式。
+- `selfhost/native-aot/main.mio`：纯 Mio 入口的 config 协议、成功标记与失败分支。
+
+本页命令已在 macOS 15.6.1 ARM64 上使用官方 v2.0.0 发行包实际执行：`mochi-aot` 生成、签名、验证并运行 `Hello, Mio!`；`native-aot` 通过 config 文件生成、签名、验证并运行同一程序；无效 Mochi 的 `decode failed` 分支也验证了“退出码 0 但无产物”的行为。完整 M18 多代链和 GC 见证属于核心仓库既有验收，本轮文档没有重新执行整条链。

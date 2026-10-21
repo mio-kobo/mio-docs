@@ -1,0 +1,23 @@
+{
+  "title": "Kiso",
+  "pages": [
+    "index",
+    "aot-arm64",
+    "aot-lower-nativefs",
+    "aot-lower-types",
+    "aot-lower",
+    "aot-macho",
+    "array",
+    "bytes",
+    "convert",
+    "encoding-binary",
+    "encoding-mochi",
+    "fs",
+    "io",
+    "math",
+    "path",
+    "string",
+    "testing",
+    "utf8"
+  ]
+}

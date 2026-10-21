@@ -1,22 +1,756 @@
 [
   {
-    "source": "docs/LANGUAGE.md",
-    "page": "language",
-    "commit": "29746a65692c73d637510cbc3f4463e68a49d05c"
-  },
-  {
-    "source": "docs/BUNKO.md",
+    "source": "docs/BUNKO.md; bunko/kiso/**/*.mio; bunko/kiso/*/README.md; internal/bunko",
     "page": "bunko",
-    "commit": "29746a65692c73d637510cbc3f4463e68a49d05c"
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "evidence": "verification/v2.0.0-release/results.json",
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "migrationSource": {
+      "source": "docs/BUNKO.md",
+      "page": "bunko",
+      "commit": "29746a65692c73d637510cbc3f4463e68a49d05c"
+    },
+    "sources": [
+      "docs/BUNKO.md",
+      "bunko/kiso",
+      "internal/bunko",
+      "internal/typecheck",
+      "internal/stdlib"
+    ],
+    "contentVerification": "Examples executed with the official v2.0.0 package on macOS 15.6.1 ARM64",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verifiedOn": "2026-10-21"
   },
   {
-    "source": "docs/MOCHI.md",
-    "page": "mochi",
-    "commit": "29746a65692c73d637510cbc3f4463e68a49d05c"
+    "source": "../mio-vscode/package.json; ../mio-jetbrains/build.gradle.kts",
+    "page": "editors",
+    "commit": null,
+    "evidence": "verification/editor-sources.json",
+    "verification": "source audit only; IDE Extension Host / JetBrains tests not run for v2.0.0",
+    "scope": "Editor plugin source and configuration; no IDE end-to-end certification for v2.0.0",
+    "sources": [
+      "../mio-vscode/package.json",
+      "../mio-vscode/README.md",
+      "../mio-vscode/src/extension.ts",
+      "../mio-vscode/src/cli/cliResolver.ts",
+      "../mio-vscode/src/lsp/serverOptions.ts",
+      "../mio-jetbrains/build.gradle.kts",
+      "../mio-jetbrains/src/main/resources/META-INF/plugin.xml",
+      "../mio-jetbrains/README.md"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "plugin source: VS Code 0.3.0; JetBrains 0.6.1",
+    "coreCommit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "coreRef": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verifiedOn": "2026-10-21"
   },
   {
-    "source": "docs/MIOCORE_LSP.md",
+    "source": "internal/aot/darwinarm64; internal/aot/m11_gc_test.go; internal/aot/m18_selfhost_test.go; bunko/kiso/aot/lower; docs/NATIVE_AOT_M18.md",
+    "page": "internals/gc",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "evidence": "verification/v2.0.0-release/results.json",
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "internal/aot/darwinarm64",
+      "internal/aot/m11_gc_test.go",
+      "internal/aot/m18_selfhost_test.go",
+      "bunko/kiso/aot/lower",
+      "docs/NATIVE_AOT_M18.md",
+      "docs/releases/v2.0.0-platforms.md"
+    ],
+    "contentVerification": "GC/Native claims are sourced from the existing M18 acceptance record; the full chain was not re-run for this documentation pass",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verifiedOn": "2026-10-21"
+  },
+  {
+    "source": "bunko/kiso/array",
+    "page": "kiso/array",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/array"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "bunko/kiso/bytes",
+    "page": "kiso/bytes",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/bytes"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "bunko/kiso/aot",
+    "page": "kiso/compiler-modules",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "source declarations only; not full runtime API validation",
+    "scope": "Go bootstrap CLI / Mochi VM; development and source-only claims labelled in page",
+    "sources": [
+      "bunko/kiso/aot"
+    ],
+    "contentVerification": "verification/content-check.json"
+  },
+  {
+    "source": "bunko/kiso/convert",
+    "page": "kiso/convert",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/convert"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "bunko/kiso/encoding/binary",
+    "page": "kiso/encoding-binary",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/encoding/binary"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "bunko/kiso/encoding/mochi",
+    "page": "kiso/encoding-mochi",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/encoding/mochi"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "bunko/kiso/fs",
+    "page": "kiso/fs",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/fs"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "bunko/kiso/io",
+    "page": "kiso/io",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/io"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "bunko/kiso/math",
+    "page": "kiso/math",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/math"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "bunko/kiso/path",
+    "page": "kiso/path",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/path"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "bunko/kiso/string",
+    "page": "kiso/string",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/string"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "bunko/kiso/testing",
+    "page": "kiso/testing",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/testing"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "bunko/kiso/utf8",
+    "page": "kiso/utf8",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "bunko/kiso/utf8"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "docs/LANGUAGE.md; internal/token/token.go; internal/lexer/lexer.go; internal/parser/parser.go; internal/typecheck/builtin.go",
+    "page": "language",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "evidence": "verification/v2.0.0-release/results.json",
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "migrationSource": {
+      "source": "docs/LANGUAGE.md",
+      "page": "language",
+      "commit": "29746a65692c73d637510cbc3f4463e68a49d05c"
+    },
+    "sources": [
+      "docs/LANGUAGE.md",
+      "internal/token/token.go",
+      "internal/lexer/lexer.go",
+      "internal/parser/parser.go",
+      "internal/typecheck/builtin.go"
+    ],
+    "contentVerification": "Tutorial and CLI examples executed with the official v2.0.0 package; no language grammar change was observed for the documented examples",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verifiedOn": "2026-10-21"
+  },
+  {
+    "source": "cmd/mio/main.go; internal/lsp; docs/MIOCORE_LSP.md",
     "page": "lsp",
-    "commit": "29746a65692c73d637510cbc3f4463e68a49d05c"
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "evidence": "verification/v2.0.0-release/results.json",
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "migrationSource": {
+      "source": "docs/MIOCORE_LSP.md",
+      "page": "lsp",
+      "commit": "29746a65692c73d637510cbc3f4463e68a49d05c"
+    },
+    "sources": [
+      "cmd/mio/main.go",
+      "internal/lsp",
+      "docs/MIOCORE_LSP.md"
+    ],
+    "contentVerification": "initialize/serverInfo 2.0.0 and shutdown/exit verified over a real stdio session; IDE E2E not run",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verifiedOn": "2026-10-21"
+  },
+  {
+    "source": "docs/MOCHI.md; internal/mochi; internal/code/code.go; internal/vm/vm.go",
+    "page": "mochi",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "evidence": "verification/v2.0.0-release/results.json",
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "migrationSource": {
+      "source": "docs/MOCHI.md",
+      "page": "mochi",
+      "commit": "29746a65692c73d637510cbc3f4463e68a49d05c"
+    },
+    "sources": [
+      "docs/MOCHI.md",
+      "internal/mochi",
+      "internal/code/code.go",
+      "internal/vm/vm.go"
+    ],
+    "contentVerification": "build/exec/disasm verified with the official v2.0.0 package; Hello bytecode structure recorded",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verifiedOn": "2026-10-21"
+  },
+  {
+    "source": "docs/NATIVE_AOT_M18.md; docs/releases/v2.0.0.md; docs/releases/v2.0.0-platforms.md; cmd/mochi-aot/main.go; selfhost/native-aot/main.mio; bunko/kiso/aot",
+    "page": "native-aot",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "evidence": "verification/v2.0.0-release/results.json",
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "docs/NATIVE_AOT_M18.md",
+      "docs/releases/v2.0.0.md",
+      "docs/releases/v2.0.0-platforms.md",
+      "cmd/mochi-aot/main.go",
+      "selfhost/native-aot/main.mio",
+      "bunko/kiso/aot",
+      "internal/aot"
+    ],
+    "stageEvidence": "existing M18 acceptance record in the core repository; see docs/NATIVE_AOT_M18.md",
+    "contentVerification": "Both Go AOT and pure Mio native-aot flows executed on the official package; full M18 chain not re-run",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verifiedOn": "2026-10-21"
+  },
+  {
+    "source": "internal/typecheck/type.go; internal/typecheck/definitions.go; internal/typecheck/checker.go; internal/value/value.go; internal/vm/vm.go",
+    "page": "reference/collections",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "internal/typecheck/type.go",
+      "internal/typecheck/definitions.go",
+      "internal/typecheck/checker.go",
+      "internal/value/value.go",
+      "internal/vm/vm.go"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "internal/resolver; internal/typecheck/program.go; internal/typecheck/calls.go; internal/vm/vm.go",
+    "page": "reference/functions",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "internal/resolver",
+      "internal/typecheck/program.go",
+      "internal/typecheck/calls.go",
+      "internal/vm/vm.go"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "internal/parser/parser.go; internal/typecheck/signature.go; internal/bunko; internal/constant",
+    "page": "reference/modules",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "internal/parser/parser.go",
+      "internal/typecheck/signature.go",
+      "internal/bunko",
+      "internal/constant"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "internal/token/token.go; internal/lexer/lexer.go; internal/parser/parser.go; internal/parser/precedence.go",
+    "page": "reference/syntax",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "internal/token/token.go",
+      "internal/lexer/lexer.go",
+      "internal/parser/parser.go",
+      "internal/parser/precedence.go"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "internal/typecheck/type.go; internal/typecheck/definitions.go; internal/typecheck/nullable.go; internal/typecheck/builtin.go; internal/vm/vm.go",
+    "page": "reference/types",
+    "commit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+    "evidence": "verification/source-lock.json",
+    "verification": "verification/latest.json",
+    "scope": "Development snapshot 8b53a25142b0da1192a6c4868e807385d7bb50f9; not re-verified against the v2.0.0 release package",
+    "sources": [
+      "internal/typecheck/type.go",
+      "internal/typecheck/definitions.go",
+      "internal/typecheck/nullable.go",
+      "internal/typecheck/builtin.go",
+      "internal/vm/vm.go"
+    ],
+    "contentVerification": "verification/content-check.json",
+    "ref": "Mio-2"
+  },
+  {
+    "source": "cmd/mio/main.go; cmd/mio/test_command.go; internal/bunko/loader.go; internal/tester",
+    "page": "tooling/cli",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "evidence": "verification/v2.0.0-release/results.json",
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "cmd/mio/main.go",
+      "cmd/mio/test_command.go",
+      "internal/bunko/loader.go",
+      "internal/tester"
+    ],
+    "contentVerification": "All documented commands, options and exit codes were checked against source and executed with the official v2.0.0 package",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verifiedOn": "2026-10-21"
+  },
+  {
+    "source": "verification/v2.0.0-release/results.json; docs/releases/v2.0.0.md; docs/releases/v2.0.0-platforms.md",
+    "sources": [
+      "verification/v2.0.0-release/results.json",
+      "docs/releases/v2.0.0.md",
+      "docs/releases/v2.0.0-platforms.md",
+      "docs/NATIVE_AOT_M18.md"
+    ],
+    "page": "tooling/verification",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "evidence": "verification/v2.0.0-release/results.json",
+    "verification": "verification/v2.0.0-release/results.json",
+    "contentVerification": "This page documents the actual commands and outputs; it does not claim the full M18 chain was re-run",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "verifiedOn": "2026-10-21"
+  },
+  {
+    "source": "docs/releases/v2.0.0.md; docs/releases/v2.0.0-platforms.md; docs/NATIVE_AOT_M18.md",
+    "page": "v2.0/index",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "docs/releases/v2.0.0.md",
+      "docs/releases/v2.0.0-platforms.md",
+      "docs/NATIVE_AOT_M18.md"
+    ],
+    "contentVerification": "Release facts checked against GitHub Release v2.0.0 and the tagged commit"
+  },
+  {
+    "source": "cmd/mio/main.go; go.mod; docs/releases/v2.0.0.md",
+    "page": "v2.0/getting-started",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "cmd/mio/main.go",
+      "go.mod",
+      "docs/releases/v2.0.0.md",
+      "verification/v2.0.0-release/results.json"
+    ],
+    "contentVerification": "Official package install, checksum, codesign, Hello, Bunko examples and source build executed on macOS 15.6.1 ARM64"
+  },
+  {
+    "source": "docs/releases/v2.0.0.md; docs/NATIVE_AOT_M18.md",
+    "page": "v2.0/development",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "docs/releases/v2.0.0.md",
+      "docs/NATIVE_AOT_M18.md",
+      "docs/releases/v2.0.0-platforms.md"
+    ],
+    "contentVerification": "Status page; distinguishes M18 acceptance from the remaining Go front end and unstarted M19"
+  },
+  {
+    "source": "cmd/mio/main.go; cmd/mio/test_command.go; internal/bunko/loader.go",
+    "page": "v2.0/tooling/cli",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "cmd/mio/main.go",
+      "cmd/mio/test_command.go",
+      "internal/bunko/loader.go",
+      "internal/tester"
+    ],
+    "contentVerification": "Commands, options and exit codes checked against source and executed with the official release package"
+  },
+  {
+    "source": "../mio-vscode; ../mio-jetbrains",
+    "page": "v2.0/tooling/editors",
+    "commit": null,
+    "coreCommit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "coreRef": "v2.0.0",
+    "ref": "VS Code 0.3.0; JetBrains 0.6.1",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "source audit only; IDE E2E not run",
+    "scope": "Plugin source and configuration; no IDE end-to-end certification for v2.0.0",
+    "sources": [
+      "../mio-vscode/package.json",
+      "../mio-vscode/README.md",
+      "../mio-jetbrains/build.gradle.kts",
+      "../mio-jetbrains/README.md"
+    ]
+  },
+  {
+    "source": "cmd/mio/main.go; internal/lsp",
+    "page": "v2.0/tooling/lsp",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "cmd/mio/main.go",
+      "internal/lsp",
+      "docs/MIOCORE_LSP.md"
+    ],
+    "contentVerification": "Real stdio initialize/serverInfo 2.0.0/shutdown/exit verified"
+  },
+  {
+    "source": "cmd/mio/main.go; cmd/mochi-aot/main.go; selfhost/native-aot/main.mio; internal/bunko/loader.go",
+    "page": "v2.0/tooling/troubleshooting",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "cmd/mio/main.go",
+      "cmd/mochi-aot/main.go",
+      "selfhost/native-aot/main.mio",
+      "internal/bunko/loader.go"
+    ],
+    "contentVerification": "Failure messages and exit behaviors captured from actual runs"
+  },
+  {
+    "source": "verification/v2.0.0-release/results.json",
+    "page": "v2.0/tooling/verification",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "verification/v2.0.0-release/results.json"
+    ],
+    "contentVerification": "Actual command log for this documentation pass"
+  },
+  {
+    "source": "docs/NATIVE_AOT_M18.md; docs/releases/v2.0.0.md; docs/releases/v2.0.0-platforms.md; cmd/mochi-aot/main.go; selfhost/native-aot/main.mio",
+    "page": "v2.0/internals/native-aot",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "docs/NATIVE_AOT_M18.md",
+      "docs/releases/v2.0.0.md",
+      "docs/releases/v2.0.0-platforms.md",
+      "cmd/mochi-aot/main.go",
+      "selfhost/native-aot/main.mio"
+    ],
+    "contentVerification": "mochi-aot and native-aot flows executed on the official package; full M18 chain not re-run"
+  },
+  {
+    "source": "internal/aot/darwinarm64; docs/NATIVE_AOT_M18.md",
+    "page": "v2.0/internals/gc",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "internal/aot/darwinarm64",
+      "internal/aot/m11_gc_test.go",
+      "internal/aot/m18_selfhost_test.go",
+      "docs/NATIVE_AOT_M18.md"
+    ],
+    "contentVerification": "GC claims sourced from the existing M18 record; full chain not re-run"
+  },
+  {
+    "source": "docs/MOCHI.md; internal/mochi; internal/vm",
+    "page": "v2.0/internals/mochi",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "docs/MOCHI.md",
+      "internal/mochi",
+      "internal/vm"
+    ],
+    "contentVerification": "build/exec/disasm verified with the official package"
+  },
+  {
+    "source": "bunko/kiso/**/*.mio; docs/BUNKO.md",
+    "page": "v2.0/kiso/index",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Mio v2.0.0 official release; macOS Apple Silicon ARM64; checked against tag v2.0.0",
+    "sources": [
+      "bunko/kiso",
+      "docs/BUNKO.md",
+      "bunko/kiso/*/README.md"
+    ],
+    "contentVerification": "Module list checked against the tagged source tree; examples executed with the official package"
+  },
+  {
+    "source": "content/versions.json; docs/releases/v2.0.0.md",
+    "page": "versions",
+    "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
+    "ref": "v2.0.0",
+    "release": {
+      "tag": "v2.0.0",
+      "url": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
+      "publishedAt": "2026-10-21T08:31:25Z",
+      "prerelease": false
+    },
+    "verification": "verification/v2.0.0-release/results.json",
+    "scope": "Site version status page; default docs entry remains v1.0 pending site activation",
+    "sources": [
+      "content/versions.json",
+      "docs/releases/v2.0.0.md"
+    ]
   }
 ]

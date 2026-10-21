@@ -1,0 +1,44 @@
+---
+title: Learn · 学习 Mio
+description: 用五个短小的程序，从变量走到模块与标准库。
+---
+
+先完成 [安装与运行](/docs/v1.0/getting-started)。每课都有可独立运行的完整程序、实际输出、解释、练习与常见错误。
+
+## 学习路线
+
+| 顺序 | 课程 | 你将学会 |
+| --- | --- | --- |
+| 01 | [变量与类型](/docs/v1.0/learn/variables) | `kaku`、类型推断、显式数值转换 |
+| 02 | [条件与循环](/docs/v1.0/learn/control-flow) | `moshi` / `sore`、`aida`、布尔条件 |
+| 03 | [函数与返回值](/docs/v1.0/learn/functions) | `waza`、参数、返回类型、`kaesu` |
+| 04 | [数组与空值](/docs/v1.0/learn/collections) | `[]T`、索引、共享引用、`T?` 收窄 |
+| 05 | [模块与数学库](/docs/v1.0/learn/modules) | `yobu`、`kiso/math`、组合函数与库 |
+
+## 如何使用示例
+
+把每一课的完整代码分别保存为一个 `.mio` 文件，然后执行：
+
+```sh
+./mio check path/to/lesson.mio
+./mio run path/to/lesson.mio
+```
+
+不要把多课程序同时粘贴到同一文件里。包级声明可能重名；每个示例应独立运行。
+
+教程基于核心提交 `51f1ba883767c1fc08ba415fbb0075316ff03106`。示例使用 Go 引导 CLI 执行，输出由本地实测获得。验证使用该提交的隔离、无本地改动源码快照，不包含相邻工作树的 M17e 改动；未对原生自举、WebAssembly 或性能作发布结论。
+
+## 关键词速查
+
+| Mio | 本教程术语 |
+| --- | --- |
+| `kaku` | 声明变量 |
+| `waza` | 声明函数 |
+| `moshi` / `sore` | 如果 / 否则 |
+| `aida` | 条件循环 |
+| `kaesu` | 返回 |
+| `hai` / `iie` | 真 / 假 |
+| `mu` | 空值 |
+| `yobu` | 导入包 |
+
+完成之后，使用 [Reference](/docs/v1.0/reference) 查精确规则，用 [Kiso](/docs/v1.0/kiso) 查标准库资料。

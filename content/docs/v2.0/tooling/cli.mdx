@@ -1,0 +1,365 @@
+---
+title: Mio CLI 与编译流程
+description: Mio v2.0.0 的 check、run、build、exec、disasm、test 与 lsp 命令、选项、退出码和实际输出。
+---
+
+本页描述 Mio **v2.0.0** 发行包中的 `mio` 命令。命令由核心仓库的 `cmd/mio/main.go` 与 `cmd/mio/test_command.go` 解析；本页只记录源码中真实存在的参数，不根据帮助文字推断未实现选项。
+
+`mio` 是 Go 源码前端、Mochi 编译器和 VM 的入口。它生成并执行 **Mochi 字节码**，不直接生成 ARM64 可执行文件；原生编译使用发行包中独立的 `mochi-aot` 与 `native-aot`，见 [Native AOT](/docs/v2.0/internals/native-aot)。
+
+## 命令总览
+
+```text
+mio check <file-or-directory> [options]
+mio run <file-or-directory> [options]
+mio build [-o <file.mochi>] <source>
+mio exec <file.mochi>
+mio disasm <file.mochi>
+mio test <directory|./...> [options]
+mio lsp [--stdio]
+mio version
+mio help
+```
+
+| 命令 | 行为 |
+| --- | --- |
+| `mio version`、`mio --version` | 输出 `Mio 2.0.0` |
+| `mio help`、`mio -h`、`mio --help` | 输出用法 |
+| `mio check` | 加载包、折叠常量、解析名称、检查类型；成功输出 `check passed` |
+| `mio run` | 在 `check` 的基础上生成字节码并在 Mochi VM 中执行 |
+| `mio build` | 检查并原子写入 Mochi 文件；成功时没有标准输出 |
+| `mio exec` | 解码、验证并在 Mochi VM 中执行 `.mochi` 文件 |
+| `mio disasm` | 解码、验证并输出字节码结构 |
+| `mio test` | 发现并运行测试包 |
+| `mio lsp` | 启动 stdio JSON-RPC 语言服务器 |
+
+`check`、`run` 的入口既可以是单个 `.mio` 文件，也可以是包目录。目录中的普通 `.mio` 文件按文件名稳定排序并共享包级声明；`_test.mio` 不参与普通 `check`、`run`、`build` 和包导入。
+
+## version 与 help
+
+```sh
+mio version
+mio help
+```
+
+`mio version` 输出：
+
+```text title="output"
+Mio 2.0.0
+```
+
+没有参数、未知命令或命令结构不合法时，CLI 把用法写到 stderr 并返回退出码 `2`。
+
+## check
+
+```sh
+mio check [options] hello.mio
+mio check src-package
+```
+
+成功时只输出：
+
+```text title="output"
+check passed
+```
+
+`check` **不执行程序**。它完成：
+
+1. 读取入口文件及 `yobu` 依赖；
+2. 折叠 `teisu` 常量；
+3. 名称解析；
+4. 静态类型检查。
+
+失败的诊断写到 stderr，退出码为 `1`。例如：
+
+```mio title="bad.mio"
+kaku x: int64 = "no";
+```
+
+```sh
+mio check --color=never bad.mio
+```
+
+```text title="output"
+error[E0301]: 变量 "x" 的初始化类型不正确
+  --> bad.mio:1:17
+   1 | kaku x: int64 = "no";
+     |                 ^^^^ cannot initialize "x" as int64 with string
+  = 期望 int64，实际 string
+```
+
+### 诊断选项
+
+`check` 与 `run` 接受以下选项，可以放在路径前后：
+
+| 选项 | 取值 | 作用 |
+| --- | --- | --- |
+| `--color` | `auto`、`always`、`never` | 控制颜色；必须写成 `--color=value` |
+| `--format` | `human`、`short`、`json` | 诊断格式；必须写成 `--format=value` |
+| `--verbose` | 无值 | 输出更详细的说明 |
+
+`--color auto` 是默认值。`--format human` 是默认值。选项不能写成 `--color always` 这样的两个参数。
+
+`--format=json` 输出单行 JSON。以上面的类型错误为例：
+
+```json
+{"code":"E0301","severity":"error","message":"变量 \"x\" 的初始化类型不正确","path":"bad.mio","location":{"offset":16,"line":1,"column":17},"labels":[{"span":{"start":{"offset":16,"line":1,"column":17},"end":{"offset":20,"line":1,"column":21}},"primary":true}],"expected":"int64","actual":"string"}
+```
+
+当前诊断管线**只报告第一条错误**。字段 `path`、`labels`、`notes`、`helps`、`expected`、`actual` 只在对应信息存在时出现；不能假定每条诊断都带可靠的文件位置。
+
+`--format=short` 使用单行诊断，例如：
+
+```text title="output"
+bad.mio:1:17: error[E0301]: 变量 "x" 的初始化类型不正确
+```
+
+`build`、`exec`、`disasm` 没有接入这些诊断选项。
+
+## run
+
+```sh
+mio run hello.mio
+```
+
+`run` 在 `check` 通过后生成字节码并在 VM 中执行。程序的 `chant` 输出写到 stdout：
+
+```mio title="hello.mio"
+chant("Hello, Mio!");
+```
+
+```text title="output"
+Hello, Mio!
+```
+
+需要注意：`run` 和 `exec` 在执行结束后，如果 VM 的值栈上还留有最后一个普通表达式值，会把它打印出来。例如：
+
+```mio title="expr.mio" no-run
+1 + 2;
+```
+
+```sh
+mio run expr.mio
+```
+
+```text title="output"
+3
+```
+
+因此不要把顶层表达式语句误认为完全没有输出。`chant` 会消费参数并换行；只包含 `chant` 的程序通常不会出现额外值。
+
+`run` 不接受入口之后的程序参数；Mio CLI 没有通用的 argv 传递机制。
+
+## build
+
+```sh
+mio build hello.mio
+mio build -o out/hello.mochi hello.mio
+mio build hello.mio -o out/hello.mochi
+```
+
+- 只给源文件时，输出文件名由源文件去掉扩展名后加 `.mochi` 得到：`hello.mio` → `hello.mochi`。
+- `-o` 可以写在源文件前或后。
+- 输出目录必须已经存在；`build` 不会自动创建目录。
+- 成功时没有标准输出，退出码为 `0`。
+- 写入使用临时文件加原子替换；编码前会验证字节码。
+
+`build` 产物是 Mochi 字节码，不是 macOS 可执行文件。
+
+## exec
+
+```sh
+mio exec hello.mochi
+```
+
+`exec` 读取并验证 Mochi 文件，然后使用 VM 执行。它与 `run` 的区别是输入已经是字节码，不再经过源码前端。
+
+```text title="output"
+Hello, Mio!
+```
+
+`exec` 只接受一个参数，不支持诊断选项或程序参数。文件不存在、格式错误、验证失败或运行时错误都会返回退出码 `1`。
+
+## disasm
+
+```sh
+mio disasm hello.mochi
+```
+
+`disasm` 解码并验证字节码，输出：
+
+- `Globals`：全局槽位数量；
+- `Constants`：常量表；
+- `Instructions`：主指令流；
+- `Functions`：函数、参数/局部槽位与捕获信息。
+
+`hello.mochi` 的实际输出：
+
+```text title="output"
+Globals: 0
+Constants (1):
+  [0] string "Hello, Mio!"
+Instructions:
+0000 OpConstant 0
+0003 OpChant
+Functions (0):
+```
+
+`disasm` 是排查编译器输出与字节码问题的工具，不是反编译器，不会恢复 Mio 源码。
+
+## test
+
+```sh
+mio test ./tests
+mio test ./...
+mio test ./tests --run='^test_add$'
+mio test ./tests --format=json --lang=en-US
+```
+
+测试文件和函数的约定：
+
+- 文件名以 `_test.mio` 结尾；
+- 测试函数在测试文件中声明，名称以 `test_` 开头；
+- 函数无参数、非泛型、返回 `unit`；
+- 测试文件与同目录普通源码共享包作用域，可以访问同包私有声明；
+- `kiso/testing` 只在 `mio test` 环境注册，普通 `run` 不能使用。
+
+参数：
+
+| 参数 | 作用 |
+| --- | --- |
+| `--run=<regexp>` | 按测试函数名筛选执行 |
+| `--lang=zh-CN\|ja-JP\|en-US` | 测试报告语言 |
+| `--format=human\|short\|json` | 报告格式 |
+| `--color=auto\|always\|never` | 颜色 |
+| `--verbose` | 更详细的诊断 |
+
+`./...` 递归发现含 `_test.mio` 的包，并跳过隐藏目录、`build`、`dist`、`node_modules`、`vendor`、`cache`、`tmp`。包和测试按稳定顺序串行执行。
+
+成功示例：
+
+```mio title="example_test.mio"
+yobu "kiso/testing";
+
+waza test_add() -> unit {
+    testing.expect(1 + 1 == 2, "addition should work");
+}
+```
+
+```sh
+mio test .
+```
+
+```text title="output"
+Starting tests .
+--- PASS: test_add (0.000s)
+Tests complete: 1 passed, 0 failed
+total duration: 0.004s
+```
+
+`--format=json` 输出稳定的结构化报告：
+
+```json
+{"schema_version":1,"packages":[{"path":".","status":"passed","tests":[{"name":"test_add","path":"./example_test.mio","status":"passed","duration_ms":0.034}]}],"summary":{"status":"passed","passed":1,"failed":0,"duration_ms":3.13}}
+```
+
+实际字段还包含顶层 `summary` 的 `duration_ms`；`duration_ms` 和总耗时随执行变化，不应写死为固定输出。JSON 的字段名和状态值不随 `--lang` 改变。
+
+测试退出码：
+
+| 情况 | 退出码 |
+| --- | --- |
+| 全部通过，或发现不到测试 | `0` |
+| 断言失败、运行时错误、资源限制或编译失败 | `1` |
+| 命令参数错误 | `2` |
+
+`--run` 的筛选发生在发现、签名检查和编译之后；未选中的测试仍参与编译，但不会创建 VM。没有名称匹配时给出提示并返回 `0`。因此 **不能只凭退出码 0 断定测试实际执行过**；还要检查 `summary.status`、`passed` 与 `failed`。
+
+## lsp
+
+```sh
+mio lsp
+mio lsp --stdio
+```
+
+`mio lsp` 在 stdin/stdout 上运行 JSON-RPC 语言服务器。`--stdio` 是当前唯一支持的传输参数，也是默认方式。
+
+- stdout **只写**带 `Content-Length` 的 JSON-RPC 帧；
+- 日志和错误写 stderr；
+- `initialize` 返回 `serverInfo.name = "MioCore"`、`serverInfo.version = "2.0.0"`；
+- 支持 `positionEncoding: utf-16`、增量文档同步、诊断、hover、definition、references、document symbol、completion 和 signature help；
+- 未实现 Rename、Semantic Tokens、Formatting、Code Action 或 Workspace Symbols。
+
+正常 `shutdown` 后再发送 `exit`，进程退出码为 `0`；未 shutdown 就退出时为 `1`；未知参数返回 `2`。
+
+编辑器接入见 [VS Code 与 JetBrains](/docs/v2.0/tooling/editors) 和 [MioCore LSP](/docs/v2.0/tooling/lsp)。
+
+## 退出码汇总
+
+主 CLI：
+
+| 退出码 | 含义 |
+| --- | --- |
+| `0` | 成功 |
+| `1` | 源码加载、编译或执行失败 |
+| `2` | 未知命令、缺少参数、参数结构不合法 |
+
+`test` 使用同一组 `0/1/2`，但有两点不同：没有测试或筛选无匹配仍返回 `0`；断言失败返回 `1`。
+
+## Bunko 根目录如何查找
+
+`mio` 按以下顺序确定标准库物理根：
+
+1. 环境变量 `MIO_BUNKO`；
+2. 从入口文件所在目录向上查找名为 `bunko` 的目录；
+3. 回退到当前工作目录的相对路径 `bunko`。
+
+推荐在发行包安装后显式设置：
+
+```sh
+export MIO_BUNKO="$MIO_HOME/bunko"
+```
+
+导入语句永远从 `kiso/` 开始：
+
+```mio
+yobu "kiso/math";
+```
+
+不要写 `yobu "bunko/kiso/math";`。加载器会拒绝物理 `bunko` 前缀、绝对路径、路径回退和越过 Bunko 根目录的符号链接。
+
+## 从源码构建 CLI
+
+```sh
+git clone --branch v2.0.0 https://github.com/mio-kobo/mio.git mio-source
+cd mio-source
+git checkout --detach 0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a
+go build -o mio ./cmd/mio
+./mio version
+```
+
+预期输出：
+
+```text title="output"
+Mio 2.0.0
+```
+
+`go.mod` 声明 Go `1.22.2`。本次文档验证在 Go `1.25.9`、macOS 15.6.1 ARM64 上完成。源码构建会得到 Go 前端的 `mio`；`mochi-aot` 与 `native-aot` 需要按原生工具链流程单独构建。
+
+## 不存在的命令与选项
+
+以下内容在本版本的 CLI 中不存在，不应写进脚本：
+
+- `mio native`、`mio aot`、`mio playground`；
+- `mio run --release`、`--watch`、`--heap-mib`；
+- 向 `mio run` 传递程序参数；
+- 在 `build`、`exec`、`disasm` 上使用 `--format` 或 `--color`；
+- 用 `--format json`（空格）代替 `--format=json`。
+
+`mochi-aot` 与 `native-aot` 的选项属于独立可执行文件，见 [Native AOT](/docs/v2.0/internals/native-aot)。
+
+## 来源与验证
+
+本页依据 v2.0.0 标签提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a` 的 `cmd/mio/main.go`、`cmd/mio/test_command.go`、`internal/bunko/loader.go` 与 `internal/tester`。
+
+本文档验证使用官方 `mio-2.0.0-darwin-arm64.tar.gz`，在 macOS 15.6.1 ARM64 上实际执行了 `version`、`help`、`check`、`run`、`build`、`exec`、`disasm`、`test`（human/JSON/筛选）与 `lsp` 初始化/关闭流程；输出与退出码按实际结果记录。完整验证范围见 [验证与来源](/docs/v2.0/tooling/verification)。

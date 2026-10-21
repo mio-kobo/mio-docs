@@ -1,0 +1,580 @@
+---
+title: kiso/encoding/binary
+description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+---
+
+固定宽度大小端与 LEB128、游标 Reader 和有容量上限 Writer；使用 []uint8，不增加 Core uint64。失败先检查 error；结果 value 可能是占位值，不能忽略错误。
+
+支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/native-aot) 单独评估。
+
+## 公开类型与常量
+
+以下为源码声明，属于签名资料，不是完整可执行程序。
+
+```text
+koukai sentaku BinaryError {
+    InvalidOffset;
+    InsufficientData;
+    Overflow;
+    MalformedVarint;
+}
+
+koukai kata U8Result { value: uint8; error: BinaryError?; }
+
+koukai kata U16Result { value: uint16; error: BinaryError?; }
+
+koukai kata U32Result { value: uint32; error: BinaryError?; }
+
+koukai kata I8Result { value: int8; error: BinaryError?; }
+
+koukai kata I16Result { value: int16; error: BinaryError?; }
+
+koukai kata I32Result { value: int32; error: BinaryError?; }
+
+koukai kata I64Result { value: int64; error: BinaryError?; }
+
+koukai kata BytesResult { data: []uint8; error: BinaryError?; }
+
+koukai kata VarU32Result { value: uint32; count: int64; error: BinaryError?; }
+
+koukai kata VarI64Result { value: int64; count: int64; error: BinaryError?; }
+
+koukai kata U64 { high: uint32; low: uint32; }
+
+koukai kata U64Result { value: U64; error: BinaryError?; }
+
+koukai kata BinaryReader { data: []uint8; state: []int64; }
+
+koukai kata BinaryWriter { data: []uint8; max_length: int64; }
+```
+
+## 函数
+
+签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
+
+### read_u8
+
+```text
+koukai waza read_u8(data: []uint8, offset: int64) -> U8Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### read_u16_le
+
+```text
+koukai waza read_u16_le(data: []uint8, offset: int64) -> U16Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### read_u16_be
+
+```text
+koukai waza read_u16_be(data: []uint8, offset: int64) -> U16Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### read_u32_le
+
+```text
+koukai waza read_u32_le(data: []uint8, offset: int64) -> U32Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### read_u32_be
+
+```text
+koukai waza read_u32_be(data: []uint8, offset: int64) -> U32Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### read_i8
+
+```text
+koukai waza read_i8(data: []uint8, offset: int64) -> I8Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### read_i16_le
+
+```text
+koukai waza read_i16_le(data: []uint8, offset: int64) -> I16Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### read_i16_be
+
+```text
+koukai waza read_i16_be(data: []uint8, offset: int64) -> I16Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### read_i32_le
+
+```text
+koukai waza read_i32_le(data: []uint8, offset: int64) -> I32Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### read_i32_be
+
+```text
+koukai waza read_i32_be(data: []uint8, offset: int64) -> I32Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### read_i64_le
+
+```text
+koukai waza read_i64_le(data: []uint8, offset: int64) -> I64Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### read_i64_be
+
+```text
+koukai waza read_i64_be(data: []uint8, offset: int64) -> I64Result
+```
+
+从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。
+
+### write_u8
+
+```text
+koukai waza write_u8(destination: []uint8, offset: int64, value: uint8) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_u16_le
+
+```text
+koukai waza write_u16_le(destination: []uint8, offset: int64, value: uint16) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_u16_be
+
+```text
+koukai waza write_u16_be(destination: []uint8, offset: int64, value: uint16) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_u32_le
+
+```text
+koukai waza write_u32_le(destination: []uint8, offset: int64, value: uint32) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_u32_be
+
+```text
+koukai waza write_u32_be(destination: []uint8, offset: int64, value: uint32) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_i8
+
+```text
+koukai waza write_i8(destination: []uint8, offset: int64, value: int8) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_i16_le
+
+```text
+koukai waza write_i16_le(destination: []uint8, offset: int64, value: int16) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_i16_be
+
+```text
+koukai waza write_i16_be(destination: []uint8, offset: int64, value: int16) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_i32_le
+
+```text
+koukai waza write_i32_le(destination: []uint8, offset: int64, value: int32) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_i32_be
+
+```text
+koukai waza write_i32_be(destination: []uint8, offset: int64, value: int32) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_i64_le
+
+```text
+koukai waza write_i64_le(destination: []uint8, offset: int64, value: int64) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_i64_be
+
+```text
+koukai waza write_i64_be(destination: []uint8, offset: int64, value: int64) -> BinaryError?
+```
+
+把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。
+
+### write_var_u32
+
+```text
+koukai waza write_var_u32(value: uint32) -> BytesResult
+```
+
+将 value 编码为新 LEB128 数组并包装为 BytesResult（data 为编码、error=mu）；u32 为无符号、i64 为 DWARF 有符号，不是 ZigZag。
+
+### read_var_u32
+
+```text
+koukai waza read_var_u32(data: []uint8, offset: int64) -> VarU32Result
+```
+
+从 data 的 offset 解码规范 LEB128，返回 value、实际 count、error。u32 最多 5 字节，i64 最多 10 字节；拒绝截断、溢出、超长与非规范编码。
+
+### write_var_i64
+
+```text
+koukai waza write_var_i64(value: int64) -> BytesResult
+```
+
+将 value 编码为新 LEB128 数组并包装为 BytesResult（data 为编码、error=mu）；u32 为无符号、i64 为 DWARF 有符号，不是 ZigZag。
+
+### read_var_i64
+
+```text
+koukai waza read_var_i64(data: []uint8, offset: int64) -> VarI64Result
+```
+
+从 data 的 offset 解码规范 LEB128，返回 value、实际 count、error。u32 最多 5 字节，i64 最多 10 字节；拒绝截断、溢出、超长与非规范编码。
+
+### reader
+
+```text
+koukai waza reader(data: []uint8) -> BinaryReader
+```
+
+共享 data，创建游标为 0 的 BinaryReader；复制 Reader 会共享 state 游标，data 也仍可被外部别名修改。
+
+### reader_offset
+
+```text
+koukai waza reader_offset(value: BinaryReader) -> int64
+```
+
+返回当前字节游标。
+
+### reader_remaining
+
+```text
+koukai waza reader_remaining(value: BinaryReader) -> int64
+```
+
+返回 data 长度减当前游标。
+
+### reader_eof
+
+```text
+koukai waza reader_eof(value: BinaryReader) -> bool
+```
+
+返回游标是否正好到末尾。
+
+### reader_seek
+
+```text
+koukai waza reader_seek(value: BinaryReader, offset: int64) -> BinaryError?
+```
+
+按 offset 定位或按 count 前移；负数返回 InvalidOffset，越界返回 InsufficientData，失败不推进游标。
+
+### reader_skip
+
+```text
+koukai waza reader_skip(value: BinaryReader, count: int64) -> BinaryError?
+```
+
+按 offset 定位或按 count 前移；负数返回 InvalidOffset，越界返回 InsufficientData，失败不推进游标。
+
+### reader_read_u8
+
+```text
+koukai waza reader_read_u8(value: BinaryReader) -> U8Result
+```
+
+从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。
+
+### reader_read_u16_le
+
+```text
+koukai waza reader_read_u16_le(value: BinaryReader) -> U16Result
+```
+
+从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。
+
+### reader_read_u16_be
+
+```text
+koukai waza reader_read_u16_be(value: BinaryReader) -> U16Result
+```
+
+从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。
+
+### reader_read_u32_le
+
+```text
+koukai waza reader_read_u32_le(value: BinaryReader) -> U32Result
+```
+
+从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。
+
+### reader_read_u32_be
+
+```text
+koukai waza reader_read_u32_be(value: BinaryReader) -> U32Result
+```
+
+从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。
+
+### reader_read_u64_le
+
+```text
+koukai waza reader_read_u64_le(value: BinaryReader) -> U64Result
+```
+
+从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。
+
+### reader_read_u64_be
+
+```text
+koukai waza reader_read_u64_be(value: BinaryReader) -> U64Result
+```
+
+从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。
+
+### reader_read_bytes
+
+```text
+koukai waza reader_read_bytes(value: BinaryReader, count: int64) -> BytesResult
+```
+
+复制 count 个连续字节到独立数组并推进游标；负数 InvalidOffset，不足 InsufficientData；失败不推进。
+
+### writer
+
+```text
+koukai waza writer(max_length: int64) -> BinaryWriter
+```
+
+创建空 BinaryWriter，max_length 是逻辑字节长度硬上限；负值实际被归一为 0，不是抛错。
+
+### writer_offset
+
+```text
+koukai waza writer_offset(value: BinaryWriter) -> int64
+```
+
+返回当前输出字节长度。
+
+### writer_reserve
+
+```text
+koukai waza writer_reserve(value: BinaryWriter, count: int64) -> I64Result
+```
+
+追加 count 个零字节并返回原始起始偏移；负数 InvalidOffset，超 max_length 为 Overflow；失败 value=-1。
+
+### writer_write_bytes
+
+```text
+koukai waza writer_write_bytes(value: BinaryWriter, source: []uint8) -> BinaryError?
+```
+
+追加 source 字节；超 max_length 返回 Overflow，负/溢出检查由 writer_grow 实施。避免 source 与自身 data 别名造成额外行为假设。
+
+### writer_write_length_prefixed
+
+```text
+koukai waza writer_write_length_prefixed(value: BinaryWriter, source: []uint8) -> BinaryError?
+```
+
+写入 4 字节大端 uint32 长度再追加 source；容量不足返回 Overflow，并在该检查失败时不写前缀。
+
+### writer_write_u8
+
+```text
+koukai waza writer_write_u8(value: BinaryWriter, number: uint8) -> BinaryError?
+```
+
+按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。
+
+### writer_write_u16_le
+
+```text
+koukai waza writer_write_u16_le(value: BinaryWriter, number: uint16) -> BinaryError?
+```
+
+按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。
+
+### writer_write_u16_be
+
+```text
+koukai waza writer_write_u16_be(value: BinaryWriter, number: uint16) -> BinaryError?
+```
+
+按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。
+
+### writer_write_u32_le
+
+```text
+koukai waza writer_write_u32_le(value: BinaryWriter, number: uint32) -> BinaryError?
+```
+
+按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。
+
+### writer_write_u32_be
+
+```text
+koukai waza writer_write_u32_be(value: BinaryWriter, number: uint32) -> BinaryError?
+```
+
+按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。
+
+### writer_write_u64_le
+
+```text
+koukai waza writer_write_u64_le(value: BinaryWriter, number: U64) -> BinaryError?
+```
+
+按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。
+
+### writer_write_u64_be
+
+```text
+koukai waza writer_write_u64_be(value: BinaryWriter, number: U64) -> BinaryError?
+```
+
+按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。
+
+### writer_patch_u16_be
+
+```text
+koukai waza writer_patch_u16_be(value: BinaryWriter, offset: int64, number: uint16) -> BinaryError?
+```
+
+在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。
+
+### writer_patch_u16_le
+
+```text
+koukai waza writer_patch_u16_le(value: BinaryWriter, offset: int64, number: uint16) -> BinaryError?
+```
+
+在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。
+
+### writer_patch_u32_be
+
+```text
+koukai waza writer_patch_u32_be(value: BinaryWriter, offset: int64, number: uint32) -> BinaryError?
+```
+
+在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。
+
+### writer_patch_u32_le
+
+```text
+koukai waza writer_patch_u32_le(value: BinaryWriter, offset: int64, number: uint32) -> BinaryError?
+```
+
+在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。
+
+### writer_patch_u64_be
+
+```text
+koukai waza writer_patch_u64_be(value: BinaryWriter, offset: int64, number: U64) -> BinaryError?
+```
+
+在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。
+
+### writer_patch_u64_le
+
+```text
+koukai waza writer_patch_u64_le(value: BinaryWriter, offset: int64, number: U64) -> BinaryError?
+```
+
+在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。
+
+### writer_bytes
+
+```text
+koukai waza writer_bytes(value: BinaryWriter) -> []uint8
+```
+
+返回已写数据的独立副本，外部修改不会回写 Writer。
+
+## 完整示例
+
+```mio fixture="binary"
+yobu "kiso/array";
+yobu "kiso/encoding/binary";
+kaku data = array.make[uint8](8, uint8(0));
+kaku error = binary.write_i64_be(data, 0, -42);
+chant(error == mu);
+kaku result = binary.read_i64_be(data, 0);
+chant(result.value);
+kaku bad = binary.read_u32_le(data, 6);
+chant(bad.error != mu);
+kaku writer = binary.writer(16);
+kaku write_error = binary.writer_write_u32_be(writer, uint32(42));
+chant(write_error == mu);
+kaku reader = binary.reader(binary.writer_bytes(writer));
+kaku read_result = binary.reader_read_u32_be(reader);
+chant(read_result.value);
+```
+
+预期 stdout（逐字节匹配，末尾有换行）：
+
+```text title="output"
+hai
+-42
+hai
+hai
+42
+```
+
+公开 data/state 字段可被调用方修改；以上游标保证以保持构造器建立的不变式为前提。BinaryError 的 Overflow 与 MalformedVarint 由对应函数返回，不能将所有错误统一当作 InsufficientData。
+
+## 源码
+
+- `bunko/kiso/encoding/binary/binary.mio`
+- `bunko/kiso/encoding/binary/stream.mio`
+
+文件哈希与版本记录见 `verification/source-lock.json`；公开声明清单可由验证脚本重新比较。

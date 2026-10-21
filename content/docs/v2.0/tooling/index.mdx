@@ -1,0 +1,30 @@
+---
+title: Tooling · 开发工具
+description: 查询 Mio v2.0.0 的 CLI、诊断、测试、语言服务、编辑器与故障排查。
+---
+
+使用与 **Mio v2.0.0** 一致的 CLI 和 Bunko。首次安装见 [Getting Started](/docs/v2.0/getting-started)。
+
+| 任务 | 资料 |
+| --- | --- |
+| check/run/build/exec/disasm、诊断、退出码 | [CLI](/docs/v2.0/tooling/cli) |
+| 编写并运行测试包 | [测试教程](/docs/v2.0/learn/testing)、[testing API](/docs/v2.0/kiso/testing) |
+| 配置 stdio 语言服务、了解能力边界 | [MioCore LSP](/docs/v2.0/tooling/lsp) |
+| 安装并配置 VS Code / JetBrains | [编辑器](/docs/v2.0/tooling/editors) |
+| 安装失败、Bunko、编译错误与 Native AOT 限制 | [故障排查](/docs/v2.0/tooling/troubleshooting) |
+| 重跑示例、查看来源及未覆盖范围 | [验证与来源](/docs/v2.0/tooling/verification) |
+
+编辑器是独立项目，其源码版本不等于核心版本。VS Code 源码清单为 `0.3.0`，JetBrains 源码清单为 `0.6.1`；本轮没有运行 IDE 客户端端到端验收，也没有查询市场当前发布状态。不要把插件市场版本直接等同于 Mio 核心版本。
+
+官方 v2.0.0 发行包包含：
+
+```text
+mio                  # 源码前端、Mochi 编译器、VM、LSP
+mochi-aot            # Go AOT 后端
+mochi-aot-audit      # 只读 Mochi 指令/缺口扫描
+native-aot           # 纯 Mio Native AOT 编译器（M18 Stage 4）
+native-aot.mochi     # native-aot 自身的 Mochi 输入
+bunko/               # 标准库物理根
+```
+
+`mio build` 生成 Mochi 字节码；`mochi-aot` 与 `native-aot` 才生成 ARM64 Mach-O。原生工具的平台、签名和 config 文件协议见 [Native AOT](/docs/v2.0/internals/native-aot)。

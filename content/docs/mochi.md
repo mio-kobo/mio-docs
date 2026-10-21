@@ -1,12 +1,14 @@
 ---
-title: Mochi VM
+title: Mochi v14 格式与 VM
+description: 格式、操作码、版本门槛与实际编码策略。
 ---
 
-# Mochi v1 至 v14 字节码格式
+
+**版本基线：Mio v2.0.0（Mochi v14）**。`mio build` 生成 Mochi 字节码，`mio exec` 使用 Mochi VM 执行；`mochi-aot` 与 `native-aot` 把受支持的 Mochi 编译为 Darwin ARM64 Mach-O，详见 [Native AOT](/docs/v2.0/internals/native-aot)。
 
 Mochi 是 Mio 的二进制字节码容器。所有多字节整数使用大端字节序，文件不包含填充、校验和或尾随数据。
 
-Mochi v14 增加受限数据复制转换指令。解码器和 VM 可以读取 Mochi v1 至 v14。
+Mochi v14 增加受限数据复制转换指令。解码器和 VM 可以读取 Mochi v1 至 v14。`Version = 14` 是实现支持上限；Go 编码器的 `encodedVersion` 按实际常量与指令选择输出版本，并非每次 build 都写 14。含 `OpDataConvert` 的程序写 v14。
 
 ## 公共头部和主指令流
 
@@ -163,3 +165,12 @@ Opcode 编号是 v1/v2 兼容面的一部分。未知 Opcode、截断操作数�
 - 格式没有校验和或签名。加载不可信文件时必须经过 `mochi.Decode`，不能绕过验证直接执行原始字节。
 
 后续格式若需要不兼容变更，应使用新的版本号，不能改变已有字段或 Opcode 编号。
+
+
+## 执行系统与验证范围
+
+Go VM 对解码后的字节码运行共享 Value Stack 与调用帧；Mochi 容器不是 ARM64 可执行文件。`build → exec` 可验证序列化后执行行为，`disasm` 列出字节码结构。相关源码为 `internal/mochi/mochi.go`、`validate.go`、`internal/code/code.go` 与 `internal/vm/vm.go`。
+
+本轮验证器为全部普通成功 fixtures 执行 check、run、build、exec、disasm，逐字节比较 run/exec 输出，并记录实际头部版本；对含字符串复制转换的例子断言 v14。完整限制与来源见 [报告](/docs/tooling/verification)。
+
+Go VM 的对象生命周期由 Go 宿主管理；Native 精确 GC 是另一个 Runtime，不应混用资源上限或验收结论，见 [GC](/docs/internals/gc)。

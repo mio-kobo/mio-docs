@@ -1,0 +1,149 @@
+---
+title: kiso/aot/lower/types
+description: 固定 V2 开发快照的签名、输入单位、结果与错误协议。
+---
+
+**V2.0 Development**，提交 `8b53a25142b0da1192a6c4868e807385d7bb50f9`。**V1.0 不提供本包**。公开声明不代表稳定 API；本页仅承诺此快照已有声明及明确列出的验证。
+
+内部表示分析，不是用户级反射接口。TypeAnalysis 保存分析 arena、槽位及控制流块的表示约束。节点编号必须来自该次分析，查询函数不会为任意编号提供安全包装。
+
+## 导入与检索
+
+导入路径为 `kiso/aot/lower/types`。以下签名不是可执行程序，参数名和类型逐字保留源码；函数行为与错误分开查阅。
+
+`type_unknown` · `type_integer` · `type_float32` · `type_float64` · `type_bool` · `type_string_id` · `type_array_ref` · `type_struct_ref` · `type_enum_ref` · `type_function_ref` · `type_nil` · `type_float_any` · `TypeArena` · `TypeBlock` · `TypeAnalysis` · [type_kind](#type_kind) · [type_nullable](#type_nullable) · [type_is_heap_reference](#type_is_heap_reference) · [type_instruction_width](#type_instruction_width) · [analyze_types](#analyze_types)
+
+## 类型与常量
+
+```text
+koukai teisu type_unknown = 0;
+
+koukai teisu type_integer = 1;
+
+koukai teisu type_float32 = 2;
+
+koukai teisu type_float64 = 3;
+
+koukai teisu type_bool = 4;
+
+koukai teisu type_string_id = 5;
+
+koukai teisu type_array_ref = 6;
+
+koukai teisu type_struct_ref = 7;
+
+koukai teisu type_enum_ref = 8;
+
+koukai teisu type_function_ref = 9;
+
+koukai teisu type_nil = 10;
+
+koukai teisu type_float_any = 11;
+
+koukai kata TypeArena {
+    parent: []int64;
+    kind: []int64;
+    nullable: []bool;
+    struct_arity: []int64;
+    struct_exact: []bool;
+    fields: [][]int64;
+    array_width: []int64;
+}
+
+koukai kata TypeBlock {
+    data: []uint8;
+    function_id: int64;
+    entry: [][]int64;
+    reachable: []bool;
+}
+
+koukai kata TypeAnalysis {
+    arena: TypeArena;
+    globals: []int64;
+    locals: [][]int64;
+    returns: []int64;
+    blocks: []TypeBlock;
+    error_detail: int64;
+}
+```
+
+类型字段为实际公开布局；复制含数组字段的值仍共享数组。不得把公开字段解释为可安全伪造内部状态的许可。
+
+## 函数
+
+### type_kind
+
+```text
+koukai waza type_kind(analysis: TypeAnalysis, node: int64) -> int64
+```
+
+参数：`analysis`：同一次分析产生的 TypeAnalysis；`node`：该分析内部有效节点索引，不是任意用户编号。
+
+返回节点根的表示类别整数，对照本页 type_* 常量。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
+
+[源码：types.mio:78](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/types/types.mio#L78)。
+
+### type_nullable
+
+```text
+koukai waza type_nullable(analysis: TypeAnalysis, node: int64) -> bool
+```
+
+参数：`analysis`：同一次分析产生的 TypeAnalysis；`node`：该分析内部有效节点索引，不是任意用户编号。
+
+返回节点根是否可空。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
+
+[源码：types.mio:82](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/types/types.mio#L82)。
+
+### type_is_heap_reference
+
+```text
+koukai waza type_is_heap_reference(analysis: TypeAnalysis, node: int64) -> bool
+```
+
+参数：`analysis`：同一次分析产生的 TypeAnalysis；`node`：该分析内部有效节点索引，不是任意用户编号。
+
+按表示类别与可空标记返回是否属于需根追踪的类别；不是动态指针合法性测试。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
+
+[源码：types.mio:86](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/types/types.mio#L86)。
+
+### type_instruction_width
+
+```text
+koukai waza type_instruction_width(opcode: int64) -> int64
+```
+
+参数：`opcode`：Mochi 操作码整数编号。
+
+返回内部分析使用的 opcode 编码宽度；未知 opcode 的处理按源码，不据此绕过 Mochi Validator。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
+
+[源码：types.mio:210](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/types/types.mio#L210)。
+
+### analyze_types
+
+```text
+koukai waza analyze_types(file: mochi.File) -> TypeAnalysis
+```
+
+参数：`file`：经 Mochi 解码验证的 File。
+
+建立并返回 TypeAnalysis；调用方须结合 error_detail 和后续 LowerResult 检查拒绝路径。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
+
+[源码：types.mio:353](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/types/types.mio#L353)。
+
+## 最小示例与验证范围
+
+保存为 `main.mio`，使用本版本的 `mio check main.mio` 与 `mio run main.mio`；输出逐字节记录。此例只验证下面使用的接口，不覆盖本包所有编码或 Runtime 分支。
+
+```mio title="main.mio"
+yobu "kiso/aot/lower/types";
+chant(types.type_unknown);
+chant(types.type_integer);
+```
+
+```text title="output"
+0
+1
+```
+
+完整输入哈希、命令及输出见仓库 `verification/content-quality/results.json`。声明资料与执行覆盖分别记录；没有在此证明原生代码执行或 Compiler A→B 验收。

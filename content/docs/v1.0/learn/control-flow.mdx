@@ -1,0 +1,50 @@
+---
+title: 条件与循环
+description: 用 moshi 作选择，用 aida 重复计算。
+---
+
+## 完整程序
+
+```mio title="control-flow.mio"
+kaku score = 72;
+moshi (score >= 60) {
+    chant("passed");
+} sore {
+    chant("failed");
+}
+
+kaku total = 0;
+kaku n = 1;
+aida (n <= 3) {
+    total = total + n;
+    n = n + 1;
+}
+chant(total);
+```
+
+```text title="output"
+passed
+6
+```
+
+## 逐步理解
+
+`moshi` 检查括号里的布尔条件。72 大于等于 60，所以执行第一个代码块；`sore` 块不会执行。Mio 的布尔字面量写作 `hai` 与 `iie`，不能把整数当成布尔条件。
+
+`aida` 在每轮开始时检查条件。这里依次把 1、2、3 加入 `total`，得到 6。每轮末尾更新 `n`，当它变为 4 时循环结束。
+
+每个花括号块创建词法作用域。循环中的赋值更新已有变量；如果再次写 `kaku total`，就可能在内层声明一个遮蔽外层的新变量。
+
+## 练习
+
+把 `score` 改为 59，把循环条件改为 `n <= 5`。
+
+预期输出 `failed` 和 `15`。试着在纸上记录每轮的 `n` 与 `total`，再运行程序核对。
+
+## 常见错误
+
+- 写 `moshi (score)`：条件必须是 `bool`，需要比较表达式。
+- 忘记更新 `n`：循环可能无法正常结束；不要依赖运行时预算来替代正确退出条件。
+- 把 `sore` 写成 `else`：关键字必须使用 Mio 拼写。
+
+上一课：[变量与类型](/docs/v1.0/learn/variables)。下一课：[函数与返回值](/docs/v1.0/learn/functions)。

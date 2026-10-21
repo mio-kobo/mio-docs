@@ -1,0 +1,108 @@
+---
+title: kiso/aot/lower
+description: 固定 V2 开发快照的签名、输入单位、结果与错误协议。
+---
+
+**V2.0 Development**，提交 `8b53a25142b0da1192a6c4868e807385d7bb50f9`。**V1.0 不提供本包**。公开声明不代表稳定 API；本页仅承诺此快照已有声明及明确列出的验证。
+
+把已经解码验证的 Mochi File 降低为 ARM64 words、常量区与地址补丁。失败返回 LowerResult.error，不能使用失败结果中的机器码。此固定快照对 Closure/Cell 和不安全表示拒绝编译；没有工作树后续的 compile_with_heap 或 BranchOutOfRange 变体。
+
+## 导入与检索
+
+导入路径为 `kiso/aot/lower`。以下签名不是可执行程序，参数名和类型逐字保留源码；函数行为与错误分开查阅。
+
+`LowerError` · `LowerResult` · [error_code](#error_code) · [error_detail](#error_detail) · [compile](#compile) · [compile_gc_stress](#compile_gc_stress)
+
+## 类型与常量
+
+```text
+koukai sentaku LowerError {
+    UnsupportedConstant;
+    UnsupportedOpcode(int64);
+    UnsupportedClosure;
+    InvalidFunction;
+    InvalidOperand(int64);
+    FrameTooLarge;
+    EncodeFailure;
+    UnsafeType(int64);
+    UnsupportedNative(int64);
+}
+
+koukai kata LowerResult {
+    words: []uint32;
+    constants: []uint8;
+    patches: []macho.AddressPatch;
+    globals: int64;
+    error: LowerError?;
+}
+```
+
+类型字段为实际公开布局；复制含数组字段的值仍共享数组。不得把公开字段解释为可安全伪造内部状态的许可。
+
+## 函数
+
+### error_code
+
+```text
+koukai waza error_code(value: LowerError) -> int64
+```
+
+参数：`value`：当前函数要处理的值或对象，类型见签名。
+
+把 LowerError 映射为整数分类；InvalidOperand 将 detail 叠加到 5000，其余按源码枚举分支映射，不将编号当作系统 errno。
+
+[源码：lower.mio:36](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/lower.mio#L36)。
+
+### error_detail
+
+```text
+koukai waza error_detail(value: LowerError) -> int64
+```
+
+参数：`value`：当前函数要处理的值或对象，类型见签名。
+
+返回错误关联 detail；UnsupportedOpcode 的 detail 编码函数、字节偏移与 opcode，其他无载荷变体返回 0。
+
+[源码：lower.mio:54](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/lower.mio#L54)。
+
+### compile
+
+```text
+koukai waza compile(file: mochi.File) -> LowerResult
+```
+
+参数：`file`：经 Mochi 解码验证的 File。
+
+执行默认 lowering，返回 LowerResult；必须先检查 error，资源和 opcode 限制以本提交实现为准。
+
+[源码：lower.mio:1377](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/lower.mio#L1377)。
+
+### compile_gc_stress
+
+```text
+koukai waza compile_gc_stress(file: mochi.File) -> LowerResult
+```
+
+参数：`file`：经 Mochi 解码验证的 File。
+
+执行 GC stress lowering，返回 LowerResult；用于在对象安全分配入口施加额外收集，不等于完整自举验收。
+
+[源码：lower.mio:1381](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/lower.mio#L1381)。
+
+## 最小示例与验证范围
+
+保存为 `main.mio`，使用本版本的 `mio check main.mio` 与 `mio run main.mio`；输出逐字节记录。此例只验证下面使用的接口，不覆盖本包所有编码或 Runtime 分支。
+
+```mio title="main.mio"
+yobu "kiso/aot/lower";
+kaku error = lower.LowerError.UnsupportedConstant();
+chant(lower.error_code(error));
+chant(lower.error_detail(error));
+```
+
+```text title="output"
+1
+0
+```
+
+完整输入哈希、命令及输出见仓库 `verification/content-quality/results.json`。声明资料与执行覆盖分别记录；没有在此证明原生代码执行或 Compiler A→B 验收。

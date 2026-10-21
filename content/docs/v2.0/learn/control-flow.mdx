@@ -1,0 +1,82 @@
+---
+title: 条件与循环
+description: 用 moshi 作选择，用 aida 重复计算。
+---
+
+## 学习目标与前置
+
+完成后，你能写布尔条件、逐轮推演循环，并区分声明与赋值。前置：[变量与类型](/docs/v2.0/learn/variables)。
+
+同一程序需要处理不同输入：成绩决定是否通过，循环把多次相同计算合并成一段代码。先把条件写成明确比较，再讨论重复执行。
+
+## 保存与运行
+
+在安装页的 `mio-tutorial` 源码根目录，把下面程序保存为 `control-flow.mio`；保持 `bunko/` 可用。在同一目录执行：
+
+```sh
+./mio check control-flow.mio
+./mio run control-flow.mio
+```
+
+`check` 成功报告 `check passed`；后面的 output 仅列 `run` 的标准输出，每行末尾包含换行。
+
+## 完整程序
+
+```mio title="control-flow.mio"
+kaku score = 72;
+moshi (score >= 60) {
+    chant("passed");
+} sore {
+    chant("failed");
+}
+
+kaku total = 0;
+kaku n = 1;
+aida (n <= 3) {
+    total = total + n;
+    n = n + 1;
+}
+chant(total);
+```
+
+```text title="output"
+passed
+6
+```
+
+
+## 跟踪循环状态
+
+分支只执行一边。进入循环前，`n=1`、`total=0`；每轮先检查 `n <= 3`，再按源代码顺序执行两条赋值：
+
+| 本轮开始的 n | 相加后的 total | 更新后的 n |
+| ---: | ---: | ---: |
+| 1 | 1 | 2 |
+| 2 | 3 | 3 |
+| 3 | 6 | 4 |
+
+下一次判断为假，控制流跳到 `chant(total)`。循环体可以一次也不执行：例如初始 `n` 大于上界时，`total` 仍为 0。
+
+## 条件、作用域与终止
+
+布尔字面量为 `hai` 与 `iie`。比较产生 `bool`，整数本身不是真假值。`&&` 与 `||` 短路；需要复合条件时按实际求值顺序思考。每个花括号建立作用域，内层声明会遮蔽外层同名变量。需要累计到外层时，使用赋值而非重新声明。
+
+本例因每轮 `n` 增加一且上界有限而终止。`tsuzuku;` 可跳过本轮剩余语句，`nukeru;` 退出最内层循环；两者的完整规则见语法参考。尤其不要在 `tsuzuku` 之前遗漏推进变量。
+
+## 练习
+
+把 `score` 改为 59，把循环条件改为 `n <= 5`。
+
+预期输出 `failed` 和 `15`。试着在纸上记录每轮的 `n` 与 `total`，再运行程序核对。
+
+## 常见错误
+
+- 写 `moshi (score)`：条件必须是 `bool`，需要比较表达式。
+- 忘记更新 `n`：循环可能无法正常结束；不要依赖运行时预算来替代正确退出条件。
+- 把 `sore` 写成 `else`：关键字必须使用 Mio 拼写。
+
+上一课：[变量与类型](/docs/v2.0/learn/variables)。下一课：[函数与返回值](/docs/v2.0/learn/functions)。
+
+## 延伸阅读
+
+精确规则见 [语言参考](/docs/v2.0/reference)。本章输出对应本版本固定提交的 Go 引导 CLI / Mochi VM，验证命令与原始输出见 [验证说明](/docs/v2.0/tooling/verification)。

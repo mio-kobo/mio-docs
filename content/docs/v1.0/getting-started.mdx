@@ -1,0 +1,77 @@
+---
+title: Getting Started · 安装与运行
+description: 从源码构建 Mio CLI，在本地检查并运行第一个程序。
+---
+
+## 准备环境
+
+你需要准备 Git、Go 1.22.2 或兼容版本，以及一个终端。当前步骤使用 Go 引导工具链与 Mochi VM 来构建和运行程序，不会生成独立的 Native AOT 可执行文件。
+
+本教程基于核心提交 `51f1ba883767c1fc08ba415fbb0075316ff03106` 的隔离快照进行验证，该提交对应正式发布标签 `v1.0.0`。下面的命令会检出这个固定提交。如果核心仓库已有本地改动，请不要直接在里面执行检出；建议在独立目录中新克隆一份。
+
+```sh
+git clone --branch v1.0.0 https://github.com/mio-kobo/mio.git mio-tutorial
+cd mio-tutorial
+git checkout --detach 51f1ba883767c1fc08ba415fbb0075316ff03106
+go build -o mio ./cmd/mio
+./mio version
+```
+
+这些命令从正式发布标签 `v1.0.0` 的提交构建。该提交源码中默认的版本字符串仍是 `Mio 1.0.0-beta.2`；正式发布的身份以 GitHub Release 记录为准，不能仅凭字符串判断。本页不讨论 Native AOT 的发布状态。
+
+## 第一个程序
+
+在 `mio-tutorial` 目录下新建文件 `hello.mio`，内容保存为 UTF-8 编码：
+
+```mio title="hello.mio"
+chant("Hello, Mio!");
+```
+
+先检查语法与类型，再运行程序：
+
+```sh
+./mio check hello.mio
+./mio run hello.mio
+```
+
+程序的标准输出为：
+
+```text title="output"
+Hello, Mio!
+```
+
+`chant` 会输出一个值并自动换行。字符串用双引号包围，每条语句以分号结束。Mio 允许直接在顶层书写语句，不需要额外定义 `main` 函数。
+
+## 生成并执行 Mochi 字节码
+
+```sh
+./mio build hello.mio
+./mio exec hello.mochi
+./mio disasm hello.mochi
+```
+
+`build` 会生成 `.mochi` 字节码文件。`exec` 在 Mochi VM 中执行它，输出同样是 `Hello, Mio!`。`disasm` 可以查看生成的指令。这个流程仍然依赖 Mochi VM。
+
+## 标准库放在哪里
+
+请保留核心仓库中的 `bunko/` 目录。源程序通过 `yobu "kiso/math";` 这样的形式导入，不需要加 `bunko/` 前缀。如果从其他工作目录调用 CLI，可以显式指定标准库根目录：
+
+```sh
+# 在 mio-tutorial 目录执行；之后可在此终端切换工作目录
+export MIO_BUNKO="$PWD/bunko"
+```
+
+Windows 用户可以在对应的 Shell 中设置同名环境变量，可执行文件通常命名为 `mio.exe`。本站的示例命令在 macOS 上实测通过，尚未在 Windows 实机上验证。
+
+## 练习
+
+把问候语改成你的名字，再执行一次 `check` 与 `run`。预期只有引号里的文本发生变化，命令本身保持不变。
+
+## 常见错误
+
+- 找不到 `./mio`：确认已经完成 `go build`，并且当前目录下有生成的可执行文件。
+- 语法诊断失败：检查是否使用了半角双引号、语句末尾是否有分号，以及文件扩展名是否为 `.mio`。
+- 导入失败：检查导入路径与 `MIO_BUNKO` 设置，不要写成 `bunko/kiso/math`。
+- 把 `.mochi` 当成系统可执行文件：应使用 `./mio exec`，而不是直接执行它。
+
+下一步：[按顺序学习 Mio](/docs/v1.0/learn)。

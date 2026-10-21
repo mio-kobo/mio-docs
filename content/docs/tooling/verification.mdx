@@ -1,0 +1,66 @@
+---
+title: 示例验证、审计与版本来源
+description: 可重跑的 fixtures、预期输出、源码哈希、协议探针与验证边界。
+---
+
+技术正文以实际实现和可复现结果为依据。命令返回成功、某条测试通过、功能全部覆盖、阶段验收完成是不同结论；本页分别记录。
+
+## 文件与复跑
+
+在 mio-docs 仓库根执行：
+
+```sh
+python3 scripts/check-reference.py --core /absolute/path/to/mio --go-tests --native
+npm run check:links
+npm run types:check
+```
+
+验证器先将核心仓库受跟踪文件和未忽略的新增文件复制到临时快照，再从快照构建 CLI。它不修改核心源码、bootstrap.config 或用户产物。`--native` 仅在 Darwin arm64 执行原生样例及 GC 测试；其他平台明确记录 not-run。省略 --go-tests 不会伪称 Go 测试通过。
+
+| 文件 | 用途 |
+| --- | --- |
+| `fixtures/docs/manifest.json` | fixture ID、执行模式、预期退出码、输出文件或诊断编号 |
+| `fixtures/docs/<id>/main.mio` | 独立程序或明确应拒绝的反例 |
+| `fixtures/docs/<id>/stdout.txt` | 成功程序的精确 UTF-8 stdout，包含末尾换行 |
+| `fixtures/docs/testing/example_test.mio` | 测试专用包，使用 mio test 验证，不用普通 run |
+| `scripts/check-reference.py` | 源码快照、CLI 构建、执行与报告生成 |
+| `verification/latest.json` | 所有实际命令、退出码、stdout/stderr、fixture 与页面状态 |
+| `verification/latest.sources.json` | 该次验证输入的完整源码文件 SHA256 |
+| `verification/source-lock.json` | 本次技术参考写作所审计的源码快照 |
+| `verification/kiso-exports.json` | 真实公开声明及源文件行号，逐项比对 |
+| `verification/editor-sources.json` | 独立 VS Code / JetBrains 仓库版本与审计文件哈希 |
+| `content/SOURCES.json` | 页面到来源的映射，保留原迁移来源 |
+| `verification/navigation-handoff.json` | 供 A 纳入导航的新增页面建议，不覆盖 meta.json |
+| `verification/REPORT.md` | 本轮人类可读结果、发现与未执行范围 |
+
+## 实际验证内容
+
+普通成功程序分别执行 check、run、build、exec、disasm。run/exec 的 stdout 必须与 fixture 文件逐字节相同，stderr 必须为空；Mochi 头签名和版本也会检查。含字符串复制转换的例子必须产出 v14。
+
+拒绝示例断言失败退出码与结构化诊断；不会把“任意进程报错”当作语言规则验证。对未固定编号的诊断，验证器至少要求合法 JSON code。测试专用包检查 summary.passed、failed、status，防止“没有发现测试但 exit 0”误报。
+
+每个正文中的 mio 代码块通过 fixture 元数据绑定源文件与输出，任何代码或输出差异都会失败。完整运行程序才使用 mio fence；签名、数据类型、测试包和内部协议资料使用 text，分别说明验证方式。
+
+真实 `mio lsp --stdio` 探针执行 initialize、initialized、shutdown、exit，解析 Content-Length 帧并检查 UTF-16 及实际声明能力。它与同目录 Go 协议/语义测试共同验证，不能替代 IDE 客户端验收。
+
+Go AOT 示例在当前平台生成、签名并实际执行 ARM64 Mach-O；M11 GC 专项检查逐项 pass/skip。它们不是纯 Mio Compiler A→B 测试。
+
+## 版本边界
+
+**历史记录（2026-10-20，Mio-2 开发快照）。** 本页记录 v2.0.0 正式发布前的文档审计，不描述最终发行版。M18 后来已通过验收，Mio v2.0.0 已于 2026-10-21 正式发布；当前状态与验证见 [V2.0 验证与来源](/docs/v2.0/tooling/verification)。
+
+核心提交为 `8b53a25142b0da1192a6c4868e807385d7bb50f9`，CLI 字符串为 `Mio 1.0.0-beta.1`。本参考同时审计了 2026-10-20 本地未提交开发文件，具体清单、diff SHA256 和每文件哈希在 source-lock 中。未提交文件不能仅凭提交号复现，也不能据提交 URL 证明最新实现。
+
+A 的 Learn 使用该提交的干净归档快照；本参考保留单独工作树快照，页面不把二者混成同一来源。普通语言与 Kiso 验证基于其实际冻结输入，开发中的 AOT 部分明确标出。
+
+旧迁移记录为提交 `29746a65692c73d637510cbc3f4463e68a49d05c`。本轮修订在 SOURCES 中保留 migrationSource，而不是继续声称新内容全部来自旧提交。
+
+VS Code 与 JetBrains 拥有各自源码提交和插件版本，不能用核心 CLI 的版本字符串替代。未检查 Marketplace 当前状态，未声称插件已发布。
+
+## 未执行与未验收
+
+- 未启动或验收 VS Code Extension Host、JetBrains IDE；未重跑插件打包或发布。
+- 未验证所有 API 的全部错误分支、所有宿主权限场景或所有 Native 表示组合。
+- 未在文档任务内重跑完整 Compiler A 构建、A→B、B/C/D 或固定点；阶段记录为来源证据转述。
+- 本页写作时（2026-10-20）：Compiler A 已生成并启动，A→B 仍因目标 Heap OOM 阻塞，M17e 尚未验收，M18 未启动。该状态已被后续 M18 验收与 v2.0.0 发布取代，见 [V2.0 验证与来源](/docs/v2.0/tooling/verification)。
+- 没有 Commit、Push、Tag、Release，也没有通过修改核心实现来使文档例子通过。

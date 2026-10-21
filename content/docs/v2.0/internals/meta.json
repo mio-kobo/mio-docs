@@ -1,0 +1,9 @@
+{
+  "title": "Internals",
+  "pages": [
+    "index",
+    "gc",
+    "mochi",
+    "native-aot"
+  ]
+}

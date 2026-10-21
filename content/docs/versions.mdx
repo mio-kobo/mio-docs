@@ -1,0 +1,59 @@
+---
+title: 文档版本与发布状态
+description: 正式版本、开发预览、Mio v2.0.0 的发布事实与长期保留策略。
+---
+
+## 当前可读版本
+
+| 文档版本 | 状态 | 来源 |
+| --- | --- | --- |
+| [V1.0](/docs/v1.0) | Stable · Latest（站点默认） | [v1.0.0 正式发布](https://github.com/mio-kobo/mio/releases/tag/v1.0.0)，2026-10-17 |
+| [V2.0](/docs/v2.0) | 站点 Development 快照；内容已按 v2.0.0 核对 | [v2.0.0 正式发布](https://github.com/mio-kobo/mio/releases/tag/v2.0.0)，2026-10-21，提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a` |
+
+**Mio v2.0.0 已正式发布。** 本节区分两件事：
+
+- **语言发布状态**：v2.0.0 是正式、非 prerelease 的 GitHub Release。
+- **文档站版本状态**：`/docs/v2.0` 仍是站点当前的 V2 文档目录；默认稳定入口和 V2.0.0 冻结快照的切换由文档站发布验收单独管理。内容本身已按正式 Tag 核对，不能把站点版本标签误读成语言未发布。
+
+`/docs` 当前自动进入站点默认稳定版 V1.0。精确版本 URL 长期保留；新增正式快照不会改变旧 URL 所指向的正文。
+
+## v2.0.0 的发布事实
+
+- Tag：`v2.0.0`
+- 源码提交：`0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`
+- CLI：`Mio 2.0.0`
+- 正式平台：macOS Apple Silicon / ARM64
+- 发行包：`mio-2.0.0-darwin-arm64.tar.gz`，3,645,944 bytes
+- SHA256：`15a7a65c048e4bac4dc1e792c2106df979d7e68ca28b36e213343c8d1e3dde2e`
+
+M18 已通过验收：纯 Mio Native AOT 完成 Mochi → Native 的多代自编译；正式链中 Go AOT 只生成 Seed。这不表示从 `.mio` 源码开始的完整工具链已经摆脱 Go。
+
+## 状态说明
+
+- **Latest**：从已发布且标记 Stable 的版本按数字语义计算出的最新稳定版标记，不是独立发布状态。
+- **Stable**：有非预发布的正式 Release 证据。
+- **Legacy**：已有正式发布、仍保留的旧文档；是否维护需另查维护字段。
+- **Development**：站点尚未完成正式版本切换的文档快照；必须显式标注，不能把它当作语言未发布。
+- **EOL**：有明确维护终止记录后才能标记。当前没有依据标记任何版本为 EOL。
+
+维护状态独立记录；`unspecified` 表示目前没有官方维护期限承诺，不意味着长期支持。版本注册表位于 `content/versions.json`。
+
+## 精确版本与语言
+
+URL 支持主版本、次版本及可选修订版本，例如 `/docs/v2.1/learn/variables`。V2.10 会排在 V2.3 之后，版本号不按字符串排序。这里的其他版本号只是格式示例，本站不会预先创建没有发布或研发依据的页面。
+
+切换版本优先保留章节；目标缺页时回到该版本首页并提示。当前只有中文；未来已翻译页面使用 `/en/docs/...` 与 `/ja/docs/...`，不会把中文页面伪装为译文。
+
+## 平台与能力边界
+
+| 能力 | v2.0.0 |
+| --- | --- |
+| macOS Apple Silicon / ARM64 | 正式验证平台 |
+| Intel Mac、Linux、Windows | 无正式支持认证 |
+| 精确 Mark-Sweep GC | 已实现 |
+| 分代 GC、High/Balanced/Low | 未实现 |
+| 纯 Mio Native AOT | M18 已验证 Mochi → Native 自编译 |
+| 从 `.mio` 到 Native 完全脱离 Go | 未完成 |
+| WebAssembly Playground | 未发布 |
+
+完整说明见 [V2.0 文档首页](/docs/v2.0) 和 [Native AOT](/docs/v2.0/internals/native-aot)。

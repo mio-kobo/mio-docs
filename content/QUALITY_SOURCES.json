@@ -1,0 +1,1329 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-10-20",
+  "pages": [
+    {
+      "page": ".docs-drafts/corrections/v1.0/getting-started.mdx",
+      "pageSha256": "7ef1ea313aad523484f451e520b83c8bac268e80d4a3ef6dc8bdfe3d9326928c",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/index.mdx",
+      "pageSha256": "6f19e16966e3b4f967dce79bab9910047e8c4f257af954973de8f680208d26e0",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/internals/gc.mdx",
+      "pageSha256": "fbf7a222a951b6c6ac9730a80df7cfe413bf3da28b473db1e9b75433ac26662b",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/mochi",
+        "internal/code/code.go",
+        "internal/vm",
+        "internal/value"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/internals/index.mdx",
+      "pageSha256": "e405c4c3848adf4329c72bd0b4900d2e8baedde4c6b83a1259e0e6ff95bebdea",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/mochi",
+        "internal/code/code.go",
+        "internal/vm",
+        "internal/value"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/internals/mochi.mdx",
+      "pageSha256": "f2e1118438e4227ac3999bc91c2f9167acfafb333afb8f5c0b23f98dc9db93d9",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/mochi",
+        "internal/code/code.go",
+        "internal/vm",
+        "internal/value"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/internals/native-aot.mdx",
+      "pageSha256": "6ef0a3d8ec719ad17ed39cd77359bba5e4fbf045bb201da7293a2325ab3283fd",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/mochi",
+        "internal/code/code.go",
+        "internal/vm",
+        "internal/value"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/array.mdx",
+      "pageSha256": "ef7ac567701899420793acf66fbcc31aa457903abd6bbeee1d9d0c0c37e3b4d3",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/array/array.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/bytes.mdx",
+      "pageSha256": "81ccfbeb047e9013be7bc2cf4bf3420e227351244f7f01a8b2db35940eee06f4",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/bytes/bytes.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/convert.mdx",
+      "pageSha256": "108197bd5fd7868664932d1025d3d8de634130486ece2a418c4aa0f269f7efca",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/convert/convert.mio",
+        "bunko/kiso/convert/float.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/encoding-binary.mdx",
+      "pageSha256": "aa30015b2f70fbb3e35575db2c0d01f18d99c5d41945ce5fd1b89e5ca84658bc",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/encoding/binary/binary.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/fs.mdx",
+      "pageSha256": "452b0abb8760a60bb6794603af73d51831164b55a884123f54b2c5a1a9f7c431",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/fs/fs.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/index.mdx",
+      "pageSha256": "ac3ecbd833ffb1490df5c7af3f7509211913baccc404572aec888b49f8824c06",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/io.mdx",
+      "pageSha256": "005285eb9962357fba54715437965dcc7fb2cad8c435101077f0b1f32b99bcef",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/io/io.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/math.mdx",
+      "pageSha256": "fb57e0e9271334e427dc3900b6d4757edea0faa6605caba6688506227a1ddf1c",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/math/compare.mio",
+        "bunko/kiso/math/constants.mio",
+        "bunko/kiso/math/float.mio",
+        "bunko/kiso/math/integer.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/path.mdx",
+      "pageSha256": "272437b51b40b6a3247247938c3d18ae54a5eb75b5c5838d53c97ed3e696b9bb",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/path/path.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/string.mdx",
+      "pageSha256": "ef02500f2d5d87abede802fdd783e8fd008f2b3c3e2bd5d0232030800f5ff75b",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/string/string.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/testing.mdx",
+      "pageSha256": "a9e6e5296e46f90553ed44147b999b65c2668924c05957f00f61b163ce867911",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/testing/testing.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/kiso/utf8.mdx",
+      "pageSha256": "780c8bd7e097a5c466437cf9ee0edceaa5e9b9698f12cbc9f249d0a0ff0f3b5f",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/utf8/utf8.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/closures.mdx",
+      "pageSha256": "aecee2aee0313f47ba5848d9075739f24146e48a56eb0f637952542393dc7184",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/collections.mdx",
+      "pageSha256": "0678e553aadc8a51abb8dbb7dc14b4c45bdcbeec9c403c99f914593b9b370fe7",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/control-flow.mdx",
+      "pageSha256": "2b7795772cc8510d635109583d1a843b5e2fe881090c6a5e4f06521a6a59bd3f",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/functions.mdx",
+      "pageSha256": "c9372a17398f984e95d399fa48762ec51cf2c4d6665d77720b524d6415c78284",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/generics.mdx",
+      "pageSha256": "4435ce3c499f90ed41bc4506e9e4eb4c945f2dcc7a48793dbe1539b0318e696a",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/index.mdx",
+      "pageSha256": "d3cca64a657585ed754f5b99b7757149d6f4e627e6e41d136a8d27196f290c9f",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/maps.mdx",
+      "pageSha256": "798435616f66fd172b7aa5317e20d4cc7f850ffc447a9505c8b7f7eab2560532",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/models.mdx",
+      "pageSha256": "033b420f089b6abfeeb299dbfc23864666931031be54640b2f80403ec2796237",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/modules.mdx",
+      "pageSha256": "431725333c26f9bfbbe943c3adda4372b85c74ad4f21dc543d1bb500502668b3",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/strings.mdx",
+      "pageSha256": "49138c5c82076ffc4ba818656f2e13c907dcbea94054bf7e95990a4dd43676be",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/testing.mdx",
+      "pageSha256": "21189a81173ad52ff8ab0e0b1816e76005e771e8b4fa365707913da22b5a1256",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/learn/variables.mdx",
+      "pageSha256": "0974b1d7dd2831af22a1b944cab093618b235d3514d850affe51633cdc39c706",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/reference/collections.mdx",
+      "pageSha256": "c4cf504c6d4f512d91341c06b0b560a287fc05c653abf64e05d098b58bee0965",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/reference/functions.mdx",
+      "pageSha256": "71ab02315a2a4a1dcb9cda2765d86e25b3a25d5facc4490d3d1a4bcddcfc9d07",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/reference/index.mdx",
+      "pageSha256": "7d775ba6bc4a41032d0398806f55b03998c36578af2a20ae737095966272d620",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/reference/modules.mdx",
+      "pageSha256": "5d26280bfbedb9395b26b6e11f92feae8b9ab58328ba26949182056dc960a589",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/reference/syntax.mdx",
+      "pageSha256": "24f4b561325129b8f8913da3a812a5c5c88ec14103066c7b83a6365dfe8752bc",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/reference/types.mdx",
+      "pageSha256": "a487a9b529da8aaa8ed9129568fa3d1ce607bf253d7b6b0d4031f29827bc83aa",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/tooling/cli.mdx",
+      "pageSha256": "7a9963e615a19ad5db3abe8c08955ac9c5c2f3f29122e67999dc448ed5cd1f18",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "cmd/mio/main.go",
+        "cmd/mio/test_command.go",
+        "internal/tester"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/tooling/editors.mdx",
+      "pageSha256": "77711801d13c0b9a6093ebd43c45582cd696bc0745c39e0164f195ae57be3238",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "independent editor source audit; compatibility not tested",
+      "sourcePaths": [
+        "cmd/mio/main.go",
+        "cmd/mio/test_command.go",
+        "internal/tester"
+      ],
+      "verification": "verification/content-quality/results.json",
+      "externalEvidence": "verification/editor-sources.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/tooling/index.mdx",
+      "pageSha256": "465c5588157ca0ec61b9bb6bd08f17140df4ad94d8a6b185eec7f2570b319965",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "cmd/mio/main.go",
+        "cmd/mio/test_command.go",
+        "internal/tester"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/tooling/lsp.mdx",
+      "pageSha256": "cd8f2f24d7707fe5f4e542cfac5e0e4b5fc9c19326018b1a4493238041eff8ff",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "cmd/mio/main.go",
+        "cmd/mio/test_command.go",
+        "internal/tester"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": ".docs-drafts/corrections/v1.0/tooling/verification.mdx",
+      "pageSha256": "c2b6219052bb1a02b723d3e8ea9816c5296b8734f4d09420a78ce1dc56cdecac",
+      "version": "v1.0",
+      "status": "pending-review",
+      "sourceCommit": "51f1ba883767c1fc08ba415fbb0075316ff03106",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "cmd/mio/main.go",
+        "cmd/mio/test_command.go",
+        "internal/tester"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/development.mdx",
+      "pageSha256": "731d0666d907e3334e8e157427b0fd7e87831e559b2ca310b7c05e961d13c4e8",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/getting-started.mdx",
+      "pageSha256": "26758f7537ee19af7267c1ee42250b71b55f8989395ad52cdd05ca66fe01b6f3",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/index.mdx",
+      "pageSha256": "17b1891aaa55acd53fc189ace924ebbbe9138ceb7899810d84acc5fca0a13f5f",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/internals/gc.mdx",
+      "pageSha256": "bfc90b461cd5faacec342b65c9876ae0f9a4fd3f3d10e3c7e2e39726f87e8385",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/mochi",
+        "internal/code/code.go",
+        "internal/vm",
+        "internal/value",
+        "internal/aot",
+        "cmd/mochi-aot/main.go",
+        "bunko/kiso/aot"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/internals/index.mdx",
+      "pageSha256": "be7e5120e5886c2ec58ec0fef8ef398fac675364dcd40b1cf0014ae1ef53aa9e",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/mochi",
+        "internal/code/code.go",
+        "internal/vm",
+        "internal/value"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/internals/mochi.mdx",
+      "pageSha256": "14ced512cfd26354dd237de1bc875b4216e7f6f21f9c0b3e0b030c224aee2691",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/mochi",
+        "internal/code/code.go",
+        "internal/vm",
+        "internal/value"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/internals/native-aot.mdx",
+      "pageSha256": "fb088a1279cfd2e7b579b78c2caf514dcc445a89d38983231410809e479af0e6",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/mochi",
+        "internal/code/code.go",
+        "internal/vm",
+        "internal/value",
+        "internal/aot",
+        "cmd/mochi-aot/main.go",
+        "bunko/kiso/aot"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/aot-arm64.mdx",
+      "pageSha256": "cb06bbf39d85cb6e36ce793ac51d86f1e7fd0b2cdf3253375d9007527599a48f",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/aot/arm64/arm64.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/aot-lower-nativefs.mdx",
+      "pageSha256": "956940c539d9935400b652341859162489070b1def9cf6b841e98fc619a3b73e",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/aot/lower/nativefs/nativefs.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/aot-lower-types.mdx",
+      "pageSha256": "c4e949ed2407ce7eabea785d06fa978c363c19b6929cc3ff1f0d89b8e8ed78fb",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/aot/lower/types/types.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/aot-lower.mdx",
+      "pageSha256": "35447f0bf0ab83a8fa59f69774cca12199a9ad21438161e396dfb9b66718b265",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/aot/lower/lower.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/aot-macho.mdx",
+      "pageSha256": "7cdc72ef02c3e6589d6feed3f162a4ea23b22cad5b2c4b0febf4ba26efcb5ef6",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/aot/macho/macho.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/array.mdx",
+      "pageSha256": "131c1b0f1ee38884c39cb2b2b328048d296d80d45e46ea8513a3cff0cbc14dd6",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/array/array.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/bytes.mdx",
+      "pageSha256": "c130f67dfa7576cc58783369dd8a1bddc1ee4a9d53e3e05bb177757f3499fd12",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/bytes/bytes.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/convert.mdx",
+      "pageSha256": "e7b664dc988624dfc8ecd30faaeb77f43570340db12097804d8ec531a5910686",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/convert/convert.mio",
+        "bunko/kiso/convert/float.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/encoding-binary.mdx",
+      "pageSha256": "2b5813c5e7bf49db99d700731777e7ca8feef35c326e1cd3f206f0d35420d708",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/encoding/binary/binary.mio",
+        "bunko/kiso/encoding/binary/stream.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/encoding-mochi.mdx",
+      "pageSha256": "6d4fa2370edd05339298d734fc905cffd17736e3359dc2940c4edf930742122c",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/encoding/mochi/decode.mio",
+        "bunko/kiso/encoding/mochi/encode.mio",
+        "bunko/kiso/encoding/mochi/file.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/fs.mdx",
+      "pageSha256": "84d94e2bc49bd9e96d62226307a448e8caeca3f1627f5935b36e535a61c401d3",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/fs/fs.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/index.mdx",
+      "pageSha256": "5a98dbc193d9741934b02d2bbc209ad2c0bd671214d541760c36d2568bbba692",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/io.mdx",
+      "pageSha256": "df06c4b9bc2a016a7bca12d26d7b175e3b860f6243e60be81fcb651eea36aa13",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/io/io.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/math.mdx",
+      "pageSha256": "d4f617c2bc8cc0cb36c1b7790d4c7ab31e87ac980060fd0dcd66192ea9f2c67c",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/math/compare.mio",
+        "bunko/kiso/math/constants.mio",
+        "bunko/kiso/math/float.mio",
+        "bunko/kiso/math/integer.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/path.mdx",
+      "pageSha256": "fa020e34765ed4de291ec21738c40b765bc508e4a44a30c3df36a2f09ae987e8",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/path/path.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/string.mdx",
+      "pageSha256": "096f61acce2900ab6a0cc7eea5f2d37035845e0d3b8a842a027ec26d6af1f44a",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/string/string.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/testing.mdx",
+      "pageSha256": "9a66f83a1e6621212c8ca999a1f5dc60e46e7720cd38bce1732bebc4b1f5c71a",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/testing/testing.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/kiso/utf8.mdx",
+      "pageSha256": "9f7e75b6c12ec7c38beb130779f2f4312d31f3bcab316ed6771cc2f18ae2b8e9",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "bunko/kiso/utf8/utf8.mio"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/closures.mdx",
+      "pageSha256": "c7003df303fffc93a600011e0d6883a0824e8049ff44136ff69ae7b82ff14621",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/collections.mdx",
+      "pageSha256": "e2977b472f9ac2297f9ded2a902101b1a998e0e30be2b3e5d12796d79b9ed815",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/control-flow.mdx",
+      "pageSha256": "b588b5bd336c7ffa9b8533c892b74df35d0a4887de2296c271ae3f61bcd09116",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/functions.mdx",
+      "pageSha256": "b1675a018dd2935a2de2f17d797307efac82e5f1431969beb6021b17c8401cf8",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/generics.mdx",
+      "pageSha256": "915f97297e80138da407e9ff4f676f612815f0d073a7b84b44955a1b4a707475",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/index.mdx",
+      "pageSha256": "fb2dff5d2f9182bc54d01e93ad6fbf1efbf801a3489ece43540d4b10932b410e",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/maps.mdx",
+      "pageSha256": "d7199ce695c6ac673cf978cff997a8a53fa34af465038bad64c60045e5352dd2",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/models.mdx",
+      "pageSha256": "a83b27830ca2d670f376f92f52cd2b047f824f1287e3d3af38a8be47a2595942",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/modules.mdx",
+      "pageSha256": "16c9fc96fbf3d16d1716c9639d053bc4e3cd242a8a00c489672e99f9e14875cf",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/strings.mdx",
+      "pageSha256": "bfa5d15c2c10ab4e40702524a1b65ec646d760bb761261950d486ec77bf2e8ae",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/testing.mdx",
+      "pageSha256": "18c1a046488db083591f737a7f916a1616e9aca883d0b29b97068429a6760117",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/learn/variables.mdx",
+      "pageSha256": "b83741a3c268f67cb31d17d5bbcf6d0ea9abcfefa2694bdea1d4a5c5c666616a",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/parser",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm",
+        "bunko/kiso"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/reference/collections.mdx",
+      "pageSha256": "5494455f759d94946aa75ac43baa829fcad4ddfbab7c791b131994533274ca30",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/reference/functions.mdx",
+      "pageSha256": "54c8f37c0c4095ad40d5ae2350b16baf9ba360b922e562e26b5a7f721828fe04",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/reference/index.mdx",
+      "pageSha256": "997e3198a0ca7bf65c0c783b1b0e7efd5ac16c7402b969dc1283e25ac4b30611",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/reference/modules.mdx",
+      "pageSha256": "f979c43269e24b7fdef3ce50e73ec7b98ed44cee76944fe4cad04044b4326de0",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/reference/syntax.mdx",
+      "pageSha256": "7d63f7816ca6472b01f9f7f1e1faeff2f236458f216c85e341fc2a3c16b89bfa",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/reference/types.mdx",
+      "pageSha256": "b9a42228bcb06013054954f08fd6b9fcf1a6b3ec0aea99929d72b341f6558eeb",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "internal/lexer/lexer.go",
+        "internal/token/token.go",
+        "internal/parser/parser.go",
+        "internal/parser/precedence.go",
+        "internal/typecheck",
+        "internal/bunko",
+        "internal/vm/vm.go"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/tooling/cli.mdx",
+      "pageSha256": "3c8da19978a99c4d2516e59ca721a735078a2f46be567f96f6803cfc36ed200e",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "cmd/mio/main.go",
+        "cmd/mio/test_command.go",
+        "internal/tester",
+        "internal/aot",
+        "cmd/mochi-aot/main.go",
+        "bunko/kiso/aot"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/tooling/editors.mdx",
+      "pageSha256": "485af7643b606823b7060bcb299a77d439f774547df1d89c24d232373e23dc9d",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "independent editor source audit; compatibility not tested",
+      "sourcePaths": [
+        "cmd/mio/main.go",
+        "cmd/mio/test_command.go",
+        "internal/tester"
+      ],
+      "verification": "verification/content-quality/results.json",
+      "externalEvidence": "verification/editor-sources.json"
+    },
+    {
+      "page": "content/docs/v2.0/tooling/index.mdx",
+      "pageSha256": "843ced0041afa8226e18f664a92ad1db0dbffa4492094cfa6a3d2a71ad55af91",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "cmd/mio/main.go",
+        "cmd/mio/test_command.go",
+        "internal/tester"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/tooling/lsp.mdx",
+      "pageSha256": "03551e286260ac3432971707f0fce7b0a126b16e7a6037b37b5312f51f7e3535",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "cmd/mio/main.go",
+        "cmd/mio/test_command.go",
+        "internal/tester",
+        "internal/lsp"
+      ],
+      "verification": "verification/content-quality/results.json"
+    },
+    {
+      "page": "content/docs/v2.0/tooling/verification.mdx",
+      "pageSha256": "c91095750359200ca3586bcb6307446c7e402d19e6ceb35af07983c74a24a886",
+      "version": "v2.0",
+      "status": "development",
+      "sourceCommit": "8b53a25142b0da1192a6c4868e807385d7bb50f9",
+      "sourceKind": "git archive",
+      "sourcePaths": [
+        "cmd/mio/main.go",
+        "cmd/mio/test_command.go",
+        "internal/tester"
+      ],
+      "verification": "verification/content-quality/results.json"
+    }
+  ]
+}

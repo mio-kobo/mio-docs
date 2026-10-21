@@ -1,0 +1,400 @@
+---
+title: 故障排查
+description: 安装、校验、Bunko 导入、编译诊断、测试与 Native AOT 的常见失败及确认方法。
+---
+
+本页按失败阶段组织。先记录你使用的 Mio 版本、平台和完整命令，再对照对应小节。不要用删除断言、关闭 GC、修改编译器或改用未锁定分支来“修复”教程中的失败。
+
+先确认基础身份：
+
+```sh
+mio version
+uname -m
+echo "$MIO_BUNKO"
+```
+
+官方 v2.0.0 的正常组合是：
+
+```text title="output"
+Mio 2.0.0
+arm64
+/Users/you/.local/share/mio-2.0.0/mio-2.0.0-darwin-arm64/bunko
+```
+
+## 安装与校验
+
+### `mio: command not found`
+
+`PATH` 没有包含安装目录。使用绝对路径确认二进制存在：
+
+```sh
+"$MIO_HOME/mio" version
+```
+
+然后把 `$MIO_HOME` 加入 shell 配置并重新打开终端：
+
+```sh
+export MIO_HOME="$HOME/.local/share/mio-2.0.0/mio-2.0.0-darwin-arm64"
+export PATH="$MIO_HOME:$PATH"
+export MIO_BUNKO="$MIO_HOME/bunko"
+```
+
+GUI 启动的编辑器可能不继承终端环境。VS Code 的 `mio.executablePath` 可以填写绝对路径；JetBrains 在 **Mio SDK** 设置中选择 CLI。
+
+### `bad CPU type in executable` 或 `cannot execute binary file`
+
+官方 v2.0.0 发行包是 **Darwin ARM64**。在 Intel Mac 上运行会失败。不要通过改名或关闭系统保护绕过；Intel Mac、Linux、Windows 没有 v2.0.0 正式支持认证。
+
+确认文件类型：
+
+```sh
+file "$MIO_HOME/mio"
+```
+
+预期包含：
+
+```text
+Mach-O 64-bit executable arm64
+```
+
+### `shasum: ... FAILED` 或校验值不一致
+
+不要运行解压后的二进制。重新从官方 Release 下载 `mio-2.0.0-darwin-arm64.tar.gz` 和 `SHA256SUMS`：
+
+```sh
+shasum -a 256 -c SHA256SUMS
+```
+
+预期：
+
+```text
+mio-2.0.0-darwin-arm64.tar.gz: OK
+```
+
+正式归档的 SHA256 是：
+
+```text
+15a7a65c048e4bac4dc1e792c2106df979d7e68ca28b36e213343c8d1e3dde2e
+```
+
+如果下载地址不是 `github.com/mio-kobo/mio/releases/...`，或校验值不同，停止安装并核对来源。
+
+### Gatekeeper 阻止首次运行
+
+发行包使用 ad-hoc 签名，没有 Developer ID，也没有 notarization。先确认签名结构：
+
+```sh
+codesign --verify --strict "$MIO_HOME/mio"
+```
+
+成功时没有输出并以 `0` 退出。`codesign -dv` 会显示 `Signature=adhoc`，这是当前发布的预期状态。
+
+Gatekeeper 的互联网下载首次运行体验尚未认证。若系统阻止打开，请按 macOS 的“隐私与安全性”提示处理；项目不提供绕过 Gatekeeper 的自动化脚本，也不会把 ad-hoc 签名描述成 Apple 公证。
+
+### 解压后找不到 `native-aot` 或 `mochi-aot`
+
+确认你解压的是完整的发行包，而不是只复制了 `mio` 一个文件。包根目录应包含：
+
+```text
+mio
+mochi-aot
+mochi-aot-audit
+native-aot
+native-aot.mochi
+bunko/
+```
+
+## Bunko 找不到或导入失败
+
+### `cannot find package`、`Bunko package ...` 或导入错误
+
+先确认物理目录存在：
+
+```sh
+test -d "$MIO_BUNKO/kiso/math" && echo "bunko ok"
+```
+
+导入路径永远从 `kiso/` 开始：
+
+```mio
+yobu "kiso/math";
+```
+
+不要写：
+
+```mio
+yobu "bunko/kiso/math";
+```
+
+加载器拒绝物理 `bunko` 前缀、绝对导入路径、包含 `..` 的路径和越过 Bunko 根的符号链接。
+
+### 显式设置 `MIO_BUNKO`
+
+推荐每次安装后显式设置：
+
+```sh
+export MIO_BUNKO="$MIO_HOME/bunko"
+```
+
+如果没有设置，CLI 会从入口文件所在目录向上查找 `bunko/`，最后回退到当前工作目录的 `bunko`。在 `/tmp` 或任意项目目录运行代码时，自动查找很可能找不到发行包内的标准库。
+
+### 包的限定名写错
+
+`yobu "kiso/math";` 的默认限定名是路径末段：
+
+```mio no-run
+math.sqrt(144.0);
+```
+
+不是 `sqrt(144.0)`，也不是 `kiso.sqrt(...)`。`yobu "kiso/array";` 使用 `array.push(...)`。
+
+### 同目录文件与测试文件
+
+同目录普通 `.mio` 文件共享包级声明；`_test.mio` 只由 `mio test` 加载。普通 `mio run` 看不到测试文件中的声明，反之亦然。
+
+## 编译与运行错误
+
+### 语法错误：缺少分号、引号或右括号
+
+Mio 语句以分号结束。字符串使用半角双引号，字符使用单引号。例如：
+
+```mio
+chant("Hello, Mio!");
+```
+
+不要使用中文引号或漏掉末尾分号。`check` 的诊断会指出行列位置。
+
+### `E0301`：初始化类型不正确
+
+```text
+error[E0301]: 变量 "x" 的初始化类型不正确
+```
+
+常见原因是把字符串赋给整数变量：
+
+```mio
+kaku x: int64 = "no";
+```
+
+改为正确类型：
+
+```mio
+kaku x: int64 = 42;
+```
+
+Mio 不在整数、浮点数之间做隐式转换。需要转换时使用显式类型名：
+
+```mio
+kaku count: int64 = 42;
+kaku value: float64 = float64(count);
+```
+
+### `E0201`：未定义的变量
+
+```text
+error[E0201]: 未定义的变量 "string"
+```
+
+检查名称拼写、作用域和导入。使用 `string` 模块需要：
+
+```mio
+yobu "kiso/string";
+```
+
+### `chant` 不能接受可空值
+
+`chant(value)` 接受整数、浮点数、`bool`、`string` 或字面量 `mu`，不接受 `string?`、`[]T`、结构体、枚举、Map 或函数。可空值先收窄：
+
+```mio no-run
+kaku text = string.from_utf8(data);
+moshi (text != mu) {
+    chant(text);
+} sore {
+    chant("invalid utf8");
+}
+```
+
+### 运行时错误与退出码
+
+- 编译、加载或执行错误：退出码 `1`；
+- 未知命令、缺少参数或参数结构不合法：退出码 `2`；
+- 正常成功：退出码 `0`。
+
+查看结构化诊断：
+
+```sh
+mio check --format=json --color=never main.mio
+```
+
+当前诊断管线只报告第一条错误。修复后重新运行，不要假设一次 JSON 输出包含全部问题。
+
+### `build` 成功但没有输出文件
+
+`build` 成功时没有 stdout，这是正常的。检查文件：
+
+```sh
+ls -l hello.mochi
+```
+
+如果没有生成，检查输出目录是否存在。`build` 不会自动创建目录：
+
+```sh
+mkdir -p out
+mio build -o out/hello.mochi hello.mio
+```
+
+### 直接运行 `.mochi` 失败
+
+`.mochi` 是字节码，不是 Mach-O：
+
+```sh
+mio exec hello.mochi
+```
+
+要生成原生程序，使用 `mochi-aot` 或 `native-aot`。
+
+## 测试
+
+### `no_tests`
+
+确认：
+
+- 文件以 `_test.mio` 结尾；
+- 测试函数以 `test_` 开头；
+- 函数无参数、非泛型、返回 `unit`；
+- 目标目录包含测试文件，或使用 `./...`。
+
+### 退出码 0 但没有执行测试
+
+`mio test` 在“没有发现测试”和“筛选没有匹配”时也返回 `0`。检查报告：
+
+```sh
+mio test ./... --format=json
+```
+
+查看 `summary.status`、`summary.passed`、`summary.failed`，不要只看退出码。
+
+### `--run` 没有匹配
+
+筛选发生在测试包编译之后。确认正则写法和函数名：
+
+```sh
+mio test ./tests --run='^test_add$'
+```
+
+没有匹配时会给出提示并返回 `0`。
+
+### 测试中无法使用 `kiso/testing`
+
+`kiso/testing` 只在 `mio test` 环境注册。用 `mio run` 执行测试文件不会得到测试报告接口。直接对测试文件执行普通命令时，CLI 会提示改用 `mio test`。
+
+## Native AOT
+
+### 平台不支持
+
+v2.0.0 只在 macOS Apple Silicon ARM64 上验证。Intel Mac、Linux、Windows 没有正式支持认证。`mochi-aot` 的 `-target` 当前只接受 `darwin-arm64`。
+
+### `mochi-aot` 签名失败或程序无法启动
+
+`mochi-aot` 输出未签名 Mach-O。执行前需要：
+
+```sh
+chmod +x hello-go-native
+codesign --force --sign - hello-go-native
+codesign --verify --strict hello-go-native
+./hello-go-native
+```
+
+`-target linux-arm64` 等取值会失败；这是当前的平台边界，不是可以忽略的警告。
+
+### `native-aot` 没有输出或没有产物
+
+`native-aot` 从当前工作目录读取两个文件：
+
+- `input.config`：输入 Mochi 路径；
+- `output.config`：输出路径。
+
+两个文件必须是 UTF-8、只包含路径、**没有末尾换行**。用 `printf '%s'`，不要用 `echo`：
+
+```sh
+printf '%s' "$PWD/hello.mochi" > input.config
+printf '%s' "$PWD/hello-pure-native" > output.config
+```
+
+输出路径必须是尚不存在的新文件。输出是数据文件，生成后需要：
+
+```sh
+chmod +x hello-pure-native
+codesign --force --sign - hello-pure-native
+codesign --verify --strict hello-pure-native
+./hello-pure-native
+```
+
+### `native-aot` 退出码是 0，但编译失败
+
+这是已知行为。部分失败分支仍以操作系统退出码 `0` 结束。必须同时检查：
+
+```sh
+grep '^native-aot: ok$' native-build.log
+test -s hello-pure-native
+```
+
+若日志是 `native-aot: decode failed`、`native-aot: lowering failed`、`native-aot: writer failed` 或 `native-aot: write failed`，即使 `$?` 为 0 也视为失败。
+
+### Native 不支持我的程序
+
+Native 支持集合小于 VM。以下能力没有完整 Native 承诺：
+
+- 完整 `Map`；
+- 通用 CLI argv；
+- 任意 MMA 宿主桥接；
+- 任意多态函数值；
+- 所有 VM 指令与 Kiso API 组合。
+
+保留 VM 路径，检查 lowering 诊断。不要通过关闭 GC、修改编译器或跳过测试来强行生成。
+
+### 分代 GC / 三档 GC 在哪里
+
+v2.0.0 只有精确 Mark-Sweep GC。分代 GC（M19）和 High / Balanced / Low 三档配置没有实现，不属于已发布能力。
+
+## LSP 与编辑器
+
+### `mio lsp` 没有响应
+
+`mio lsp` 是 stdio JSON-RPC 服务器，不是逐行文本命令。stdout 只能输出带 `Content-Length` 的协议帧；任何调试输出写到 stderr 或 `window/logMessage`。
+
+手动检查初始化：
+
+```sh
+mio lsp --stdio
+```
+
+然后由 LSP 客户端发送 `initialize`，不要直接在终端输入普通文本。
+
+### 编辑器没有诊断
+
+- 确认 `mio.executablePath` 或 `PATH` 指向 v2.0.0 CLI；
+- 确认 `MIO_BUNKO` 指向发行包的 `bunko`；
+- 尝试关闭再打开语言服务器；
+- VS Code 在 LSP 不可用时会回退到 `mio check --format=json`；
+- JetBrains 使用自己的 CLI 诊断，不是 LSP。
+
+### `mio` 版本不匹配
+
+插件可以启动旧版 CLI，但旧版可能没有 `lsp` 子命令或没有 v2.0.0 的诊断格式。用 `mio version` 确认。插件版本与 Mio 语言版本是独立维度，不能用插件版本推断 CLI 版本。
+
+## 仍无法解决时
+
+收集以下信息：
+
+```sh
+mio version
+uname -m
+sw_vers
+echo "$MIO_BUNKO"
+mio check --format=json --color=never <file>
+```
+
+附上完整命令、退出码、stdout/stderr 和最小可复现程序。不要只粘贴“运行失败”。如果问题涉及 Native AOT，还要记录 `mochi-aot` / `native-aot` 的完整命令、成功标记、产物路径和 `codesign` 结果。
+
+更多命令细节见 [CLI](/docs/v2.0/tooling/cli)，原生流程见 [Native AOT](/docs/v2.0/internals/native-aot)。

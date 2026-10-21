@@ -1,0 +1,23 @@
+---
+title: Internals · 执行系统与内部实现
+description: 按 Mochi 容器、Mochi VM、Go AOT、纯 Mio Native AOT 和 GC 区分实现边界。
+---
+
+本栏目解释 **Mio v2.0.0**（提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`）的执行系统。API 用户优先查询 [Reference](/docs/v2.0/reference) 和 [Kiso](/docs/v2.0/kiso)，后端开发再阅读内部布局。
+
+| 层次 | 内容 |
+| --- | --- |
+| 序列化与 VM | [Mochi 文件格式、版本门槛和验证](/docs/v2.0/internals/mochi) |
+| 原生执行 | [Go AOT 与纯 Mio Native AOT 的边界](/docs/v2.0/internals/native-aot) |
+| 内存生命周期 | [对象表示、精确根与 GC](/docs/v2.0/internals/gc) |
+
+Mochi 字节码文件不是原生可执行文件。`mio run` / `mio exec` 使用 Mochi VM；`mochi-aot` 和 `native-aot` 生成独立原生程序，使用自己的 Runtime、Heap、根协议和 GC。
+
+## v2.0.0 的结论
+
+- M18 已通过验收：纯 Mio Native AOT 完成 Mochi → Native 的多代自编译，Stage 1–5 未签名字节一致；正式链中 Go AOT 只生成 Seed。
+- 源码前端、VM、LSP 和 `mochi-aot` 仍为 Go 实现；纯 Mio 后端只覆盖受支持的 Native 子集。
+- 精确 Mark-Sweep GC 已实现；分代 GC 和 High/Balanced/Low 三档未实现。
+- 完整 `.mio` 源码到 Native 的工具链尚未完全摆脱 Go；WebAssembly Playground 未发布。
+
+每项状态都要结合具体后端、提交和实际执行证据。安装与签名流程见 [Native AOT](/docs/v2.0/internals/native-aot)，命令级诊断见 [CLI](/docs/v2.0/tooling/cli)。
