@@ -5,10 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/check-versions.mjs && node scripts/check-release.mjs && next build",
     "start": "next start",
     "types:check": "next typegen && tsc --noEmit",
-    "check:links": "node scripts/check-links.mjs"
+    "check:links": "node scripts/check-links.mjs",
+    "check:examples": "node scripts/check-examples.mjs",
+    "test:versions": "node --test scripts/versioning.test.mjs",
+    "check:versions": "node scripts/check-versions.mjs",
+    "docs:version": "node scripts/create-docs-version.mjs",
+    "check:release": "node scripts/check-release.mjs",
+    "test:release": "node --test scripts/release.test.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.0",
