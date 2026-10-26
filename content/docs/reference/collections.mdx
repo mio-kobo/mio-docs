@@ -26,16 +26,6 @@ array.truncate(alias, 1);
 chant(len(original));
 ```
 
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-9
-3
-9
-6
-1
-```
-
 当前类型系统与 VM 支持数组嵌套；旧 LANGUAGE.md 的“不支持多维数组”已过时。嵌套使用数组的数组，共享内层引用，不承诺矩阵连续布局或 Native 后端完整支持。
 
 ```mio fixture="nested-array"
@@ -44,13 +34,6 @@ kaku inner = values[0];
 inner[0] = 9;
 chant(values[0][0]);
 chant(len(values));
-```
-
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-9
-2
 ```
 
 ## 结构体与枚举
@@ -74,13 +57,6 @@ kaku result: Result<int64, string> = Result.Ok(7);
 chant(get(result));
 ```
 
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-42
-7
-```
-
 ## Map
 
 类型写作 `Map<K, V>`，构造写作 `Map[K, V]()`；目标类型明确时可用 `Map()`。键只支持整数、`bool` 和 `string`；浮点、数组和复合对象不能作为键。Map 赋值和传参共享修改。`map[key] = value;` 插入或更新；读取返回 `V?`，缺键为 `mu`。当前此参考不承诺不存在于源码的遍历、删除或长度 API。
@@ -93,13 +69,6 @@ alias["answer"] = 43;
 kaku answer = entries["answer"];
 moshi (answer != mu) { chant(answer); }
 chant(entries["missing"] == mu);
-```
-
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-43
-hai
 ```
 
 证据：`internal/typecheck/type.go` 的 `ArrayOf`、`definitions.go`、`checker.go` 与 `internal/value/`、`internal/vm/`；拒绝字段赋值和嵌套数组成功均有 fixture。

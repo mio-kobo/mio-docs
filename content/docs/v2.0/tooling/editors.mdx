@@ -1,40 +1,106 @@
 ---
-title: VS Code 与 JetBrains
-description: 安装 Mio 编辑器插件、配置 v2.0.0 CLI 与 Bunko 路径，并使用诊断、补全和运行功能。
+title: 编辑器支持
+description: Mio V2.0 VS Code 与 JetBrains 插件的安装、配置和语言功能
 ---
 
-编辑器插件是独立于 Mio 核心仓库的项目，版本号不跟随 Mio 语言版本。本页依据各插件仓库的实际源码清单核对安装与配置；**没有在 IDE 中完成 v2.0.0 的端到端认证**，因此不把“源码声明的功能”写成“已在所有 IDE 版本中验证通过”。
+## 编辑器支持
 
-| 插件 | 源码版本 | IDE 要求 |
-| --- | --- | --- |
-| VS Code `mio-language-support` | `0.3.0` | VS Code `^1.85.0` |
-| JetBrains `Mio - Programming Language Tools` | `0.6.1` | IntelliJ IDEA / GoLand 2025.3，`sinceBuild 253` |
+编辑器（Editor）是编写 Mio 程序的主要工作环境。除了直接在终端运行源码，开发者还可以使用 Mio 编辑器插件获得语法高亮、错误诊断、代码补全和跳转等功能。
 
-两个插件都需要一个可用的 Mio CLI。官方 v2.0.0 发行包只提供 macOS Apple Silicon ARM64 构建：
+Mio 目前提供适用于 VS Code 和 JetBrains IDE 的独立插件项目。插件与 Mio 语言核心分别维护，因此插件版本号不需要与 `Mio 2.0.0` 相同。
+
+本章节根据现有插件源码和 Mio V2.0.0 核心能力介绍配置方式。插件实际能否运行，还取决于所使用的 IDE 版本及 Mio CLI 安装环境。
+
+### 准备 Mio CLI
+
+在编辑器中使用 Mio 之前，应先安装与当前语言文档对应的 CLI 和 Bunko 标准库。
+
+使用终端确认版本：
+
+```sh
+mio version
+```
+
+如果使用 macOS Apple Silicon 的 V2.0.0 发行包，可以将其安装根目录加入环境变量：
 
 ```sh
 export MIO_HOME="$HOME/.local/share/mio-2.0.0/mio-2.0.0-darwin-arm64"
 export PATH="$MIO_HOME:$PATH"
 export MIO_BUNKO="$MIO_HOME/bunko"
-mio version
 ```
 
-预期输出 `Mio 2.0.0`。安装步骤见 [Getting Started](/docs/v2.0/getting-started)。
+以上目录是示例安装位置，实际位置应以你的安装目录为准。
 
-## VS Code
+目前 v2.0.0 预编译发行包的正式验证平台是 macOS Apple Silicon ARM64。其他平台可以尝试自行构建，但不应直接理解为已有同等级别的官方发行支持。
 
-### 安装
+### VS Code 插件
 
-插件身份为 `exmikupro.mio-language-support`，可从 Visual Studio Marketplace 安装：
+Mio 的 VS Code 插件名为 **Mio Language Support**，扩展标识为 `exmikupro.mio-language-support`。
 
-- Marketplace：[Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=exmikupro.mio-language-support)
-- 命令行安装 VSIX：
+可以在 VS Code 扩展市场中搜索该扩展，或从 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=exmikupro.mio-language-support) 打开插件页面。
+
+安装后，打开 `.mio` 文件即可使用基础语法高亮。需要语言服务器和检查、运行功能时，还必须让插件能够找到 Mio CLI。
+
+### 配置 VS Code
+
+VS Code 可以通过 `settings.json` 明确指定 Mio 可执行文件的位置。
+
+例如：
+
+```json title="settings.json"
+{
+  "mio.executablePath": "/Users/you/.local/share/mio-2.0.0/mio-2.0.0-darwin-arm64/mio",
+  "mio.languageServer.enabled": true,
+  "mio.diagnostics.enabled": true,
+  "mio.diagnostics.onSave": true,
+  "mio.outputDirectory": ""
+}
+```
+
+请将 `mio.executablePath` 替换为本机实际路径。如果不填写，插件会尝试在 `PATH` 中寻找 `mio`。
+
+常用设置包括：
+
+| 设置 | 作用 |
+| --- | --- |
+| `mio.executablePath` | Mio CLI 可执行文件路径 |
+| `mio.languageServer.enabled` | 是否启动 MioCore LSP |
+| `mio.diagnostics.enabled` | 是否启用代码诊断 |
+| `mio.diagnostics.onSave` | 在 LSP 不可用时保存后使用 CLI 检查 |
+| `mio.outputDirectory` | `mio build` 的输出目录；空值为源文件旁边 |
+
+VS Code 插件没有独立的 `mio.bunkoPath` 设置。如果标准库没有放在项目目录中，可以在启动 VS Code 前设置 `MIO_BUNKO`：
 
 ```sh
-code --install-extension mio-language-support-0.3.0.vsix
+export MIO_BUNKO="$MIO_HOME/bunko"
+code .
 ```
 
-从源码构建：
+从图形界面直接启动的 VS Code 不一定继承终端的环境变量。在这种情况下，应检查编辑器进程能否找到 CLI 和标准库。
+
+### VS Code 命令
+
+插件向命令面板提供以下命令：
+
+| 命令 | 功能 |
+| --- | --- |
+| `Mio: Check Current File` | 检查当前文件 |
+| `Mio: Run Current File` | 运行当前文件 |
+| `Mio: Build Current File` | 编译当前文件为 Mochi |
+| `Mio: Show Compiler Version` | 查看编译器版本 |
+| `Mio: Open Output` | 打开 Mio 输出面板 |
+
+运行和编译当前文件时，插件会先保存尚未写入磁盘的编辑内容。
+
+VS Code 插件通过 `mio lsp` 接入 MioCore。语言服务可以提供诊断、悬停信息、定义跳转、引用查询、文档符号、补全和函数签名提示。
+
+当 LSP 不可用时，插件可以回退使用 `mio check --format=json` 进行保存后检查，避免同时展示来自两个检查来源的重复错误。
+
+目前 MioCore 不提供重命名、语义标记、自动格式化、代码修复和调试器协议，因此这些功能不能作为该语言服务器已经实现的能力来介绍。
+
+### 从源码构建 VS Code 插件
+
+如果需要自行打包扩展，可以从插件仓库构建：
 
 ```sh
 git clone https://github.com/mio-kobo/mio-vscode.git
@@ -42,141 +108,59 @@ cd mio-vscode
 npm ci
 npm run compile
 npx vsce package
-code --install-extension mio-language-support-0.3.0.vsix
 ```
 
-安装后重新加载 VS Code，打开任意 `.mio` 文件。
+之后使用 VS Code 的“从 VSIX 安装”功能安装生成的文件。
 
-### 配置 CLI 与 Bunko
+历史文档核对的插件源码清单版本为 `0.3.0`，要求 VS Code `^1.85.0`；具体市场发布版本应以插件项目当前发布信息为准，不应将其直接当作 Mio 语言版本。
 
-插件优先使用 `mio.executablePath`，为空时在 `PATH` 中查找 `mio` 或 `mio.exe`。它不会扫描工作区寻找同名二进制。
+### JetBrains 插件
 
-```json
-{
-  "mio.executablePath": "/Users/you/.local/share/mio-2.0.0/mio-2.0.0-darwin-arm64/mio",
-  "mio.languageServer.enabled": true,
-  "mio.diagnostics.enabled": true,
-  "mio.outputDirectory": ""
-}
-```
+Mio 也提供 JetBrains IDE 插件，显示名称为 **Mio - Programming Language Tools**，插件 ID 为 `com.exmikupro.mio`。
 
-Bunko 路径没有单独的 `mio.bunkoPath` 设置。插件沿用 CLI 的查找规则：
+可以从 [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/35197-mio-language-support) 获取该插件，或在 IDE 的 **Settings → Plugins** 中搜索 Mio。
 
-1. 启动 VS Code 的环境变量 `MIO_BUNKO`；
-2. 从源文件向上查找最近的 `bunko/` 目录。
-
-如果 Bunko 不在项目内，请在启动 VS Code 的 shell 环境中设置：
-
-```sh
-export MIO_BUNKO="$MIO_HOME/bunko"
-code .
-```
-
-### 设置
-
-| 设置 | 默认值 | 作用 |
-| --- | --- | --- |
-| `mio.executablePath` | 空 | CLI 绝对路径；空表示查找 `PATH`。支持 `~` 展开 |
-| `mio.languageServer.enabled` | `true` | 使用 `mio lsp` 启动语言服务器 |
-| `mio.diagnostics.enabled` | `true` | 诊断总开关 |
-| `mio.diagnostics.onSave` | `true` | LSP 不可用时，保存后运行 `mio check` |
-| `mio.outputDirectory` | 空 | `mio build` 的输出目录；空表示写在源文件旁 |
-
-### 命令
-
-| 命令 ID | 命令面板标题 |
-| --- | --- |
-| `mio.checkCurrentFile` | Mio: Check Current File |
-| `mio.runCurrentFile` | Mio: Run Current File |
-| `mio.buildCurrentFile` | Mio: Build Current File |
-| `mio.showCompilerVersion` | Mio: Show Compiler Version |
-| `mio.openOutput` | Mio: Open Output |
-
-`Run Current File` 与 `Build Current File` 会先保存脏缓冲区。语言服务器运行时，诊断由 `mio lsp` 提供，手动 `Check Current File` 不会再启动一套重复的 CLI 诊断。
-
-### 语言服务
-
-VS Code 客户端通过 `mio lsp` 启动 MioCore LSP，支持：
-
-- 实时诊断（包括未保存缓冲区）；
-- Hover、Definition、References、Document Symbol、Completion、Signature Help；
-- UTF-16 位置转换、增量编辑、版本校验和 `$/cancelRequest`。
-
-语言服务器不可用或崩溃时，插件回退到 `mio check --format=json`，并清空另一套诊断，避免 Problems 面板同时显示两个来源。语法高亮和代码片段不依赖 CLI。
-
-当前 LSP 诊断只发布第一条错误；Rename、Semantic Tokens、Formatting、Code Action、Workspace Symbols 没有实现。Rename 等能力不应写进工作流。
-
-## JetBrains
-
-### 安装
-
-插件 ID 为 `com.exmikupro.mio`，显示名为 **Mio - Programming Language Tools**：
-
-- Marketplace：[JetBrains Marketplace](https://plugins.jetbrains.com/plugin/35197-mio-language-support)
-- 本地 ZIP：执行 `./gradlew buildPlugin` 后，在 **Settings → Plugins → Install Plugin from Disk...** 选择 `build/distributions/mio-language-support-*.zip`，重启 IDE。
-
-源码版本 `0.6.1` 目标 IntelliJ IDEA 2025.3 / GoLand 2025.3（平台分支 253），使用 Java 21、Kotlin 2.2.20、IntelliJ Platform Gradle Plugin 2.19.0。它只依赖通用 IntelliJ Platform 模块，不依赖 GoLand 私有 API 或 Go 插件。
+现有插件源码清单版本为 `0.6.1`，目标平台是 IntelliJ IDEA / GoLand 2025.3 系列（平台分支 253）。具体安装兼容性仍应以所使用的 IDE 和插件版本为准。
 
 ### 配置 Mio SDK
 
-进入 **Settings → Languages & Frameworks → Mio SDK**：
+JetBrains 插件通过自己的 SDK 设置管理 Mio CLI 和 Bunko。
 
-- 查看已安装 SDK；
-- 添加本地 CLI；
-- 从 GitHub Releases 安装（按平台选择资产并验证 SHA-256）；
-- 为 SDK 配置 Bunko 根目录；
-- 为当前项目选择 SDK。
+在 IDE 中打开 **Settings → Languages & Frameworks → Mio SDK**，为当前项目选择 Mio SDK，指定 CLI 可执行文件和对应的 Bunko 根目录。
 
-CLI 解析优先级：
+JetBrains 插件寻找 CLI 时，会优先使用运行配置中明确指定的路径，其次选择当前项目的 Mio SDK，最后尝试其他兼容路径与 `PATH`。
 
-1. Run Configuration 中显式配置的 CLI；
-2. 项目选择的 Mio SDK；
-3. 兼容路径；
-4. `PATH`。
+JetBrains 插件并不是 MioCore LSP 客户端，它使用自身的代码分析与 `mio check --format=json` 集成。
 
-Bunko 路径通过 `MIO_BUNKO` 传给检查和运行，并作为补全与自动导入的索引根。未配置 Bunko 时，SDK 会显示为部分可用。
+插件提供的主要功能包括 `.mio` 文件识别、语法高亮、基础代码补全、定义跳转、查找用法、Quick Documentation、导入辅助以及文件或包目录运行配置。
 
-### 功能与边界
+需要注意，这不等于已经实现完整的重命名重构、调试器或全部表达式的精确类型推断。
 
-JetBrains 插件使用自己的轻量 PSI、解析器和 CLI 集成，**不是 MioCore LSP 客户端**。它提供：
+### 从源码构建 JetBrains 插件
 
-- `.mio` 文件识别、语法高亮、括号匹配和注释；
-- 参数、局部变量、函数、常量、类型、同目录包声明补全；
-- Bunko `koukai` 成员补全、`yobu` 路径补全、自动导入与安全导入；
-- 跳转、Find Usages、Quick Documentation；
-- 后台调用 `mio check --format=json` 的诊断；
-- Mio Run Configuration，可运行单个文件或包目录。
-
-当前不支持持久化 StubIndex、安全重命名、完整表达式类型推断、LSP 和 Debugger。字段跳转依赖显式类型或可直接识别的结构体字面量；解析不唯一时不会猜测。
-
-Run Configuration 保留程序参数字段，但当前 Mio CLI 不接受 `run <target>` 之后的程序参数；插件会在运行前明确报错，而不是静默丢弃。
-
-### 源码构建
-
-在插件仓库执行：
+如果需要从源码构建，可以获取仓库后执行：
 
 ```sh
+git clone https://github.com/mio-kobo/mio-jetbrains.git
+cd mio-jetbrains
 ./gradlew test
 ./gradlew buildPlugin
 ./gradlew verifyPlugin
 ```
 
-首次运行需要联网下载 Gradle、IntelliJ Platform 和测试依赖。ZIP 位于 `build/distributions/`。这些命令是插件仓库的构建入口；本页没有把它们标记为本轮已在所有 IDE 版本上验证。
+生成的插件包通常位于 `build/distributions/`，可以通过 IDE 的 **Install Plugin from Disk** 功能安装。
 
-## 常见问题
+### 编辑器与 CLI 的关系
 
-- **插件找不到 CLI**：设置 `mio.executablePath` 或把安装目录加入启动 IDE 的环境 `PATH`。GUI 启动的 VS Code / JetBrains 可能读不到你终端里的 `PATH`。
-- **诊断提示找不到 `kiso/...`**：设置 `MIO_BUNKO` 指向发行包的 `bunko` 目录，并重启 IDE。
-- **LSP 无法启动**：用 `mio lsp --stdio` 手动测试；确认 CLI 版本为 `2.0.0`，且 stdout 没有被其他程序污染。
-- **运行配置参数被拒绝**：当前 CLI 不支持程序参数，移除参数或等待 CLI 支持。
-- **v2.0.0 CLI 在 Intel Mac 上无法运行**：官方 v2.0.0 只提供 macOS ARM64 构建；插件本身不改变这一平台边界。
+编辑器插件只是开发工具的接入层，不会替代 Mio 的编译器与运行时。
 
-更多安装、Bunko 和原生工具问题见 [故障排查](/docs/v2.0/tooling/troubleshooting)。
+当编辑器显示无法运行、无法补全或找不到标准库时，建议先在终端执行：
 
-## 来源
+```sh
+mio version
+mio check Hello.mio
+```
 
-- VS Code：`package.json`（版本、引擎、设置、命令）、`README.md`、`src/extension.ts`、`src/cli/cliResolver.ts`、`src/lsp/serverOptions.ts`。
-- JetBrains：`build.gradle.kts`、`src/main/resources/META-INF/plugin.xml`、`README.md`、SDK/诊断/运行实现。
-- 核心侧 LSP 能力：`cmd/mio/main.go`、`internal/lsp`。
+如果终端中也无法检查同一个文件，应优先解决 CLI 或 Bunko 配置问题，再检查编辑器插件的设置。
 
-本页只核对源码声明和配置项，没有启动 VS Code Extension Host 或 JetBrains IDE 做 v2.0.0 端到端测试；插件市场的最新发布版本也可能独立于上述源码版本。
+编辑器扩展的源码功能声明不等于所有版本已完成端到端验收；独立发布状态和兼容性请以相应插件仓库为准。

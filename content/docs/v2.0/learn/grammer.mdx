@@ -1,0 +1,31 @@
+---
+title: 基本语法
+description: Mio V2.0 基本语法
+---
+
+## 语法示例
+Mio的基本语法十分简洁而具有特色，下面通过一个简单的示例来进行讲解。
+
+```mio title="HelloWorld.mio"
+waza echo(message: string) -> int64 {
+    chant(message);
+    kaesu 0;
+}
+
+echo("Hello, 世界🌍！");
+
+```
+在上述示例中，我们使用 `waza` 关键字声明了一个名为 `echo` 的函数。
+
+函数定义中的 `message: string` 表示该函数接收一个名为 `message`、类型为 `string`（字符串）的参数；`-> int64` 则指定函数的返回值类型为 `int64`（64 位整数）。
+
+在函数体中：
+
+- `chant(message);` 调用 Mio 内置的 `chant` 函数，将 `message` 的内容输出到控制台，并自动换行。
+- `kaesu 0;` 使用 `kaesu` 关键字返回整数 `0`，与函数声明的 `int64` 返回类型保持一致。
+
+最后，我们通过 `echo("Hello, 世界🌍！");` 调用这个函数，并将字符串 `"Hello, 世界🌍！"` 作为参数传入。程序最终将在控制台输出：
+
+`Hello, 世界🌍！`
+
+通过这个简单的示例，我们可以初步了解 Mio 的**函数声明、参数类型标注、返回值定义以及控制台输出**等基本语法。

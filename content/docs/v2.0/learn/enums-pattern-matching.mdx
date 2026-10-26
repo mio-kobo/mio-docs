@@ -1,0 +1,248 @@
+---
+title: 枚举与模式匹配
+description: Mio V2.0 枚举变体、关联数据与 awase 模式匹配
+---
+
+## 枚举与模式匹配
+
+枚举（Enum）用于描述一个值可能具有的多种状态。在 Mio 中，枚举使用 `sentaku` 关键字声明，每一种可能的状态称为一个变体（Variant）。
+
+模式匹配（Pattern Matching）则用于根据枚举值所属的变体执行对应的代码。Mio 使用 `awase` 和 `baai` 关键字完成枚举匹配。
+
+例如：
+
+```mio title="Enum.mio"
+sentaku Status {
+    Ready;
+    Failed(string);
+}
+
+kaku status: Status = Status.Ready();
+
+awase (status) {
+    baai Ready {
+        chant("准备完成");
+    }
+    baai Failed(message) {
+        chant(message);
+    }
+}
+```
+
+在上述示例中，`Status` 有 `Ready` 和 `Failed` 两个变体。程序通过 `awase` 判断实际的变体，并执行对应的 `baai` 分支。
+
+### 声明枚举
+
+枚举的基本声明格式如下：
+
+```text
+sentaku 类型名 {
+    变体名;
+    变体名(关联数据类型);
+}
+```
+
+例如：
+
+```mio title="Enum.mio"
+sentaku TaskStatus {
+    Pending;
+    Running;
+    Completed;
+    Failed(string);
+}
+```
+
+`Pending`、`Running` 和 `Completed` 不包含关联数据，`Failed` 则包含一个 `string` 类型的关联值。
+
+Mio V2.0 要求用户定义的枚举类型名称以 ASCII 大写字母开头。枚举至少需要包含一个变体，同一个枚举中不能重复声明相同名称的变体。
+
+### 创建枚举值
+
+创建枚举值时，可以通过 `枚举名.变体名(...)` 指定对应的变体。
+
+例如：
+
+```mio title="Enum.mio"
+sentaku TaskStatus {
+    Pending;
+    Completed;
+    Failed(string);
+}
+
+kaku pending: TaskStatus = TaskStatus.Pending();
+kaku completed: TaskStatus = TaskStatus.Completed();
+kaku failed: TaskStatus = TaskStatus.Failed("任务执行失败");
+```
+
+不包含关联数据的变体可以使用空参数列表 `()`，带有关联数据的变体则需要提供相应数量和类型的参数。
+
+### 使用 awase 匹配枚举
+
+Mio 使用 `awase` 对枚举值进行匹配，并通过 `baai` 为不同的变体编写处理逻辑。
+
+基本形式如下：
+
+```text
+awase (枚举表达式) {
+    baai 变体名 {
+        // 对应变体的处理代码
+    }
+    baai 其他变体名 {
+        // 其他处理代码
+    }
+}
+```
+
+例如：
+
+```mio title="Enum.mio"
+sentaku TaskStatus {
+    Pending;
+    Completed;
+}
+
+kaku status: TaskStatus = TaskStatus.Completed();
+
+awase (status) {
+    baai Pending {
+        chant("等待执行");
+    }
+    baai Completed {
+        chant("执行完成");
+    }
+}
+```
+
+在上述示例中，`awase` 根据 `status` 当前所属的变体，选择相应的 `baai` 代码块执行。
+
+### 获取变体的关联数据
+
+枚举变体可以携带关联数据，匹配时可以为这些数据声明局部绑定。
+
+例如：
+
+```mio title="Enum.mio"
+sentaku Message {
+    Text(string);
+    Number(int64);
+}
+
+kaku message: Message = Message.Text("Hello, Mio!");
+
+awase (message) {
+    baai Text(value) {
+        chant(value);
+    }
+    baai Number(value) {
+        chant(value);
+    }
+}
+```
+
+在上述示例中，`Text` 携带字符串，而 `Number` 携带整数。
+
+`baai Text(value)` 中的 `value` 用于接收 `Text` 变体保存的关联数据，并且只能在对应分支的作用域内访问。
+
+一个变体也可以声明多个关联数据类型：
+
+```mio title="Enum.mio"
+sentaku Event {
+    Move(int64, int64);
+    Stop;
+}
+
+kaku event: Event = Event.Move(10, 20);
+
+awase (event) {
+    baai Move(x, y) {
+        chant(x + y);
+    }
+    baai Stop {
+        chant("已停止");
+    }
+}
+```
+
+匹配分支中绑定的变量数量必须与对应变体的关联数据数量一致。
+
+### 完整匹配
+
+Mio V2.0 要求 `awase` 完整覆盖枚举中的所有变体，这称为穷尽匹配（Exhaustive Matching）。
+
+例如，下面的枚举包含两个变体：
+
+```mio title="Enum.mio"
+sentaku State {
+    Ready;
+    Failed(string);
+}
+```
+
+因此，匹配时必须分别处理 `Ready` 和 `Failed`。如果只编写一个 `baai Ready` 分支，编译器会报告缺少其他变体的错误。
+
+此外，同一个 `awase` 中不能重复匹配相同变体，也不能使用枚举中不存在的变体名称。
+
+需要注意，Mio 当前的 `awase` 是针对枚举的匹配语句，不是可以直接返回普通值的表达式，也不提供通用的 `default` 或通配符分支。需要得到计算结果时，可以在分支中修改事先声明的变量，或在函数中使用 `kaesu`。
+
+### 在函数中使用枚举
+
+枚举适合表示函数可能返回的不同结果，例如成功得到数据，或者得到错误信息。
+
+Mio 可以通过泛型枚举表达这样的数据：
+
+```mio title="Enum.mio"
+sentaku Result<T, E> {
+    Ok(T);
+    Err(E);
+}
+
+waza get_value(result: Result<int64, string>) -> int64 {
+    awase (result) {
+        baai Ok(value) {
+            kaesu value;
+        }
+        baai Err(message) {
+            chant(message);
+            kaesu 0;
+        }
+    }
+}
+
+kaku result: Result<int64, string> = Result.Ok(42);
+chant(get_value(result));
+```
+
+这里的 `Result<T, E>` 是用户自定义的泛型枚举，而不是 Mio 内置的错误处理类型。
+
+`Ok` 与 `Err` 可以分别保存不同类型的数据。函数通过完整的 `awase` 分支处理两种情况。
+
+示例中在错误分支返回 `0` 只是这个函数自行采用的处理方式，并不是语言规定的统一错误值。
+
+### 可空枚举与匹配
+
+如果变量的类型为 `State?`，它还可能保存 `mu`。`awase` 要求匹配的是非空枚举值，因此需要先判断它是否为空。
+
+```mio title="Enum.mio"
+sentaku State {
+    Ready;
+    Failed;
+}
+
+kaku current: State? = State.Ready();
+
+moshi (current != mu) {
+    awase (current) {
+        baai Ready {
+            chant("就绪");
+        }
+        baai Failed {
+            chant("失败");
+        }
+    }
+}
+```
+
+这里先通过 `current != mu` 进行非空判断，再在条件分支中对枚举值执行完整匹配。
+
+Mio V2.0 不支持将 `awase` 当作任意整数、字符串或结构体的通用模式匹配机制。

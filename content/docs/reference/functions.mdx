@@ -17,14 +17,6 @@ value = value + 1;
 chant(value);
 ```
 
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-20
-10
-11
-```
-
 ## 具名函数
 
 函数声明只能位于文件顶层。每个参数必须注明类型，返回类型使用 `-> T`。支持先调用后声明、递归和相互递归。非 `unit` 函数必须在所有静态可见路径返回正确类型；`unit` 可写 `kaesu;`，到达函数末尾也会返回。
@@ -36,12 +28,6 @@ waza factorial(n: int64) -> int64 {
 }
 waza show(value: int64) -> unit { chant(value); kaesu; }
 show(factorial(5));
-```
-
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-120
 ```
 
 函数可读取和修改可见全局变量。因此调用之后全局 Nullable 的已有收窄可能失效；不要把“函数不会修改它”作为类型检查器会接受的假设。
@@ -58,13 +44,6 @@ waza counter() -> () -> int64 {
 kaku next = counter();
 chant(next());
 chant(next());
-```
-
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-1
-2
 ```
 
 ## VM 资源边界

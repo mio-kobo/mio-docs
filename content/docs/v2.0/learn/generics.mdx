@@ -1,64 +1,212 @@
 ---
-title: 泛型与数值约束
-description: 在保留静态类型的同时复用同一算法。
+title: 泛型
+description: Mio V2.0 泛型函数、泛型结构体和泛型枚举
 ---
 
-## 学习目标与前置
+## 泛型
 
-在保留静态类型的同时复用同一算法。 前置：[上课：函数值与闭包](/docs/v2.0/learn/closures)。本章使用固定版本的 Go 引导 CLI / Mochi VM。
+泛型（Generics）允许我们在定义函数或自定义类型时使用类型参数，从而让同一份代码适用于多种数据类型。
 
-## 为什么需要
+在 Mio 中，泛型可以用于函数、结构体和枚举。编译器会在使用这些声明时确定具体类型，并进行静态类型检查。
 
-取数组第一个元素的算法与元素究竟是整数还是字符串无关。泛型把这种不变的结构写一次，同时让调用点得到具体类型，而非丢失类型信息。
+例如：
 
-## 保存与运行
+```mio title="Generic.mio"
+waza identity<T>(value: T) -> T {
+    kaesu value;
+}
 
-在安装页的 `mio-tutorial` 目录保存为 `generics.mio`，使用该版本构建的 CLI 和同一份 `bunko/`：
-
-```sh
-./mio check generics.mio
-./mio run generics.mio
+chant(identity(42));
+chant(identity("Mio"));
 ```
 
-`check` 成功报告 `check passed`。下面是完整程序与 `run` 的标准输出，末尾包含换行。
+在上述示例中，`T` 是一个类型参数。`identity` 可以接收并返回同一种类型的值，而不需要为整数和字符串分别编写函数。
 
-```mio title="generics.mio"
+### 声明泛型函数
+
+Mio 使用 `<T>` 在函数名称之后声明类型参数。
+
+基本形式如下：
+
+```text
+waza 函数名<T>(参数名: T) -> T {
+    // 函数体
+}
+```
+
+例如：
+
+```mio title="Generic.mio"
 waza first<T>(values: []T) -> T? {
-    moshi (len(values) == 0) { kaesu mu; }
+    moshi (len(values) == 0) {
+        kaesu mu;
+    }
+
     kaesu values[0];
 }
-waza plus<T: Number>(left: T, right: T) -> T { kaesu left + right; }
+
+kaku number = first([10, 20, 30]);
+
+moshi (number != mu) {
+    chant(number);
+}
+```
+
+这里的 `first` 可以接收不同元素类型的数组。由于数组可能为空，返回类型使用 `T?`，表示结果也可能是 `mu`。
+
+需要注意，类型参数本身并不允许任意操作。对于没有数值约束的 `T`，不能直接假定其支持加法、乘法等算术运算。
+
+### 类型参数推断
+
+调用泛型函数时，如果编译器能从参数推断出类型，就不需要显式写出类型参数。
+
+例如：
+
+```mio title="Generic.mio"
+waza echo<T>(value: T) -> T {
+    kaesu value;
+}
+
+kaku number = echo(100);
+kaku message = echo("Hello");
+
+chant(number);
+chant(message);
+```
+
+在上述示例中，`echo(100)` 的 `T` 被推断为 `int64`，而 `echo("Hello")` 的 `T` 被推断为 `string`。
+
+如果类型无法从实参或目标上下文确定，就需要显式指定类型参数。
+
+### 显式指定类型参数
+
+Mio 的泛型函数声明使用尖括号 `<T>`，调用时显式指定类型参数则使用方括号 `[T]`。
+
+例如：
+
+```mio title="Generic.mio"
+waza first<T>(values: []T) -> T? {
+    moshi (len(values) == 0) {
+        kaesu mu;
+    }
+    kaesu values[0];
+}
+
 kaku item = first[int64]([7, 8]);
-moshi (item != mu) { chant(item); }
-chant(plus[float32](1.5, 2.5));
+kaku empty = first[int64]([]);
+
+moshi (item != mu) {
+    chant(item);
+}
+
+chant(empty == mu);
 ```
 
-```text title="output"
-7
-4
+在上述示例中，`first[int64]` 表示本次调用使用 `int64` 作为类型参数。
+
+对于空数组 `[]`，显式指定类型参数尤其有用，因为编译器无法直接从空数组内容推断元素类型。
+
+### 多个类型参数
+
+Mio 的泛型函数可以同时声明多个类型参数，使用逗号分隔。
+
+例如：
+
+```mio title="Generic.mio"
+waza apply<T, U>(value: T, transform: (T) -> U) -> U {
+    kaesu transform(value);
+}
+
+kaku result = apply(21, waza (value: int64) -> int64 {
+    kaesu value * 2;
+});
+
+chant(result);
 ```
 
-## 逐段理解
+这里的 `T` 表示输入类型，`U` 表示返回类型。
 
-`first<T>` 接收 `[]T`，返回 `T?`。空数组没有第一个元素，返回 `mu`；非空时返回索引 0。调用 `first[int64]` 明确选择元素类型，读取结果仍须检查非空。这把数组边界与可空类型合在一个可复用函数里。
+通过多个类型参数，泛型函数可以在保留静态类型检查的同时连接不同类型的数据。
 
-`plus<T: Number>` 则需要加法能力，因此声明数值约束。`plus[float32](1.5, 2.5)` 在 `float32` 上下文检查字面量，返回同类型的 4。不写约束的任意 T 不能直接拿来作数值运算。
+### 泛型结构体
 
-声明用尖括号 `<T>`，显式调用用方括号 `[T]`，类型标注如 `Pair<int64>` 又使用尖括号。`Number`、`Integer`、`Signed`、`Float` 是实现中的数值约束，不代表可以声明任意 trait。不同数值类型变量不会因为都满足 Number 就自动混合。
+Mio 允许在结构体声明中使用类型参数。
 
-## 练习
+```mio title="Generic.mio"
+kata Box<T> {
+    value: T;
+}
 
-把 `[7, 8]` 改为 `[9, 10]`。 先预测再执行 `check` 与 `run`，预期逐行输出：
+kaku number = Box[int64] { value: 42 };
+kaku message = Box[string] { value: "Mio" };
 
-```text title="exercise-output"
-9
-4
+chant(number.value);
+chant(message.value);
 ```
 
-## 常见陷阱与核对
+其中，`Box<T>` 是一个泛型结构体定义。
 
-`first<T>` 是声明，`first[int64]` 是显式调用，两种括号不可互换。数组为空时会返回 `mu`，要在非空分支使用结果。不同数值类型都满足 Number，并不使它们可以直接相加。
+构造时可以通过 `Box[int64]` 或 `Box[string]` 显式指定字段的具体类型。在具有明确上下文时，编译器也能从初始化字段推断类型参数。
 
-## 延伸阅读与下一章
+需要注意，类型标注使用尖括号，例如 `Box<int64>`；构造表达式显式使用类型参数时，则使用方括号，例如 `Box[int64] { ... }`。
 
-完整规则见 [Reference](/docs/v2.0/reference)，相关库的签名、错误约定和验证范围见 [Kiso](/docs/v2.0/kiso)。上一课：[函数值与闭包](/docs/v2.0/learn/closures)；下一课：[继续学习](/docs/v2.0/learn/modules)。
+### 泛型枚举
+
+枚举也可以通过类型参数让不同的变体保存不同类型的数据。
+
+```mio title="Generic.mio"
+sentaku Result<T, E> {
+    Ok(T);
+    Err(E);
+}
+
+kaku result: Result<int64, string> = Result.Ok(42);
+
+awase (result) {
+    baai Ok(value) {
+        chant(value);
+    }
+    baai Err(message) {
+        chant(message);
+    }
+}
+```
+
+这里的 `T` 表示成功时保存的值类型，`E` 表示失败时保存的数据类型。
+
+通过泛型枚举，可以在不同调用场景中复用相同的结果结构。
+
+### 泛型与数组
+
+数组类型 `[]T` 可以直接包含泛型类型参数，因此常用于编写可复用的数组处理函数。
+
+```mio title="Generic.mio"
+waza count<T>(values: []T) -> int64 {
+    kaesu len(values);
+}
+
+chant(count([1, 2, 3]));
+chant(count(["A", "B"]));
+```
+
+`count` 不需要知道元素的具体类型，只需要数组支持 `len()` 操作。
+
+对于依赖算术运算的泛型函数，则需要使用 Mio 已支持的泛型约束，例如 `T: Number`。泛型约束的具体规则可以在「泛型约束」章节中进一步了解。
+
+### 泛型的类型限制
+
+泛型不会绕过 Mio 的静态类型系统。同一个类型参数在一次调用中必须保持一致，参数和返回值需要符合函数声明的类型关系。
+
+例如，下面的函数要求两个参数具有相同类型：
+
+```mio title="Generic.mio"
+waza choose<T>(first: T, second: T) -> T {
+    kaesu first;
+}
+
+chant(choose(10, 20));
+```
+
+如果将已经确定为不同类型的变量同时传入，不会自动因为它们都属于数值类型而执行隐式类型转换。
+
+Mio V2.0 目前没有用户自定义 Trait 约束、高阶类型（Higher-Kinded Types）或型变（Variance）语法，不应将其他语言的泛型功能直接套用到 Mio 中。

@@ -1,0 +1,389 @@
+---
+title: 循环控制
+description: Mio V2.0 循环控制
+---
+
+## 循环控制
+
+循环控制（Loop Control）用于让程序在满足指定条件时重复执行一段代码。
+
+在 Mio 中，我们可以通过循环减少重复代码，并完成计数、累加、数组遍历等操作。
+
+Mio 使用 `aida` 关键字声明循环，并通过 `nukeru` 和 `tsuzuku` 控制循环的执行流程。
+
+例如：
+
+```mio title="Loop.mio"
+kaku count = 0;
+
+aida (count < 3) {
+    count = count + 1;
+    chant(count);
+}
+```
+
+在上述示例中，`aida` 用于创建一个循环。
+
+程序会在每次执行循环体之前检查 `count < 3` 是否成立。当条件为 `hai` 时，执行大括号中的代码；当条件为 `iie` 时，退出循环。
+
+## 基本循环
+
+Mio 使用 `aida` 实现基于条件的循环，其行为类似于其他编程语言中的 `while` 循环。
+
+基本语法如下：
+
+```text
+aida (条件表达式) {
+    // 需要重复执行的代码
+}
+```
+
+其中，`条件表达式` 必须返回 `bool` 类型。
+
+循环的执行过程如下：
+
+1. 判断循环条件是否成立。
+2. 如果条件为 `hai`，执行循环体中的代码。
+3. 循环体执行结束后，重新判断循环条件。
+4. 如果条件为 `iie`，结束循环并继续执行后面的语句。
+
+例如：
+
+```mio title="Loop.mio"
+kaku number = 1;
+
+aida (number <= 5) {
+    chant(number);
+
+    number = number + 1;
+}
+
+chant("循环结束");
+```
+
+在上述示例中，变量 `number` 的初始值为 `1`。
+
+每次循环都会输出当前的 `number`，然后将它的值增加 `1`。
+
+当 `number` 增加到 `6` 时，条件 `number <= 5` 不再成立，循环便会结束。
+
+需要注意，Mio 的 `aida` 是先判断条件、再执行循环体的结构。
+
+如果循环条件一开始就是 `iie`，循环体将不会执行。
+
+```mio title="Loop.mio"
+aida (iie) {
+    chant("不会执行");
+}
+
+chant("程序结束");
+```
+
+## 循环累加
+
+循环经常用于重复执行相同的计算，例如计算多个整数的总和。
+
+假设我们需要计算从 `1` 到 `5` 的整数之和，可以使用 `aida` 实现：
+
+```mio title="Loop.mio"
+kaku number = 1;
+kaku total = 0;
+
+aida (number <= 5) {
+    total = total + number;
+
+    number = number + 1;
+}
+
+chant(total);
+```
+
+在上述示例中，`number` 用于记录当前参与计算的整数，而 `total` 用于保存累加的结果。
+
+每次循环都会执行 `total = total + number;`，将当前整数加到 `total` 中。
+
+随后通过 `number = number + 1;` 更新计数变量，直到循环条件不再成立。
+
+需要注意，如果需要在循环结束后继续使用计算结果，应当将保存结果的变量声明在循环外部。
+
+## 退出循环
+
+在某些情况下，我们可能希望在循环条件仍然成立时提前结束循环。
+
+Mio 使用 `nukeru` 关键字实现这一功能。
+
+当程序执行到 `nukeru;` 时，会立即退出当前循环，并继续执行循环之后的代码。
+
+例如：
+
+```mio title="Loop.mio"
+kaku number = 0;
+
+aida (number < 10) {
+    number = number + 1;
+
+    moshi (number == 4) {
+        nukeru;
+    }
+
+    chant(number);
+}
+
+chant("循环结束");
+```
+
+在上述示例中，循环原本会在 `number < 10` 成立时继续执行。
+
+但是，当 `number` 增加到 `4` 时，条件 `number == 4` 成立，程序执行 `nukeru;`，立即结束循环。
+
+因此，数值 `4` 不会被输出，程序直接执行循环之后的 `chant("循环结束");`。
+
+`nukeru` 通常用于提前终止查找、满足某个条件后停止计算等场景。
+
+## 跳过当前循环
+
+除了提前退出循环，Mio 还提供 `tsuzuku` 关键字，用于跳过当前循环中尚未执行的语句。
+
+当程序执行到 `tsuzuku;` 时，会结束当前这一轮循环，并重新判断循环条件。
+
+例如：
+
+```mio title="Loop.mio"
+kaku number = 0;
+
+aida (number < 5) {
+    number = number + 1;
+
+    moshi (number == 3) {
+        tsuzuku;
+    }
+
+    chant(number);
+}
+```
+
+在上述示例中，当 `number` 等于 `3` 时，程序会执行 `tsuzuku;`。
+
+此时，当前循环中剩余的 `chant(number);` 不会执行，程序直接进入下一次循环条件判断。
+
+因此，输出结果中不会出现 `3`。
+
+需要注意，`tsuzuku` 不会自动修改循环变量。
+
+如果在更新计数变量之前执行 `tsuzuku`，可能导致循环条件始终成立，从而产生无法正常结束的循环。
+
+## nukeru 与 tsuzuku 的区别
+
+虽然 `nukeru` 和 `tsuzuku` 都可以改变循环的执行流程，但二者的作用并不相同。
+
+| 关键字 | 作用 | 执行结果 |
+| --- | --- | --- |
+| `nukeru` | 退出循环 | 直接结束当前循环 |
+| `tsuzuku` | 继续下一轮 | 跳过当前循环剩余语句，重新判断循环条件 |
+
+简单来说，`nukeru` 用于结束整个循环，而 `tsuzuku` 用于跳过当前这一轮循环。
+
+二者都只能在循环内部使用，不能直接写在循环外部。
+
+## 嵌套循环
+
+Mio 允许在一个循环内部继续创建其他循环，这种结构称为嵌套循环（Nested Loop）。
+
+例如：
+
+```mio title="Loop.mio"
+kaku outer = 0;
+
+aida (outer < 2) {
+    kaku inner = 1;
+
+    aida (inner <= 2) {
+        chant(outer * 10 + inner);
+
+        inner = inner + 1;
+    }
+
+    outer = outer + 1;
+}
+```
+
+在上述示例中，外层循环由 `outer` 控制，内层循环由 `inner` 控制。
+
+每次外层循环执行时，都会重新创建并执行一次内层循环。
+
+当 `outer` 为 `0` 时，内层循环输出 `1` 和 `2`；当 `outer` 增加到 `1` 时，内层循环输出 `11` 和 `12`。
+
+需要注意，在嵌套循环中，`nukeru` 和 `tsuzuku` 只作用于它们所在的最内层循环。
+
+例如：
+
+```mio title="Loop.mio"
+kaku outer = 0;
+
+aida (outer < 3) {
+    kaku inner = 0;
+
+    aida (inner < 3) {
+        inner = inner + 1;
+
+        moshi (inner == 2) {
+            nukeru;
+        }
+
+        chant(outer * 10 + inner);
+    }
+
+    outer = outer + 1;
+}
+```
+
+这里的 `nukeru` 只会结束内层循环，而不会直接结束外层循环。
+
+## 遍历数组
+
+Mio 可以通过 `aida` 循环与数组索引访问数组中的元素。
+
+数组的索引从 `0` 开始，我们可以通过内置函数 `len()` 获取数组的元素数量。
+
+例如：
+
+```mio title="Loop.mio"
+kaku numbers = [10, 20, 30, 40];
+
+kaku index = 0;
+
+aida (index < len(numbers)) {
+    chant(numbers[index]);
+
+    index = index + 1;
+}
+```
+
+在上述示例中，`index` 用于表示当前访问的数组索引。
+
+`len(numbers)` 返回数组的元素数量，因此循环条件 `index < len(numbers)` 能够使程序依次访问数组中的所有元素。
+
+每次循环结束前，程序都会将 `index` 增加 `1`，直到所有元素都被访问。
+
+通过这种方式，我们可以使用循环完成数组遍历、元素查找以及数值统计等操作。
+
+目前 Mio V2.0 没有独立的 `for` 或 `for...in` 循环语法，因此可以使用 `aida` 和索引来实现上述遍历过程。
+
+## 循环变量的作用域
+
+在 Mio 中，循环体中的大括号 `{}` 会创建独立的词法作用域。
+
+在循环体内部声明的局部变量不能直接从循环外部访问。
+
+例如：
+
+```mio title="Loop.mio"
+kaku value = 100;
+kaku count = 0;
+
+aida (count < 2) {
+    kaku value = count;
+
+    chant(value);
+
+    count = count + 1;
+}
+
+chant(value);
+```
+
+在上述示例中，循环体内部声明了一个与外部变量同名的 `value`。
+
+内部变量会遮蔽外部变量，但不会修改外部变量保存的值。
+
+因此，当循环结束后，外部的 `value` 仍然为 `100`。
+
+如果希望修改循环外部的变量，应直接使用赋值语句，而不是在循环体内部重新声明同名变量。
+
+## 循环条件的类型
+
+Mio 是静态强类型语言，因此 `aida` 的条件表达式必须返回 `bool` 类型。
+
+例如：
+
+```mio title="Loop.mio"
+kaku count = 0;
+
+aida (count < 3) {
+    chant(count);
+
+    count = count + 1;
+}
+```
+
+这是合法的，因为 `count < 3` 是一个比较表达式，结果为 `bool` 类型。
+
+但是，下面的写法无法通过类型检查：
+
+```text
+kaku count = 3;
+
+aida (count) {
+    count = count - 1;
+}
+```
+
+因为 `count` 是 `int64` 类型，而不是 `bool` 类型。
+
+与某些编程语言不同，Mio 不会自动将非零整数转换为 `hai`，也不会将零转换为 `iie`。
+
+如果需要判断一个整数是否不为零，应使用明确的比较表达式：
+
+```mio title="Loop.mio"
+kaku count = 3;
+
+aida (count != 0) {
+    chant(count);
+
+    count = count - 1;
+}
+```
+
+## 无限循环
+
+当循环条件始终为 `hai` 时，程序会不断重复执行循环体。
+
+例如：
+
+```mio title="Loop.mio"
+kaku count = 0;
+
+aida (hai) {
+    count = count + 1;
+
+    moshi (count == 3) {
+        nukeru;
+    }
+
+    chant(count);
+}
+```
+
+在上述示例中，`aida (hai)` 表示循环条件始终为真。
+
+程序通过 `nukeru;` 在 `count` 等于 `3` 时主动退出循环。
+
+如果没有任何能够使循环结束的条件，程序就可能持续执行循环。
+
+Mio 的 Mochi VM 具有执行指令数量限制，可以在超过预算时停止程序并报告运行时错误，但不应依赖这一机制代替正常的循环终止条件。
+
+## 循环控制的注意事项
+
+在 Mio V2.0 中，使用循环时需要注意以下规则：
+
+- `aida` 后必须使用括号 `()` 包围循环条件。
+- 循环条件必须返回 `bool` 类型。
+- 循环体使用大括号 `{}` 包围。
+- `aida` 会先检查条件，再决定是否执行循环体。
+- `nukeru;` 用于退出当前循环。
+- `tsuzuku;` 用于跳过当前循环剩余语句，开始下一轮条件判断。
+- `nukeru` 和 `tsuzuku` 只能在循环内部使用。
+- 循环体拥有独立的词法作用域。
+- 循环代码块结束后不需要额外添加分号。
+
+此外，在使用计数变量控制循环时，应当确保变量能够按照预期更新，避免因条件始终成立而导致程序无法正常结束。

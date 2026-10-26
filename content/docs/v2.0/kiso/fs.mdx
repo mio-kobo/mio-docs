@@ -1,222 +1,125 @@
 ---
-title: kiso/fs
-description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+title: 文件系统
+description: Mio V2.0 文件系统标准库 kiso/fs
 ---
 
-**版本范围：Mio v2.0.0 正式版**，源码提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`；Go 引导 CLI / Mochi VM。
+## 文件系统
 
-完整索引见 [Bunko API 参考](/docs/v2.0/kiso/api)；本页保留逐函数签名、参数、返回值、错误与示例。
+文件系统标准库（File System）提供同步文件打开、读写、关闭、目录创建、文件状态与目录列表等操作。
 
-同步宿主文件系统 API。CLI 默认注册 NativeFS，权限与进程相同。File 使用受信任 resource；错误通过结果字段返回，不使用异常。流偏移单位均为字节。
+它借助宿主提供的文件系统能力执行操作。`File` 内部包含受信任的 `resource` 句柄，不是可以由 Mio 普通代码随意构造的操作系统指针。
 
-支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v2.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v2.0/internals/native-aot) 单独评估。
+本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
 
-## 公开类型与常量
+### 导入包
 
-以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
 
-```text
-koukai sentaku FsError {
-    NotFound(string);
-    PermissionDenied(string);
-    Closed(string);
-    InvalidArgument(string);
-    NoSpace(string);
-    InvalidPath(string);
-    IOFailure(string);
-}
+通过 `yobu "kiso/fs";` 导入本包，随后使用 `fs.函数名(...)` 调用。
 
-koukai kata File { handle: resource; }
-
-koukai kata FileResult { file: File?; error: FsError?; }
-
-koukai kata ReadAllResult { data: []uint8; error: FsError?; }
-
-koukai kata UnitResult { error: FsError?; }
-
-koukai kata StatResult { exists: bool; is_file: bool; is_dir: bool; error: FsError?; }
-
-koukai kata DirEntry { name: string; is_file: bool; is_dir: bool; }
-
-koukai kata DirResult { entries: []DirEntry; error: FsError?; }
-```
-
-## 函数索引
-
-[open_read](#open_read) · [open_write](#open_write) · [open_append](#open_append) · [read](#read) · [write](#write) · [close](#close) · [reader](#reader) · [writer](#writer) · [read_all](#read_all) · [write_all](#write_all) · [stat](#stat) · [exists](#exists) · [is_file](#is_file) · [is_dir](#is_dir) · [create_dir](#create_dir) · [read_dir](#read_dir)
-
-## 函数
-
-签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
-
-### open_read
-
-```text
-koukai waza open_read(path: string) -> FileResult
-```
-
-参数：`path`：宿主文件系统路径字符串。
-
-按 path 只读打开，返回 FileResult；失败 file=mu。
-
-### open_write
-
-```text
-koukai waza open_write(path: string) -> FileResult
-```
-
-参数：`path`：宿主文件系统路径字符串。
-
-按 path 创建或截断写入，返回 FileResult。
-
-### open_append
-
-```text
-koukai waza open_append(path: string) -> FileResult
-```
-
-参数：`path`：宿主文件系统路径字符串。
-
-按 path 创建或追加写入，返回 FileResult。
-
-### read
-
-```text
-koukai waza read(file: File, destination: []uint8, offset: int64, length: int64) -> io.ReadResult
-```
-
-参数：`file`：由本包成功打开且仍有效的 File 句柄；`destination`：接收写入的现有目标数组；`offset`：从起点计数的字节偏移，起点为 0；`length`：本次读写的字节数量。
-
-读取到 destination 的 offset/length 区间，返回 io.ReadResult；非法区间返回 InvalidArgument，关闭句柄返回 Closed，其他宿主错误映射为 Other(message)。
-
-### write
-
-```text
-koukai waza write(file: File, source: []uint8, offset: int64, length: int64) -> io.WriteResult
-```
-
-参数：`file`：由本包成功打开且仍有效的 File 句柄；`source`：读取或追加的来源数组；`offset`：从起点计数的字节偏移，起点为 0；`length`：本次读写的字节数量。
-
-将 source 的 offset/length 区间写入 file，返回 io.WriteResult；允许部分写，错误映射同 read。
-
-### close
-
-```text
-koukai waza close(file: File) -> UnitResult
-```
-
-参数：`file`：由本包成功打开且仍有效的 File 句柄。
-
-关闭 file，返回 UnitResult；复制的 File 共享关闭状态，重复关闭返回 Closed。
-
-### reader
-
-```text
-koukai waza reader(file: File) -> io.Reader
-```
-
-参数：`file`：由本包成功打开且仍有效的 File 句柄。
-
-将 file 适配为 io.Reader，不转移/自动关闭句柄。
-
-### writer
-
-```text
-koukai waza writer(file: File) -> io.Writer
-```
-
-参数：`file`：由本包成功打开且仍有效的 File 句柄。
-
-将 file 适配为 io.Writer，不转移/自动关闭句柄。
-
-### read_all
-
-```text
-koukai waza read_all(path: string) -> ReadAllResult
-```
-
-参数：`path`：宿主文件系统路径字符串。
-
-按 path 打开、32768 字节分块读并关闭，返回 data/error；读取错误可带已读前缀，成功后关闭错误也返回。
-
-### write_all
-
-```text
-koukai waza write_all(path: string, data: []uint8) -> UnitResult
-```
-
-参数：`path`：宿主文件系统路径字符串；`data`：输入字节数组；是否复制见返回语义。
-
-按 path 创建或截断，完整写入 data 并关闭；写入错误优先，否则返回关闭结果。
-
-### stat
-
-```text
-koukai waza stat(path: string) -> StatResult
-```
-
-参数：`path`：宿主文件系统路径字符串。
-
-返回 path 的 exists/is_file/is_dir；NotFound 转为 exists=iie 且 error=mu，其他错误保留。
-
-### exists
-
-```text
-koukai waza exists(path: string) -> bool
-```
-
-参数：`path`：宿主文件系统路径字符串。
-
-返回 stat(path).exists；便捷 bool 会丢弃详细错误，需区分失败时用 stat。
-
-### is_file
-
-```text
-koukai waza is_file(path: string) -> bool
-```
-
-参数：`path`：宿主文件系统路径字符串。
-
-返回 stat(path).is_file；详细错误需用 stat。
-
-### is_dir
-
-```text
-koukai waza is_dir(path: string) -> bool
-```
-
-参数：`path`：宿主文件系统路径字符串。
-
-返回 stat(path).is_dir；详细错误需用 stat。
-
-### create_dir
-
-```text
-koukai waza create_dir(path: string) -> UnitResult
-```
-
-参数：`path`：宿主文件系统路径字符串。
-
-为 path 创建单级目录，返回 UnitResult；不递归创建父目录。
-
-### read_dir
-
-```text
-koukai waza read_dir(path: string) -> DirResult
-```
-
-参数：`path`：宿主文件系统路径字符串。
-
-返回 path 目录项数组与错误，使用资源迭代器并关闭；不要依赖未承诺的排序。
-
-## 完整示例
-
-此程序会创建或截断当前目录的 `sample.txt`。在新的空练习目录保存为 `main.mio`，设置 `MIO_BUNKO` 指向本版标准库，并使用本版 CLI 的绝对路径执行 `check main.mio` 和 `run main.mio`。验证器也在独立临时目录执行，避免与已有文件混用。
-
-
-```mio fixture="fs"
+```mio title="Stdlib.mio"
 yobu "kiso/fs";
 yobu "kiso/string";
+```
+
+### 读取和写入整个文件
+
+`read_all` 和 `write_all` 适合一次性处理一个文件。两者均通过结果类型返回 `error`；其中 `read_all` 返回字节数组，而不是自动解码后的文本。
+
+```mio title="Fs.mio" no-run
+yobu "kiso/fs";
+yobu "kiso/string";
+
+kaku written = fs.write_all("sample.txt", string.to_bytes("Mio"));
+chant(written.error == mu);
+kaku loaded = fs.read_all("sample.txt");
+chant(loaded.error == mu);
+```
+
+### 显式打开与关闭
+
+`open_read`、`open_write`、`open_append` 分别用于只读、创建或截断写入、追加写入。成功打开后可以调用 `read`、`write`；使用完毕应调用 `close`。
+
+```mio title="Fs.mio" no-run
+yobu "kiso/fs";
+yobu "kiso/string";
+
+kaku result = fs.open_read("sample.txt");
+kaku file = result.file;
+moshi (file != mu) {
+    kaku closed = fs.close(file);
+    chant(closed.error == mu);
+}
+```
+
+### 文件和目录状态
+
+`stat` 提供是否存在、是否为文件、是否为目录及错误详情。`exists`、`is_file`、`is_dir` 是便捷布尔函数，但会丢弃详细错误。`read_dir` 返回目录项数组。
+
+```mio title="Fs.mio" no-run
+yobu "kiso/fs";
+yobu "kiso/string";
+
+kaku info = fs.stat("sample.txt");
+moshi (info.error == mu) { chant(info.exists); }
+```
+
+### 连接到 io
+
+`fs.reader`、`fs.writer` 将文件句柄包装为 `kiso/io` 兼容的 Reader 或 Writer。适配器不会接管文件的关闭责任。
+
+```mio title="Fs.mio" no-run
+yobu "kiso/fs";
+yobu "kiso/string";
+
+kaku opened = fs.open_read("sample.txt");
+kaku file = opened.file;
+moshi (file != mu) {
+    kaku reader = fs.reader(file);
+    fs.close(file);
+}
+```
+
+### 公开类型
+
+- `File { handle: resource; }`：受宿主管理的文件句柄。
+- `FileResult { file: File?; error: FsError?; }`：文件打开结果。
+- `ReadAllResult { data: []uint8; error: FsError?; }`：完整读取结果。
+- `UnitResult { error: FsError?; }`：无普通值的操作结果。
+- `StatResult { exists: bool; is_file: bool; is_dir: bool; error: FsError?; }`：路径状态。
+- `DirEntry { name: string; is_file: bool; is_dir: bool; }`：目录项。
+- `DirResult { entries: []DirEntry; error: FsError?; }`：目录列举结果。
+- `FsError`：文件系统操作错误的枚举。
+
+### 公开函数（16 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `open_read` | `open_read(path: string) -> FileResult` | 以只读方式打开文件，失败时 `file = mu`。 |
+| `open_write` | `open_write(path: string) -> FileResult` | 创建或截断文件，以写入方式打开。 |
+| `open_append` | `open_append(path: string) -> FileResult` | 创建或以追加模式打开文件。 |
+| `read` | `read(file: File, destination: []uint8, offset: int64, length: int64) -> io.ReadResult` | 从打开的文件读取字节，支持部分读取。 |
+| `write` | `write(file: File, source: []uint8, offset: int64, length: int64) -> io.WriteResult` | 将字节写入文件，支持部分写入。 |
+| `close` | `close(file: File) -> UnitResult` | 关闭文件句柄，重复关闭会返回错误。 |
+| `reader` | `reader(file: File) -> io.Reader` | 将打开的文件包装为 io.Reader。 |
+| `writer` | `writer(file: File) -> io.Writer` | 将打开的文件包装为 io.Writer。 |
+| `read_all` | `read_all(path: string) -> ReadAllResult` | 打开、分块读取并关闭文件；错误时可能包含已读前缀。 |
+| `write_all` | `write_all(path: string, data: []uint8) -> UnitResult` | 创建或截断文件，完整写入字节并关闭。 |
+| `stat` | `stat(path: string) -> StatResult` | 返回文件是否存在、文件或目录的状态和错误。 |
+| `exists` | `exists(path: string) -> bool` | 判断是否存在；不保留详细错误。 |
+| `is_file` | `is_file(path: string) -> bool` | 判断是否为文件；不保留详细错误。 |
+| `is_dir` | `is_dir(path: string) -> bool` | 判断是否为目录；不保留详细错误。 |
+| `create_dir` | `create_dir(path: string) -> UnitResult` | 创建单级目录；不自动递归创建父目录。 |
+| `read_dir` | `read_dir(path: string) -> DirResult` | 列举目录项并返回错误。 |
+
+### 完整示例
+
+```mio title="Fs.mio" no-run
+yobu "kiso/fs";
+yobu "kiso/string";
+
 kaku written = fs.write_all("sample.txt", string.to_bytes("Mio"));
 chant(written.error == mu);
 kaku loaded = fs.read_all("sample.txt");
@@ -226,31 +129,13 @@ chant(fs.is_file("sample.txt"));
 kaku opened = fs.open_read("sample.txt");
 kaku file = opened.file;
 moshi (file != mu) {
-    kaku active = file;
-    kaku first = fs.close(active);
+    kaku first = fs.close(file);
     chant(first.error == mu);
-    kaku second = fs.close(active);
-    chant(second.error != mu);
 }
 ```
 
-预期 stdout（逐字节匹配，末尾有换行）：
+### 使用限制
 
-```text title="output"
-hai
-hai
-3
-hai
-hai
-hai
-```
+使用 `kiso/fs` 需要当前运行环境提供文件系统宿主接口；浏览器中的 Mio Playground 不等同于具有本机文件访问能力。文件的访问权限、路径解析与实际写入结果由宿主系统决定。复制 `File` 值会共享句柄状态，关闭后其他副本同样不能再用。
 
-文件例子以验证器的独立临时工作目录执行，创建 sample.txt，不会覆盖用户文件。fs 不提供本页未列出的递归建目录、删除、监听或异步 API。
-
-## 源码
-
-- `bunko/kiso/fs/fs.mio`
-
-公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
-
-精确来源：[bunko/kiso/fs/fs.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/fs/fs.mio)。
+源码依据：[Mio v2.0.0 · `bunko/kiso/fs/fs.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/fs/fs.mio)。

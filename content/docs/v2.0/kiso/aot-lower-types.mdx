@@ -1,149 +1,83 @@
 ---
-title: kiso/aot/lower/types
-description: 固定 V2 开发快照的签名、输入单位、结果与错误协议。
+title: AOT 类型分析
+description: Mio V2.0 AOT 类型分析库 kiso/aot/lower/types
 ---
 
-**V2.0 Development**，提交 `8b53a25142b0da1192a6c4868e807385d7bb50f9`。**V1.0 不提供本包**。公开声明不代表稳定 API；本页仅承诺此快照已有声明及明确列出的验证。
+## AOT 类型分析
 
-内部表示分析，不是用户级反射接口。TypeAnalysis 保存分析 arena、槽位及控制流块的表示约束。节点编号必须来自该次分析，查询函数不会为任意编号提供安全包装。
+AOT 类型分析模块读取 Mochi 文件并构造供 Lowering 使用的类型和控制流信息，包括节点表示、可空性、可达函数及其它内部判定结果。
 
-## 导入与检索
+这是编译器内部表示分析接口，**不是**通用对象反射功能。使用者不能把分析节点编号与 Mio 运行时对象地址混为一谈。
 
-导入路径为 `kiso/aot/lower/types`。以下签名不是可执行程序，参数名和类型逐字保留源码；函数行为与错误分开查阅。
+本模块属于 **AOT 编译工具链接口**，其公开声明不等于稳定的应用层 API；以下内容对应 `v2.0.0` 发布标签。
 
-`type_unknown` · `type_integer` · `type_float32` · `type_float64` · `type_bool` · `type_string_id` · `type_array_ref` · `type_struct_ref` · `type_enum_ref` · `type_function_ref` · `type_nil` · `type_float_any` · `TypeArena` · `TypeBlock` · `TypeAnalysis` · [type_kind](#type_kind) · [type_nullable](#type_nullable) · [type_is_heap_reference](#type_is_heap_reference) · [type_instruction_width](#type_instruction_width) · [analyze_types](#analyze_types)
+### 导入包
 
-## 类型与常量
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
 
-```text
-koukai teisu type_unknown = 0;
+通过 `yobu "kiso/aot/lower/types";` 导入本包，随后使用 `types.函数名(...)` 调用。
 
-koukai teisu type_integer = 1;
-
-koukai teisu type_float32 = 2;
-
-koukai teisu type_float64 = 3;
-
-koukai teisu type_bool = 4;
-
-koukai teisu type_string_id = 5;
-
-koukai teisu type_array_ref = 6;
-
-koukai teisu type_struct_ref = 7;
-
-koukai teisu type_enum_ref = 8;
-
-koukai teisu type_function_ref = 9;
-
-koukai teisu type_nil = 10;
-
-koukai teisu type_float_any = 11;
-
-koukai kata TypeArena {
-    parent: []int64;
-    kind: []int64;
-    nullable: []bool;
-    struct_arity: []int64;
-    struct_exact: []bool;
-    fields: [][]int64;
-    array_width: []int64;
-}
-
-koukai kata TypeBlock {
-    data: []uint8;
-    function_id: int64;
-    entry: [][]int64;
-    reachable: []bool;
-}
-
-koukai kata TypeAnalysis {
-    arena: TypeArena;
-    globals: []int64;
-    locals: [][]int64;
-    returns: []int64;
-    blocks: []TypeBlock;
-    error_detail: int64;
-}
-```
-
-类型字段为实际公开布局；复制含数组字段的值仍共享数组。不得把公开字段解释为可安全伪造内部状态的许可。
-
-## 函数
-
-### type_kind
-
-```text
-koukai waza type_kind(analysis: TypeAnalysis, node: int64) -> int64
-```
-
-参数：`analysis`：同一次分析产生的 TypeAnalysis；`node`：该分析内部有效节点索引，不是任意用户编号。
-
-返回节点根的表示类别整数，对照本页 type_* 常量。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
-
-[源码：types.mio:78](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/types/types.mio#L78)。
-
-### type_nullable
-
-```text
-koukai waza type_nullable(analysis: TypeAnalysis, node: int64) -> bool
-```
-
-参数：`analysis`：同一次分析产生的 TypeAnalysis；`node`：该分析内部有效节点索引，不是任意用户编号。
-
-返回节点根是否可空。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
-
-[源码：types.mio:82](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/types/types.mio#L82)。
-
-### type_is_heap_reference
-
-```text
-koukai waza type_is_heap_reference(analysis: TypeAnalysis, node: int64) -> bool
-```
-
-参数：`analysis`：同一次分析产生的 TypeAnalysis；`node`：该分析内部有效节点索引，不是任意用户编号。
-
-按表示类别与可空标记返回是否属于需根追踪的类别；不是动态指针合法性测试。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
-
-[源码：types.mio:86](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/types/types.mio#L86)。
-
-### type_instruction_width
-
-```text
-koukai waza type_instruction_width(opcode: int64) -> int64
-```
-
-参数：`opcode`：Mochi 操作码整数编号。
-
-返回内部分析使用的 opcode 编码宽度；未知 opcode 的处理按源码，不据此绕过 Mochi Validator。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
-
-[源码：types.mio:210](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/types/types.mio#L210)。
-
-### analyze_types
-
-```text
-koukai waza analyze_types(file: mochi.File) -> TypeAnalysis
-```
-
-参数：`file`：经 Mochi 解码验证的 File。
-
-建立并返回 TypeAnalysis；调用方须结合 error_detail 和后续 LowerResult 检查拒绝路径。 节点/数组内部不变式被破坏可能直接触发运行时越界；本包没有通用错误 Result 包装。
-
-[源码：types.mio:353](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/types/types.mio#L353)。
-
-## 最小示例与验证范围
-
-保存为 `main.mio`，使用本版本的 `mio check main.mio` 与 `mio run main.mio`；输出逐字节记录。此例只验证下面使用的接口，不覆盖本包所有编码或 Runtime 分支。
-
-```mio title="main.mio"
+```mio title="Stdlib.mio"
 yobu "kiso/aot/lower/types";
+```
+
+### 表示类别
+
+本包公开 `type_integer`、`type_float32`、`type_array_ref` 等常量表示内部分析结果。`type_kind`、`type_nullable` 和 `type_is_heap_reference` 可查询已建立分析中的节点状态。
+
+```mio title="Types.mio" no-run
+yobu "kiso/aot/lower/types";
+
 chant(types.type_unknown);
 chant(types.type_integer);
 ```
 
-```text title="output"
-0
-1
+### 分析程序
+
+`analyze_types` 返回包含内部 arena、全局值、函数局部值与控制流信息的 `TypeAnalysis`。`analyze_types_traced` 可以开启分析追踪配置。
+
+### 辅助判定
+
+`reachable_functions` 用于函数可达性分析，`enum_read_tag` 辅助枚举标签读取，`type_instruction_width` 提供指令宽度信息。它们应处理已验证的 Mochi 输入。
+
+### 公开类型
+
+- `TypeArena`：保存节点并查集、种类、宽度和引用信息的分析存储。
+- `TypeBlock`：表示控制流基本块的内部结构。
+- `TypeAnalysis`：保存 arena、函数可达与槽位/返回值分析及错误详情。
+
+### 公开常量
+
+`type_unknown`、`type_integer`、`type_float32`、`type_float64`、`type_bool`、`type_string_id`、`type_array_ref`、`type_struct_ref`、`type_enum_ref`、`type_function_ref`、`type_nil`、`type_float_any`，共 12 个公开类型分类常量。
+
+### 公开函数（10 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `type_kind` | `type_kind(analysis: TypeAnalysis, node: int64) -> int64` | 返回分析节点的表示类别编号。 |
+| `type_nullable` | `type_nullable(analysis: TypeAnalysis, node: int64) -> bool` | 查询分析节点是否标记为可空。 |
+| `type_is_heap_reference` | `type_is_heap_reference(analysis: TypeAnalysis, node: int64) -> bool` | 判断节点表示是否需要作为受管理的堆引用追踪。 |
+| `type_instruction_width` | `type_instruction_width(opcode: int64) -> int64` | 返回分析使用的操作码编码宽度。 |
+| `enum_read_tag` | `enum_read_tag(file: mochi.File, data: []uint8, at: int64) -> int64` | 读取分析所需的枚举标签信息。 |
+| `reachable_functions` | `reachable_functions(file: mochi.File) -> []bool` | 返回函数可达性标记数组。 |
+| `array_forward_opcode` | `array_forward_opcode(function: mochi.Function) -> int64` | 查询函数在数组前向分析中的相关操作码信息。 |
+| `is_float_predicate` | `is_float_predicate(function: mochi.Function) -> bool` | 判断函数是否符合内部浮点谓词形态。 |
+| `analyze_types` | `analyze_types(file: mochi.File) -> TypeAnalysis` | 执行类型与控制流信息分析。 |
+| `analyze_types_traced` | `analyze_types_traced(file: mochi.File, trace: bool) -> TypeAnalysis` | 在给定追踪配置下执行类型分析。 |
+
+### 完整示例
+
+```mio title="Types.mio" no-run
+yobu "kiso/aot/lower/types";
+
+chant(types.type_unknown);
+chant(types.type_integer);
 ```
 
-完整输入哈希、命令及输出见仓库 `verification/content-quality/results.json`。声明资料与执行覆盖分别记录；没有在此证明原生代码执行或 Compiler A→B 验收。
+### 使用限制
+
+`node` 必须来自同一次有效的分析结果；使用非法编号或破坏内部数组约束可能触发越界错误。不能仅凭 `type_is_heap_reference` 断言任意运行时指针合法，且分析 API 不承诺用户级动态类型信息。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/aot/lower/types/types.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/aot/lower/types/types.mio)。

@@ -1,58 +1,75 @@
 ---
-title: kiso/testing
-description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+title: 测试
+description: Mio V2.0 测试标准库 kiso/testing
 ---
 
-**版本范围：Mio v2.0.0 正式版**，源码提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`；Go 引导 CLI / Mochi VM。
+## 测试
 
-完整索引见 [Bunko API 参考](/docs/v2.0/kiso/api)；本页保留逐函数签名、参数、返回值、错误与示例。
+测试标准库（Testing）用于在 Mio 测试函数中报告断言失败。它只在 `mio test` 环境提供所需的宿主测试接口，不能将其当作普通 `mio run` 程序中的通用输出或异常处理库。
 
-仅 mio test 注册测试报告 MMA 接口。普通 check/run 的注册表没有该接口，不能将 import 成功当作普通程序支持。测试文件名以 _test.mio 结束，顶层函数名以 test_ 开头，零参数、非泛型、返回 unit。
+测试源码以 `_test.mio` 结尾，测试函数名以 `test_` 开头、不能带参数、不能为泛型，并且返回 `unit`。
 
-支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v2.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v2.0/internals/native-aot) 单独评估。
+本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
 
-## 函数索引
+### 导入包
 
-[expect](#expect) · [fail](#fail)
+> **运行环境：** 测试示例仅供 Mio CLI 的 `mio test` 使用。网页 Playground 不提供测试宿主接口，请将代码保存为 `answer_test.mio` 后执行 `mio test`。
 
-## 函数
+通过 `yobu "kiso/testing";` 导入本包，随后使用 `testing.函数名(...)` 调用。
 
-签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
-
-### expect
-
-```text
-koukai waza expect(condition: bool, message: string) -> unit
-```
-
-参数：`condition`：断言条件；`message`：失败时记录的说明。
-
-condition 为 iie 时记录 message 失败；不会通过异常中断当前函数。
-
-### fail
-
-```text
-koukai waza fail(message: string) -> unit
-```
-
-参数：`message`：失败时记录的说明。
-
-无条件记录 message 失败。
-
-## 完整示例
-
-保存为 `example_test.mio`，在该目录执行 `mio test . --format=json --lang=en-US`。测试发现并通过 `test_answer`。JSON 的 duration 字段随运行变化，报告以结构化 summary.passed=1、failed=0 验证；该代码是测试包，仅由 mio test 执行。
-
-```mio mode="test" title="example_test.mio"
+```mio title="Stdlib.mio"
 yobu "kiso/testing";
-waza test_answer() -> unit { testing.expect(6 * 7 == 42, "answer"); }
 ```
 
+### 编写测试函数
 
-## 源码
+将测试逻辑放在顶层的 `test_` 函数里，再通过 `testing.expect` 检查条件。条件为 `iie` 时记录错误消息，但并不以异常方式立即停止整个函数。
 
-- `bunko/kiso/testing/testing.mio`
+```mio title="answer_test.mio" mode=test no-run
+yobu "kiso/testing";
 
-公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
+waza test_answer() -> unit {
+    testing.expect(6 * 7 == 42, "answer should be 42");
+}
+```
 
-精确来源：[bunko/kiso/testing/testing.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/testing/testing.mio)。
+### 主动标记失败
+
+`testing.fail(message)` 无条件记录一次失败，适合处理测试逻辑中不应该到达的分支。
+
+```mio title="answer_test.mio" mode=test no-run
+yobu "kiso/testing";
+
+waza test_unexpected() -> unit {
+    moshi (iie) { testing.fail("unexpected state"); }
+}
+```
+
+### 运行测试
+
+使用 `mio test` 执行测试，而不是直接调用 `mio run`。测试文件中的普通顶层代码和待测源文件的加载行为应遵守 `mio test` 的测试发现规则。
+
+### 公开函数（2 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `expect` | `expect(condition: bool, message: string) -> unit` | 在条件为 `iie` 时记录失败及消息。 |
+| `fail` | `fail(message: string) -> unit` | 无条件记录一条测试失败。 |
+
+### 完整示例
+
+```mio title="answer_test.mio" mode=test no-run
+yobu "kiso/testing";
+
+waza test_answer() -> unit {
+    testing.expect(6 * 7 == 42, "answer");
+}
+```
+
+### 使用限制
+
+完整示例应保存为 `answer_test.mio`，并在测试模式中执行。不要把 `_test.mio` 文件当作普通运行入口，也不要假设 `expect` 会停止当前函数的后续语句。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/testing/testing.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/testing/testing.mio)。

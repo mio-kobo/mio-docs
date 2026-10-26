@@ -1,0 +1,347 @@
+---
+title: 常量和变量
+description: Mio V2.0 常量和变量
+---
+
+## 常量和变量
+
+在 Mio 中，变量（Variable）和常量（Constant）用于保存程序中需要使用的数据。
+
+变量的值可以在程序运行过程中发生变化，而常量的值在声明后不能被修改。
+
+Mio 使用 `kaku` 关键字声明变量，使用 `teisu` 关键字声明常量。
+
+例如：
+
+```mio title="Variable.mio"
+kaku age = 18;
+teisu pi = 3.14;
+
+chant(age);
+chant(pi);
+```
+
+在上述示例中，`age` 是一个变量，而 `pi` 是一个常量。
+
+Mio 是静态强类型语言，因此每个变量和常量都有确定的数据类型。
+
+### 变量
+
+变量（Variable）是程序中用于保存数据的命名标识符，其保存的值可以在程序运行过程中被修改。
+
+在 Mio 中，我们使用 `kaku` 关键字声明变量。
+
+变量的基本声明格式如下：
+
+```text
+kaku 变量名 = 初始值;
+```
+
+例如：
+
+```mio title="Variable.mio"
+kaku name = "Mio";
+kaku age = 18;
+kaku enabled = hai;
+
+chant(name);
+chant(age);
+chant(enabled);
+```
+
+在上述示例中，我们通过 `kaku` 声明了三个变量，分别用于保存字符串、整数和布尔值。
+
+其中，`name`、`age` 和 `enabled` 是变量的名称，`=` 用于将右侧表达式的值赋给变量。
+
+### 变量的类型声明
+
+Mio 支持在声明变量时明确指定数据类型。
+
+声明格式如下：
+
+```text
+kaku 变量名: 类型 = 初始值;
+```
+
+例如：
+
+```mio title="Variable.mio"
+kaku age: int64 = 18;
+kaku price: float64 = 19.5;
+kaku name: string = "Mio";
+kaku enabled: bool = hai;
+```
+
+在上述示例中，`:` 后面的类型名称用于指定变量的数据类型。
+
+如果没有显式指定类型，Mio 会根据初始化表达式推断变量的类型。
+
+例如：
+
+```mio title="Variable.mio"
+kaku number = 100;
+kaku price = 3.14;
+kaku message = "Hello, Mio!";
+```
+
+其中，`number` 被推断为 `int64`，`price` 被推断为 `float64`，`message` 被推断为 `string`。
+
+需要注意，Mio 的变量声明必须提供初始化表达式。
+
+下面的写法是不合法的：
+
+```text
+kaku number: int64;
+```
+
+因为 Mio 不会自动为未初始化的变量填充默认值。
+
+正确的写法是：
+
+```mio title="Variable.mio"
+kaku number: int64 = 0;
+```
+
+### 修改变量的值
+
+变量声明后，可以通过赋值运算符 `=` 修改其保存的值。
+
+例如：
+
+```mio title="Variable.mio"
+kaku count = 10;
+
+count = 20;
+
+chant(count);
+```
+
+在上述示例中，`count` 最初保存整数 `10`，随后通过 `count = 20;` 将其修改为 `20`。
+
+我们也可以在赋值表达式中使用变量原来的值：
+
+```mio title="Variable.mio"
+kaku count = 0;
+
+count = count + 1;
+count = count + 1;
+
+chant(count);
+```
+
+需要注意，Mio 目前不支持 `++`、`--` 和 `+=` 等自增或复合赋值运算符，因此需要使用普通赋值语句完成这些操作。
+
+### 变量的类型限制
+
+Mio 的变量在声明后，其数据类型便会确定。
+
+虽然变量的值可以修改，但不能随意将其他类型的值赋给该变量。
+
+例如：
+
+```mio title="Variable.mio"
+kaku age: int64 = 18;
+
+age = 20;
+
+chant(age);
+```
+
+这是合法的，因为新旧数值都符合 `int64` 类型。
+
+但是，下面的写法无法通过类型检查：
+
+```text
+kaku age: int64 = 18;
+
+age = "Mio";
+```
+
+因为 `"Mio"` 是字符串，而 `age` 被声明为整数类型。
+
+如果需要在不同数值类型之间转换，应使用 Mio 提供的显式类型转换语法。
+
+### 变量的作用域
+
+作用域（Scope）用于决定一个变量能够在哪些代码区域中被访问。
+
+Mio 使用词法作用域，不同的代码块可以拥有各自的局部变量。
+
+例如：
+
+```mio title="Variable.mio"
+kaku number = 10;
+
+moshi (hai) {
+    kaku number = 20;
+
+    chant(number);
+}
+
+chant(number);
+```
+
+在上述示例中，代码块内部重新声明了一个名为 `number` 的变量。
+
+内部变量会遮蔽外部同名变量，但不会直接修改外部变量保存的值。
+
+当程序离开该代码块后，外部的 `number` 仍然是 `10`。
+
+需要注意，同一个作用域内不能重复声明相同名称的变量。
+
+另外，变量必须先声明后使用，不能直接访问尚未声明的普通变量。
+
+### 常量
+
+常量（Constant）用于表示在程序运行过程中不需要改变的数据。
+
+Mio 使用 `teisu` 关键字声明常量。
+
+与变量不同，Mio 的常量在编译期进行求值，其值在声明后不能被修改。
+
+基本声明格式如下：
+
+```text
+teisu 常量名 = 常量表达式;
+```
+
+例如：
+
+```mio title="Constant.mio"
+teisu max_count = 100;
+teisu pi = 3.14;
+teisu name = "Mio";
+
+chant(max_count);
+chant(pi);
+chant(name);
+```
+
+在上述示例中，`max_count`、`pi` 和 `name` 都是常量。
+
+常量适合用于保存固定的配置值、数学常数以及其他不会变化的数据。
+
+### 常量的类型声明
+
+与变量类似，Mio 也允许在声明常量时显式指定数据类型。
+
+例如：
+
+```mio title="Constant.mio"
+teisu max_count: int64 = 100;
+teisu pi: float64 = 3.14;
+teisu enabled: bool = hai;
+teisu name: string = "Mio";
+```
+
+如果没有显式指定类型，Mio 会根据常量表达式推断类型。
+
+Mio V2.0 的编译期常量主要支持整数、浮点数、布尔值和字符串等基础类型。
+
+需要注意，当前的 `teisu` 不支持直接将数组、Map、结构体或函数值声明为编译期常量。
+
+### 常量表达式
+
+Mio 的常量可以使用编译期能够计算的表达式进行初始化。
+
+例如：
+
+```mio title="Constant.mio"
+teisu width: int64 = 10;
+teisu height: int64 = 20;
+
+teisu area: int64 = width * height;
+
+chant(area);
+```
+
+在上述示例中，`area` 的值由两个已经声明的常量计算得到。
+
+Mio 会在编译阶段计算常量表达式，并将常量引用替换为计算结果，因此不会在程序运行时重复计算这些常量。
+
+常量表达式可以包含数值字面量、其他常量的引用、受支持的运算符以及显式数值转换。
+
+例如：
+
+```mio title="Constant.mio"
+teisu base: int64 = 10;
+teisu result: int64 = base * 2 + 5;
+
+chant(result);
+```
+
+需要注意，常量表达式必须能够在编译期确定其结果。
+
+因此，不能直接使用普通变量或函数调用作为编译期常量的初始化表达式。
+
+Mio 还会检查常量之间的循环依赖，避免出现无法完成求值的情况。
+
+### 常量不能修改
+
+常量声明后，其值不能再次赋值。
+
+例如，下面的写法是不合法的：
+
+```text
+teisu max_count = 100;
+
+max_count = 200;
+```
+
+因为 `max_count` 是使用 `teisu` 声明的常量。
+
+如果需要在程序运行过程中修改数据，应使用 `kaku` 声明变量。
+
+此外，`teisu` 常量应在文件顶层声明，不应将其当作普通代码块中的局部变量声明使用。
+
+### 公开常量
+
+Mio 支持通过 `koukai` 关键字将常量公开给其他包使用。
+
+例如：
+
+```mio title="mathutils/constants.mio"
+koukai teisu max_value: int64 = 100;
+```
+
+在上述示例中，`max_value` 是一个公开常量。
+
+其他包导入 `mathutils` 后，可以通过 `mathutils.max_value` 访问它。
+
+与常量不同，Mio V2.0 目前不支持通过 `koukai` 直接导出普通的 `kaku` 变量。
+
+有关包导入和公开成员的规则，可以参考「包」章节。
+
+### 变量与常量的区别
+
+Mio 中的 `kaku` 和 `teisu` 都可以用于声明具有名称的数据，但它们的行为存在明显区别。
+
+| 特性 | 变量 `kaku` | 常量 `teisu` |
+| --- | --- | --- |
+| 声明关键字 | `kaku` | `teisu` |
+| 是否允许修改 | 允许 | 不允许 |
+| 是否支持类型推断 | 支持 | 支持 |
+| 是否需要初始化 | 需要 | 需要 |
+| 求值方式 | 运行时求值 | 编译期求值 |
+| 支持的数据类型 | 基础类型和受支持的复合类型 | 基础标量类型 |
+| 是否可以跨包公开 | 不支持直接导出 | 支持 `koukai` |
+
+在实际开发中，如果一个数据需要随着程序执行而变化，应使用 `kaku`。
+
+如果一个数据在整个程序中保持固定，并且能够在编译期计算，就可以使用 `teisu`。
+
+例如：
+
+```mio title="Variable.mio"
+teisu max_count: int64 = 5;
+
+kaku count: int64 = 0;
+
+aida (count < max_count) {
+    count = count + 1;
+}
+
+chant(count);
+```
+
+在上述示例中，`max_count` 是固定的循环上限，因此使用常量保存；而 `count` 会在循环执行过程中不断变化，因此使用变量保存。

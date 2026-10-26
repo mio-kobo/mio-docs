@@ -91,11 +91,6 @@ chant(math.sqrt(value));
 chant(math.gcd(84, 30));
 ```
 
-```text title="output"
-12
-6
-```
-
 `sqrt`、`floor`、`ceil`、`round`、`trunc` 使用 `Float` 约束，同时支持 `float32` 与 `float64`，不会隐式转换精度。`gcd`、`lcm` 使用 `int64`；结果不可表示时，checked 版本返回 `mu`，非 checked 版本产生运行时错误。
 
 ### 动态数组
@@ -107,11 +102,6 @@ kaku numbers = [10, 20];
 array.push(numbers, 30);
 chant(len(numbers));
 chant(numbers[2]);
-```
-
-```text title="output"
-3
-30
 ```
 
 数组赋值和传参保持共享引用语义。`array.clone` 创建独立数组并按浅复制规则复制元素；`truncate` 原地缩短共享长度并保留容量。
@@ -126,11 +116,6 @@ string.write_string(builder, "Mio");
 string.write_string(builder, " v2.0.0");
 chant(string.builder_string(builder));
 chant(string.byte_len("澪"));
-```
-
-```text title="output"
-Mio v2.0.0
-3
 ```
 
 `string.index` 返回 UTF-8 字节偏移，未找到时返回 `-1`。模块不做 Unicode 规范化、大小写折叠或字素簇处理。`builder_string` 成功导出的字符串是独立不可变副本。

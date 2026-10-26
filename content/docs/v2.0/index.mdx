@@ -1,53 +1,92 @@
 ---
-title: Mio V2.0.0 文档
-description: Mio v2.0.0 正式发行版的安装、语言、标准库、工具链与实现边界。
+title: Mio V2.0 · 开始了解 Mio
+description: 认识 Mio 编程语言的设计理念、语言特性、开发方式、语言 API 与 Bunko 标准库。
 ---
 
-**Mio v2.0.0 已正式发布。** 正式 Tag 为 [`v2.0.0`](https://github.com/mio-kobo/mio/releases/tag/v2.0.0)，发布时间为 2026-10-21，对应源码提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`。
+Mio 是一门使用**日语罗马字关键字**的静态强类型编程语言。它以小巧的语言核心、明确的类型与数值语义，以及按需导入的标准库为设计方向，希望让程序的表达保持简洁，同时让每一次类型转换和数据操作都有清晰的含义。
 
-本目录的文档已按该正式发行版核对。站点默认的稳定文档入口仍由版本注册表管理；无论从哪个入口阅读，请以页面标注的版本、CLI 字符串和平台边界为准。
+Mio V2.0 在 Mochi 字节码与虚拟机的基础上，引入了针对 macOS Apple Silicon（ARM64）的原生 AOT 编译能力。无论是第一次接触 Mio，还是希望了解其语言设计和工具链，都可以从本页开始。
 
-## 这个版本包含什么
+本页介绍 [Mio 特性](#mio-特性)、[使用 Mio](#使用-mio)、[语言 API](#语言-api) 和 [标准库](#标准库)。如果你想直接运行程序，可以跳转到 [安装与运行](/docs/v2.0/getting-started)。
 
-- **Mochi VM 与 Mochi v14**：源码前端、编译器、VM 和 LSP。
-- **Native AOT**：面向 macOS Apple Silicon / ARM64 的 Mach-O 生成。
-- **M18 验收**：纯 Mio Native AOT 完成 Mochi → Native 的多代自编译；Go AOT 在正式链中只生成初始 Seed。
-- **精确 Mark-Sweep GC**：Shadow Frame、typed Storage、有界 managed arena 与 NativeFS。
-- **Bunko / Kiso**：按需导入的标准库模块，以及公开的工具链开发接口。
+## Mio 特性
 
-## 阅读入口
+### 熟悉而独特的语法
 
-| 目标 | 入口 |
+Mio 使用 `kaku` 声明变量、`waza` 定义函数、`moshi` 表示条件判断、`kaesu` 返回结果。这些关键字采用日语罗马字拼写，但程序中的标识符、类型标注、运算符和代码块仍遵循清晰、常见的结构化语法。
+
+Mio 允许直接执行顶层语句，因此简单程序不需要额外编写 `main` 函数。完整的关键字、表达式和控制流规则见 [语法与表达式](/docs/v2.0/reference/syntax)。
+
+### 静态强类型与明确的数值语义
+
+Mio 在程序运行前执行类型检查，支持类型推断，也支持显式类型标注。不同宽度的整数、整数与浮点数之间不会随意进行隐式转换。需要转换时，应通过类型名明确写出操作。
+
+语言提供固定宽度整数、`float32`、`float64`、`bool`、`string` 和 `rune` 等基础类型，也支持数组、Map、结构体和枚举。数值运算、溢出、转换和可空值都有明确规则，详见 [类型系统](/docs/v2.0/reference/types)。
+
+### 泛型、Nullable 与函数式能力
+
+Mio 支持泛型函数、泛型结构体与枚举，可以在保持类型安全的前提下复用代码。数值泛型还提供 `Number`、`Integer`、`Signed` 和 `Float` 等内建约束。
+
+更多用法见 [函数与闭包](/docs/v2.0/reference/functions)、[数组与集合](/docs/v2.0/reference/collections) 和 [泛型与模块](/docs/v2.0/reference/modules)。
+
+### Mochi 与原生编译
+
+Mio 将源码编译为 **Mochi 字节码**，既可以通过 Mochi VM 执行，也可以把受支持的字节码进一步编译为原生程序。V2.0 已实现 macOS ARM64 的原生 AOT 后端，并验证了纯 Mio 原生后端的多代自编译。
+
+需要注意的是，Mochi VM 与 Native AOT 的功能覆盖范围并不完全相同；Mio 的源码前端、VM 和 LSP 目前仍使用 Go 实现。相关原理见 [Native AOT](/docs/v2.0/internals/native-aot) 和 [运行时与 GC](/docs/v2.0/internals/gc)。
+
+## 使用 Mio
+
+### 安装与准备
+
+Mio v2.0.0 已正式发布，可从 [GitHub Releases](https://github.com/mio-kobo/mio/releases/tag/v2.0.0) 获取。该版本的官方预编译发行包面向 **macOS Apple Silicon / ARM64**；其他平台尚未获得这一版本的正式支持认证。
+
+使用官方发行包无需额外安装 Go。安装后可以使用 `mio version` 查看版本，并根据 [安装与运行教程](/docs/v2.0/getting-started) 配置 Bunko 标准库目录。
+
+### 继续学习
+
+如果你刚开始学习 Mio，推荐阅读 [Learn 学习教程](/docs/v2.0/learn)。教程从变量和数据类型开始，逐步介绍条件、循环、函数、数组、Map、结构体、枚举、泛型、模块和测试。
+
+Mio 还提供 [VS Code 与 JetBrains 编辑器支持](/docs/v2.0/tooling/editors)，可配合语言工具完成日常开发。
+
+## 语言 API
+
+Mio 的语言 API 分为不需要导入的内置能力，以及由语法和类型系统直接提供的操作。对于查阅用途，建议先从 [语言参考 Reference](/docs/v2.0/reference) 开始。
+
+### 语言参考索引
+
+- [语法与表达式](/docs/v2.0/reference/syntax)：关键字、字面量、运算符和控制语句。
+- [类型与 Nullable](/docs/v2.0/reference/types)：数值类型、显式转换、可空值与类型收窄。
+- [函数与闭包](/docs/v2.0/reference/functions)：函数声明、作用域、返回值和捕获。
+- [数组、结构体、枚举与 Map](/docs/v2.0/reference/collections)：复合数据类型及其使用规则。
+- [泛型、常量与模块](/docs/v2.0/reference/modules)：类型参数、数值约束、`teisu` 和 `yobu`。
+
+语言参考主要用于准确查询规则；如果希望循序学习，建议阅读 [Learn](/docs/v2.0/learn)。
+
+## 标准库
+
+Mio 的标准库称为 **Bunko**。它把语言核心以外的常用能力组织成独立模块，由程序按需导入。基础标准库使用 `kiso/` 作为公开导入路径，`bunko/` 则是安装包或源码中的物理目录，不需要写在 `yobu` 语句中。
+
+
+### 常用标准库模块
+
+| 模块 | 主要用途 |
 | --- | --- |
-| 安装并运行 | [Getting Started](/docs/v2.0/getting-started) |
-| 顺序学习 | [Learn](/docs/v2.0/learn) |
-| 查精确规则 | [Reference](/docs/v2.0/reference) |
-| 查标准库 | [Kiso](/docs/v2.0/kiso) |
-| 查全部内置与标准库 API | [内置函数](/docs/v2.0/reference/builtins) · [Bunko API](/docs/v2.0/kiso/api) |
-| 找开发工具 | [Tooling](/docs/v2.0/tooling) |
-| 看实现边界 | [Internals](/docs/v2.0/internals) |
-| 遇到失败 | [故障排查](/docs/v2.0/tooling/troubleshooting) |
+| [`kiso/math`](/docs/v2.0/kiso/math) | 数值计算、平方根、取整和数学常量 |
+| [`kiso/array`](/docs/v2.0/kiso/array) | 动态数组的追加、复制和容量操作 |
+| [`kiso/string`](/docs/v2.0/kiso/string) | 字符串、UTF-8 文本与 Builder |
+| [`kiso/bytes`](/docs/v2.0/kiso/bytes) | 字节序列比较、查找和修改 |
+| [`kiso/convert`](/docs/v2.0/kiso/convert) | 数值与文本的转换 |
+| [`kiso/io`](/docs/v2.0/kiso/io) | 同步读写接口与流操作 |
+| [`kiso/fs`](/docs/v2.0/kiso/fs) | 文件和目录操作 |
+| [`kiso/path`](/docs/v2.0/kiso/path) | 路径处理 |
+| [`kiso/encoding/binary`](/docs/v2.0/kiso/api) | 二进制数据编码与解码 |
+| [`kiso/testing`](/docs/v2.0/kiso/testing) | `mio test` 环境中的断言与测试辅助 |
 
-## 平台与能力边界
+关于全部公开函数、参数类型和返回值，请查看 [Bunko API 参考](/docs/v2.0/kiso/api)。
 
-| 能力 | v2.0.0 状态 |
-| --- | --- |
-| macOS Apple Silicon / ARM64 | 唯一正式验证平台 |
-| Intel Mac、Linux、Windows | 没有 v2.0.0 正式支持认证 |
-| Mochi VM | 已发布 |
-| Go AOT（`mochi-aot`） | 已发布，独立原生后端 |
-| 纯 Mio Native AOT（`native-aot`） | 已发布，基于 M18 Stage 4 |
-| 精确 Mark-Sweep GC | 已实现 |
-| 分代 GC、High/Balanced/Low 三档 | 未实现，不属于 v2.0.0 |
-| 从 `.mio` 到 Native 完全摆脱 Go | 未完成；源码前端/VM/LSP 仍为 Go |
-| WebAssembly Playground | 未发布 |
+---
 
-Native 支持集合小于 VM。Map、通用 CLI argv、任意 MMA 宿主桥接和任意函数值等能力不能仅凭 VM 支持推断为 Native 支持。详见 [Native AOT](/docs/v2.0/internals/native-aot)。
+Mio v2.0.0 对应 [正式发布记录](https://github.com/mio-kobo/mio/releases/tag/v2.0.0)。目前原生 AOT 的正式验证平台为 macOS ARM64，其他平台和 Native 后端能力以各自文档的实际验证范围为准。详细来源见 [验证与来源](/docs/v2.0/tooling/verification)。
 
-## 文档范围
-
-本版本提供安装页、十一课学习路线，以及独立的 Reference、Kiso、Tooling 和 Internals 正文。安装、CLI、编辑器、Native AOT、GC、Bunko 概览与教程示例已按官方 `v2.0.0` 发行包核对；部分 Reference/Kiso 深度页面仍保留其 2026-10-20 开发快照的验证来源，页面内会标注具体提交。未在本轮重新执行的完整 M18 链、GC 见证、IDE 端到端和跨平台测试也会明确标注。
-
-官方发行包不需要 Go；从源码重建工具链和首次 Seed 需要 Go。发行包使用 ad-hoc 签名，没有 Developer ID 或 notarization。
-
-[查看版本状态与来源](/docs/versions)。当前只提供中文文档，不生成英文或日文的假翻译。
+**下一步：** [安装与运行 Mio](/docs/v2.0/getting-started)。

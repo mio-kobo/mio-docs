@@ -1,0 +1,204 @@
+---
+title: 泛型约束
+description: Mio V2.0 Number、Integer、Signed 与 Float 数值泛型约束
+---
+
+## 泛型约束
+
+泛型约束（Generic Constraint）用于限制类型参数能够接受的数据类型。
+
+在 Mio 中，普通泛型参数 `T` 可以代表多种类型，但并不意味着所有类型都支持相同的操作。
+
+如果一个泛型函数需要使用加法、减法、乘法或除法等数值运算，就可以为类型参数添加数值约束。
+
+例如：
+
+```mio title="GenericConstraint.mio"
+waza add<T: Number>(left: T, right: T) -> T {
+    kaesu left + right;
+}
+
+chant(add[int64](10, 20));
+chant(add[float64](1.5, 2.5));
+```
+
+在上述示例中，`T: Number` 表示类型参数 `T` 必须是 Mio 支持的数值类型。
+
+因此，`add` 可以对相同类型的数值执行加法，但不能用于字符串或结构体等非数值类型。
+
+### 声明泛型约束
+
+Mio 使用 `:` 在类型参数后面指定约束。
+
+基本语法如下：
+
+```text
+waza 函数名<T: 约束名>(参数: T) -> T {
+    // 函数体
+}
+```
+
+例如：
+
+```mio title="GenericConstraint.mio"
+waza multiply<T: Number>(left: T, right: T) -> T {
+    kaesu left * right;
+}
+
+chant(multiply[int64](6, 7));
+```
+
+这里的 `Number` 不是变量类型，而是对泛型参数可使用哪些实际类型的限制。
+
+Mio V2.0 已实现的函数数值泛型约束包括 `Number`、`Integer`、`Signed` 和 `Float`。
+
+### Number 约束
+
+`Number` 约束允许类型参数使用 Mio 支持的整数和浮点数类型。
+
+它覆盖有符号整数、无符号整数、`float32` 和 `float64`。
+
+例如：
+
+```mio title="GenericConstraint.mio"
+waza add<T: Number>(left: T, right: T) -> T {
+    kaesu left + right;
+}
+
+kaku a: int32 = 10;
+kaku b: int32 = 20;
+
+chant(add(a, b));
+chant(add[float32](1.5, 2.5));
+```
+
+在上述示例中，`a` 与 `b` 都是 `int32`，因此可以推断泛型参数 `T` 为 `int32`。
+
+`float32` 同样满足 `Number` 约束，所以也可以被用于此函数。
+
+需要注意，`Number` 约束并不会自动将不同的数值类型转换为同一种类型。一次调用中的 `T` 仍然必须保持一致。
+
+### Integer 约束
+
+`Integer` 约束表示类型参数必须是整数类型。
+
+它包括 Mio 已支持的有符号整数和无符号整数，但不包括 `float32` 与 `float64`。
+
+例如：
+
+```mio title="GenericConstraint.mio"
+waza quotient<T: Integer>(left: T, right: T) -> T {
+    kaesu left / right;
+}
+
+chant(quotient[int64](20, 4));
+```
+
+在上述示例中，`quotient` 只能接受整数类型的参数。
+
+整数除法按照整数运算规则执行，小数部分向零截断。如果除数为零，则会产生运行时错误。
+
+### Signed 约束
+
+`Signed` 约束表示类型参数必须是支持有符号数值运算的类型。
+
+在 Mio V2.0 中，`Signed` 包括有符号整数以及 `float32`、`float64` 浮点数，不包括无符号整数类型。
+
+例如：
+
+```mio title="GenericConstraint.mio"
+waza negate<T: Signed>(value: T) -> T {
+    kaesu -value;
+}
+
+chant(negate[int64](10));
+chant(negate[float64](2.5));
+```
+
+在上述示例中，`negate` 使用了一元负号 `-`，因此需要能够表示负数的类型。
+
+无符号整数不满足 `Signed` 约束，不能直接用于该函数。
+
+### Float 约束
+
+`Float` 约束表示类型参数必须是浮点数类型。
+
+Mio V2.0 中，满足 `Float` 的类型包括 `float32` 和 `float64`。
+
+例如：
+
+```mio title="GenericConstraint.mio"
+waza divide<T: Float>(left: T, right: T) -> T {
+    kaesu left / right;
+}
+
+chant(divide[float32](7.5, 2.5));
+chant(divide[float64](9.0, 3.0));
+```
+
+在上述示例中，`divide` 只能处理浮点类型。
+
+浮点运算遵循对应精度的 IEEE 754 规则，计算结果可能存在舍入误差。
+
+### 泛型约束对照
+
+Mio V2.0 已实现的四种数值约束如下：
+
+| 约束名称 | 允许的类型 | 常见用途 |
+| --- | --- | --- |
+| `Number` | 有符号整数、无符号整数、浮点数 | 通用数值运算 |
+| `Integer` | 有符号整数、无符号整数 | 整数运算 |
+| `Signed` | 有符号整数、浮点数 | 负号和有符号运算 |
+| `Float` | `float32`、`float64` | 浮点运算 |
+
+`rune` 是 `int32` 的别名，因此按照整数类型参与这些约束的判断。
+
+需要注意，约束本身不会改变实际数据的类型，返回结果仍然遵循所选的具体类型。
+
+### 多个类型参数
+
+一个泛型函数可以同时声明多个类型参数，并分别为需要数值操作的参数添加约束。
+
+例如：
+
+```mio title="GenericConstraint.mio"
+waza choose<T: Number, U>(number: T, fallback: U) -> U {
+    kaesu fallback;
+}
+
+chant(choose[int64, string](10, "Mio"));
+```
+
+在上述示例中，`T` 受到 `Number` 约束，而 `U` 是普通的类型参数。
+
+因此，`T` 需要是数值类型，`U` 则由参数和返回类型共同确定。
+
+### 不满足约束的类型
+
+如果调用泛型函数时提供的类型不满足约束，编译器会拒绝该调用。
+
+例如，下列写法不合法：
+
+```text
+waza add<T: Number>(left: T, right: T) -> T {
+    kaesu left + right;
+}
+
+kaku result = add[string]("Hello", "Mio");
+```
+
+因为 `string` 不属于 `Number` 约束允许的类型。
+
+同样，如果函数要求 `T: Integer`，就不能使用 `float64` 作为对应的类型参数。
+
+即使两个类型都满足 `Number`，也不能因此在一次调用中直接混合不同位宽或不同类别的数值变量。需要转换时，应使用明确的数值类型转换。
+
+### 泛型约束的限制
+
+Mio V2.0 的数值泛型约束已经覆盖一些常见运算需求，但它们不等同于其他语言中的 Trait 或接口系统。
+
+目前没有用户自定义约束、任意 Trait 组合或高阶类型约束的语言机制。
+
+因此，在编写泛型函数时，应只使用类型参数和当前约束所允许的操作，而不要假设每一种类型都支持所有运算符。
+
+本章采用已经实现并经过相应测试覆盖的泛型函数数值约束语法，不将这些规则扩展为尚未确认的其他泛型能力。

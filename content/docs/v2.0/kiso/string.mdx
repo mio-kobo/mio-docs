@@ -1,206 +1,107 @@
 ---
-title: kiso/string
-description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+title: 字符串
+description: Mio V2.0 字符串标准库 kiso/string
 ---
 
-**版本范围：Mio v2.0.0 正式版**，源码提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`；Go 引导 CLI / Mochi VM。
+## 字符串
 
-完整索引见 [Bunko API 参考](/docs/v2.0/kiso/api)；本页保留逐函数签名、参数、返回值、错误与示例。
+字符串标准库（String）提供 UTF-8 字节长度、Unicode 标量值计数、前后缀判断、查找、字符串拼接和 `StringBuilder`。
 
-UTF-8 字节语义查找、转换及 StringBuilder。不处理 Unicode 规范化、大小写折叠或字素簇；索引与容量单位均为字节。Builder 值复制共享 buffer。
+Mio 的 `string` 是不可变的 UTF-8 文本，语言本身没有字符串 `+` 拼接运算符。
 
-支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v2.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v2.0/internals/native-aot) 单独评估。
+本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
 
-## 公开类型与常量
+### 导入包
 
-以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
+> **网页运行说明：** 本页的 Playground 代码块都是独立程序，已分别加入所需的 `yobu` 导入语句。点击「运行」时不会继承页面中其他代码块的状态。
 
-```text
-koukai kata StringBuilder { buffer: bytes.ByteBuffer; }
-```
+通过 `yobu "kiso/string";` 导入本包，随后使用 `string.函数名(...)` 调用。
 
-## 函数索引
-
-[to_bytes](#to_bytes) · [from_utf8](#from_utf8) · [byte_len](#byte_len) · [rune_count](#rune_count) · [has_prefix](#has_prefix) · [has_suffix](#has_suffix) · [index](#index) · [contains](#contains) · [concat](#concat) · [new_builder](#new_builder) · [builder_with_capacity](#builder_with_capacity) · [write_string](#write_string) · [write_rune](#write_rune) · [builder_len](#builder_len) · [builder_capacity](#builder_capacity) · [builder_reset](#builder_reset) · [builder_string](#builder_string)
-
-## 函数
-
-签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
-
-### to_bytes
-
-```text
-koukai waza to_bytes(value: string) -> []uint8
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下。
-
-复制 value 的 UTF-8 字节到新数组，修改数组不会修改字符串。
-
-### from_utf8
-
-```text
-koukai waza from_utf8(data: []uint8) -> string?
-```
-
-参数：`data`：输入字节数组；是否复制见返回语义。
-
-严格校验 data；合法时返回独立字符串副本，非法时返回 mu。
-
-### byte_len
-
-```text
-koukai waza byte_len(value: string) -> int64
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下。
-
-返回 value 的字节数，O(1)。
-
-### rune_count
-
-```text
-koukai waza rune_count(value: string) -> int64
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下。
-
-返回 Unicode 标量值数量；若宿主传入非法 UTF-8 字符串，产生运行时错误。
-
-### has_prefix
-
-```text
-koukai waza has_prefix(value: string, prefix: string) -> bool
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下；`prefix`：待匹配前缀。
-
-按字节比较 value 的 prefix。
-
-### has_suffix
-
-```text
-koukai waza has_suffix(value: string, suffix: string) -> bool
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下；`suffix`：待匹配后缀。
-
-按字节比较 value 的 suffix。
-
-### index
-
-```text
-koukai waza index(value: string, pattern: string) -> int64
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下；`pattern`：待查找的字符串模式。
-
-返回 pattern 首次出现的 UTF-8 字节偏移；未找到为 -1，空 pattern 为 0。
-
-### contains
-
-```text
-koukai waza contains(value: string, pattern: string) -> bool
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下；`pattern`：待查找的字符串模式。
-
-返回 value 是否包含 pattern，空模式为真。
-
-### concat
-
-```text
-koukai waza concat(left: string, right: string) -> string
-```
-
-参数：`left`：左侧输入；`right`：右侧输入。
-
-返回 left 与 right 拼接后的独立字符串。
-
-### new_builder
-
-```text
-koukai waza new_builder() -> StringBuilder
-```
-
-参数：无。
-
-返回空 StringBuilder。
-
-### builder_with_capacity
-
-```text
-koukai waza builder_with_capacity(capacity: int64) -> StringBuilder
-```
-
-参数：`capacity`：预留容量；字节容器按字节，普通数组按元素。
-
-创建空 Builder，capacity 按字节预留；负容量或资源不足报错。
-
-### write_string
-
-```text
-koukai waza write_string(builder: StringBuilder, value: string) -> unit
-```
-
-参数：`builder`：待操作共享字符串构造器；`value`：本次操作的输入值，返回语义及限制如下。
-
-将 value 的字节追加到 builder，返回 unit。
-
-### write_rune
-
-```text
-koukai waza write_rune(builder: StringBuilder, value: rune) -> unit
-```
-
-参数：`builder`：待操作共享字符串构造器；`value`：本次操作的输入值，返回语义及限制如下。
-
-将 value 编码并追加到 builder；非法 Unicode 标量值报运行时错误。
-
-### builder_len
-
-```text
-koukai waza builder_len(builder: StringBuilder) -> int64
-```
-
-参数：`builder`：待操作共享字符串构造器。
-
-返回当前 builder 字节长度。
-
-### builder_capacity
-
-```text
-koukai waza builder_capacity(builder: StringBuilder) -> int64
-```
-
-参数：`builder`：待操作共享字符串构造器。
-
-返回 builder 字节容量。
-
-### builder_reset
-
-```text
-koukai waza builder_reset(builder: StringBuilder) -> unit
-```
-
-参数：`builder`：待操作共享字符串构造器。
-
-将共享 buffer 长度置零并保留容量。
-
-### builder_string
-
-```text
-koukai waza builder_string(builder: StringBuilder) -> string
-```
-
-参数：`builder`：待操作共享字符串构造器。
-
-返回独立不可变字符串副本；外部若污染 buffer 为非法 UTF-8，报运行时错误。
-
-## 完整示例
-
-```mio fixture="string"
+```mio title="Stdlib.mio"
 yobu "kiso/string";
+```
+
+### 字节与字符数量
+
+`byte_len` 计算编码后占用的字节数；`rune_count` 计算 Unicode 标量值数量。两者不同，尤其在中文、日文与 Emoji 文本中。
+
+```mio title="String.mio"
+yobu "kiso/string";
+
+kaku text = "澪Mio";
+chant(string.byte_len(text));
+chant(string.rune_count(text));
+```
+
+### 查找与拼接
+
+`has_prefix`、`has_suffix` 和 `contains` 返回布尔值。`index` 返回首次匹配的 UTF-8 **字节偏移量**，找不到返回 `-1`。`concat` 返回新的字符串。
+
+```mio title="String.mio"
+yobu "kiso/string";
+
+chant(string.index("你Mio", "Mio"));
+chant(string.concat("Hello, ", "Mio"));
+```
+
+### 字符串与字节数组
+
+`to_bytes` 生成独立的 `[]uint8`；`from_utf8` 严格检查编码，有效时生成独立的字符串，无效时返回 `mu`。
+
+```mio title="String.mio"
+yobu "kiso/string";
+
+kaku data = string.to_bytes("Mio");
+kaku decoded = string.from_utf8(data);
+moshi (decoded != mu) { chant(decoded); }
+```
+
+### 使用 StringBuilder
+
+`StringBuilder` 可以逐段追加字符串或 Unicode 标量值。写入和重置会修改共享的内部缓冲区；`builder_string` 返回独立的不可变文本。
+
+```mio title="String.mio"
+yobu "kiso/string";
+
+kaku builder = string.new_builder();
+string.write_string(builder, "Mio");
+string.write_rune(builder, '!');
+chant(string.builder_string(builder));
+```
+
+### 公开类型
+
+- `StringBuilder { buffer: bytes.ByteBuffer; }`：共享字节缓冲区的字符串构造器。
+
+### 公开函数（17 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `to_bytes` | `to_bytes(value: string) -> []uint8` | 将 UTF-8 文本复制到独立字节数组。 |
+| `from_utf8` | `from_utf8(data: []uint8) -> string?` | 严格解码；非法 UTF-8 返回 `mu`。 |
+| `byte_len` | `byte_len(value: string) -> int64` | 获取 UTF-8 字节长度。 |
+| `rune_count` | `rune_count(value: string) -> int64` | 获取 Unicode 标量值数量。 |
+| `has_prefix` | `has_prefix(value: string, prefix: string) -> bool` | 判断前缀。 |
+| `has_suffix` | `has_suffix(value: string, suffix: string) -> bool` | 判断后缀。 |
+| `index` | `index(value: string, pattern: string) -> int64` | 返回首次匹配的字节偏移，缺失为 `-1`，空模式为零。 |
+| `contains` | `contains(value: string, pattern: string) -> bool` | 判断是否包含指定内容，空模式为真。 |
+| `concat` | `concat(left: string, right: string) -> string` | 拼接成独立字符串。 |
+| `new_builder` | `new_builder() -> StringBuilder` | 创建空字符串构造器。 |
+| `builder_with_capacity` | `builder_with_capacity(capacity: int64) -> StringBuilder` | 创建并按字节预留容量的构造器。 |
+| `write_string` | `write_string(builder: StringBuilder, value: string) -> unit` | 向构造器追加文本。 |
+| `write_rune` | `write_rune(builder: StringBuilder, value: rune) -> unit` | 向构造器追加编码后的单个 Unicode 标量。 |
+| `builder_len` | `builder_len(builder: StringBuilder) -> int64` | 获取已写入的字节长度。 |
+| `builder_capacity` | `builder_capacity(builder: StringBuilder) -> int64` | 获取字节容量。 |
+| `builder_reset` | `builder_reset(builder: StringBuilder) -> unit` | 清空缓冲区长度并保留容量。 |
+| `builder_string` | `builder_string(builder: StringBuilder) -> string` | 导出独立不可变字符串，非法 UTF-8 缓冲内容报错。 |
+
+### 完整示例
+
+```mio title="String.mio"
+yobu "kiso/string";
+
 chant(string.byte_len("澪A"));
 chant(string.rune_count("澪A"));
 chant(string.index("澪A", "A"));
@@ -212,20 +113,8 @@ kaku invalid: []uint8 = [255];
 chant(string.from_utf8(invalid) == mu);
 ```
 
-预期 stdout（逐字节匹配，末尾有换行）：
+### 使用限制
 
-```text title="output"
-4
-2
-3
-Mio!
-hai
-```
+字符串操作以 UTF-8 字节与 Unicode 标量为单位，不处理 Unicode 规范化、字素簇或语言相关的大小写匹配。`StringBuilder` 的赋值共享内部缓冲区，不等于生成独立副本。
 
-## 源码
-
-- `bunko/kiso/string/string.mio`
-
-公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
-
-精确来源：[bunko/kiso/string/string.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/string/string.mio)。
+源码依据：[Mio v2.0.0 · `bunko/kiso/string/string.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/string/string.mio)。

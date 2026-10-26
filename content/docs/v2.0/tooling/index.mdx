@@ -1,30 +1,98 @@
 ---
-title: Tooling · 开发工具
-description: 查询 Mio v2.0.0 的 CLI、诊断、测试、语言服务、编辑器与故障排查。
+title: 开发工具
+description: Mio V2.0 开发工具、编译流程、编辑器与语言服务器
 ---
 
-使用与 **Mio v2.0.0** 一致的 CLI 和 Bunko。首次安装见 [Getting Started](/docs/v2.0/getting-started)。
+## 开发工具
 
-| 任务 | 资料 |
+开发工具（Tooling）是用于编写、检查、编译、运行和维护 Mio 程序的一组工具。
+
+Mio V2.0.0 提供命令行工具 `mio`、Mochi 字节码虚拟机、MioCore 语言服务器（LSP），并可与 VS Code 和 JetBrains 编辑器插件配合使用。
+
+在 Mio 中，源码使用 `.mio` 扩展名。我们可以直接运行源码，也可以先将源码编译成 `.mochi` 字节码，再交给 Mochi VM 执行。
+
+### 命令行工具
+
+`mio` 是 Mio 的主要命令行入口。它提供静态检查、运行、字节码编译、字节码执行、反汇编、测试和语言服务器等命令。
+
+常见操作如下：
+
+| 命令 | 作用 |
 | --- | --- |
-| check/run/build/exec/disasm、诊断、退出码 | [CLI](/docs/v2.0/tooling/cli) |
-| 编写并运行测试包 | [测试教程](/docs/v2.0/learn/testing)、[testing API](/docs/v2.0/kiso/testing) |
-| 配置 stdio 语言服务、了解能力边界 | [MioCore LSP](/docs/v2.0/tooling/lsp) |
-| 安装并配置 VS Code / JetBrains | [编辑器](/docs/v2.0/tooling/editors) |
-| 安装失败、Bunko、编译错误与 Native AOT 限制 | [故障排查](/docs/v2.0/tooling/troubleshooting) |
-| 重跑示例、查看来源及未覆盖范围 | [验证与来源](/docs/v2.0/tooling/verification) |
+| `mio version` | 查看 Mio 版本 |
+| `mio check` | 解析并检查源代码，不执行程序 |
+| `mio run` | 编译并通过 Mochi VM 运行程序 |
+| `mio build` | 将 Mio 源代码编译成 `.mochi` 字节码 |
+| `mio exec` | 执行已有 `.mochi` 字节码文件 |
+| `mio disasm` | 查看 Mochi 字节码指令 |
+| `mio test` | 发现和执行测试函数 |
+| `mio lsp` | 启动 MioCore 语言服务器 |
 
-编辑器是独立项目，其源码版本不等于核心版本。VS Code 源码清单为 `0.3.0`，JetBrains 源码清单为 `0.6.1`；本轮没有运行 IDE 客户端端到端验收，也没有查询市场当前发布状态。不要把插件市场版本直接等同于 Mio 核心版本。
+例如，创建一个名为 `Hello.mio` 的文件：
 
-官方 v2.0.0 发行包包含：
-
-```text
-mio                  # 源码前端、Mochi 编译器、VM、LSP
-mochi-aot            # Go AOT 后端
-mochi-aot-audit      # 只读 Mochi 指令/缺口扫描
-native-aot           # 纯 Mio Native AOT 编译器（M18 Stage 4）
-native-aot.mochi     # native-aot 自身的 Mochi 输入
-bunko/               # 标准库物理根
+```mio title="Hello.mio"
+chant("Hello, Mio!");
 ```
 
-`mio build` 生成 Mochi 字节码；`mochi-aot` 与 `native-aot` 才生成 ARM64 Mach-O。原生工具的平台、签名和 config 文件协议见 [Native AOT](/docs/v2.0/internals/native-aot)。
+随后在终端中执行：
+
+```sh
+mio check Hello.mio
+mio run Hello.mio
+```
+
+上述代码可以直接在网页 Playground 中运行。终端命令则需要在已安装 Mio CLI 的本地环境中执行。
+
+### 从源码到运行结果
+
+Mio 的主要运行流程如下：
+
+```text
+Mio 源文件（.mio）
+       │
+       ├── mio check ──→ 语法、名称与类型检查
+       │
+       ├── mio run ────→ 编译为 Mochi ──→ Mochi VM 执行
+       │
+       └── mio build ──→ Mochi 字节码（.mochi）
+                                  │
+                                  ├── mio exec ──→ Mochi VM 执行
+                                  └── mio disasm → 查看字节码
+```
+
+`mio build` 生成的是 Mochi 字节码，不是操作系统可以直接执行的机器码文件。
+
+Mio V2.0.0 的正式发行包还提供 `mochi-aot` 和 `native-aot` 两个独立的原生编译工具，用于在已支持的平台上将 Mochi 转换为 ARM64 Mach-O 程序。原生编译与普通 `mio build` 是不同的操作。
+
+### Bunko 标准库
+
+Bunko 是 Mio 的标准库。其物理目录为 `bunko/`，但在源代码中应使用 `kiso/` 导入路径。
+
+例如：
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+kaku value: float64 = 144.0;
+chant(math.sqrt(value));
+```
+
+每个网页 Playground 示例都是独立编译的程序，因此使用标准库的代码块应当自行包含需要的 `yobu` 语句。
+
+本地 CLI 可以通过 `MIO_BUNKO` 环境变量指定标准库根目录。
+
+### 编辑器和语言服务
+
+MioCore 是 Mio CLI 内置的语言服务器，通过 `mio lsp --stdio` 与编辑器通信。它支持语法与类型诊断、悬停信息、定义跳转、引用查询、补全和函数签名提示。
+
+VS Code 插件能够调用 MioCore LSP；JetBrains 插件则使用自己的编辑器解析与 CLI 集成机制。这两个插件是独立项目，其版本号不等于 Mio 语言版本。
+
+### 阅读顺序
+
+| 章节 | 内容 |
+| --- | --- |
+| [CLI 与编译流程](/docs/v2.0/tooling/cli) | `check`、`run`、`build`、`exec`、`disasm`、`test` 与相关参数 |
+| [编辑器支持](/docs/v2.0/tooling/editors) | VS Code、JetBrains 插件安装和设置 |
+| [MioCore LSP](/docs/v2.0/tooling/lsp) | 语言服务器协议、能力与限制 |
+| [故障排查](/docs/v2.0/tooling/troubleshooting) | 常见命令、导入、Playground 与编译错误 |
+| [验证与来源](/docs/v2.0/tooling/verification) | 文档对应的源码版本与功能验证边界 |

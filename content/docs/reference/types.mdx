@@ -30,15 +30,6 @@ teisu answer: int64 = 6 * 7;
 chant(answer);
 ```
 
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
--128
-1.5
--2
-42
-```
-
 ## bool 与 string
 
 `bool` 使用 `hai` / `iie`。`string` 为不可变 UTF-8 字符串，语言运算符只支持字符串 `==` / `!=`。字节转换、拼接、查找、Builder 见 [kiso/string](/docs/kiso/string)。字符输出是整数，文本输出应使用字符串或 UTF-8 编码 API。
@@ -61,15 +52,6 @@ kaku item = values[0];
 moshi (item != mu) { chant(item); }
 kaku optional: ([]int64)? = [7];
 moshi (optional != mu) { chant(len(optional)); }
-```
-
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-hai
-19
-10
-1
 ```
 
 ## unit、函数和资源

@@ -1,0 +1,219 @@
+---
+title: 数组
+description: Mio V2.0 数组的声明、索引、共享引用与动态操作
+---
+
+## 数组
+
+数组（Array）用于按照一定的顺序保存一组相同类型的数据。
+
+在 Mio 中，数组通过 `[]T` 表示，其中 `T` 是数组元素的类型。Mio 的数组支持索引访问、修改元素以及动态追加等操作。
+
+例如：
+
+```mio title="Array.mio"
+kaku numbers = [10, 20, 30];
+
+chant(numbers[0]);
+chant(numbers[1]);
+chant(numbers[2]);
+```
+
+在上述示例中，`numbers` 是一个 `[]int64` 类型的数组，包含三个整数。我们可以通过方括号中的索引访问对应的元素。
+
+### 声明数组
+
+数组类型的基本形式如下：
+
+```text
+[]元素类型
+```
+
+声明数组时，可以明确指定元素类型，也可以让 Mio 根据初始化表达式推断类型。
+
+```mio title="Array.mio"
+kaku numbers: []int64 = [1, 2, 3];
+kaku names: []string = ["Mio", "Haruka"];
+kaku flags = [hai, iie, hai];
+```
+
+这里，`numbers` 保存整数，`names` 保存字符串，而 `flags` 保存布尔值。
+
+同一个数组中的元素需要具有兼容的元素类型，不能随意混合不同类型的数据。
+
+### 空数组
+
+Mio 允许创建空数组，使用 `[]` 表示没有元素的数组字面量。
+
+但是，由于空数组不包含任何元素，编译器无法仅根据 `[]` 推断元素类型，所以需要提供明确的类型上下文。
+
+```mio title="Array.mio"
+kaku numbers: []int64 = [];
+
+chant(len(numbers));
+```
+
+在上述示例中，`numbers` 的类型为 `[]int64`，初始长度为 `0`。后续可以通过数组标准库向其中添加元素。
+
+### 访问数组元素
+
+Mio 使用 `数组[索引]` 访问数组元素。索引从 `0` 开始，最后一个有效索引为 `len(数组) - 1`。
+
+```mio title="Array.mio"
+kaku colors = ["red", "green", "blue"];
+
+chant(colors[0]);
+chant(colors[2]);
+```
+
+数组的索引表达式必须为 `int64` 类型。
+
+如果索引为负数，或者索引不小于数组长度，程序就会产生运行时越界错误。
+
+### 修改数组元素
+
+数组创建后，可以通过索引赋值修改其中的元素。
+
+```mio title="Array.mio"
+kaku numbers = [10, 20, 30];
+
+numbers[1] = 99;
+
+chant(numbers[1]);
+```
+
+这里的 `numbers[1] = 99;` 修改第二个元素，而不会改变数组的长度。
+
+写入的值必须与数组的元素类型兼容。例如，不能直接向 `[]int64` 数组写入字符串。
+
+### 数组长度
+
+Mio 提供内置函数 `len()`，用于获取数组当前的元素数量。
+
+```mio title="Array.mio"
+kaku numbers = [10, 20, 30, 40];
+
+chant(len(numbers));
+```
+
+我们也可以将 `len()` 与 `aida` 循环结合，依次访问数组的所有元素。
+
+```mio title="Array.mio"
+kaku numbers = [10, 20, 30];
+kaku index = 0;
+
+aida (index < len(numbers)) {
+    chant(numbers[index]);
+    index = index + 1;
+}
+```
+
+在上述示例中，`index` 从 `0` 开始，每次循环增加 `1`，直到访问完数组中的全部元素。
+
+### 数组的共享引用
+
+Mio 的数组采用共享引用语义。将一个数组赋值给另一个变量，不会自动复制数组中的全部元素。
+
+```mio title="Array.mio"
+kaku numbers = [10, 20, 30];
+kaku other = numbers;
+
+other[0] = 99;
+
+chant(numbers[0]);
+```
+
+在上述示例中，`other` 和 `numbers` 引用同一个数组。因此，通过 `other` 修改元素后，使用 `numbers` 也可以观察到这一变化。
+
+这种共享行为也适用于将数组作为函数参数传递的情况。
+
+### 动态追加数组元素
+
+Mio 通过标准库 `kiso/array` 提供动态数组操作。
+
+使用这些功能之前，需要先导入对应的包：
+
+```mio title="Array.mio"
+yobu "kiso/array";
+
+kaku numbers = [10, 20];
+
+array.push(numbers, 30);
+array.push(numbers, 40);
+
+chant(len(numbers));
+chant(numbers[3]);
+```
+
+`array.push()` 会在已有数组的末尾添加元素。它会直接修改传入的数组，而不是返回一个新数组。
+
+### 数组容量
+
+数组的长度（Length）表示当前实际包含的元素数量，容量（Capacity）则表示已分配、可容纳元素的空间。
+
+Mio 可以通过 `array.with_capacity()` 创建预留容量的空数组，也可以通过 `array.capacity()` 查看容量。
+
+```mio title="Array.mio"
+yobu "kiso/array";
+
+kaku numbers = array.with_capacity[int64](8);
+
+array.push(numbers, 10);
+array.push(numbers, 20);
+
+chant(len(numbers));
+chant(array.capacity(numbers));
+```
+
+这里的 `array.with_capacity[int64](8)` 创建一个初始长度为 `0`、预留容量为 `8` 的整数数组。
+
+需要注意，容量不是数组的有效索引范围。即使容量大于长度，也不能直接访问尚未追加的元素。
+
+### 复制与截断数组
+
+如果需要创建一个独立的数组，可以使用 `array.clone()`。
+
+```mio title="Array.mio"
+yobu "kiso/array";
+
+kaku original = [10, 20, 30];
+kaku copied = array.clone(original);
+
+copied[0] = 99;
+
+chant(original[0]);
+chant(copied[0]);
+```
+
+`clone()` 会创建独立的数组存储，但属于浅复制（Shallow Copy）。如果元素本身是数组等引用类型，内层数据仍可能共享。
+
+如果需要缩短数组长度，可以使用 `array.truncate()`：
+
+```mio title="Array.mio"
+yobu "kiso/array";
+
+kaku numbers = [10, 20, 30, 40];
+
+array.truncate(numbers, 2);
+
+chant(len(numbers));
+```
+
+`truncate()` 只能将长度缩短到有效范围内，不会通过它创建新的子数组。
+
+`kiso/array` 还提供 `make()`、`reserve()` 和 `append_all()`，分别用于创建指定长度的数组、预留额外容量以及批量追加元素。
+
+### 多层数组
+
+Mio 支持将数组作为另一个数组的元素，类型可以写作 `[][]T`。
+
+```mio title="Array.mio"
+kaku values: [][]int64 = [[1, 2], [3, 4]];
+
+chant(values[0][1]);
+chant(values[1][0]);
+```
+
+这里的 `values` 是一个元素类型为 `[]int64` 的数组。每一层数组都拥有自己的索引和长度，内层数组同样具有共享引用语义。
+
+需要注意，Mio V2.0 尚未实现 `values[1:3]` 这样的切片语法，也不能直接使用 `==` 比较两个数组的内容。需要复制数组子区间时，可以通过循环与数组标准库自行实现。

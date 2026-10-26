@@ -10,6 +10,7 @@ const temp = mkdtempSync(join(tmpdir(), 'mio-docs-examples-'));
 const version = process.env.DOCS_VERSION ?? 'v1.0';
 if (!/^v[0-9]+\.[0-9]+(?:\.[0-9]+)?$/u.test(version)) throw new Error('Invalid DOCS_VERSION');
 const base = `content/docs/${version}`;
+const playgroundOutputs = new Map(Object.entries(JSON.parse(readFileSync('fixtures/docs/playground-stdout.json', 'utf8')).outputs));
 const files = [base + '/getting-started.mdx', ...readdirSync(base + '/learn').filter(f => f.endsWith('.mdx')).map(f => base + '/learn/' + f)];
 let count = 0;
 let helloProgram;
@@ -32,12 +33,15 @@ try {
       // Test packages are executed with discovery/summary assertions by check-content-quality.py.
       if (node.meta?.includes('mode="test"')) continue;
       const next = nodes.slice(i + 1).find(n => n.type === 'code' && (n.lang === 'mio' || n.meta === 'title="output"'));
-      if (!next || next.lang === 'mio') throw new Error(`${file}: Mio snippet must have an explicit output fence`);
-      execute(file, node.value, next.value);
-      programs.set(file, { code: node.value, output: next.value });
+      // Playgrounds no longer render a second static output fence. Exact stdout
+      // lives in a test-only fixture so CLI verification remains byte-exact.
+      const expected = playgroundOutputs.get(node.value) ?? (next && next.lang !== 'mio' ? next.value : undefined);
+      if (expected === undefined) throw new Error(`${file}: Mio snippet has no expected stdout`);
+      execute(file, node.value, expected);
+      programs.set(file, { code: node.value, output: expected });
       // Getting Started now contains several independently verified programs;
       // the Hello build/exec/disasm check below always uses its first program.
-      if (file === base + '/getting-started.mdx' && !helloProgram) helloProgram = { code: node.value, output: next.value };
+      if (file === base + '/getting-started.mdx' && !helloProgram) helloProgram = { code: node.value, output: expected };
     }
   }
   const home = JSON.parse(readFileSync('lib/home-example.json', 'utf8'));

@@ -1,0 +1,597 @@
+---
+title: 数据类型
+description: Mio V2.0 数据类型
+---
+
+Mio 是一门静态强类型编程语言，每个变量、函数参数和表达式都有明确的数据类型。
+
+数据类型（Data Type）用于规定一个值能够表示的数据范围，以及可以对该值执行的操作。
+
+在 Mio 中，我们可以通过 `kaku` 关键字声明变量，并使用 `:` 指定变量的类型。
+
+例如：
+
+```mio title="DataType.mio"
+kaku age: int64 = 18;
+kaku name: string = "Mio";
+kaku enabled: bool = hai;
+
+chant(age);
+chant(name);
+chant(enabled);
+```
+
+在上述示例中，`int64` 表示整数类型，`string` 表示字符串类型，`bool` 表示布尔类型。
+
+如果没有显式指定类型，Mio 通常会根据初始化表达式推断变量的类型。
+
+## 布尔类型
+
+布尔类型（Boolean）用于表示逻辑上的真或假，在 Mio 中使用 `bool` 表示。
+
+Mio 提供两个布尔字面量：
+
+| 字面量 | 含义 | 说明 |
+| --- | --- | --- |
+| `hai` | 真 | 相当于 `true` |
+| `iie` | 假 | 相当于 `false` |
+
+例如：
+
+```mio title="DataType.mio"
+kaku enabled: bool = hai;
+kaku finished: bool = iie;
+
+chant(enabled);
+chant(finished);
+```
+
+运行结果：
+
+```text
+hai
+iie
+```
+
+布尔类型通常用于条件判断和逻辑运算。
+
+```mio title="DataType.mio"
+kaku age = 18;
+kaku is_adult: bool = age >= 18;
+
+moshi (is_adult) {
+    chant("已成年");
+} sore {
+    chant("未成年");
+}
+```
+
+在上述示例中，`age >= 18` 是一个比较表达式，其返回值为 `bool` 类型。
+
+Mio 的布尔类型支持 `==`、`!=`、`&&`、`||` 和 `!` 等运算符。
+
+需要注意，Mio 不会自动将整数转换为布尔值，因此不能使用整数 `1` 或 `0` 直接代替 `hai` 和 `iie`。
+
+## 整型
+
+整型（Integer）用于表示不包含小数部分的数值。
+
+Mio 提供多种不同位宽的整数类型，包括有符号整数和无符号整数。
+
+有符号整数可以表示正数、负数和零，而无符号整数只能表示非负整数。
+
+Mio V2.0 支持以下整数类型：
+
+| 类型 | 位宽 | 数值范围 |
+| --- | --- | --- |
+| `int8` | 8 位 | -128 ~ 127 |
+| `int16` | 16 位 | -32768 ~ 32767 |
+| `int32` | 32 位 | -2147483648 ~ 2147483647 |
+| `int64` | 64 位 | -9223372036854775808 ~ 9223372036854775807 |
+| `uint8` | 8 位 | 0 ~ 255 |
+| `uint16` | 16 位 | 0 ~ 65535 |
+| `uint32` | 32 位 | 0 ~ 4294967295 |
+
+其中，`int` 开头的是有符号整数类型，`uint` 开头的是无符号整数类型。
+
+例如：
+
+```mio title="DataType.mio"
+kaku small: int8 = 100;
+kaku count: uint32 = 1000;
+kaku total: int64 = 5000;
+
+chant(small);
+chant(count);
+chant(total);
+```
+
+运行结果：
+
+```text
+100
+1000
+5000
+```
+
+默认情况下，没有明确类型上下文的整数字面量会被推断为 `int64` 类型。
+
+```mio title="DataType.mio"
+kaku number = 100;
+
+chant(number);
+```
+
+这相当于声明了一个 `int64` 类型的变量。
+
+### 整数运算
+
+Mio 的整数类型支持加法、减法、乘法、除法和数值比较。
+
+```mio title="DataType.mio"
+kaku a: int64 = 20;
+kaku b: int64 = 5;
+
+chant(a + b);
+chant(a - b);
+chant(a * b);
+chant(a / b);
+```
+
+运行结果：
+
+```text
+25
+15
+100
+4
+```
+
+需要注意，整数除法不会保留小数部分，结果向零截断。
+
+不同整数类型之间不会自动进行隐式转换。例如，一个 `int8` 变量不能直接赋值给 `int64` 变量，需要进行显式类型转换。
+
+```mio title="DataType.mio"
+kaku small: int8 = 100;
+kaku number: int64 = int64(small);
+
+chant(number);
+```
+
+整数之间的显式转换需要保证数值能够被目标类型表示，否则会发生运行时错误。
+
+Mio 的固定宽度整数加法、减法和乘法采用对应位宽的回绕语义。普通整数运算溢出并不等同于类型转换越界。
+
+目前 Mio V2.0 没有公开的 `uint64` 基础类型。
+
+## 浮点型
+
+浮点型（Floating Point）用于表示带有小数部分的数值。
+
+Mio 提供 `float32` 和 `float64` 两种浮点类型。
+
+| 类型 | 位宽 | 说明 |
+| --- | --- | --- |
+| `float32` | 32 位 | IEEE 754 单精度浮点数 |
+| `float64` | 64 位 | IEEE 754 双精度浮点数 |
+
+例如：
+
+```mio title="DataType.mio"
+kaku price: float32 = 19.5;
+kaku pi: float64 = 3.141592653589793;
+
+chant(price);
+chant(pi);
+```
+
+默认情况下，没有明确类型上下文的浮点数字面量会被推断为 `float64` 类型。
+
+如果需要使用 `float32`，可以在声明变量时明确指定。
+
+浮点类型支持加法、减法、乘法、除法和数值比较。
+
+例如：
+
+```mio title="DataType.mio"
+kaku a: float64 = 7.0;
+kaku b: float64 = 2.0;
+
+chant(a + b);
+chant(a / b);
+```
+
+运行结果：
+
+```text
+9
+3.5
+```
+
+Mio 还支持使用科学计数法表示浮点数：
+
+```mio title="DataType.mio"
+kaku large = 1e3;
+kaku small = 2.5e-2;
+
+chant(large);
+chant(small);
+```
+
+需要注意，`float32` 和 `float64` 的精度不同，某些十进制小数无法被二进制浮点数精确表示。
+
+此外，Mio 不会在整数与浮点数之间自动进行隐式转换。
+
+例如：
+
+```mio title="DataType.mio"
+kaku number: int64 = 10;
+kaku result: float64 = float64(number);
+
+chant(result);
+```
+
+这里使用 `float64(number)` 将整数显式转换为浮点数。
+
+## 复数类型
+
+复数（Complex Number）是由实部和虚部组成的数值，通常写作 `a + bi`。
+
+**Mio V2.0 目前尚未提供内置的复数类型。**
+
+因此，`complex64`、`complex128` 等类型并不是 Mio V2.0 已支持的基础类型，也不能直接使用复数字面量进行计算。
+
+如果程序需要保存复数，可以通过结构体分别表示实部和虚部。
+
+例如：
+
+```mio title="DataType.mio"
+kata Complex {
+    real: float64;
+    imag: float64;
+}
+
+kaku number = Complex {
+    real: 3.0,
+    imag: 4.0
+};
+
+chant(number.real);
+chant(number.imag);
+```
+
+在上述示例中，`Complex` 是一个由开发者自定义的结构体，其中 `real` 表示实部，`imag` 表示虚部。
+
+这种方式可以保存复数数据，但不代表 Mio 已提供内置的复数运算能力。复数加法、乘法等操作需要自行实现。
+
+## 字符类型
+
+字符类型用于表示单个 Unicode 标量值。
+
+Mio 使用 `rune` 表示字符，`rune` 是 `int32` 类型的别名。
+
+字符字面量使用单引号 `'` 包围。
+
+例如：
+
+```mio title="DataType.mio"
+kaku letter: rune = 'A';
+kaku character: rune = '中';
+
+chant(letter);
+chant(character);
+```
+
+运行结果：
+
+```text
+65
+20013
+```
+
+这是因为 Mio 将 `rune` 按照整数值处理，`chant` 输出字符时会显示对应的 Unicode 码点数值。
+
+需要注意，字符和字符串并不相同。
+
+```mio title="DataType.mio"
+kaku character = 'A';
+kaku text = "A";
+```
+
+其中，`character` 为 `rune` 类型，而 `text` 为 `string` 类型。
+
+`string` 是 Mio 的内置字符串类型，用于保存 UTF-8 文本，可以包含多个 Unicode 字符。
+
+如果希望直接输出一个可阅读的字符，应当使用字符串形式：
+
+```mio title="DataType.mio"
+chant("A");
+chant("中");
+```
+
+运行结果：
+
+```text
+A
+中
+```
+
+Mio 的字符字面量也支持 `'\n'`、`'\t'`、`'\x41'`、`'\u4E2D'` 等转义写法。
+
+## 派生类型
+
+派生类型用于将已有的数据类型组合成更复杂的数据结构。
+
+Mio V2.0 支持数组、Map、结构体、枚举、函数类型和可空类型等形式。
+
+| 类型 | 表示方式 | 说明 |
+| --- | --- | --- |
+| 数组 | `[]T` | 保存相同元素类型的数据 |
+| Map | `Map<K, V>` | 保存键值对应的数据 |
+| 结构体 | `kata` | 将多个字段组合为一个类型 |
+| 枚举 | `sentaku` | 表示多种可能的变体 |
+| 函数类型 | `(T) -> R` | 表示接受参数并返回结果的函数 |
+| 可空类型 | `T?` | 表示值可以为 `T` 或 `mu` |
+
+### 数组
+
+数组用于保存多个相同类型的元素。
+
+```mio title="DataType.mio"
+kaku numbers: []int64 = [10, 20, 30];
+
+chant(numbers[0]);
+chant(numbers[1]);
+```
+
+数组中的元素从索引 `0` 开始访问。
+
+### Map
+
+Map 用于保存键值对。
+
+```mio title="DataType.mio"
+kaku scores = Map[string, int64]();
+
+scores["Mio"] = 100;
+
+kaku score = scores["Mio"];
+
+moshi (score != mu) {
+    chant(score);
+}
+```
+
+Map 的键可以使用整数、布尔值或字符串等受支持的类型。
+
+需要注意，读取不存在的键时会得到 `mu`，因此 Map 的读取结果是可空类型。
+
+### 结构体
+
+结构体通过 `kata` 关键字声明，可以将多个不同类型的字段组合在一起。
+
+```mio title="DataType.mio"
+kata User {
+    name: string;
+    age: int64;
+}
+
+kaku user = User {
+    name: "Mio",
+    age: 18
+};
+
+chant(user.name);
+chant(user.age);
+```
+
+在上述示例中，`User` 是一个自定义类型，包含 `name` 和 `age` 两个字段。
+
+### 枚举
+
+枚举类型（Enum）用于表示一个值可能存在的多种状态或不同形式的数据。
+
+Mio 使用 `sentaku` 关键字声明枚举类型，并通过不同的变体表示可能的取值。
+
+例如：
+
+```mio title="DataType.mio"
+sentaku Result<T, E> {
+    Ok(T);
+    Err(E);
+}
+
+waza get_value(result: Result<int64, string>) -> int64 {
+    awase (result) {
+        baai Ok(value) {
+            kaesu value;
+        }
+        baai Err(message) {
+            chant(message);
+            kaesu 0;
+        }
+    }
+}
+
+kaku result: Result<int64, string> = Result.Ok(42);
+
+chant(get_value(result));
+```
+
+运行结果：
+
+```text
+42
+```
+
+在上述示例中，`sentaku` 声明了一个名为 `Result` 的枚举类型，其中包含 `Ok` 和 `Err` 两个变体。
+
+`Result<T, E>` 使用泛型参数，允许不同变体保存不同类型的数据。
+
+`awase` 用于匹配枚举值，`baai` 则用于定义对应的处理分支。
+
+通过这种方式，我们可以使用枚举表示程序执行的不同结果，例如操作成功或发生错误。
+
+需要注意，Mio 的枚举匹配需要完整覆盖所有变体，否则编译器会报告错误。
+
+### 函数类型
+
+函数类型（Function Type）用于表示一个可以被调用的函数值。
+
+在 Mio 中，函数不仅可以通过 `waza` 声明，还可以作为值保存到变量中，并在需要时调用。
+
+函数类型使用 `(参数类型) -> 返回类型` 的形式表示。
+
+例如：
+
+```mio title="DataType.mio"
+kaku multiply: (int64, int64) -> int64 = waza (a: int64, b: int64) -> int64 {
+    kaesu a * b;
+};
+
+chant(multiply(6, 7));
+```
+
+
+在上述示例中，`(int64, int64) -> int64` 表示一个接收两个 `int64` 参数，并返回一个 `int64` 结果的函数类型。
+
+`waza (a: int64, b: int64) -> int64 { ... }` 是一个匿名函数表达式，它没有独立的函数名称，而是直接赋值给变量 `multiply`。
+
+随后，我们可以像调用普通函数一样，通过 `multiply(6, 7)` 执行这个函数。
+
+Mio 的函数类型还支持将函数作为参数传递，或作为其他函数的返回值。
+
+### 可空类型
+
+可空类型（Nullable Type）用于表示一个变量既可以保存指定类型的值，也可以保存空值 `mu`。
+
+Mio 使用 `?` 声明可空类型，例如 `int64?` 表示可空整数，`string?` 表示可空字符串。
+
+例如：
+
+```mio title="DataType.mio"
+kaku age: int64? = mu;
+
+moshi (age == mu) {
+    chant("年龄尚未设置");
+}
+
+age = 18;
+
+moshi (age != mu) {
+    chant(age + 1);
+}
+```
+
+
+在上述示例中，`age` 被声明为 `int64?` 类型，因此既可以保存整数，也可以保存 `mu`。
+
+程序首先通过 `age == mu` 判断变量是否为空，随后将 `18` 赋值给 `age`。
+
+当 `age != mu` 成立时，Mio 可以在对应的条件分支中将变量收窄为非空的 `int64` 类型，因此能够安全执行 `age + 1` 运算。
+
+可空类型可以用于表示尚未设置的数据、可能不存在的值以及可能失败的查询结果。
+
+需要注意，普通类型与可空类型并不相同。例如，`int64` 不能保存 `mu`，而 `int64?` 可以保存整数或空值。
+
+此外，Mio 不允许通过单独的 `mu` 推断变量类型，因此使用空值时通常需要明确指定可空类型。
+
+Mio 另外提供 `unit` 和 `resource` 等特殊内置类型。其中，`unit` 主要用于表示函数没有普通返回值，`resource` 用于表示受信任的宿主资源句柄，并不是可以随意创建的普通数值类型。
+
+## 零值
+
+零值（Zero Value）通常指某种数据类型在未明确设置其他值时所对应的基础值。
+
+需要注意，**Mio V2.0 的变量声明必须提供初始化表达式，不会像某些编程语言一样自动为未初始化变量填充零值。**
+
+例如，以下写法是不合法的：
+
+```text
+kaku number: int64;
+kaku enabled: bool;
+```
+
+正确的写法需要显式提供初始值：
+
+```mio title="DataType.mio"
+kaku number: int64 = 0;
+kaku price: float64 = 0.0;
+kaku enabled: bool = iie;
+kaku name: string = "";
+```
+
+上面的 `0`、`0.0`、`iie` 和 `""` 分别是这些变量显式指定的初始值，而不是编译器自动填入的默认值。
+
+对于数组与 Map，也可以显式创建空集合：
+
+```mio title="DataType.mio"
+kaku numbers: []int64 = [];
+kaku entries = Map[string, int64]();
+
+chant(len(numbers));
+```
+
+需要区分空集合和空值：`[]` 表示一个存在但不包含元素的数组，而 `mu` 表示没有值。
+
+## mu
+
+`mu` 是 Mio 中用于表示空值（Nil）的关键字。
+
+当某个变量可能没有有效值时，可以使用可空类型（Nullable Type）。
+
+可空类型通过在类型后添加 `?` 表示。
+
+例如：
+
+```mio title="DataType.mio"
+kaku age: int64? = mu;
+
+moshi (age == mu) {
+    chant("年龄尚未设置");
+}
+```
+
+其中，`int64?` 表示 `age` 可以保存 `int64` 类型的整数，也可以保存空值 `mu`。
+
+我们也可以在后续为变量赋予实际的数值：
+
+```mio title="DataType.mio"
+kaku age: int64? = mu;
+
+age = 18;
+
+moshi (age != mu) {
+    chant(age);
+}
+```
+
+运行结果：
+
+```text
+18
+```
+
+需要注意，`mu` 不是所有类型的通用零值，也不会自动赋给未初始化的普通变量。
+
+下面的代码无法通过类型检查：
+
+```text
+kaku value = mu;
+```
+
+因为编译器无法仅根据 `mu` 推断变量的具体可空类型。
+
+如果需要使用空值，应该明确指定类型：
+
+```mio title="DataType.mio"
+kaku value: int64? = mu;
+kaku message: string? = mu;
+```
+
+在 Mio 中，普通非空类型和可空类型存在区别。
+
+例如，`int64` 必须保存一个有效的整数，而 `int64?` 可以保存整数或 `mu`。
+
+对于可空变量，通常需要先判断其是否为 `mu`，再使用其中的实际值。
+
+此外，`mu` 与 `unit` 并不相同。`mu` 表示空值，而 `unit` 表示函数没有普通返回值。

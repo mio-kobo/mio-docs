@@ -13,6 +13,8 @@ npm run types:check
 npm run test:versions
 npm run check:versions
 npm run check:links
+npm run check:playground
+npm run check:tutorial
 npm run build
 npm run start -- --hostname 127.0.0.1 --port 3210
 BASE_URL=http://127.0.0.1:3210 npm run test:versions
@@ -49,6 +51,10 @@ DOCS_VERSION=v2.0 \
 
 运行时是独立 Worker 中的官方 Go `js/wasm` ABI：调用 `mioExecute(source, "run" | "check")`，按消息 ID 串行处理请求。执行超时为 10 秒，停止或超时会真实 `terminate()` Worker，下一次请求重新初始化。页面级共享一个 Worker，源码、输出、诊断和待处理请求数均有上限。
 
+Mio 示例不再在 Playground 下方重复渲染静态 stdout；结果、诊断与耗时统一由实时运行面板展示。CLI、Mochi、测试和 Native AOT 等独立命令的技术输出仍保留。逐字节 stdout 契约保存在 `fixtures/docs/playground-stdout.json`，供 CLI 验证脚本使用。
+
+`npm run check:playground` 会自动收集 `content/docs/` 中的所有 Mio 代码块，用真实的 `public/wasm/mio-worker.js`、`mio.wasm` 和 `wasm_exec.js` 执行，并检查分类、`check` 状态、`run` 状态、stdout、诊断和错误。预期值保存在 `fixtures/docs/playground-expectations.json`；`no-run`、`mode="test"` 和 WASM 未内置模块的示例会被明确分类而不执行。Mio 编译器或 WASM 升级后，先运行 `npm run update:playground`，审阅预期值差异，再提交。回归测试还覆盖多个示例连续执行、诊断后恢复、超时终止、Worker 中断和 WASM 加载失败；失败信息会列出对应的 `content/docs/...:行号` 与期望/实际结果。
+
 Playground 只内置 WASM 中的 `kiso/math`、`kiso/array`、`kiso/string`、`kiso/bytes`、`kiso/utf8`；依赖其他模块（如 `kiso/fs`、`kiso/testing`）的示例保持静态。不完整片段可用 `no-run` 元数据排除：
 
 ````md
@@ -58,6 +64,19 @@ math.sqrt(144.0);
 ````
 
 `mode="test"` 示例也不会自动接入，因为浏览器接口只有 `run` 与 `check`。
+
+
+## 交互式教程
+
+`/docs/v2.0/tutorials` 提供五课 MVP 教程：Hello World、变量、数值计算、条件分支、函数与返回值。课程正文是 MDX，练习元数据集中在 `lib/tutorial-data.ts`；`MioExercise` 复用现有 `runMio()` 和页面级 Worker，不复制编译器或 WASM 加载器。
+
+练习的“检查答案”会真实执行当前源码，并按稳定练习 ID 校验标准化 stdout，而不是读取或匹配前端源码字符串。运行、编译诊断、运行时错误、超时、停止和重置仍使用 Playground 的同一套运行时边界。完成状态、最后访问课程与每个练习的草稿保存在 `localStorage`（键 `mio-tutorial-progress-v1`）；服务端和首次客户端渲染都先显示稳定占位，再由 `useEffect` 读取，避免 hydration mismatch。
+
+```sh
+npm run check:tutorial
+```
+
+该测试用真实 `public/wasm/mio-worker.js`、`mio.wasm` 和 `wasm_exec.js` 验证五课的初始代码都是可编译、可运行的错误答案，五份参考答案都能通过 stdout 校验；同时覆盖诊断后恢复、停止后重新运行，以及进度/草稿存储和换行归一化。练习代码或预期输出变更后，先更新 `lib/tutorial-data.ts` 与测试参考答案，再运行该命令。
 
 
 ## 新增文档版本

@@ -1,0 +1,278 @@
+---
+title: 作用域
+description: Mio V2.0 词法作用域、名称遮蔽、局部变量和闭包捕获
+---
+
+## 作用域
+
+作用域（Scope）用于确定一个变量、函数参数或其他标识符可以在哪些位置被访问。
+
+Mio 使用词法作用域（Lexical Scope），也就是说，标识符能够被访问的范围由源代码中的声明位置和代码块结构决定。
+
+例如：
+
+```mio title="Scope.mio"
+kaku number = 10;
+
+moshi (hai) {
+    kaku message = "Hello";
+    chant(number);
+    chant(message);
+}
+
+chant(number);
+```
+
+在上述示例中，`number` 定义在外部作用域，因此内部代码块也能访问它。
+
+而 `message` 声明在 `moshi` 的代码块内，离开该代码块后就不能再通过这个名称访问它。
+
+### 全局作用域
+
+在 Mio 源文件顶层声明的普通变量属于当前程序或包的全局作用域。
+
+例如：
+
+```mio title="Scope.mio"
+kaku count = 0;
+
+waza increase() -> unit {
+    count = count + 1;
+}
+
+increase();
+increase();
+
+chant(count);
+```
+
+在上述示例中，`count` 在文件顶层声明。`increase` 函数可以访问并修改这个变量。
+
+对于同一个包中的源文件，包级声明可以在文件之间共享；跨包访问则遵守 `yobu` 导入和 `koukai` 公开规则。
+
+需要注意，Mio V2.0 不支持使用 `koukai kaku` 直接导出普通可变全局变量。
+
+### 局部作用域
+
+函数体、条件分支和循环体都会建立相应的局部作用域。
+
+在局部作用域中声明的变量，通常只能在该代码块及其内部代码块中访问。
+
+例如：
+
+```mio title="Scope.mio"
+waza show() -> unit {
+    kaku message = "Mio";
+    chant(message);
+}
+
+show();
+```
+
+在上述示例中，`message` 是 `show` 函数内部的局部变量。
+
+不能直接在函数外部使用 `message`，因为它不属于外部作用域。
+
+### 条件分支的作用域
+
+`moshi` 和 `sore` 各自拥有独立的代码块作用域。
+
+例如：
+
+```mio title="Scope.mio"
+kaku score = 75;
+
+moshi (score >= 60) {
+    kaku result = "及格";
+    chant(result);
+} sore {
+    kaku result = "不及格";
+    chant(result);
+}
+```
+
+在上述示例中，两个分支都声明了名为 `result` 的变量，但它们位于不同的局部作用域，因此不会构成同一作用域内的重复声明。
+
+这两个 `result` 都不能在对应的条件代码块外部直接访问。
+
+### 循环代码块的作用域
+
+`aida` 循环体也会创建局部作用域。
+
+```mio title="Scope.mio"
+kaku index = 0;
+
+aida (index < 3) {
+    kaku current = index;
+    chant(current);
+
+    index = index + 1;
+}
+```
+
+在上述示例中，`current` 是循环体内部的局部变量，而 `index` 声明在循环外部。
+
+每次执行循环体时，局部声明都属于当次执行的代码块。循环结束后，`current` 不会作为外部变量继续存在。
+
+如果需要在循环结束后继续使用计算结果，应当在循环外部声明保存结果的变量。
+
+### 标识符遮蔽
+
+Mio 允许在内层作用域中声明与外层相同名称的变量，这种行为称为遮蔽（Shadowing）。
+
+例如：
+
+```mio title="Scope.mio"
+kaku value = 10;
+
+moshi (hai) {
+    kaku value = 20;
+    chant(value);
+}
+
+chant(value);
+```
+
+在上述示例中，内层的 `value` 遮蔽了外层的同名变量。
+
+在条件代码块内，`value` 指向内层变量；离开代码块后，`value` 又指向外层变量。
+
+遮蔽并不会自动修改外层变量的值。
+
+### 声明与赋值的区别
+
+`kaku` 用于在当前作用域中声明新变量，而 `=` 赋值语句用于修改已经声明的变量。
+
+例如：
+
+```mio title="Scope.mio"
+kaku count = 10;
+
+moshi (hai) {
+    count = 20;
+}
+
+chant(count);
+```
+
+在上述示例中，`count = 20;` 修改的是外层已经存在的变量。
+
+而下面的写法会在内部创建新变量，并遮蔽外部变量：
+
+```mio title="Scope.mio"
+kaku count = 10;
+
+moshi (hai) {
+    kaku count = 20;
+    chant(count);
+}
+
+chant(count);
+```
+
+因此，在希望更新外部状态时，应使用赋值语句，而不是再次使用 `kaku` 声明同名变量。
+
+### 重复声明与先声明后使用
+
+Mio 不允许在同一个作用域内重复声明相同名称的普通变量。
+
+下面的写法不合法：
+
+```text
+kaku value = 10;
+kaku value = 20;
+```
+
+另外，普通变量应先声明再引用，不能直接使用尚未存在的变量名称。
+
+```text
+chant(number);
+kaku number = 10;
+```
+
+需要区分的是，文件顶层的具名函数支持提前引用：编译器会预先登记具名函数声明，因此可以在函数声明之前调用它。
+
+```mio title="Scope.mio"
+chant(double(21));
+
+waza double(value: int64) -> int64 {
+    kaesu value * 2;
+}
+```
+
+这一规则不意味着普通 `kaku` 变量也支持先使用后声明。
+
+### 函数参数的作用域
+
+函数参数属于函数内部可见的局部名称。
+
+例如：
+
+```mio title="Scope.mio"
+waza greet(name: string) -> unit {
+    kaku message = name;
+    chant(message);
+}
+
+greet("Mio");
+```
+
+在上述示例中，`name` 是函数参数，`message` 是函数局部变量。
+
+二者都只能在函数作用域及其内部代码块中直接访问。
+
+函数参数必须具有明确的类型标注，且不能在同一作用域中与其他声明重复使用同一个名称。
+
+### 枚举匹配分支的作用域
+
+使用 `awase` 匹配枚举时，`baai` 中绑定的关联数据也属于对应分支的局部作用域。
+
+例如：
+
+```mio title="Scope.mio"
+sentaku Result {
+    Ok(int64);
+    Err(string);
+}
+
+kaku result: Result = Result.Ok(42);
+
+awase (result) {
+    baai Ok(value) {
+        chant(value);
+    }
+    baai Err(message) {
+        chant(message);
+    }
+}
+```
+
+在上述示例中，`value` 只属于 `Ok` 分支，`message` 只属于 `Err` 分支。
+
+不能在匹配语句结束后直接使用这两个绑定名称。
+
+### 闭包与变量生命周期
+
+一般情况下，局部变量只在对应代码块中有效。但如果局部变量被闭包捕获，其存储可以随闭包继续保留。
+
+```mio title="Scope.mio"
+waza counter() -> () -> int64 {
+    kaku number = 0;
+
+    kaesu waza () -> int64 {
+        number = number + 1;
+        kaesu number;
+    };
+}
+
+kaku next = counter();
+
+chant(next());
+chant(next());
+```
+
+在上述示例中，`number` 是 `counter` 的局部变量，却被返回的匿名函数捕获。
+
+因此，即使 `counter()` 调用已经结束，闭包仍然可以继续访问并修改这份局部状态。
+
+Mio 的闭包遵循词法作用域，多个闭包如果捕获同一个可变变量，就会共享这个变量的更新。

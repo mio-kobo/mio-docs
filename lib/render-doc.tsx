@@ -6,8 +6,23 @@ import { source } from './source';
 import { defaultVersion, docsUrl, getVersion, versionLabel } from './versions.mjs';
 import { VersionNotice } from '@/components/version-notice';
 import { MioCodeBlock } from '@/components/mio-code-block';
+import { MioExerciseBlock } from '@/components/mio-exercise-block';
+import { TutorialLayout } from '@/components/tutorial-layout';
+import { TutorialProgress } from '@/components/tutorial-progress';
+import { TutorialLessonList } from '@/components/tutorial-lesson-list';
+import { ContinueLearning } from '@/components/continue-learning';
+import { TutorialNav } from '@/components/tutorial-nav';
 import { i18n } from './i18n';
-const mdxComponents = { ...defaultMdxComponents, pre: MioCodeBlock };
+const mdxComponents = {
+  ...defaultMdxComponents,
+  pre: MioCodeBlock,
+  MioExercise: MioExerciseBlock,
+  TutorialLayout,
+  TutorialProgress,
+  TutorialLessonList,
+  ContinueLearning,
+  TutorialNav,
+};
 const legacyOwned = new Set(['getting-started','learn','reference','kiso','tooling','internals']);
 function resolvePage(slugs: string[] = [], locale = 'zh-CN') {
   if (!(i18n.languages as string[]).includes(locale)) notFound();

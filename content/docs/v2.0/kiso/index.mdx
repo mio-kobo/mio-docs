@@ -1,83 +1,48 @@
 ---
-title: Kiso · 标准库参考
-description: 按真实导入路径查询 Mio v2.0.0 的标准库模块、签名、参数、返回值和错误约定。
+title: Bunko 标准库
+description: Mio V2.0.0 标准库使用指南与公开接口索引
 ---
 
-本栏目对应 **Mio v2.0.0**（标签 `v2.0.0`，提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`）。Bunko 是物理 `bunko/` 根，Kiso 是公开导入路径；例如 `yobu "kiso/math";`，不要加入 `bunko/` 前缀。
+## Bunko 标准库
 
-完整函数、类型与常量目录见 [Bunko API 参考](/docs/v2.0/kiso/api)；包规则与可运行示例见 [Bunko 与 Kiso API](/docs/bunko)。
+Bunko 是 Mio 的标准库集合，公开的基础模块使用 `kiso/` 作为导入路径。模块名称与源文件的物理目录相对应，使用时不应将 `bunko/` 加入导入语句。
 
-## 基础包索引
+本目录按 Mio **v2.0.0** 发布标签的实际源码整理，介绍已公开的类型、函数和常量。每个包独立成篇，文中示例采用 Mio 语法，不包含输出结果段落。
 
-| 导入路径 | 主要用途 |
-| --- | --- |
-| [kiso/array](/docs/v2.0/kiso/array) | 动态数组、容量、克隆、截断与批量追加 |
-| [kiso/bytes](/docs/v2.0/kiso/bytes) | 紧凑 `[]uint8` 操作与 `ByteBuffer` |
-| [kiso/convert](/docs/v2.0/kiso/convert) | 严格的整数、浮点数与布尔文本转换 |
-| [kiso/encoding/binary](/docs/v2.0/kiso/encoding-binary) | 定宽大小端、LEB128 与流式 Reader/Writer |
-| [kiso/encoding/mochi](/docs/v2.0/kiso/encoding-mochi) | Mochi v1–v14 解码、规范化与摘要 |
-| [kiso/fs](/docs/v2.0/kiso/fs) | 同步文件、目录与状态 |
-| [kiso/io](/docs/v2.0/kiso/io) | Reader/Writer 函数值与流复制 |
-| [kiso/math](/docs/v2.0/kiso/math) | 数值泛型、整数数学、浮点数学与常量 |
-| [kiso/path](/docs/v2.0/kiso/path) | 纯 Mio 逻辑路径操作 |
-| [kiso/string](/docs/v2.0/kiso/string) | UTF-8 字节操作与 `StringBuilder` |
-| [kiso/testing](/docs/v2.0/kiso/testing) | `mio test` 专用断言 |
-| [kiso/utf8](/docs/v2.0/kiso/utf8) | UTF-8 验证、解码与编码 |
+### 网页 Playground 与 CLI
 
-## 编译工具链包
+网页 Playground 当前仅内置 `kiso/math`、`kiso/array`、`kiso/string`、`kiso/bytes` 和 `kiso/utf8`。这五个模块的代码示例都能作为独立代码块编译：每段均包含自己的 `yobu` 语句。
 
-以下模块公开可导入，但属于工具链开发接口；API 不承诺稳定 ABI，也不表示所有程序都能通过 Native 后端：
+其余标准库和 AOT 工具链需要 Mio V2.0.0 CLI 与完整 Bunko。`kiso/testing` 则需要 `mio test`；对应示例不会显示网页运行按钮。
 
-| 导入路径 | 主要用途 |
-| --- | --- |
-| [kiso/aot/arm64](/docs/v2.0/kiso/aot-arm64) | ARM64 指令编码、fixup 与分支 |
-| [kiso/aot/lower](/docs/v2.0/kiso/aot-lower) | Mochi lowering |
-| [kiso/aot/lower/nativefs](/docs/v2.0/kiso/aot-lower-nativefs) | 原生文件系统桥接发射 |
-| [kiso/aot/lower/types](/docs/v2.0/kiso/aot-lower-types) | 表示、可达性与 CFG 分析 |
-| [kiso/aot/macho](/docs/v2.0/kiso/aot-macho) | Darwin Mach-O 镜像 |
+### 基础标准库
 
-## 如何读 API
+- [`kiso/math`](/docs/v2.0/kiso/math)：数学，17 个公开函数。
+- [`kiso/array`](/docs/v2.0/kiso/array)：数组，8 个公开函数。
+- [`kiso/string`](/docs/v2.0/kiso/string)：字符串，17 个公开函数。
+- [`kiso/bytes`](/docs/v2.0/kiso/bytes)：字节，18 个公开函数。
+- [`kiso/utf8`](/docs/v2.0/kiso/utf8)：UTF-8 编解码，7 个公开函数。
+- [`kiso/convert`](/docs/v2.0/kiso/convert)：类型转换，10 个公开函数。
+- [`kiso/path`](/docs/v2.0/kiso/path)：路径，8 个公开函数。
+- [`kiso/io`](/docs/v2.0/kiso/io)：输入输出，7 个公开函数。
+- [`kiso/fs`](/docs/v2.0/kiso/fs)：文件系统，16 个公开函数。
+- [`kiso/encoding/binary`](/docs/v2.0/kiso/encoding-binary)：二进制编码，61 个公开函数。
 
-每个函数先列源码原始签名，再说明输入、返回、错误和存储共享。`unit` 表示没有普通返回值；`T?` 用 `mu` 表示缺失；`Error?` 返回 `mu` 通常表示成功，返回非空错误表示失败。带 `error` 的 Result 应先检查错误再读有效负载。
+### 测试与格式库
 
-长度和偏移须看单位：数组按元素，字节与路径/字符串索引规则按各包说明。`clone` 的独立存储不必然意味着递归深复制。动态分配还受 VM 资源预算影响，返回错误值的 API 不保证能捕获一切资源错误。
+- [`kiso/testing`](/docs/v2.0/kiso/testing)：测试，2 个公开函数。
+- [`kiso/encoding/mochi`](/docs/v2.0/kiso/encoding-mochi)：Mochi 格式编码，5 个公开函数。
 
-## 快速示例
+### AOT 编译工具链
 
-```mio title="math.mio"
-yobu "kiso/math";
+这些包为工具链开发提供指令编码、类型分析和 Mach-O 生成等接口；不应将它们当作稳定的应用层 ABI。
 
-kaku value: float64 = 144.0;
-chant(math.sqrt(value));
-chant(math.gcd(84, 30));
-```
+- [`kiso/aot/arm64`](/docs/v2.0/kiso/aot-arm64)：ARM64 指令编码，63 个公开函数。
+- [`kiso/aot/lower`](/docs/v2.0/kiso/aot-lower)：AOT 降低编译，5 个公开函数。
+- [`kiso/aot/lower/nativefs`](/docs/v2.0/kiso/aot-lower-nativefs)：AOT NativeFS 桥接，6 个公开函数。
+- [`kiso/aot/lower/types`](/docs/v2.0/kiso/aot-lower-types)：AOT 类型分析，10 个公开函数。
+- [`kiso/aot/macho`](/docs/v2.0/kiso/aot-macho)：Mach-O 文件生成，5 个公开函数。
 
-```text title="output"
-12
-6
-```
+### 选择与使用
 
-```mio title="array.mio"
-yobu "kiso/array";
-
-kaku numbers = [10, 20];
-array.push(numbers, 30);
-chant(len(numbers));
-chant(numbers[2]);
-```
-
-```text title="output"
-3
-30
-```
-
-`yobu` 的默认限定名取路径末段，因此 `kiso/math` 使用 `math.sqrt(...)`，`kiso/array` 使用 `array.push(...)`。
-
-## 支持边界
-
-- 基础包在 Mochi VM 路径下记录和验证；Native 支持集合小于 VM。
-- `kiso/testing` 只在 `mio test` 环境注册，普通 `run` 不能使用。
-- `kiso/aot/*` 与 `kiso/encoding/mochi` 是工具链接口，公开声明不表示 API 稳定或自举已验收。
-- 私有 `__...` 原语与 `mio/fs/runtime` 宿主 ABI 不是普通 Kiso 公共兼容承诺。
-
-模块教程见 [Learn · 模块与数学库](/docs/v2.0/learn/modules)；类型规则见 [Reference · 类型](/docs/v2.0/reference/types)；验证范围见 [验证与来源](/docs/v2.0/tooling/verification)。
+使用数组、字符串或数字处理时，优先选择对应的基础包。涉及磁盘文件时请使用 `kiso/fs` 并检查返回错误；需要字节流时使用 `kiso/io`；测试请使用 `mio test` 和 `kiso/testing`。对于 `T?`、错误结果和共享引用，需要按照每个包的说明处理。

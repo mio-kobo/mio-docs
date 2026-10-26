@@ -1,108 +1,74 @@
 ---
-title: kiso/aot/lower
-description: 固定 V2 开发快照的签名、输入单位、结果与错误协议。
+title: AOT 降低编译
+description: Mio V2.0 AOT Lowering 库 kiso/aot/lower
 ---
 
-**V2.0 Development**，提交 `8b53a25142b0da1192a6c4868e807385d7bb50f9`。**V1.0 不提供本包**。公开声明不代表稳定 API；本页仅承诺此快照已有声明及明确列出的验证。
+## AOT 降低编译
 
-把已经解码验证的 Mochi File 降低为 ARM64 words、常量区与地址补丁。失败返回 LowerResult.error，不能使用失败结果中的机器码。此固定快照对 Closure/Cell 和不安全表示拒绝编译；没有工作树后续的 compile_with_heap 或 BranchOutOfRange 变体。
+AOT Lowering 模块将经过验证的 Mochi 字节码描述转换为用于生成 ARM64 可执行文件的指令字、常量区与地址修补记录。
 
-## 导入与检索
+这是工具链开发接口，普通 Mio 程序不应将它视为通用的 JIT 编译 API。
 
-导入路径为 `kiso/aot/lower`。以下签名不是可执行程序，参数名和类型逐字保留源码；函数行为与错误分开查阅。
+本模块属于 **AOT 编译工具链接口**，其公开声明不等于稳定的应用层 API；以下内容对应 `v2.0.0` 发布标签。
 
-`LowerError` · `LowerResult` · [error_code](#error_code) · [error_detail](#error_detail) · [compile](#compile) · [compile_gc_stress](#compile_gc_stress)
+### 导入包
 
-## 类型与常量
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
 
-```text
-koukai sentaku LowerError {
-    UnsupportedConstant;
-    UnsupportedOpcode(int64);
-    UnsupportedClosure;
-    InvalidFunction;
-    InvalidOperand(int64);
-    FrameTooLarge;
-    EncodeFailure;
-    UnsafeType(int64);
-    UnsupportedNative(int64);
-}
+通过 `yobu "kiso/aot/lower";` 导入本包，随后使用 `lower.函数名(...)` 调用。
 
-koukai kata LowerResult {
-    words: []uint32;
-    constants: []uint8;
-    patches: []macho.AddressPatch;
-    globals: int64;
-    error: LowerError?;
-}
-```
-
-类型字段为实际公开布局；复制含数组字段的值仍共享数组。不得把公开字段解释为可安全伪造内部状态的许可。
-
-## 函数
-
-### error_code
-
-```text
-koukai waza error_code(value: LowerError) -> int64
-```
-
-参数：`value`：当前函数要处理的值或对象，类型见签名。
-
-把 LowerError 映射为整数分类；InvalidOperand 将 detail 叠加到 5000，其余按源码枚举分支映射，不将编号当作系统 errno。
-
-[源码：lower.mio:36](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/lower.mio#L36)。
-
-### error_detail
-
-```text
-koukai waza error_detail(value: LowerError) -> int64
-```
-
-参数：`value`：当前函数要处理的值或对象，类型见签名。
-
-返回错误关联 detail；UnsupportedOpcode 的 detail 编码函数、字节偏移与 opcode，其他无载荷变体返回 0。
-
-[源码：lower.mio:54](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/lower.mio#L54)。
-
-### compile
-
-```text
-koukai waza compile(file: mochi.File) -> LowerResult
-```
-
-参数：`file`：经 Mochi 解码验证的 File。
-
-执行默认 lowering，返回 LowerResult；必须先检查 error，资源和 opcode 限制以本提交实现为准。
-
-[源码：lower.mio:1377](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/lower.mio#L1377)。
-
-### compile_gc_stress
-
-```text
-koukai waza compile_gc_stress(file: mochi.File) -> LowerResult
-```
-
-参数：`file`：经 Mochi 解码验证的 File。
-
-执行 GC stress lowering，返回 LowerResult；用于在对象安全分配入口施加额外收集，不等于完整自举验收。
-
-[源码：lower.mio:1381](https://github.com/mio-kobo/mio/blob/8b53a25142b0da1192a6c4868e807385d7bb50f9/bunko/kiso/aot/lower/lower.mio#L1381)。
-
-## 最小示例与验证范围
-
-保存为 `main.mio`，使用本版本的 `mio check main.mio` 与 `mio run main.mio`；输出逐字节记录。此例只验证下面使用的接口，不覆盖本包所有编码或 Runtime 分支。
-
-```mio title="main.mio"
+```mio title="Stdlib.mio"
 yobu "kiso/aot/lower";
+```
+
+### 编译结果
+
+`compile` 接收已经解码的 `mochi.File`，返回 `LowerResult`。成功结果包含 `words`、`constants`、`patches` 和 `globals`；失败时 `error` 非空。
+
+### GC 压力和堆大小
+
+`compile_gc_stress` 采用 GC 压力配置；`compile_with_heap` 允许指定容量和 `gc_stress`。这是 v2.0.0 确认存在的公开函数，旧文档可能没有包含。
+
+### 错误分类
+
+`error_code` 和 `error_detail` 可从 `LowerError` 获取便于工具分析的数字类别与详细信息。这些数值不等同于操作系统的 errno。
+
+```mio title="Lower.mio" no-run
+yobu "kiso/aot/lower";
+
+kaku error = lower.LowerError.UnsupportedConstant();
+chant(lower.error_code(error));
+```
+
+### 公开类型
+
+- `LowerError`：不支持的操作码、无效操作数、表示限制等降低编译错误枚举。
+- `LowerResult { words: []uint32; constants: []uint8; patches: []macho.AddressPatch; globals: int64; error: LowerError?; }`：机器指令、常量区和修补记录。
+
+### 公开函数（5 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `error_code` | `error_code(value: LowerError) -> int64` | 返回工具链定义的降低编译错误代码。 |
+| `error_detail` | `error_detail(value: LowerError) -> int64` | 返回错误对应的细节编号。 |
+| `compile` | `compile(file: mochi.File) -> LowerResult` | 使用默认设置降低已验证的 Mochi 文件。 |
+| `compile_gc_stress` | `compile_gc_stress(file: mochi.File) -> LowerResult` | 在 GC 压力模式下降低文件。 |
+| `compile_with_heap` | `compile_with_heap(file: mochi.File, capacity: int64, gc_stress: bool) -> LowerResult` | 指定堆容量与 GC 压力模式执行降低编译。 |
+
+### 完整示例
+
+```mio title="Lower.mio" no-run
+yobu "kiso/aot/lower";
+
 kaku error = lower.LowerError.UnsupportedConstant();
 chant(lower.error_code(error));
 chant(lower.error_detail(error));
 ```
 
-```text title="output"
-1
-0
-```
+### 使用限制
 
-完整输入哈希、命令及输出见仓库 `verification/content-quality/results.json`。声明资料与执行覆盖分别记录；没有在此证明原生代码执行或 Compiler A→B 验收。
+应先通过 `kiso/encoding/mochi` 对输入进行解码与验证，调用降低编译后检查 `LowerResult.error`。不是所有 Mochi 指令或数据表示都适合当前 AOT 路径，失败时不能把部分生成的数据视为可执行代码。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/aot/lower/lower.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/aot/lower/lower.mio)。

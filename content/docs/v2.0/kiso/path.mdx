@@ -1,116 +1,84 @@
 ---
-title: kiso/path
-description: 公开签名、参数、返回值、错误与经过 VM 验证的使用示例。
+title: 路径
+description: Mio V2.0 路径处理标准库 kiso/path
 ---
 
-**版本范围：Mio v2.0.0 正式版**，源码提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`；Go 引导 CLI / Mochi VM。
+## 路径
 
-完整索引见 [Bunko API 参考](/docs/v2.0/kiso/api)；本页保留逐函数签名、参数、返回值、错误与示例。
+路径标准库（Path）提供路径清理、拼接、扩展名提取、目录与文件名分离等操作。
 
-固定 / 的逻辑路径处理，全部在 Mio 中实现，不访问文件系统、不解析符号链接。不识别 Windows 盘符、UNC 或反斜杠。
+本包处理以 `/` 为分隔符的**逻辑路径字符串**，不会实际访问文件系统，也不会解析符号链接。
 
-支持范围：本页示例通过 Go 引导 CLI / Mochi VM 验证；错误分支覆盖范围见 [验证报告](/docs/v2.0/tooling/verification)，不表示每个函数的每条分支均实测。Native AOT 与纯 Mio 后端需按 [当前阶段](/docs/v2.0/internals/native-aot) 单独评估。
+本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
 
-## 公开类型与常量
+### 导入包
 
-以下是精确源码声明，属于签名资料；字段可见性不意味着可任意破坏构造器不变式。
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
 
-```text
-koukai kata SplitResult { dir: string; base: string; }
-```
+通过 `yobu "kiso/path";` 导入本包，随后使用 `path.函数名(...)` 调用。
 
-## 函数索引
-
-[clean](#clean) · [join](#join) · [join_all](#join_all) · [is_abs](#is_abs) · [base](#base) · [dir](#dir) · [ext](#ext) · [split](#split)
-
-## 函数
-
-签名中的参数名及类型保持源码原样；下文说明参数含义、返回值及错误。除明确返回错误值的路径外，数组分配、转换和 VM 指令预算等资源限制仍可能导致运行时错误。
-
-### clean
-
-```text
-koukai waza clean(value: string) -> string
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下。
-
-清理 value 的重复 /、. 与可抵消的 ..；空输入返回 .，绝对路径不越根。
-
-### join
-
-```text
-koukai waza join(left: string, right: string) -> string
-```
-
-参数：`left`：左侧输入；`right`：右侧输入。
-
-用 / 连接 left/right 后 clean；right 的前导 / 不会丢弃 left。
-
-### join_all
-
-```text
-koukai waza join_all(parts: []string) -> string
-```
-
-参数：`parts`：按顺序拼接的路径段字符串数组。
-
-用 / 连接 parts 后 clean；无元素返回 .。
-
-### is_abs
-
-```text
-koukai waza is_abs(value: string) -> bool
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下。
-
-返回 value 是否以 / 开头。
-
-### base
-
-```text
-koukai waza base(value: string) -> string
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下。
-
-返回清理后最后路径段；/、.、.. 保留自身。
-
-### dir
-
-```text
-koukai waza dir(value: string) -> string
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下。
-
-返回清理后目录部分；无分隔符返回 .。
-
-### ext
-
-```text
-koukai waza ext(value: string) -> string
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下。
-
-返回 base 最后一个非首位点及其后缀；.env 无扩展名。
-
-### split
-
-```text
-koukai waza split(value: string) -> SplitResult
-```
-
-参数：`value`：本次操作的输入值，返回语义及限制如下。
-
-返回 clean 后的 dir/base 组合，不保留原始尾斜线。
-
-## 完整示例
-
-```mio fixture="path"
+```mio title="Stdlib.mio"
 yobu "kiso/path";
+```
+
+### 清理与拼接
+
+`clean` 去除冗余分隔符和可抵消的 `.`、`..`。`join` 处理两个部分，`join_all` 按顺序连接字符串数组并清理结果。
+
+```mio title="Path.mio" no-run
+yobu "kiso/path";
+
+chant(path.clean("/a//b/../c/"));
+chant(path.join("docs", "v2/guide.mio"));
+```
+
+### 判断与拆分
+
+`is_abs` 判断路径是否以 `/` 开头；`base`、`dir`、`ext` 分别取得基本名称、目录和扩展名。
+
+```mio title="Path.mio" no-run
+yobu "kiso/path";
+
+chant(path.base("docs/hello.mio"));
+chant(path.ext("docs/hello.mio"));
+```
+
+### SplitResult
+
+`split` 返回结构体，其 `dir` 和 `base` 字段分别是清理后的目录部分与末段名称。
+
+```mio title="Path.mio" no-run
+yobu "kiso/path";
+
+kaku result = path.split("docs/main.mio");
+chant(result.dir);
+chant(result.base);
+```
+
+### 公开类型
+
+- `SplitResult { dir: string; base: string; }`：分离目录与末段名称的返回结果。
+
+### 公开函数（8 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `clean` | `clean(value: string) -> string` | 清理路径中的重复分隔符、`.` 和可抵消的 `..`。 |
+| `join` | `join(left: string, right: string) -> string` | 连接两个路径片段并清理。 |
+| `join_all` | `join_all(parts: []string) -> string` | 连接数组中的全部路径片段并清理。 |
+| `is_abs` | `is_abs(value: string) -> bool` | 判断路径是否以 `/` 开始。 |
+| `base` | `base(value: string) -> string` | 返回路径最后一段。 |
+| `dir` | `dir(value: string) -> string` | 返回清理后的目录部分。 |
+| `ext` | `ext(value: string) -> string` | 返回基本名称中的扩展名，`.env` 不视为有扩展名。 |
+| `split` | `split(value: string) -> SplitResult` | 返回包含 `dir` 和 `base` 的结果结构体。 |
+
+### 完整示例
+
+```mio title="Path.mio" no-run
+yobu "kiso/path";
+
 chant(path.clean("/a//b/../c/"));
 chant(path.clean(""));
 chant(path.join("a", "/b"));
@@ -120,21 +88,8 @@ chant(result.dir);
 chant(result.base);
 ```
 
-预期 stdout（逐字节匹配，末尾有换行）：
+### 使用限制
 
-```text title="output"
-/a/c
-.
-a/b
+这里的路径算法不认识 Windows 盘符、UNC 路径或反斜杠，也不验证文件是否存在。特别注意 `join("a", "/b")` 的规则不同于某些语言的路径库：第二段以 `/` 开头不代表自动抛弃第一段。
 
-a
-b.mio
-```
-
-## 源码
-
-- `bunko/kiso/path/path.mio`
-
-公开声明逐项核对本版本源码；文件哈希与真实命令见仓库 `verification/content-quality/results.json`。声明一致性不代表全部行为分支已经执行。
-
-精确来源：[bunko/kiso/path/path.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/path/path.mio)。
+源码依据：[Mio v2.0.0 · `bunko/kiso/path/path.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/path/path.mio)。

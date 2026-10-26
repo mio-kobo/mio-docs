@@ -1,0 +1,414 @@
+---
+title: 映射表
+description: Mio V2.0 映射表
+---
+
+## 映射表
+
+映射表（Map）是一种用于存储键值对（Key-Value Pair）的数据结构。
+
+在 Mio 中，我们可以通过映射表将一个键与对应的值关联起来，并通过键快速查找和修改数据。
+
+与数组不同，映射表不需要通过连续的整数索引访问元素，而是可以使用字符串、整数或布尔值作为键。
+
+例如：
+
+```mio title="Map.mio"
+kaku scores = Map[string, int64]();
+
+scores["Mio"] = 100;
+scores["Haruka"] = 95;
+
+kaku score = scores["Mio"];
+
+moshi (score != mu) {
+    chant(score);
+}
+```
+
+运行结果：
+
+```text
+100
+```
+
+在上述示例中，`Map[string, int64]()` 创建了一个映射表。
+
+其中，`string` 表示键的类型，`int64` 表示值的类型。
+
+我们通过 `scores["Mio"] = 100;` 添加一组键值对，再通过 `scores["Mio"]` 读取对应的值。
+
+Mio V2.0 支持映射表的创建、插入、读取和更新等基本操作。
+
+### 创建映射表
+
+Mio 使用 `Map<K, V>` 表示映射表类型。
+
+其中，`K` 表示键（Key）的类型，`V` 表示值（Value）的类型。
+
+创建映射表时，需要使用 `Map[K, V]()` 构造表达式。
+
+基本语法如下：
+
+```text
+kaku 变量名 = Map[键类型, 值类型]();
+```
+
+例如：
+
+```mio title="Map.mio"
+kaku ages = Map[string, int64]();
+kaku names = Map[int64, string]();
+kaku states = Map[bool, string]();
+```
+
+在上述示例中，我们分别创建了三个映射表。
+
+`ages` 使用字符串作为键、整数作为值；`names` 使用整数作为键、字符串作为值；`states` 则使用布尔值作为键、字符串作为值。
+
+需要注意，Mio 的映射表类型声明与构造表达式使用不同的语法。
+
+例如：
+
+```mio title="Map.mio"
+kaku ages: Map<string, int64> = Map();
+```
+
+这里的 `Map<string, int64>` 是类型标注，而 `Map()` 是创建映射表的构造表达式。
+
+因为变量已经明确指定了映射表类型，所以构造时可以省略类型参数。
+
+如果没有明确的类型上下文，就需要使用 `Map[K, V]()` 指定类型，不能仅通过空的 `Map()` 自动推断键和值的类型。
+
+### 映射表的键类型
+
+Mio 的映射表要求键必须是可哈希（Hashable）的类型。
+
+Mio V2.0 支持以下类型作为映射表的键：
+
+| 键类型 | 说明 |
+| --- | --- |
+| `int8` | 8 位有符号整数 |
+| `int16` | 16 位有符号整数 |
+| `int32` | 32 位有符号整数 |
+| `int64` | 64 位有符号整数 |
+| `uint8` | 8 位无符号整数 |
+| `uint16` | 16 位无符号整数 |
+| `uint32` | 32 位无符号整数 |
+| `bool` | 布尔值 |
+| `string` | 字符串 |
+
+其中，`rune` 是 `int32` 的类型别名，也可以作为整数键类型使用。
+
+例如：
+
+```mio title="Map.mio"
+kaku messages = Map[int64, string]();
+
+messages[1] = "Hello";
+messages[2] = "Mio";
+
+kaku message = messages[2];
+
+moshi (message != mu) {
+    chant(message);
+}
+```
+
+在上述示例中，映射表使用 `int64` 作为键，`string` 作为值。
+
+因此，可以通过整数键 `1` 和 `2` 保存不同的字符串。
+
+需要注意，Mio V2.0 不支持将 `float32`、`float64`、数组或结构体等类型直接作为映射表的键。
+
+映射表的键类型在创建时确定，后续使用的键必须与声明的类型一致。
+
+### 添加键值对
+
+映射表创建后，可以通过索引赋值语法添加键值对。
+
+基本语法如下：
+
+```text
+映射表[键] = 值;
+```
+
+例如：
+
+```mio title="Map.mio"
+kaku scores = Map[string, int64]();
+
+scores["Mio"] = 100;
+scores["Haruka"] = 95;
+scores["Yuki"] = 90;
+
+kaku score = scores["Haruka"];
+
+moshi (score != mu) {
+    chant(score);
+}
+```
+
+在上述示例中，我们向 `scores` 映射表中添加了三个键值对。
+
+每个键对应一个整数值，程序可以通过指定的键读取对应的数据。
+
+需要注意，映射表中的键和值都必须符合创建时指定的数据类型。
+
+例如：
+
+```text
+kaku scores = Map[string, int64]();
+
+scores[10] = 100;       // 键类型不正确
+scores["Mio"] = "100";  // 值类型不正确
+```
+
+上述写法无法通过类型检查，因为 `scores` 要求键为 `string`，值为 `int64`。
+
+### 读取映射表
+
+Mio 使用 `映射表[键]` 的形式读取映射表中的值。
+
+例如：
+
+```mio title="Map.mio"
+kaku scores = Map[string, int64]();
+
+scores["Mio"] = 100;
+
+kaku score = scores["Mio"];
+
+moshi (score != mu) {
+    chant(score);
+}
+```
+
+
+需要注意，**Mio 的映射表读取结果是可空类型**。
+
+这是因为我们访问的键可能并不存在。
+
+例如，对于 `Map<string, int64>`，读取结果的类型为 `int64?`，而不是普通的 `int64`。
+
+因此，读取映射表后通常需要检查结果是否为 `mu`，再将其作为普通整数使用。
+
+### 处理不存在的键
+
+当访问映射表中不存在的键时，Mio 不会自动返回整数 `0` 或空字符串，而是返回空值 `mu`。
+
+例如：
+
+```mio title="Map.mio"
+kaku scores = Map[string, int64]();
+
+scores["Mio"] = 100;
+
+kaku score = scores["Unknown"];
+
+moshi (score == mu) {
+    chant("没有找到对应的成绩");
+} sore {
+    chant(score);
+}
+```
+
+在上述示例中，映射表只保存了 `"Mio"` 对应的成绩，并不存在 `"Unknown"` 这个键。
+
+因此，读取结果为 `mu`，程序执行第一个条件分支。
+
+我们也可以使用 `!= mu` 判断读取结果是否包含有效值：
+
+```mio title="Map.mio"
+kaku scores = Map[string, int64]();
+
+scores["Mio"] = 100;
+
+kaku score = scores["Mio"];
+
+moshi (score != mu) {
+    chant(score + 10);
+}
+```
+
+这里的 `score` 是一个可空整数。
+
+当 `score != mu` 成立时，Mio 可以在对应的条件分支中将其收窄为非空的 `int64` 类型，因此能够安全执行 `score + 10`。
+
+需要注意，如果映射表的值类型本身允许 `mu`，那么读取结果为 `mu` 既可能表示键不存在，也可能表示该键保存了空值。仅通过 `== mu` 不能区分这两种情况。
+
+### 更新映射表
+
+如果映射表中已经存在某个键，我们可以通过相同的赋值语法修改其对应的值。
+
+例如：
+
+```mio title="Map.mio"
+kaku scores = Map[string, int64]();
+
+scores["Mio"] = 80;
+
+scores["Mio"] = 100;
+
+kaku score = scores["Mio"];
+
+moshi (score != mu) {
+    chant(score);
+}
+```
+
+在上述示例中，我们首先将 `"Mio"` 对应的成绩设置为 `80`。
+
+随后，通过 `scores["Mio"] = 100;` 将其修改为 `100`。
+
+由于键已经存在，新的值会覆盖原来的值。
+
+因此，在 Mio 中，添加键值对和更新键值对使用相同的语法。
+
+### 映射表的共享引用
+
+Mio 的映射表采用共享引用语义。
+
+这意味着，将一个映射表赋值给另一个变量时，不会自动创建一个独立的映射表。
+
+例如：
+
+```mio title="Map.mio"
+kaku scores = Map[string, int64]();
+
+scores["Mio"] = 80;
+
+kaku other = scores;
+
+other["Mio"] = 100;
+
+kaku score = scores["Mio"];
+
+moshi (score != mu) {
+    chant(score);
+}
+```
+
+在上述示例中，`other` 与 `scores` 引用的是同一个映射表。
+
+因此，通过 `other["Mio"] = 100;` 修改数据后，使用 `scores["Mio"]` 也能够读取到修改后的值。
+
+需要注意，普通赋值并不意味着复制映射表中的全部键值对。
+
+如果希望不同的数据互不影响，需要创建新的映射表，并按照实际需求重新写入数据。
+
+### 将映射表作为函数参数
+
+Mio 允许将映射表作为函数参数传递。
+
+函数参数可以使用 `Map<K, V>` 指定需要接收的映射表类型。
+
+例如：
+
+```mio title="Map.mio"
+waza set_score(scores: Map<string, int64>, name: string, score: int64) -> unit {
+    scores[name] = score;
+}
+
+kaku scores = Map[string, int64]();
+
+set_score(scores, "Mio", 100);
+
+kaku result = scores["Mio"];
+
+moshi (result != mu) {
+    chant(result);
+}
+```
+
+在上述示例中，我们定义了一个名为 `set_score` 的函数。
+
+其中，`scores: Map<string, int64>` 表示函数接收一个字符串到整数的映射表。
+
+函数通过 `scores[name] = score;` 添加或更新对应的成绩。
+
+由于 Mio 的映射表采用共享引用语义，因此函数内部的修改会影响调用者传入的映射表。
+
+通过这种方式，我们可以将映射表的修改逻辑封装到函数中，提高代码的复用性。
+
+### 布尔值作为键
+
+除了字符串和整数，Mio 还支持使用 `bool` 作为映射表的键。
+
+例如：
+
+```mio title="Map.mio"
+kaku states = Map[bool, string]();
+
+states[hai] = "启用";
+states[iie] = "禁用";
+
+kaku state = states[hai];
+
+moshi (state != mu) {
+    chant(state);
+}
+```
+
+在上述示例中，映射表使用 `bool` 类型作为键。
+
+其中，`hai` 和 `iie` 分别对应不同的字符串值。
+
+因此，我们可以根据布尔值直接读取相应的数据。
+
+### 映射表与数组的区别
+
+虽然映射表和数组都可以用于保存多个数据，但二者的访问方式不同。
+
+数组通过整数索引访问元素，而映射表通过指定类型的键访问数据。
+
+| 特性 | 数组 | 映射表 |
+| --- | --- | --- |
+| 类型表示 | `[]T` | `Map<K, V>` |
+| 访问方式 | 整数索引 | 键 |
+| 索引起点 | 从 `0` 开始 | 没有固定的连续索引 |
+| 数据类型 | 相同类型的元素 | 指定的键和值类型 |
+| 数据修改 | 支持 | 支持 |
+| 共享引用 | 支持 | 支持 |
+| 不存在的索引或键 | 越界产生运行时错误 | 返回 `mu` |
+| 长度查询 | 支持 `len()` | V2.0 尚无公开长度 API |
+
+例如，当我们需要按顺序保存一组整数时，可以使用数组：
+
+```mio title="Map.mio"
+kaku numbers = [10, 20, 30];
+
+chant(numbers[0]);
+```
+
+而当我们需要通过名称关联对应的数据时，则可以使用映射表：
+
+```mio title="Map.mio"
+kaku scores = Map[string, int64]();
+
+scores["Mio"] = 100;
+
+kaku result = scores["Mio"];
+
+moshi (result != mu) {
+    chant(result);
+}
+```
+
+因此，应当根据实际的数据组织方式选择合适的集合类型。
+
+### 映射表的注意事项
+
+在 Mio V2.0 中，使用映射表时需要注意以下规则：
+
+- 映射表类型使用 `Map<K, V>` 表示。
+- 创建映射表使用 `Map[K, V]()`，也可以在明确类型上下文中使用 `Map()`。
+- 映射表的键必须是受支持的整数、布尔值或字符串类型。
+- 添加和更新键值对都使用 `映射表[键] = 值;`。
+- 读取映射表中的值会得到可空类型 `V?`。
+- 当键不存在时，读取结果为 `mu`，不会自动返回对应类型的零值。
+- 使用可空读取结果前，通常需要先判断它是否为 `mu`。
+- 映射表赋值与函数传参采用共享引用语义，不会自动复制全部键值对。
+- Mio V2.0 尚未提供公开的映射表删除、键值遍历或长度查询 API。
+
+此外，映射表的键和值具有确定的数据类型，不能在同一个映射表中随意混用不同类型的键和值。

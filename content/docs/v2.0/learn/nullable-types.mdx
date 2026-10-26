@@ -1,0 +1,233 @@
+---
+title: 可空类型
+description: Mio V2.0 可空类型、mu、非空判断与类型收窄
+---
+
+## 可空类型
+
+可空类型（Nullable Type）用于表示一个值既可以保存指定类型的数据，也可以表示数据不存在。
+
+Mio 使用 `?` 标记可空类型，使用 `mu` 表示空值。
+
+例如：
+
+```mio title="Nullable.mio"
+kaku age: int64? = mu;
+
+moshi (age == mu) {
+    chant("年龄尚未设置");
+}
+
+age = 18;
+
+moshi (age != mu) {
+    chant(age);
+}
+```
+
+在上述示例中，`age` 是一个 `int64?` 类型的变量。它既可以保存 `int64` 整数，也可以保存 `mu`。
+
+### 声明可空类型
+
+Mio 的可空类型使用 `T?` 表示，其中 `T` 是原本的数据类型。
+
+基本声明格式如下：
+
+```text
+kaku 变量名: 类型? = 初始值;
+```
+
+例如：
+
+```mio title="Nullable.mio"
+kaku age: int64? = mu;
+kaku name: string? = "Mio";
+kaku enabled: bool? = hai;
+```
+
+在上述示例中，`age` 初始为空值，`name` 和 `enabled` 则分别保存有效的字符串和布尔值。
+
+普通的 `T` 类型可以赋给相应的 `T?` 类型，但不能未经检查便将 `T?` 直接当作 `T` 使用。
+
+### mu 空值
+
+`mu` 是 Mio 的空值字面量，用于表示某个可空值目前不存在。
+
+需要注意，Mio 不能仅根据 `mu` 推断变量的具体数据类型。
+
+例如，下面的声明不合法：
+
+```text
+kaku value = mu;
+```
+
+正确的写法需要明确指定可空类型：
+
+```mio title="Nullable.mio"
+kaku value: int64? = mu;
+```
+
+此外，`mu` 并不等于数值 `0`、布尔值 `iie` 或空字符串 `""`。这些都是对应类型的有效数据，而 `mu` 表示没有值。
+
+`mu` 也不等于 `unit`。`unit` 用来表示函数没有普通返回值，不能把它当成一般的空值使用。
+
+### 判断是否为空
+
+我们可以通过 `==` 和 `!=` 判断可空变量是否为 `mu`。
+
+```mio title="Nullable.mio"
+kaku score: int64? = mu;
+
+moshi (score == mu) {
+    chant("没有分数");
+} sore {
+    chant(score);
+}
+```
+
+当 `score == mu` 成立时，程序执行第一个分支；如果不成立，就进入 `sore` 分支。
+
+### 非空类型收窄
+
+Mio 支持通过条件判断缩小变量的可能类型，这称为类型收窄（Type Narrowing）。
+
+例如：
+
+```mio title="Nullable.mio"
+kaku score: int64? = 90;
+
+moshi (score != mu) {
+    chant(score + 10);
+}
+```
+
+在上述示例中，`score` 原本是 `int64?` 类型，不能直接参与普通整数加法。
+
+但在 `score != mu` 成立的分支中，编译器可以确认这个局部变量不是空值，因此允许将它按 `int64` 使用。
+
+同样，当 `score == mu` 不成立时，也可以在对应的 `sore` 分支中使用非空的 `score`。
+
+需要注意，这种收窄主要适用于明确的变量引用与 `mu` 比较，并不意味着任意复杂表达式都可以自动获得相同的收窄结果。
+
+### 变量修改与收窄失效
+
+类型收窄依赖先前建立的非空判断。如果变量在之后被重新赋值为空值，原先的判断就不再有效。
+
+例如，下面的代码无法通过类型检查：
+
+```text
+kaku score: int64? = 90;
+
+moshi (score != mu) {
+    score = mu;
+    chant(score + 1);
+}
+```
+
+这里的 `score = mu;` 已经改变变量状态，不能再把 `score` 当作普通的 `int64` 使用。
+
+此外，闭包或函数调用可能修改外部可见的变量，因此编译器可能在调用后清除相关的非空事实。
+
+### 在函数中使用可空类型
+
+可空类型可以用于函数参数和返回类型。
+
+```mio title="Nullable.mio"
+waza next(value: int64?) -> int64? {
+    moshi (value == mu) {
+        kaesu mu;
+    }
+
+    kaesu value + 1;
+}
+
+kaku result = next(10);
+
+moshi (result != mu) {
+    chant(result);
+}
+```
+
+在上述示例中，`next` 接收一个可空整数，并返回一个可空整数。
+
+如果参数为 `mu`，函数直接返回 `mu`；否则在确认非空后执行整数运算。
+
+这种方式适合表示可能没有结果的查找或计算。
+
+### 可空数组元素
+
+Mio 可以让数组的元素为可空类型。例如，`[]int64?` 表示一个元素类型为 `int64?` 的数组。
+
+```mio title="Nullable.mio"
+kaku values: []int64? = [10, mu, 30];
+
+kaku first = values[0];
+kaku second = values[1];
+
+moshi (first != mu) {
+    chant(first);
+}
+
+chant(second == mu);
+```
+
+在上述示例中，数组本身存在，但某些元素可以为 `mu`。
+
+取出的可空元素应当先保存在局部变量中，再根据是否为 `mu` 决定如何使用。
+
+### 可空数组与可空元素的区别
+
+Mio 需要区分数组本身可空，以及数组中的元素可空这两种情况。
+
+| 类型 | 含义 |
+| --- | --- |
+| `[]int64?` | 数组存在，但每个元素可以为 `mu` |
+| `([]int64)?` | 整个数组可以为 `mu`，数组元素为普通 `int64` |
+
+例如：
+
+```mio title="Nullable.mio"
+kaku optional: ([]int64)? = mu;
+
+optional = [10, 20];
+
+moshi (optional != mu) {
+    chant(len(optional));
+}
+```
+
+这里必须先判断数组变量本身是否为 `mu`，随后才能在非空分支中调用 `len()`。
+
+### 映射表与可空结果
+
+在 Mio 中，读取映射表中的键会得到可空类型，因为键可能不存在。
+
+例如：
+
+```mio title="Nullable.mio"
+kaku scores = Map[string, int64]();
+
+scores["Mio"] = 100;
+
+kaku score = scores["Mio"];
+
+moshi (score != mu) {
+    chant(score);
+}
+
+chant(scores["Unknown"] == mu);
+```
+
+对于 `Map<string, int64>`，索引读取结果为 `int64?`，而不是 `int64`。
+
+如果映射表的值本身已经是可空类型，直接读取并判断 `mu` 无法区分“没有这个键”和“键存在但对应值为 `mu`”。
+
+### 可空类型的限制
+
+Mio V2.0 不允许将 `unit` 声明为可空类型，因此 `unit?` 无效。
+
+Mio 也不支持重复添加可空标记，例如 `int64??`。
+
+对于可空值，不能依靠 `0`、空字符串等普通值代替显式的空值判断，也不能假定检查一个数组索引后，后续访问同一索引一定保持非空。
+
+需要安全使用可能缺失的数据时，通常应先保存到局部变量，再通过 `value != mu` 等条件判断进行处理。

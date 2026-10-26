@@ -1,545 +1,111 @@
 ---
-title: Bunko API 参考
-description: Bunko API Reference — Mio v2.0.0 全部公开标准库函数、类型与常量的检索入口。
+title: Bunko API 索引
+description: Mio V2.0.0 标准库公开函数总览
 ---
 
-**版本范围：Mio v2.0.0 正式版**，源码提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`。本页只收录 Bunko 源码中带 `koukai` 的公开声明；编译器私有 `$...` intrinsic 与 AOT 内部实现不作为稳定 API。
+## Bunko API 索引
 
-签名保留完整参数名和类型；每个函数名称链接到对应模块的逐参数说明、返回值与错误。模块页各提供最小可运行示例。
-
-表中的“调用示例”展示最小调用形态；`reader`、`writer`、`buffer`、`builder`、`file`、`error` 等上下文变量由对应模块页的完整示例初始化。全部签名均从 v2.0.0 的 `bunko/kiso/**/*.mio` 提取；示例在可用时直接接入 WebAssembly Playground。
-
-## 模块总览
-
-| 模块 | 分类 | 函数 | 类型 | 枚举 | 常量 | 浏览器 Playground | 详细参考 |
-| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
-| [`kiso/math`](/docs/v2.0/kiso/math) | 应用 API | 17 | 0 | 0 | 4 | 可用 | [打开](/docs/v2.0/kiso/math) |
-| [`kiso/array`](/docs/v2.0/kiso/array) | 应用 API | 8 | 0 | 0 | 0 | 可用 | [打开](/docs/v2.0/kiso/array) |
-| [`kiso/string`](/docs/v2.0/kiso/string) | 应用 API | 17 | 1 | 0 | 0 | 可用 | [打开](/docs/v2.0/kiso/string) |
-| [`kiso/bytes`](/docs/v2.0/kiso/bytes) | 应用 API | 18 | 1 | 0 | 0 | 可用 | [打开](/docs/v2.0/kiso/bytes) |
-| [`kiso/utf8`](/docs/v2.0/kiso/utf8) | 应用 API | 7 | 1 | 0 | 0 | 可用 | [打开](/docs/v2.0/kiso/utf8) |
-| [`kiso/convert`](/docs/v2.0/kiso/convert) | 应用 API | 10 | 0 | 0 | 0 | 不可用（仅 CLI） | [打开](/docs/v2.0/kiso/convert) |
-| [`kiso/io`](/docs/v2.0/kiso/io) | 应用 API | 7 | 5 | 1 | 0 | 不可用（仅 CLI） | [打开](/docs/v2.0/kiso/io) |
-| [`kiso/fs`](/docs/v2.0/kiso/fs) | 应用 API | 16 | 7 | 1 | 0 | 不可用（仅 CLI） | [打开](/docs/v2.0/kiso/fs) |
-| [`kiso/path`](/docs/v2.0/kiso/path) | 应用 API | 8 | 1 | 0 | 0 | 不可用（仅 CLI） | [打开](/docs/v2.0/kiso/path) |
-| [`kiso/encoding/binary`](/docs/v2.0/kiso/encoding-binary) | 应用 API | 61 | 14 | 1 | 0 | 不可用（仅 CLI） | [打开](/docs/v2.0/kiso/encoding-binary) |
-| [`kiso/testing`](/docs/v2.0/kiso/testing) | 测试专用 | 2 | 0 | 0 | 0 | 不可用（仅 CLI） | [打开](/docs/v2.0/kiso/testing) |
-| [`kiso/encoding/mochi`](/docs/v2.0/kiso/encoding-mochi) | 工具链 API | 5 | 7 | 1 | 8 | 不可用（仅 CLI） | [打开](/docs/v2.0/kiso/encoding-mochi) |
-
-共 **176 个公开函数**、**37 个结构体类型**、**4 个公开枚举**、**12 个公开常量**。其中应用 API 为 169 个函数；工具链/测试 API 为 7 个函数。
-
-## 可执行环境
-
-浏览器 WASM 只内置 `kiso/math`、`kiso/array`、`kiso/string`、`kiso/bytes`、`kiso/utf8`。这些模块的示例会自动显示 Playground。其他模块没有浏览器实现，示例会标记为 `no-run`，只能使用对应版本的 CLI 与完整 Bunko 运行；不提供模拟输出。
-
-## 应用 API
+本索引按模块列出发布标签 `v2.0.0` 已实现的公开函数。每个函数的签名和使用说明见对应模块页面。
 
 ### kiso/math
 
-导入方式：`yobu "kiso/math";`  
-浏览器 Playground：可用。
+[数学模块说明](./math)
 
-数值泛型与整数/浮点数学。`checked_*` 返回 `T?`，溢出时返回 `mu`；非 checked 版本报运行时错误。`clamp` 在 `lower > upper` 时报错。
-
-常量：`pi32`、`pi64`、`tau32`、`tau64`。
-
-逐函数参数、返回值、错误与示例见 [kiso/math](/docs/v2.0/kiso/math)。
-
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`min`](/docs/v2.0/kiso/math#min) | `min<T: Number>(left: T, right: T) -> T` | `T` | 返回 left/right 较小值；传播 NaN，相等零选择负零。 | `math.min[int64](1, 2)` |
-| [`max`](/docs/v2.0/kiso/math#max) | `max<T: Number>(left: T, right: T) -> T` | `T` | 返回 left/right 较大值；传播 NaN，相等零选择正零。 | `math.max[int64](1, 2)` |
-| [`checked_abs`](/docs/v2.0/kiso/math#checked_abs) | `checked_abs<T: Signed>(value: T) -> T?` | `T?`（`mu`） | 返回 value 的绝对值；有符号整数最小值无法表示时返回 mu。 | `math.checked_abs[int64](1)` |
-| [`abs`](/docs/v2.0/kiso/math#abs) | `abs<T: Signed>(value: T) -> T` | `T` | 返回 value 的绝对值；无法表示时运行时错误。无符号类型不满足 Signed。 | `math.abs[int64](1)` |
-| [`clamp`](/docs/v2.0/kiso/math#clamp) | `clamp<T: Number>(value: T, lower: T, upper: T) -> T` | `T` | 返回 value 限制到 lower..upper 的值；lower > upper 报运行时错误。 | `math.clamp[int64](1, 0, 10)` |
-| [`sqrt`](/docs/v2.0/kiso/math#sqrt) | `sqrt<T: Float>(value: T) -> T` | `T` | 返回 value 平方根；负输入按浮点语义产生 NaN。 | `math.sqrt[float64](1.5)` |
-| [`floor`](/docs/v2.0/kiso/math#floor) | `floor<T: Float>(value: T) -> T` | `T` | 向负无穷取整，返回同一浮点类型。 | `math.floor[float64](1.5)` |
-| [`ceil`](/docs/v2.0/kiso/math#ceil) | `ceil<T: Float>(value: T) -> T` | `T` | 向正无穷取整，返回同一浮点类型。 | `math.ceil[float64](1.5)` |
-| [`round`](/docs/v2.0/kiso/math#round) | `round<T: Float>(value: T) -> T` | `T` | 返回最接近整数的同类型浮点数，正中间使用 ties-to-even。 | `math.round[float64](1.5)` |
-| [`trunc`](/docs/v2.0/kiso/math#trunc) | `trunc<T: Float>(value: T) -> T` | `T` | 向零截断，返回同一浮点类型。 | `math.trunc[float64](1.5)` |
-| [`is_nan`](/docs/v2.0/kiso/math#is_nan) | `is_nan<T: Float>(value: T) -> bool` | `bool` | 返回 value 是否 NaN。 | `math.is_nan[float64](1.5)` |
-| [`is_inf`](/docs/v2.0/kiso/math#is_inf) | `is_inf<T: Float>(value: T) -> bool` | `bool` | 返回 value 是否任一符号 Infinity。 | `math.is_inf[float64](1.5)` |
-| [`is_finite`](/docs/v2.0/kiso/math#is_finite) | `is_finite<T: Float>(value: T) -> bool` | `bool` | 返回 value 是否有限。 | `math.is_finite[float64](1.5)` |
-| [`checked_gcd`](/docs/v2.0/kiso/math#checked_gcd) | `checked_gcd(left: int64, right: int64) -> int64?` | `int64?`（`mu`） | 同 gcd，但结果无法表示返回 mu。 | `math.checked_gcd(1, 2)` |
-| [`gcd`](/docs/v2.0/kiso/math#gcd) | `gcd(left: int64, right: int64) -> int64` | `int64` | 返回 left/right 非负最大公约数；结果无法用 int64 表示时报错。 | `math.gcd(1, 2)` |
-| [`checked_lcm`](/docs/v2.0/kiso/math#checked_lcm) | `checked_lcm(left: int64, right: int64) -> int64?` | `int64?`（`mu`） | 零输入返回 0；绝对值、中间 gcd 或乘积无法表示则返回 mu。 | `math.checked_lcm(1, 2)` |
-| [`lcm`](/docs/v2.0/kiso/math#lcm) | `lcm(left: int64, right: int64) -> int64` | `int64` | 返回 left/right 非负最小公倍数；溢出报运行时错误。 | `math.lcm(1, 2)` |
-
-示例（可在浏览器运行）：
-
-```mio title="math.mio"
-yobu "kiso/math";
-kaku value: float64 = 144.0;
-chant(math.sqrt(value));
-chant(math.gcd(84, 30));
-```
-
-源码：[constants.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/math/constants.mio) · [compare.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/math/compare.mio) · [float.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/math/float.mio) · [integer.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/math/integer.mio)
+`min`、`max`、`checked_abs`、`abs`、`clamp`、`sqrt`、`floor`、`ceil`、`round`、`trunc`、`is_nan`、`is_inf`、`is_finite`、`checked_gcd`、`gcd`、`checked_lcm`、`lcm`。
 
 ### kiso/array
 
-导入方式：`yobu "kiso/array";`  
-浏览器 Playground：可用。
+[数组模块说明](./array)
 
-动态数组，变量、参数与返回值共享后备存储。资源不足、负长度或非法截断产生运行时错误。
-
-逐函数参数、返回值、错误与示例见 [kiso/array](/docs/v2.0/kiso/array)。
-
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`make`](/docs/v2.0/kiso/array#make) | `make<T>(length: int64, initial: T) -> []T` | `[]T` | `length` 个元素，均初始化为 `initial`。若 initial 含引用，各元素仍共享该引用。负长度、容量溢出或资源不足报运行时错误。 | `array.make[int64](1, 1)` |
-| [`with_capacity`](/docs/v2.0/kiso/array#with_capacity) | `with_capacity<T>(capacity: int64) -> []T` | `[]T` | 为元素类型 T 创建长度 0、预留 capacity 的数组；类型不能推断时用 `[T]`。负容量或超限报错。 | `array.with_capacity[int64](1)` |
-| [`push`](/docs/v2.0/kiso/array#push) | `push<T>(values: []T, value: T) -> unit` | `unit` | 向 values 原地追加 value，返回 unit；别名可见，必要时扩容。资源不足报错。 | `array.push[int64]([1, 2], 1)` |
-| [`capacity`](/docs/v2.0/kiso/array#capacity) | `capacity<T>(values: []T) -> int64` | `int64` | 返回 values 已分配元素容量，不是长度。 | `array.capacity[int64]([1, 2])` |
-| [`reserve`](/docs/v2.0/kiso/array#reserve) | `reserve<T>(values: []T, additional: int64) -> unit` | `unit` | 确保可额外容纳 additional 个元素，不改变长度与已有内容；additional 不能为负，溢出或超限报错。 | `array.reserve[int64]([1, 2], 1)` |
-| [`clone`](/docs/v2.0/kiso/array#clone) | `clone<T>(values: []T) -> []T` | `[]T` | 返回独立后备数组，浅复制元素；嵌套引用仍共享，分配受资源上限约束。 | `array.clone[int64]([1, 2])` |
-| [`truncate`](/docs/v2.0/kiso/array#truncate) | `truncate<T>(values: []T, new_length: int64) -> unit` | `unit` | 将共享长度缩到 new_length，保留容量；必须在 0 与原长度之间，否则报错。 | `array.truncate[int64]([1, 2], 1)` |
-| [`append_all`](/docs/v2.0/kiso/array#append_all) | `append_all<T>(destination: []T, source: []T) -> unit` | `unit` | 向 destination 批量追加 source 当前元素；支持自追加，按追加前长度处理，溢出或资源不足报错。 | `array.append_all[int64]([1, 2], [1, 2])` |
-
-示例（可在浏览器运行）：
-
-```mio title="array.mio"
-yobu "kiso/array";
-kaku values = array.make(2, 7);
-array.push(values, 9);
-chant(len(values));
-chant(values[2]);
-```
-
-源码：[array.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/array/array.mio)
+`make`、`with_capacity`、`push`、`capacity`、`reserve`、`clone`、`truncate`、`append_all`。
 
 ### kiso/string
 
-导入方式：`yobu "kiso/string";`  
-浏览器 Playground：可用。
+[字符串模块说明](./string)
 
-UTF-8 字节语义字符串操作与 `StringBuilder`。 `from_utf8` 非法时返回 `mu`；`rune_count`/`builder_string` 在宿主注入非法 UTF-8 时报运行时错误。
-
-结构体：`StringBuilder`。
-
-逐函数参数、返回值、错误与示例见 [kiso/string](/docs/v2.0/kiso/string)。
-
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`to_bytes`](/docs/v2.0/kiso/string#to_bytes) | `to_bytes(value: string) -> []uint8` | `[]uint8` | 复制 value 的 UTF-8 字节到新数组，修改数组不会修改字符串。 | `string.to_bytes("Mio")` |
-| [`from_utf8`](/docs/v2.0/kiso/string#from_utf8) | `from_utf8(data: []uint8) -> string?` | `string?`（`mu`） | 严格校验 data；合法时返回独立字符串副本，非法时返回 mu。 | `string.from_utf8([1, 2])` |
-| [`byte_len`](/docs/v2.0/kiso/string#byte_len) | `byte_len(value: string) -> int64` | `int64` | 返回 value 的字节数，O(1)。 | `string.byte_len("Mio")` |
-| [`rune_count`](/docs/v2.0/kiso/string#rune_count) | `rune_count(value: string) -> int64` | `int64` | 返回 Unicode 标量值数量；若宿主传入非法 UTF-8 字符串，产生运行时错误。 | `string.rune_count("Mio")` |
-| [`has_prefix`](/docs/v2.0/kiso/string#has_prefix) | `has_prefix(value: string, prefix: string) -> bool` | `bool` | 按字节比较 value 的 prefix。 | `string.has_prefix("Mio", "Mi")` |
-| [`has_suffix`](/docs/v2.0/kiso/string#has_suffix) | `has_suffix(value: string, suffix: string) -> bool` | `bool` | 按字节比较 value 的 suffix。 | `string.has_suffix("Mio", "io")` |
-| [`index`](/docs/v2.0/kiso/string#index) | `index(value: string, pattern: string) -> int64` | `int64` | 返回 pattern 首次出现的 UTF-8 字节偏移；未找到为 -1，空 pattern 为 0。 | `string.index("Mio", "io")` |
-| [`contains`](/docs/v2.0/kiso/string#contains) | `contains(value: string, pattern: string) -> bool` | `bool` | 返回 value 是否包含 pattern，空模式为真。 | `string.contains("Mio", "io")` |
-| [`concat`](/docs/v2.0/kiso/string#concat) | `concat(left: string, right: string) -> string` | `string` | 返回 left 与 right 拼接后的独立字符串。 | `string.concat("Mio", "Docs")` |
-| [`new_builder`](/docs/v2.0/kiso/string#new_builder) | `new_builder() -> StringBuilder` | `StringBuilder` | 返回空 StringBuilder。 | `string.new_builder()` |
-| [`builder_with_capacity`](/docs/v2.0/kiso/string#builder_with_capacity) | `builder_with_capacity(capacity: int64) -> StringBuilder` | `StringBuilder` | 创建空 Builder，capacity 按字节预留；负容量或资源不足报错。 | `string.builder_with_capacity(1)` |
-| [`write_string`](/docs/v2.0/kiso/string#write_string) | `write_string(builder: StringBuilder, value: string) -> unit` | `unit` | 将 value 的字节追加到 builder，返回 unit。 | `kaku builder = string.new_builder(); string.write_string(builder, "Mio")` |
-| [`write_rune`](/docs/v2.0/kiso/string#write_rune) | `write_rune(builder: StringBuilder, value: rune) -> unit` | `unit` | 将 value 编码并追加到 builder；非法 Unicode 标量值报运行时错误。 | `kaku builder = string.new_builder(); string.write_rune(builder, 'A')` |
-| [`builder_len`](/docs/v2.0/kiso/string#builder_len) | `builder_len(builder: StringBuilder) -> int64` | `int64` | 返回当前 builder 字节长度。 | `kaku builder = string.new_builder(); string.builder_len(builder)` |
-| [`builder_capacity`](/docs/v2.0/kiso/string#builder_capacity) | `builder_capacity(builder: StringBuilder) -> int64` | `int64` | 返回 builder 字节容量。 | `kaku builder = string.new_builder(); string.builder_capacity(builder)` |
-| [`builder_reset`](/docs/v2.0/kiso/string#builder_reset) | `builder_reset(builder: StringBuilder) -> unit` | `unit` | 将共享 buffer 长度置零并保留容量。 | `kaku builder = string.new_builder(); string.builder_reset(builder)` |
-| [`builder_string`](/docs/v2.0/kiso/string#builder_string) | `builder_string(builder: StringBuilder) -> string` | `string` | 返回独立不可变字符串副本；外部若污染 buffer 为非法 UTF-8，报运行时错误。 | `kaku builder = string.new_builder(); string.builder_string(builder)` |
-
-示例（可在浏览器运行）：
-
-```mio title="string.mio"
-yobu "kiso/string";
-chant(string.concat("Mio", " Docs"));
-chant(string.byte_len("澪"));
-```
-
-源码：[string.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/string/string.mio)
+`to_bytes`、`from_utf8`、`byte_len`、`rune_count`、`has_prefix`、`has_suffix`、`index`、`contains`、`concat`、`new_builder`、`builder_with_capacity`、`write_string`、`write_rune`、`builder_len`、`builder_capacity`、`builder_reset`、`builder_string`。
 
 ### kiso/bytes
 
-导入方式：`yobu "kiso/bytes";`  
-浏览器 Playground：可用。
+[字节模块说明](./bytes)
 
-`[]uint8` 操作与共享后备存储的 `ByteBuffer`。`buffer_bytes`/`buffer_clone` 返回独立副本。
-
-结构体：`ByteBuffer`。
-
-逐函数参数、返回值、错误与示例见 [kiso/bytes](/docs/v2.0/kiso/bytes)。
-
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`equal`](/docs/v2.0/kiso/bytes#equal) | `equal(left: []uint8, right: []uint8) -> bool` | `bool` | 比较 left/right 字节内容与长度，返回是否相等。 | `bytes.equal([1], [2])` |
-| [`compare`](/docs/v2.0/kiso/bytes#compare) | `compare(left: []uint8, right: []uint8) -> int64` | `int64` | 按无符号字节字典序比较 left/right，返回 -1、0、1。 | `bytes.compare([1], [2])` |
-| [`index`](/docs/v2.0/kiso/bytes#index) | `index(values: []uint8, target: uint8) -> int64` | `int64` | 返回 values 中 target 第一次出现的字节索引；缺失返回 -1。 | `bytes.index([1, 2], 1)` |
-| [`contains`](/docs/v2.0/kiso/bytes#contains) | `contains(values: []uint8, target: uint8) -> bool` | `bool` | 返回 values 是否含 target 字节。 | `bytes.contains([1, 2], 1)` |
-| [`has_prefix`](/docs/v2.0/kiso/bytes#has_prefix) | `has_prefix(values: []uint8, prefix: []uint8) -> bool` | `bool` | 返回 values 是否以 prefix 开头；空 prefix 为真。 | `bytes.has_prefix([1, 2], [1])` |
-| [`has_suffix`](/docs/v2.0/kiso/bytes#has_suffix) | `has_suffix(values: []uint8, suffix: []uint8) -> bool` | `bool` | 返回 values 是否以 suffix 结尾；空 suffix 为真。 | `bytes.has_suffix([1, 2], [2])` |
-| [`copy`](/docs/v2.0/kiso/bytes#copy) | `copy(destination: []uint8, source: []uint8) -> int64` | `int64` | 向 destination 现有元素复制 source，返回两者长度的较小值；不扩容。 | `bytes.copy([1, 2], [1, 2])` |
-| [`fill`](/docs/v2.0/kiso/bytes#fill) | `fill(values: []uint8, value: uint8) -> unit` | `unit` | 将 values 的全部现有元素写为 value，返回 unit。 | `bytes.fill([1, 2], 1)` |
-| [`clone`](/docs/v2.0/kiso/bytes#clone) | `clone(values: []uint8) -> []uint8` | `[]uint8` | 浅复制字节数组，返回独立存储。 | `bytes.clone([1, 2])` |
-| [`new_buffer`](/docs/v2.0/kiso/bytes#new_buffer) | `new_buffer() -> ByteBuffer` | `ByteBuffer` | 创建长度为 0 的 ByteBuffer。 | `bytes.new_buffer()` |
-| [`buffer_with_capacity`](/docs/v2.0/kiso/bytes#buffer_with_capacity) | `buffer_with_capacity(capacity: int64) -> ByteBuffer` | `ByteBuffer` | 创建长度 0 并预留 capacity 的 ByteBuffer；负容量或资源不足报错。 | `bytes.buffer_with_capacity(1)` |
-| [`write_byte`](/docs/v2.0/kiso/bytes#write_byte) | `write_byte(buffer: ByteBuffer, value: uint8) -> unit` | `unit` | 向 buffer 共享 data 追加 value，返回 unit。 | `kaku buffer = bytes.new_buffer(); bytes.write_byte(buffer, 1)` |
-| [`write`](/docs/v2.0/kiso/bytes#write) | `write(buffer: ByteBuffer, source: []uint8) -> int64` | `int64` | 将 source 追加到 buffer，返回 source 的原长度。 | `kaku buffer = bytes.new_buffer(); bytes.write(buffer, [1, 2])` |
-| [`buffer_len`](/docs/v2.0/kiso/bytes#buffer_len) | `buffer_len(buffer: ByteBuffer) -> int64` | `int64` | 返回 buffer.data 长度。 | `kaku buffer = bytes.new_buffer(); bytes.buffer_len(buffer)` |
-| [`buffer_capacity`](/docs/v2.0/kiso/bytes#buffer_capacity) | `buffer_capacity(buffer: ByteBuffer) -> int64` | `int64` | 返回 buffer.data 容量。 | `kaku buffer = bytes.new_buffer(); bytes.buffer_capacity(buffer)` |
-| [`reset`](/docs/v2.0/kiso/bytes#reset) | `reset(buffer: ByteBuffer) -> unit` | `unit` | 将 buffer 长度归零，保留容量；别名可见。 | `kaku buffer = bytes.new_buffer(); bytes.reset(buffer)` |
-| [`buffer_clone`](/docs/v2.0/kiso/bytes#buffer_clone) | `buffer_clone(buffer: ByteBuffer) -> ByteBuffer` | `ByteBuffer` | 返回具有独立字节存储的 ByteBuffer。 | `kaku buffer = bytes.new_buffer(); bytes.buffer_clone(buffer)` |
-| [`buffer_bytes`](/docs/v2.0/kiso/bytes#buffer_bytes) | `buffer_bytes(buffer: ByteBuffer) -> []uint8` | `[]uint8` | 返回 buffer 当前内容的独立数组副本。 | `kaku buffer = bytes.new_buffer(); bytes.buffer_bytes(buffer)` |
-
-示例（可在浏览器运行）：
-
-```mio title="bytes.mio"
-yobu "kiso/bytes";
-kaku data: []uint8 = [1, 2, 3];
-chant(bytes.contains(data, uint8(2)));
-chant(bytes.index(data, uint8(3)));
-```
-
-源码：[bytes.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/bytes/bytes.mio)
+`equal`、`compare`、`index`、`contains`、`has_prefix`、`has_suffix`、`copy`、`fill`、`clone`、`new_buffer`、`buffer_with_capacity`、`write_byte`、`write`、`buffer_len`、`buffer_capacity`、`reset`、`buffer_clone`、`buffer_bytes`。
 
 ### kiso/utf8
 
-导入方式：`yobu "kiso/utf8";`  
-浏览器 Playground：可用。
+[UTF-8 编解码模块说明](./utf8)
 
-严格 UTF-8 编解码。`decode_one` 用 `valid` 区分成功/非法序列；`rune_count` 非法时返回 `mu`；非法 Unicode 标量写入报错。
-
-结构体：`DecodeResult`。
-
-逐函数参数、返回值、错误与示例见 [kiso/utf8](/docs/v2.0/kiso/utf8)。
-
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`is_valid_rune`](/docs/v2.0/kiso/utf8#is_valid_rune) | `is_valid_rune(value: rune) -> bool` | `bool` | 检查 value 是否为 Unicode 标量值。 | `utf8.is_valid_rune('A')` |
-| [`rune_width`](/docs/v2.0/kiso/utf8#rune_width) | `rune_width(value: rune) -> int64` | `int64` | 返回合法 value 的 1..4 字节编码长度；非法标量报运行时错误。 | `utf8.rune_width('A')` |
-| [`decode_one`](/docs/v2.0/kiso/utf8#decode_one) | `decode_one(data: []uint8, offset: int64) -> DecodeResult` | `DecodeResult`（检查 `.error`） | 从 data 的字节 offset 解码一个标量。成功 width=1..4、valid=hai；非法序列 value=U+FFFD、width=1、valid=iie；正好末尾 width=0；其他越界 offset 报运行时错误。 | `utf8.decode_one([1, 2], 1)` |
-| [`encode_rune`](/docs/v2.0/kiso/utf8#encode_rune) | `encode_rune(value: rune) -> []uint8` | `[]uint8` | 将 value 编码为新 UTF-8 字节数组；负值、代理区或大于 U+10FFFF 报运行时错误。 | `utf8.encode_rune('A')` |
-| [`append_rune`](/docs/v2.0/kiso/utf8#append_rune) | `append_rune(destination: []uint8, value: rune) -> unit` | `unit` | 将 value 编码追加至 destination；非法标量在修改目标前报错。 | `utf8.append_rune([1, 2], 'A')` |
-| [`valid`](/docs/v2.0/kiso/utf8#valid) | `valid(data: []uint8) -> bool` | `bool` | 返回 data 是否是严格合法的 UTF-8。 | `utf8.valid([1, 2])` |
-| [`rune_count`](/docs/v2.0/kiso/utf8#rune_count) | `rune_count(data: []uint8) -> int64?` | `int64?`（`mu`） | 合法 data 返回标量数量，非法数据返回 mu。 | `utf8.rune_count([1, 2])` |
-
-示例（可在浏览器运行）：
-
-```mio title="utf8.mio"
-yobu "kiso/utf8";
-kaku data = utf8.encode_rune('澪');
-kaku result = utf8.decode_one(data, 0);
-chant(result.valid);
-chant(result.width);
-```
-
-源码：[utf8.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/utf8/utf8.mio)
+`is_valid_rune`、`rune_width`、`decode_one`、`encode_rune`、`append_rune`、`valid`、`rune_count`。
 
 ### kiso/convert
 
-导入方式：`yobu "kiso/convert";`  
-浏览器 Playground：不可用（当前 WASM 未内置此模块）。
+[类型转换模块说明](./convert)
 
-严格 ASCII 数值与布尔文本转换。`parse_*` 失败返回 `mu`；浮点输入上限为 10000 字节。
-
-逐函数参数、返回值、错误与示例见 [kiso/convert](/docs/v2.0/kiso/convert)。
-
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`parse_int`](/docs/v2.0/kiso/convert#parse_int) | `parse_int(value: string) -> int64?` | `int64?`（`mu`） | 解析 value 的 ASCII 十进制 int64，可带 + 或 -；空白、非法字符或越界返回 mu。 | `convert.parse_int("Mio")` |
-| [`parse_uint`](/docs/v2.0/kiso/convert#parse_uint) | `parse_uint(value: string) -> uint32?` | `uint32?`（`mu`） | 解析 value 的 ASCII 十进制 uint32，可带 +，拒绝 -；非法或越界返回 mu。 | `convert.parse_uint("Mio")` |
-| [`format_int`](/docs/v2.0/kiso/convert#format_int) | `format_int(value: int64) -> string` | `string` | 返回 value 的十进制文本，覆盖 MinInt64。 | `convert.format_int(1)` |
-| [`format_uint`](/docs/v2.0/kiso/convert#format_uint) | `format_uint(value: uint32) -> string` | `string` | 返回 value 的无符号十进制文本。 | `convert.format_uint(1)` |
-| [`parse_bool`](/docs/v2.0/kiso/convert#parse_bool) | `parse_bool(value: string) -> bool?` | `bool?`（`mu`） | 只接受 value 为 hai 或 iie，其他文本返回 mu。 | `convert.parse_bool("Mio")` |
-| [`format_bool`](/docs/v2.0/kiso/convert#format_bool) | `format_bool(value: bool) -> string` | `string` | 返回 hai 或 iie。 | `convert.format_bool(hai)` |
-| [`parse_float64`](/docs/v2.0/kiso/convert#parse_float64) | `parse_float64(value: string) -> float64?` | `float64?`（`mu`） | 将 value 舍入为 binary64；非法、上溢或输入超过 10000 字节返回 mu。 | `convert.parse_float64("Mio")` |
-| [`parse_float32`](/docs/v2.0/kiso/convert#parse_float32) | `parse_float32(value: string) -> float32?` | `float32?`（`mu`） | 直接将 value 舍入为 binary32；非法、上溢或输入超过 10000 字节返回 mu。 | `convert.parse_float32("Mio")` |
-| [`format_float64`](/docs/v2.0/kiso/convert#format_float64) | `format_float64(value: float64) -> string` | `string` | 返回 value 最短往返十进制，保留负零文本；NaN 文本不保留 payload。 | `convert.format_float64(1.5)` |
-| [`format_float32`](/docs/v2.0/kiso/convert#format_float32) | `format_float32(value: float32) -> string` | `string` | 返回 value 最短往返十进制，保留负零文本；NaN 文本不保留 payload。 | `convert.format_float32(1.5)` |
-
-示例（需使用 CLI，浏览器不可运行）：
-
-```mio title="convert.mio" no-run
-yobu "kiso/convert";
-kaku value = convert.parse_int("-42");
-moshi (value != mu) { chant(value); }
-```
-
-> 当前 `mio.wasm` 未内置 `kiso/convert`，因此本示例没有 Playground；请在本版本 CLI 中运行。
-
-源码：[convert.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/convert/convert.mio) · [float.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/convert/float.mio)
-
-### kiso/io
-
-导入方式：`yobu "kiso/io";`  
-浏览器 Playground：不可用（当前 WASM 未内置此模块）。
-
-同步字节流接口。结果通过 `ReadResult`/`WriteResult`/`CopyResult.error` 返回，`mu` 表示成功。
-
-结构体：`ReadResult`、`WriteResult`、`CopyResult`、`Reader`、`Writer`；枚举：`IoError`。
-
-逐函数参数、返回值、错误与示例见 [kiso/io](/docs/v2.0/kiso/io)。
-
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`read`](/docs/v2.0/kiso/io#read) | `read(reader: Reader, destination: []uint8, offset: int64, length: int64) -> ReadResult` | `ReadResult`（检查 `.error`） | 检查 destination 的 offset/length 后调用 reader.read；非法区间返回 InvalidArgument。count 是读取字节数，可同时 eof=hai。 | `io.read(reader, [0, 0], 0, 1)` |
-| [`write`](/docs/v2.0/kiso/io#write) | `write(writer: Writer, source: []uint8, offset: int64, length: int64) -> WriteResult` | `WriteResult`（检查 `.error`） | 检查 source 的 offset/length 后调用 writer.write；非法区间返回 InvalidArgument，允许部分写入。 | `io.write(writer, [1, 2], 0, 1)` |
-| [`read_full`](/docs/v2.0/kiso/io#read_full) | `read_full(reader: Reader, destination: []uint8, offset: int64, length: int64) -> ReadResult` | `ReadResult`（检查 `.error`） | 反复读取直到 length；保留已读取 count，提前 EOF 返回 UnexpectedEOF，无进展返回 NoProgress，非法 count 返回 InvalidArgument。长度 0 不调用 Reader，eof=iie。 | `io.read_full(reader, [0, 0], 0, 1)` |
-| [`write_all`](/docs/v2.0/kiso/io#write_all) | `write_all(writer: Writer, source: []uint8, offset: int64, length: int64) -> WriteResult` | `WriteResult`（检查 `.error`） | 反复写完 source 指定区间；保留 count，无进展返回 NoProgress，非法区间/回调 count 返回 InvalidArgument；长度 0 成功。 | `io.write_all(writer, [1, 2], 0, 1)` |
-| [`copy_stream`](/docs/v2.0/kiso/io#copy_stream) | `copy_stream(reader: Reader, writer: Writer) -> CopyResult` | `CopyResult`（检查 `.error`） | 使用固定 32768 字节 buffer 从 reader 复制到 writer；返回已写 count 与错误，内存与执行成本受资源限制。 | `io.copy_stream(reader, writer)` |
-| [`reader_from_bytes`](/docs/v2.0/kiso/io#reader_from_bytes) | `reader_from_bytes(source: []uint8) -> Reader` | `Reader` | 返回共享 source 存储、独立游标的 Reader；后续外部修改可见，读取推进游标，到末尾 eof=hai。 | `io.reader_from_bytes([1, 2])` |
-| [`writer_to_buffer`](/docs/v2.0/kiso/io#writer_to_buffer) | `writer_to_buffer(buffer: bytes.ByteBuffer) -> Writer` | `Writer` | 返回将 source 指定区间追加到 buffer 的 Writer；返回追加字节数，外部 buffer 别名可见。 | `kaku buffer = bytes.new_buffer(); io.writer_to_buffer(buffer)` |
-
-示例（需使用 CLI，浏览器不可运行）：
-
-```mio title="io.mio" no-run
-yobu "kiso/io";
-yobu "kiso/bytes";
-kaku input: []uint8 = [65, 66, 67];
-kaku reader = io.reader_from_bytes(input);
-kaku buffer = bytes.new_buffer();
-kaku result = io.copy_stream(reader, io.writer_to_buffer(buffer));
-chant(result.count);
-```
-
-> 当前 `mio.wasm` 未内置 `kiso/io`，因此本示例没有 Playground；请在本版本 CLI 中运行。
-
-源码：[io.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/io/io.mio)
-
-### kiso/fs
-
-导入方式：`yobu "kiso/fs";`  
-浏览器 Playground：不可用（当前 WASM 未内置此模块）。
-
-同步宿主文件系统 API。失败通过各 `*Result.error` 返回；`File` 复制共享关闭状态。
-
-结构体：`File`、`FileResult`、`ReadAllResult`、`UnitResult`、`StatResult`、`DirEntry`、`DirResult`；枚举：`FsError`。
-
-逐函数参数、返回值、错误与示例见 [kiso/fs](/docs/v2.0/kiso/fs)。
-
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`open_read`](/docs/v2.0/kiso/fs#open_read) | `open_read(path: string) -> FileResult` | `FileResult`（检查 `.error`） | 按 path 只读打开，返回 FileResult；失败 file=mu。 | `fs.open_read("example.txt")` |
-| [`open_write`](/docs/v2.0/kiso/fs#open_write) | `open_write(path: string) -> FileResult` | `FileResult`（检查 `.error`） | 按 path 创建或截断写入，返回 FileResult。 | `fs.open_write("example.txt")` |
-| [`open_append`](/docs/v2.0/kiso/fs#open_append) | `open_append(path: string) -> FileResult` | `FileResult`（检查 `.error`） | 按 path 创建或追加写入，返回 FileResult。 | `fs.open_append("example.txt")` |
-| [`read`](/docs/v2.0/kiso/fs#read) | `read(file: File, destination: []uint8, offset: int64, length: int64) -> io.ReadResult` | `io.ReadResult`（检查 `.error`） | 读取到 destination 的 offset/length 区间，返回 io.ReadResult；非法区间返回 InvalidArgument，关闭句柄返回 Closed，其他宿主错误映射为 Other(message)。 | `fs.read(file, [1, 2], 0, 1)` |
-| [`write`](/docs/v2.0/kiso/fs#write) | `write(file: File, source: []uint8, offset: int64, length: int64) -> io.WriteResult` | `io.WriteResult`（检查 `.error`） | 将 source 的 offset/length 区间写入 file，返回 io.WriteResult；允许部分写，错误映射同 read。 | `fs.write(file, [1, 2], 0, 1)` |
-| [`close`](/docs/v2.0/kiso/fs#close) | `close(file: File) -> UnitResult` | `UnitResult`（检查 `.error`） | 关闭 file，返回 UnitResult；复制的 File 共享关闭状态，重复关闭返回 Closed。 | `fs.close(file)` |
-| [`reader`](/docs/v2.0/kiso/fs#reader) | `reader(file: File) -> io.Reader` | `io.Reader` | 将 file 适配为 io.Reader，不转移/自动关闭句柄。 | `fs.reader(file)` |
-| [`writer`](/docs/v2.0/kiso/fs#writer) | `writer(file: File) -> io.Writer` | `io.Writer` | 将 file 适配为 io.Writer，不转移/自动关闭句柄。 | `fs.writer(file)` |
-| [`read_all`](/docs/v2.0/kiso/fs#read_all) | `read_all(path: string) -> ReadAllResult` | `ReadAllResult`（检查 `.error`） | 按 path 打开、32768 字节分块读并关闭，返回 data/error；读取错误可带已读前缀，成功后关闭错误也返回。 | `fs.read_all("example.txt")` |
-| [`write_all`](/docs/v2.0/kiso/fs#write_all) | `write_all(path: string, data: []uint8) -> UnitResult` | `UnitResult`（检查 `.error`） | 按 path 创建或截断，完整写入 data 并关闭；写入错误优先，否则返回关闭结果。 | `fs.write_all("example.txt", [1, 2])` |
-| [`stat`](/docs/v2.0/kiso/fs#stat) | `stat(path: string) -> StatResult` | `StatResult`（检查 `.error`） | 返回 path 的 exists/is_file/is_dir；NotFound 转为 exists=iie 且 error=mu，其他错误保留。 | `fs.stat("example.txt")` |
-| [`exists`](/docs/v2.0/kiso/fs#exists) | `exists(path: string) -> bool` | `bool` | 返回 stat(path).exists；便捷 bool 会丢弃详细错误，需区分失败时用 stat。 | `fs.exists("example.txt")` |
-| [`is_file`](/docs/v2.0/kiso/fs#is_file) | `is_file(path: string) -> bool` | `bool` | 返回 stat(path).is_file；详细错误需用 stat。 | `fs.is_file("example.txt")` |
-| [`is_dir`](/docs/v2.0/kiso/fs#is_dir) | `is_dir(path: string) -> bool` | `bool` | 返回 stat(path).is_dir；详细错误需用 stat。 | `fs.is_dir("example.txt")` |
-| [`create_dir`](/docs/v2.0/kiso/fs#create_dir) | `create_dir(path: string) -> UnitResult` | `UnitResult`（检查 `.error`） | 为 path 创建单级目录，返回 UnitResult；不递归创建父目录。 | `fs.create_dir("example.txt")` |
-| [`read_dir`](/docs/v2.0/kiso/fs#read_dir) | `read_dir(path: string) -> DirResult` | `DirResult`（检查 `.error`） | 返回 path 目录项数组与错误，使用资源迭代器并关闭；不要依赖未承诺的排序。 | `fs.read_dir("example.txt")` |
-
-示例（需使用 CLI，浏览器不可运行）：
-
-```mio title="fs.mio" no-run
-yobu "kiso/fs";
-yobu "kiso/string";
-kaku result = fs.write_all("demo.txt", string.to_bytes("Mio"));
-chant(result.error == mu);
-```
-
-> 当前 `mio.wasm` 未内置 `kiso/fs`，因此本示例没有 Playground；请在本版本 CLI 中运行。
-
-源码：[fs.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/fs/fs.mio)
+`parse_int`、`parse_uint`、`format_int`、`format_uint`、`parse_bool`、`format_bool`、`parse_float64`、`parse_float32`、`format_float64`、`format_float32`。
 
 ### kiso/path
 
-导入方式：`yobu "kiso/path";`  
-浏览器 Playground：不可用（当前 WASM 未内置此模块）。
+[路径模块说明](./path)
 
-固定 `/` 分隔的逻辑路径操作，不访问文件系统，不识别 Windows 盘符或反斜杠。
+`clean`、`join`、`join_all`、`is_abs`、`base`、`dir`、`ext`、`split`。
 
-结构体：`SplitResult`。
+### kiso/io
 
-逐函数参数、返回值、错误与示例见 [kiso/path](/docs/v2.0/kiso/path)。
+[输入输出模块说明](./io)
 
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`clean`](/docs/v2.0/kiso/path#clean) | `clean(value: string) -> string` | `string` | 清理 value 的重复 /、. 与可抵消的 ..；空输入返回 .，绝对路径不越根。 | `path.clean("Mio")` |
-| [`join`](/docs/v2.0/kiso/path#join) | `join(left: string, right: string) -> string` | `string` | 用 / 连接 left/right 后 clean；right 的前导 / 不会丢弃 left。 | `path.join("a", "b")` |
-| [`join_all`](/docs/v2.0/kiso/path#join_all) | `join_all(parts: []string) -> string` | `string` | 用 / 连接 parts 后 clean；无元素返回 .。 | `path.join_all(["a", "b"])` |
-| [`is_abs`](/docs/v2.0/kiso/path#is_abs) | `is_abs(value: string) -> bool` | `bool` | 返回 value 是否以 / 开头。 | `path.is_abs("Mio")` |
-| [`base`](/docs/v2.0/kiso/path#base) | `base(value: string) -> string` | `string` | 返回清理后最后路径段；/、.、.. 保留自身。 | `path.base("Mio")` |
-| [`dir`](/docs/v2.0/kiso/path#dir) | `dir(value: string) -> string` | `string` | 返回清理后目录部分；无分隔符返回 .。 | `path.dir("Mio")` |
-| [`ext`](/docs/v2.0/kiso/path#ext) | `ext(value: string) -> string` | `string` | 返回 base 最后一个非首位点及其后缀；.env 无扩展名。 | `path.ext("Mio")` |
-| [`split`](/docs/v2.0/kiso/path#split) | `split(value: string) -> SplitResult` | `SplitResult`（检查 `.error`） | 返回 clean 后的 dir/base 组合，不保留原始尾斜线。 | `path.split("Mio")` |
+`read`、`write`、`read_full`、`write_all`、`copy_stream`、`reader_from_bytes`、`writer_to_buffer`。
 
-示例（需使用 CLI，浏览器不可运行）：
+### kiso/fs
 
-```mio title="path.mio" no-run
-yobu "kiso/path";
-chant(path.clean("/a//b/../c/"));
-chant(path.ext("main.mio"));
-```
+[文件系统模块说明](./fs)
 
-> 当前 `mio.wasm` 未内置 `kiso/path`，因此本示例没有 Playground；请在本版本 CLI 中运行。
-
-源码：[path.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/path/path.mio)
+`open_read`、`open_write`、`open_append`、`read`、`write`、`close`、`reader`、`writer`、`read_all`、`write_all`、`stat`、`exists`、`is_file`、`is_dir`、`create_dir`、`read_dir`。
 
 ### kiso/encoding/binary
 
-导入方式：`yobu "kiso/encoding/binary";`  
-浏览器 Playground：不可用（当前 WASM 未内置此模块）。
+[二进制编码模块说明](./encoding-binary)
 
-固定宽度大小端整数、LEB128、游标 Reader/Writer。读取使用 `*Result.error`，写入返回 `BinaryError?`。
-
-结构体：`U8Result`、`U16Result`、`U32Result`、`I8Result`、`I16Result`、`I32Result`、`I64Result`、`BytesResult`、`VarU32Result`、`VarI64Result`、`U64`、`U64Result`、`BinaryReader`、`BinaryWriter`；枚举：`BinaryError`。
-
-逐函数参数、返回值、错误与示例见 [kiso/encoding/binary](/docs/v2.0/kiso/encoding-binary)。
-
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`read_u8`](/docs/v2.0/kiso/encoding-binary#read_u8) | `read_u8(data: []uint8, offset: int64) -> U8Result` | `U8Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_u8([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`read_u16_le`](/docs/v2.0/kiso/encoding-binary#read_u16_le) | `read_u16_le(data: []uint8, offset: int64) -> U16Result` | `U16Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_u16_le([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`read_u16_be`](/docs/v2.0/kiso/encoding-binary#read_u16_be) | `read_u16_be(data: []uint8, offset: int64) -> U16Result` | `U16Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_u16_be([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`read_u32_le`](/docs/v2.0/kiso/encoding-binary#read_u32_le) | `read_u32_le(data: []uint8, offset: int64) -> U32Result` | `U32Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_u32_le([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`read_u32_be`](/docs/v2.0/kiso/encoding-binary#read_u32_be) | `read_u32_be(data: []uint8, offset: int64) -> U32Result` | `U32Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_u32_be([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`read_i8`](/docs/v2.0/kiso/encoding-binary#read_i8) | `read_i8(data: []uint8, offset: int64) -> I8Result` | `I8Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_i8([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`read_i16_le`](/docs/v2.0/kiso/encoding-binary#read_i16_le) | `read_i16_le(data: []uint8, offset: int64) -> I16Result` | `I16Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_i16_le([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`read_i16_be`](/docs/v2.0/kiso/encoding-binary#read_i16_be) | `read_i16_be(data: []uint8, offset: int64) -> I16Result` | `I16Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_i16_be([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`read_i32_le`](/docs/v2.0/kiso/encoding-binary#read_i32_le) | `read_i32_le(data: []uint8, offset: int64) -> I32Result` | `I32Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_i32_le([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`read_i32_be`](/docs/v2.0/kiso/encoding-binary#read_i32_be) | `read_i32_be(data: []uint8, offset: int64) -> I32Result` | `I32Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_i32_be([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`read_i64_le`](/docs/v2.0/kiso/encoding-binary#read_i64_le) | `read_i64_le(data: []uint8, offset: int64) -> I64Result` | `I64Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_i64_le([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`read_i64_be`](/docs/v2.0/kiso/encoding-binary#read_i64_be) | `read_i64_be(data: []uint8, offset: int64) -> I64Result` | `I64Result`（检查 `.error`） | 从 data 的 offset 按指定端序读取固定宽度值，返回对应 Result；负 offset 为 InvalidOffset，剩余不足为 InsufficientData，不复制整个输入。 | `binary.read_i64_be([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`write_u8`](/docs/v2.0/kiso/encoding-binary#write_u8) | `write_u8(destination: []uint8, offset: int64, value: uint8) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_u8([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_u16_le`](/docs/v2.0/kiso/encoding-binary#write_u16_le) | `write_u16_le(destination: []uint8, offset: int64, value: uint16) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_u16_le([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_u16_be`](/docs/v2.0/kiso/encoding-binary#write_u16_be) | `write_u16_be(destination: []uint8, offset: int64, value: uint16) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_u16_be([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_u32_le`](/docs/v2.0/kiso/encoding-binary#write_u32_le) | `write_u32_le(destination: []uint8, offset: int64, value: uint32) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_u32_le([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_u32_be`](/docs/v2.0/kiso/encoding-binary#write_u32_be) | `write_u32_be(destination: []uint8, offset: int64, value: uint32) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_u32_be([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_i8`](/docs/v2.0/kiso/encoding-binary#write_i8) | `write_i8(destination: []uint8, offset: int64, value: int8) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_i8([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_i16_le`](/docs/v2.0/kiso/encoding-binary#write_i16_le) | `write_i16_le(destination: []uint8, offset: int64, value: int16) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_i16_le([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_i16_be`](/docs/v2.0/kiso/encoding-binary#write_i16_be) | `write_i16_be(destination: []uint8, offset: int64, value: int16) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_i16_be([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_i32_le`](/docs/v2.0/kiso/encoding-binary#write_i32_le) | `write_i32_le(destination: []uint8, offset: int64, value: int32) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_i32_le([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_i32_be`](/docs/v2.0/kiso/encoding-binary#write_i32_be) | `write_i32_be(destination: []uint8, offset: int64, value: int32) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_i32_be([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_i64_le`](/docs/v2.0/kiso/encoding-binary#write_i64_le) | `write_i64_le(destination: []uint8, offset: int64, value: int64) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_i64_le([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_i64_be`](/docs/v2.0/kiso/encoding-binary#write_i64_be) | `write_i64_be(destination: []uint8, offset: int64, value: int64) -> BinaryError?` | `BinaryError?`（`mu`） | 把 value 按指定端序写到 destination 的 offset；不扩容。成功返回 mu，负 offset 为 InvalidOffset，空间不足为 InsufficientData。 | `binary.write_i64_be([0, 0, 0, 0, 0, 0, 0, 0], 0, 1)` |
-| [`write_var_u32`](/docs/v2.0/kiso/encoding-binary#write_var_u32) | `write_var_u32(value: uint32) -> BytesResult` | `BytesResult`（检查 `.error`） | 将 value 编码为新 LEB128 数组并包装为 BytesResult（data 为编码、error=mu）；u32 为无符号、i64 为 DWARF 有符号，不是 ZigZag。 | `binary.write_var_u32(1)` |
-| [`read_var_u32`](/docs/v2.0/kiso/encoding-binary#read_var_u32) | `read_var_u32(data: []uint8, offset: int64) -> VarU32Result` | `VarU32Result`（检查 `.error`） | 从 data 的 offset 解码规范 LEB128，返回 value、实际 count、error。u32 最多 5 字节，i64 最多 10 字节；拒绝截断、溢出、超长与非规范编码。 | `binary.read_var_u32([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`write_var_i64`](/docs/v2.0/kiso/encoding-binary#write_var_i64) | `write_var_i64(value: int64) -> BytesResult` | `BytesResult`（检查 `.error`） | 将 value 编码为新 LEB128 数组并包装为 BytesResult（data 为编码、error=mu）；u32 为无符号、i64 为 DWARF 有符号，不是 ZigZag。 | `binary.write_var_i64(1)` |
-| [`read_var_i64`](/docs/v2.0/kiso/encoding-binary#read_var_i64) | `read_var_i64(data: []uint8, offset: int64) -> VarI64Result` | `VarI64Result`（检查 `.error`） | 从 data 的 offset 解码规范 LEB128，返回 value、实际 count、error。u32 最多 5 字节，i64 最多 10 字节；拒绝截断、溢出、超长与非规范编码。 | `binary.read_var_i64([0, 0, 0, 0, 0, 0, 0, 0], 0)` |
-| [`reader`](/docs/v2.0/kiso/encoding-binary#reader) | `reader(data: []uint8) -> BinaryReader` | `BinaryReader` | 共享 data，创建游标为 0 的 BinaryReader；复制 Reader 会共享 state 游标，data 也仍可被外部别名修改。 | `binary.reader([0, 0, 0, 0, 0, 0, 0, 0])` |
-| [`reader_offset`](/docs/v2.0/kiso/encoding-binary#reader_offset) | `reader_offset(value: BinaryReader) -> int64` | `int64` | 返回当前字节游标。 | `binary.reader_offset(reader)` |
-| [`reader_remaining`](/docs/v2.0/kiso/encoding-binary#reader_remaining) | `reader_remaining(value: BinaryReader) -> int64` | `int64` | 返回 data 长度减当前游标。 | `binary.reader_remaining(reader)` |
-| [`reader_eof`](/docs/v2.0/kiso/encoding-binary#reader_eof) | `reader_eof(value: BinaryReader) -> bool` | `bool` | 返回游标是否正好到末尾。 | `binary.reader_eof(reader)` |
-| [`reader_seek`](/docs/v2.0/kiso/encoding-binary#reader_seek) | `reader_seek(value: BinaryReader, offset: int64) -> BinaryError?` | `BinaryError?`（`mu`） | 按 offset 定位或按 count 前移；负数返回 InvalidOffset，越界返回 InsufficientData，失败不推进游标。 | `binary.reader_seek(reader, 0)` |
-| [`reader_skip`](/docs/v2.0/kiso/encoding-binary#reader_skip) | `reader_skip(value: BinaryReader, count: int64) -> BinaryError?` | `BinaryError?`（`mu`） | 按 offset 定位或按 count 前移；负数返回 InvalidOffset，越界返回 InsufficientData，失败不推进游标。 | `binary.reader_skip(reader, 1)` |
-| [`reader_read_u8`](/docs/v2.0/kiso/encoding-binary#reader_read_u8) | `reader_read_u8(value: BinaryReader) -> U8Result` | `U8Result`（检查 `.error`） | 从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。 | `binary.reader_read_u8(reader)` |
-| [`reader_read_u16_le`](/docs/v2.0/kiso/encoding-binary#reader_read_u16_le) | `reader_read_u16_le(value: BinaryReader) -> U16Result` | `U16Result`（检查 `.error`） | 从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。 | `binary.reader_read_u16_le(reader)` |
-| [`reader_read_u16_be`](/docs/v2.0/kiso/encoding-binary#reader_read_u16_be) | `reader_read_u16_be(value: BinaryReader) -> U16Result` | `U16Result`（检查 `.error`） | 从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。 | `binary.reader_read_u16_be(reader)` |
-| [`reader_read_u32_le`](/docs/v2.0/kiso/encoding-binary#reader_read_u32_le) | `reader_read_u32_le(value: BinaryReader) -> U32Result` | `U32Result`（检查 `.error`） | 从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。 | `binary.reader_read_u32_le(reader)` |
-| [`reader_read_u32_be`](/docs/v2.0/kiso/encoding-binary#reader_read_u32_be) | `reader_read_u32_be(value: BinaryReader) -> U32Result` | `U32Result`（检查 `.error`） | 从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。 | `binary.reader_read_u32_be(reader)` |
-| [`reader_read_u64_le`](/docs/v2.0/kiso/encoding-binary#reader_read_u64_le) | `reader_read_u64_le(value: BinaryReader) -> U64Result` | `U64Result`（检查 `.error`） | 从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。 | `binary.reader_read_u64_le(reader)` |
-| [`reader_read_u64_be`](/docs/v2.0/kiso/encoding-binary#reader_read_u64_be) | `reader_read_u64_be(value: BinaryReader) -> U64Result` | `U64Result`（检查 `.error`） | 从当前游标按函数名指定宽度/端序读取；成功推进对应字节数，失败保持游标并返回 error。U64 返回 high/low 两字，保留最高位。 | `binary.reader_read_u64_be(reader)` |
-| [`reader_read_bytes`](/docs/v2.0/kiso/encoding-binary#reader_read_bytes) | `reader_read_bytes(value: BinaryReader, count: int64) -> BytesResult` | `BytesResult`（检查 `.error`） | 复制 count 个连续字节到独立数组并推进游标；负数 InvalidOffset，不足 InsufficientData；失败不推进。 | `binary.reader_read_bytes(reader, 1)` |
-| [`writer`](/docs/v2.0/kiso/encoding-binary#writer) | `writer(max_length: int64) -> BinaryWriter` | `BinaryWriter` | 创建空 BinaryWriter，max_length 是逻辑字节长度硬上限；负值实际被归一为 0，不是抛错。 | `binary.writer(1)` |
-| [`writer_offset`](/docs/v2.0/kiso/encoding-binary#writer_offset) | `writer_offset(value: BinaryWriter) -> int64` | `int64` | 返回当前输出字节长度。 | `binary.writer_offset(writer)` |
-| [`writer_reserve`](/docs/v2.0/kiso/encoding-binary#writer_reserve) | `writer_reserve(value: BinaryWriter, count: int64) -> I64Result` | `I64Result`（检查 `.error`） | 追加 count 个零字节并返回原始起始偏移；负数 InvalidOffset，超 max_length 为 Overflow；失败 value=-1。 | `binary.writer_reserve(writer, 1)` |
-| [`writer_write_bytes`](/docs/v2.0/kiso/encoding-binary#writer_write_bytes) | `writer_write_bytes(value: BinaryWriter, source: []uint8) -> BinaryError?` | `BinaryError?`（`mu`） | 追加 source 字节；超 max_length 返回 Overflow，负/溢出检查由 writer_grow 实施。避免 source 与自身 data 别名造成额外行为假设。 | `binary.writer_write_bytes(writer, [1, 2])` |
-| [`writer_write_length_prefixed`](/docs/v2.0/kiso/encoding-binary#writer_write_length_prefixed) | `writer_write_length_prefixed(value: BinaryWriter, source: []uint8) -> BinaryError?` | `BinaryError?`（`mu`） | 写入 4 字节大端 uint32 长度再追加 source；容量不足返回 Overflow，并在该检查失败时不写前缀。 | `binary.writer_write_length_prefixed(writer, [1, 2])` |
-| [`writer_write_u8`](/docs/v2.0/kiso/encoding-binary#writer_write_u8) | `writer_write_u8(value: BinaryWriter, number: uint8) -> BinaryError?` | `BinaryError?`（`mu`） | 按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。 | `binary.writer_write_u8(writer, 1)` |
-| [`writer_write_u16_le`](/docs/v2.0/kiso/encoding-binary#writer_write_u16_le) | `writer_write_u16_le(value: BinaryWriter, number: uint16) -> BinaryError?` | `BinaryError?`（`mu`） | 按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。 | `binary.writer_write_u16_le(writer, 1)` |
-| [`writer_write_u16_be`](/docs/v2.0/kiso/encoding-binary#writer_write_u16_be) | `writer_write_u16_be(value: BinaryWriter, number: uint16) -> BinaryError?` | `BinaryError?`（`mu`） | 按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。 | `binary.writer_write_u16_be(writer, 1)` |
-| [`writer_write_u32_le`](/docs/v2.0/kiso/encoding-binary#writer_write_u32_le) | `writer_write_u32_le(value: BinaryWriter, number: uint32) -> BinaryError?` | `BinaryError?`（`mu`） | 按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。 | `binary.writer_write_u32_le(writer, 1)` |
-| [`writer_write_u32_be`](/docs/v2.0/kiso/encoding-binary#writer_write_u32_be) | `writer_write_u32_be(value: BinaryWriter, number: uint32) -> BinaryError?` | `BinaryError?`（`mu`） | 按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。 | `binary.writer_write_u32_be(writer, 1)` |
-| [`writer_write_u64_le`](/docs/v2.0/kiso/encoding-binary#writer_write_u64_le) | `writer_write_u64_le(value: BinaryWriter, number: U64) -> BinaryError?` | `BinaryError?`（`mu`） | 按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。 | `binary.writer_write_u64_le(writer, U64 { high: uint32(0), low: uint32(1) })` |
-| [`writer_write_u64_be`](/docs/v2.0/kiso/encoding-binary#writer_write_u64_be) | `writer_write_u64_be(value: BinaryWriter, number: U64) -> BinaryError?` | `BinaryError?`（`mu`） | 按指定宽度和端序追加 number；超逻辑上限返回 Overflow。u64 使用 U64.high/low 表示，成功返回 mu。 | `binary.writer_write_u64_be(writer, U64 { high: uint32(0), low: uint32(1) })` |
-| [`writer_patch_u16_be`](/docs/v2.0/kiso/encoding-binary#writer_patch_u16_be) | `writer_patch_u16_be(value: BinaryWriter, offset: int64, number: uint16) -> BinaryError?` | `BinaryError?`（`mu`） | 在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。 | `binary.writer_patch_u16_be(writer, 0, 1)` |
-| [`writer_patch_u16_le`](/docs/v2.0/kiso/encoding-binary#writer_patch_u16_le) | `writer_patch_u16_le(value: BinaryWriter, offset: int64, number: uint16) -> BinaryError?` | `BinaryError?`（`mu`） | 在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。 | `binary.writer_patch_u16_le(writer, 0, 1)` |
-| [`writer_patch_u32_be`](/docs/v2.0/kiso/encoding-binary#writer_patch_u32_be) | `writer_patch_u32_be(value: BinaryWriter, offset: int64, number: uint32) -> BinaryError?` | `BinaryError?`（`mu`） | 在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。 | `binary.writer_patch_u32_be(writer, 0, 1)` |
-| [`writer_patch_u32_le`](/docs/v2.0/kiso/encoding-binary#writer_patch_u32_le) | `writer_patch_u32_le(value: BinaryWriter, offset: int64, number: uint32) -> BinaryError?` | `BinaryError?`（`mu`） | 在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。 | `binary.writer_patch_u32_le(writer, 0, 1)` |
-| [`writer_patch_u64_be`](/docs/v2.0/kiso/encoding-binary#writer_patch_u64_be) | `writer_patch_u64_be(value: BinaryWriter, offset: int64, number: U64) -> BinaryError?` | `BinaryError?`（`mu`） | 在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。 | `binary.writer_patch_u64_be(writer, 0, U64 { high: uint32(0), low: uint32(1) })` |
-| [`writer_patch_u64_le`](/docs/v2.0/kiso/encoding-binary#writer_patch_u64_le) | `writer_patch_u64_le(value: BinaryWriter, offset: int64, number: U64) -> BinaryError?` | `BinaryError?`（`mu`） | 在已有 data 的 offset 按指定端序回填 number，不增长。负 offset 为 InvalidOffset，空间不足为 InsufficientData；u64 逐半写入，不承诺第二半失败时回滚第一半。 | `binary.writer_patch_u64_le(writer, 0, U64 { high: uint32(0), low: uint32(1) })` |
-| [`writer_bytes`](/docs/v2.0/kiso/encoding-binary#writer_bytes) | `writer_bytes(value: BinaryWriter) -> []uint8` | `[]uint8` | 返回已写数据的独立副本，外部修改不会回写 Writer。 | `binary.writer_bytes(writer)` |
-
-示例（需使用 CLI，浏览器不可运行）：
-
-```mio title="binary.mio" no-run
-yobu "kiso/array";
-yobu "kiso/encoding/binary";
-kaku data = array.make[uint8](2, uint8(0));
-kaku error = binary.write_u16_be(data, 0, uint16(258));
-chant(error == mu);
-chant(data[0]);
-chant(data[1]);
-```
-
-> 当前 `mio.wasm` 未内置 `kiso/encoding/binary`，因此本示例没有 Playground；请在本版本 CLI 中运行。
-
-源码：[binary.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/encoding/binary/binary.mio) · [stream.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/encoding/binary/stream.mio)
-
-## 工具链与测试 API
+`read_u8`、`read_u16_le`、`read_u16_be`、`read_u32_le`、`read_u32_be`、`read_i8`、`read_i16_le`、`read_i16_be`、`read_i32_le`、`read_i32_be`、`read_i64_le`、`read_i64_be`、`write_u8`、`write_u16_le`、`write_u16_be`、`write_u32_le`、`write_u32_be`、`write_i8`、`write_i16_le`、`write_i16_be`、`write_i32_le`、`write_i32_be`、`write_i64_le`、`write_i64_be`、`write_var_u32`、`read_var_u32`、`write_var_i64`、`read_var_i64`、`reader`、`reader_offset`、`reader_remaining`、`reader_eof`、`reader_seek`、`reader_skip`、`reader_read_u8`、`reader_read_u16_le`、`reader_read_u16_be`、`reader_read_u32_le`、`reader_read_u32_be`、`reader_read_u64_le`、`reader_read_u64_be`、`reader_read_bytes`、`writer`、`writer_offset`、`writer_reserve`、`writer_write_bytes`、`writer_write_length_prefixed`、`writer_write_u8`、`writer_write_u16_le`、`writer_write_u16_be`、`writer_write_u32_le`、`writer_write_u32_be`、`writer_write_u64_le`、`writer_write_u64_be`、`writer_patch_u16_be`、`writer_patch_u16_le`、`writer_patch_u32_be`、`writer_patch_u32_le`、`writer_patch_u64_be`、`writer_patch_u64_le`、`writer_bytes`。
 
 ### kiso/testing
 
-导入方式：`yobu "kiso/testing";`  
-分类：测试专用；浏览器 Playground：不可用。
+[测试模块说明](./testing)
 
-只由 `mio test` 注册；普通 `run`/`check` 没有测试报告接口。
-
-详细说明见 [kiso/testing](/docs/v2.0/kiso/testing)。
-
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`expect`](/docs/v2.0/kiso/testing#expect) | `expect(condition: bool, message: string) -> unit` | `unit` | condition 为 iie 时记录 message 失败；不会通过异常中断当前函数。 | `testing.expect(hai, "message")` |
-| [`fail`](/docs/v2.0/kiso/testing#fail) | `fail(message: string) -> unit` | `unit` | 无条件记录 message 失败。 | `testing.fail("message")` |
-
-示例（测试专用；浏览器不可运行）：
-
-```mio title="example_test.mio" no-run
-yobu "kiso/testing";
-waza test_answer() -> unit {
-    testing.expect(6 * 7 == 42, "answer");
-}
-```
-
-> 当前 `mio.wasm` 未内置 `kiso/testing`；这不是稳定的普通应用 Playground 入口。 测试包只能由 `mio test` 执行。
-
-源码：[testing.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/testing/testing.mio)
+`expect`、`fail`。
 
 ### kiso/encoding/mochi
 
-导入方式：`yobu "kiso/encoding/mochi";`  
-分类：工具链 API；浏览器 Playground：不可用。
+[Mochi 格式编码模块说明](./encoding-mochi)
 
-Mochi v1–v14 解码、规范化与摘要。属于工具链 API；解码失败通过 `DecodeResult.error` 返回。
+`decode`、`error_code`、`canonical_bytes`、`summarize`、`decode_file`。
 
-结构体：`DecodeError`、`Constant`、`Capture`、`Function`、`File`、`DecodeResult`、`Summary`；枚举：`DecodeErrorKind`；常量：`VERSION`、`MAX_FILE_SIZE`、`MAX_CONSTANTS`、`MAX_GLOBALS`、`MAX_STRING_BYTES`、`MAX_INSTRUCTION_BYTES`、`MAX_FUNCTIONS`、`MAX_FUNCTION_SLOTS`。
+### kiso/aot/arm64
 
-详细说明见 [kiso/encoding/mochi](/docs/v2.0/kiso/encoding-mochi)。
+[ARM64 指令编码模块说明](./aot-arm64)
 
-| 函数 | 签名 | 返回 / 可空 | 说明 | 调用示例 |
-| --- | --- | --- | --- | --- |
-| [`decode`](/docs/v2.0/kiso/encoding-mochi#decode) | `decode(data: []uint8) -> DecodeResult` | `DecodeResult`（检查 `.error`） | 解码并验证 data，不修改输入；失败返回 DecodeResult.error，成功返回 file。 | `mochi.decode([])` |
-| [`error_code`](/docs/v2.0/kiso/encoding-mochi#error_code) | `error_code(error: DecodeError) -> int64` | `int64` | 将 DecodeError.kind 映射为差分测试使用的稳定整数分类。 | `mochi.error_code(error)` |
-| [`canonical_bytes`](/docs/v2.0/kiso/encoding-mochi#canonical_bytes) | `canonical_bytes(value: File) -> []uint8` | `[]uint8` | 对有效解码 File 确定性重编码；不承诺任意手工伪造 File 都能安全编码。 | `mochi.canonical_bytes(file)` |
-| [`summarize`](/docs/v2.0/kiso/encoding-mochi#summarize) | `summarize(value: File) -> Summary` | `Summary` | 对有效 File 返回版本、全局/常量/函数数量、指令总字节数和规范化长度。 | `mochi.summarize(file)` |
-| [`decode_file`](/docs/v2.0/kiso/encoding-mochi#decode_file) | `decode_file(path: string) -> DecodeResult` | `DecodeResult`（检查 `.error`） | 按 path 分块读取并在增长前检查 64 MiB 上限；I/O 失败变成 DecodeErrorKind.IoFailure。 | `mochi.decode_file("example.mochi")` |
+`movz_x`、`movk_x`、`movn_x`、`movz_w`、`add_x`、`sub_x`、`adds_x`、`subs_x`、`and_x`、`orr_x`、`eor_x`、`mul_x`、`sdiv_x`、`udiv_x`、`msub_x`、`cmp_x`、`add_imm_x`、`sub_imm_x`、`cmp_imm_x`、`add_imm_w`、`cset_w`、`lsl_x`、`lsr_x`、`asr_x`、`lsrv_x`、`ldr_x`、`str_x`、`ldrb_w`、`strb_w`、`ldrh_w`、`stp_x`、`ldp_x`、`stp_pre_x`、`ldp_post_x`、`b`、`bl`、`b_cond`、`cbz_x`、`cbnz_x`、`br_x`、`blr_x`、`ret_x`、`ret`、`adr`、`adrp_offset`、`svc`、`fadd_d`、`fsub_d`、`fmul_d`、`fdiv_d`、`fcmp_d`、`scvtf_d`、`fcvtzs_x`、`assembler`、`assembler_emit`、`assembler_label`、`assembler_b`、`assembler_bl`、`assembler_b_cond`、`assembler_cbz_x`、`assembler_cbnz_x`、`assembler_assemble`、`assembler_label_word`。
 
-示例（工具链 API；浏览器不可运行）：
+### kiso/aot/lower
 
-```mio mochi.mio no-run
-yobu "kiso/encoding/mochi";
-kaku input: []uint8 = [];
-kaku result = mochi.decode(input);
-chant(result.error != mu);
-```
+[AOT 降低编译模块说明](./aot-lower)
 
-> 当前 `mio.wasm` 未内置 `kiso/encoding/mochi`；这不是稳定的普通应用 Playground 入口。
+`error_code`、`error_detail`、`compile`、`compile_gc_stress`、`compile_with_heap`。
 
-源码：[decode.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/encoding/mochi/decode.mio) · [encode.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/encoding/mochi/encode.mio) · [file.mio](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/encoding/mochi/file.mio)
+### kiso/aot/lower/nativefs
 
-## 工具链 AOT 模块
+[AOT NativeFS 桥接模块说明](./aot-lower-nativefs)
 
-以下模块在源码中公开可导入，但属于 AOT/自举工具链接口，不承诺稳定 ABI，也不计入上表的普通标准库 API：
+`operation`、`parameter_count`、`parameter_is_root`、`returns_reference`、`entry_label`、`emit_runtime`。
 
-| 模块 | 状态 | 详细页 |
-| --- | --- | --- |
-| `kiso/aot/arm64` | 工具链内部，未承诺稳定 | [打开](/docs/v2.0/kiso/aot-arm64) |
-| `kiso/aot/lower` | 工具链内部，未承诺稳定 | [打开](/docs/v2.0/kiso/aot-lower) |
-| `kiso/aot/lower/nativefs` | 工具链内部，未承诺稳定 | [打开](/docs/v2.0/kiso/aot-lower-nativefs) |
-| `kiso/aot/lower/types` | 工具链内部，未承诺稳定 | [打开](/docs/v2.0/kiso/aot-lower-types) |
-| `kiso/aot/macho` | 工具链内部，未承诺稳定 | [打开](/docs/v2.0/kiso/aot-macho) |
+### kiso/aot/lower/types
 
-## 源码依据
+[AOT 类型分析模块说明](./aot-lower-types)
 
-- 源码：Mio `v2.0.0`，提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`，目录 [`bunko/kiso`](https://github.com/mio-kobo/mio/tree/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso)。
-- 只收录 `koukai waza`、`koukai kata`、`koukai sentaku` 与 `koukai teisu`。
-- `$math.*`、`$array.*`、`$data.*` 等内部原语与 AOT 私有实现不属于公共 API；公开 Kiso 函数由源码显式 `koukai`。
-- 详细的逐函数参数、返回值与错误说明见各模块页；各模块页提供最小可运行示例。本页提供完整检索和跨模块总览。
+`type_kind`、`type_nullable`、`type_is_heap_reference`、`type_instruction_width`、`enum_read_tag`、`reachable_functions`、`array_forward_opcode`、`is_float_predicate`、`analyze_types`、`analyze_types_traced`。
+
+### kiso/aot/macho
+
+[Mach-O 文件生成模块说明](./aot-macho)
+
+`text_target`、`const_target`、`data_target`、`plan`、`executable`。
+

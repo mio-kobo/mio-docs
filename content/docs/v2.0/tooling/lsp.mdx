@@ -1,67 +1,161 @@
 ---
 title: MioCore LSP
-description: Mio v2.0.0 内置语言服务器的启动方式、能力、限制与编辑器接入。
+description: Mio V2.0 语言服务器的启动、协议能力和编辑器集成
 ---
 
-MioCore 是核心 CLI 内置的 stdio JSON-RPC 语言服务器。使用 `mio lsp` 或 `mio lsp --stdio` 启动；`--stdio` 是当前唯一支持的传输参数。
+## MioCore LSP
+
+语言服务器协议（Language Server Protocol，LSP）用于在编程语言与编辑器之间提供统一的代码分析能力。
+
+Mio V2.0.0 内置了 MioCore 语言服务器，它可以为编辑器提供语法检查、类型诊断、代码补全、定义跳转和函数签名提示等功能。
+
+MioCore 使用标准输入输出（stdio）作为通信通道，并通过 JSON-RPC 协议交换消息。
+
+### 启动语言服务器
+
+Mio 使用 `lsp` 子命令启动 MioCore：
+
+```sh
+mio lsp
+```
+
+也可以显式指定 stdio 模式：
 
 ```sh
 mio lsp --stdio
 ```
 
-stdout **只用于**带 `Content-Length` 的 JSON-RPC 帧；日志和错误写 stderr。不能把 `mio lsp` 当作逐行 JSON 命令，也不要在 stdout 打印版本号、shell 提示或调试信息。
+`--stdio` 是 Mio V2.0.0 当前支持的语言服务器传输方式。
 
-## 协议与能力
+需要注意，启动后程序会等待 LSP 客户端发送协议消息。这不是交互式 Mio 解释器，不能直接在终端中逐行输入普通源码。
 
-| 范围 | v2.0.0 状态 |
-| --- | --- |
-| 生命周期 | `initialize` / `initialized` / `shutdown` / `exit` |
-| 文档同步 | open/close、增量 change、save；位置编码 `utf-16` |
-| 诊断 | 名称解析、语法、类型检查；未保存文本参与分析 |
-| Hover | 类型、签名与可提取的源码文档注释 |
-| Definition / References | 语义符号身份与引用索引 |
-| DocumentSymbol | AST 声明、字段、变体、参数 |
-| Completion | 作用域、模块/成员、字段与变体候选，`.` 触发 |
-| SignatureHelp | `(` 与 `,` 触发的调用参数信息 |
-| 取消 | `$/cancelRequest` 与分析取消路径 |
+### 协议通信
 
-`initialize` 返回的 `serverInfo` 为：
+MioCore 的消息采用 JSON-RPC，并使用 `Content-Length` 标头标记消息体的字节长度。
+
+因此，编辑器客户端需要按 LSP 协议发送完整的数据帧，而不是直接发送一行 JSON 文本。
+
+正常运行时，语言服务器的标准输出仅用于协议消息。日志和错误应通过标准错误输出或协议的日志机制处理，以免破坏通信格式。
+
+初始化成功时，服务器信息包含：
 
 ```json
-{ "name": "MioCore", "version": "2.0.0" }
+{
+  "name": "MioCore",
+  "version": "2.0.0"
+}
 ```
 
-当前**没有**声明或实现 Rename、Semantic Tokens、Formatting、Code Action、Workspace Symbols 或 Debugger。编辑器自己的语法着色不是 LSP 语义着色。
+这是初始化响应中的 `serverInfo` 内容，不是单独发送的完整 JSON-RPC 响应。
 
-## 分析范围与限制
+### 文档同步
 
-- 使用真实 Lexer、Parser、Resolver、TypeChecker，不是正则或猜测。
-- 结合导入图与已打开的文档；不等于对整个工作区的全部 `.mio` 建立持久索引。
-- 当前诊断管线主要返回第一条错误；容错解析结果不能当作完整静态检查通过。
-- Mio 源码位置、宿主 UTF-8 字节偏移和 LSP UTF-16 位置不同；实现中有 Unicode 与 CRLF 转换测试。
-- 未保存缓冲区通过内存 overlay 参与分析，不会在磁盘创建临时文件。
-- 同一文件同时只应有一个诊断来源；客户端应避免 LSP 与 CLI 诊断重复显示。
+MioCore 支持编辑器打开、修改、保存和关闭源码文件，并基于编辑器尚未保存的文本进行分析。
 
-## 编辑器接入
+语言服务器采用 UTF-16 位置编码，以便与常见编辑器的 LSP 坐标系统兼容。
 
-外部编辑器应配置：
+需要注意，Mio 源码本身是 UTF-8 文本，源码字节偏移与 LSP 的 UTF-16 字符位置并不总是一致。尤其是在中文、日文和 Emoji 字符附近，客户端必须使用协议约定的位置编码。
 
-- 命令：Mio CLI 的绝对路径，或 `PATH` 中的 `mio`；
-- 参数：`["lsp", "--stdio"]`；
-- 环境：`MIO_BUNKO` 指向与 CLI 匹配的 Bunko 根。
+### 已支持的语言能力
 
-VS Code 的具体设置、LSP 回退和 JetBrains 的独立 CLI 集成见 [编辑器](/docs/v2.0/tooling/editors)。
+Mio V2.0.0 的 MioCore 包含以下功能：
 
-## 实测验证
+| 功能 | 说明 |
+| --- | --- |
+| Diagnostics | 显示语法、名称解析和类型错误 |
+| Hover | 查看符号的类型和函数信息 |
+| Definition | 跳转到声明或定义的位置 |
+| References | 查找符号的引用位置 |
+| Document Symbol | 显示文件中的函数、类型和其他声明 |
+| Completion | 提供标识符、字段、成员及包等补全候选 |
+| Signature Help | 在函数调用时提供参数与返回类型信息 |
+| Document Sync | 同步编辑器中的打开、修改、保存与关闭事件 |
+| Cancel Request | 支持取消部分正在进行的语言服务请求 |
 
-本次文档验证使用官方 v2.0.0 发行包启动了真实 `mio lsp --stdio`，完成：
+例如，当编辑器中存在一个已声明的函数时，MioCore 可以分析其参数与返回类型，并为调用位置提供签名提示。
 
-1. `initialize`，确认 `serverInfo = {"name":"MioCore","version":"2.0.0"}`；
-2. 读取 capabilities，确认包含 completion、definition、documentSymbol、hover、references、signatureHelp、textDocumentSync 与 `positionEncoding`；
-3. `shutdown` 后发送 `exit`，进程退出码 `0`。
+```mio title="Function.mio"
+waza add(a: int64, b: int64) -> int64 {
+    kaesu a + b;
+}
 
-这是一次协议级握手验证，不是 VS Code 或 JetBrains 的端到端 IDE 验收。
+chant(add(10, 20));
+```
 
-## 来源
+上面的示例是一个完整的 Mio 程序，可以在网页 Playground 中单独运行。编辑器中的 Hover 和签名提示则由 MioCore LSP 提供，并不是运行程序时产生的输出。
 
-`cmd/mio/main.go:runLSP`、`internal/lsp/server.go`、`transport.go`、`position.go`、`analysis.go`、`semantic.go` 及同目录测试；`docs/MIOCORE_LSP.md` 提供架构背景，但其版本与验证记录属于历史开发阶段，不能替代 v2.0.0 的发行证据。
+### 诊断机制
+
+MioCore 使用实际的 Lexer、Parser、Resolver 和 TypeChecker 分析代码，而不是只通过关键字匹配猜测语法是否合法。
+
+例如，下面的代码具有类型不匹配问题：
+
+```mio title="Invalid.mio" no-run
+kaku number: int64 = "Mio";
+```
+
+当编译器检查该文件时，会报告变量初始化的类型错误。此处使用 `no-run`，是为了避免在文档中将故意错误的示例当作可运行 Playground。
+
+当前诊断流程通常只报告第一条错误。修复后，编辑器可能会继续显示下一处错误。
+
+### 自动补全与导航
+
+MioCore 的补全基于符号作用域、已知声明以及导入的包成员等信息。
+
+如果程序使用 `yobu` 导入标准库，语言服务器也需要能够找到对应的 Bunko 根目录，才能正确解析公开成员。
+
+例如：
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+kaku value: float64 = 144.0;
+chant(math.sqrt(value));
+```
+
+此时，编辑器可在 `math.` 后提供可见的包成员补全候选。
+
+语言服务器会结合当前文件和已加载的依赖进行分析，但不代表会自动为整个工作区建立完整、持久的跨项目符号索引。
+
+### 尚不支持的功能
+
+MioCore V2.0.0 目前没有实现以下 LSP 功能：
+
+| 功能 | 当前状态 |
+| --- | --- |
+| Rename | 暂不支持 |
+| Formatting | 暂不支持 |
+| Code Action | 暂不支持 |
+| Semantic Tokens | 暂不支持 |
+| Workspace Symbols | 暂不支持 |
+| Debug Adapter Protocol | 暂不支持 |
+
+某些编辑器可能自行提供词法高亮或其他辅助功能，但这些功能不能直接视为 MioCore 语言服务器提供的能力。
+
+### 编辑器接入配置
+
+在支持自定义 LSP 的编辑器中，语言服务器启动配置一般包含以下信息：
+
+| 项目 | 配置 |
+| --- | --- |
+| 可执行文件 | `mio` 的绝对路径或 `PATH` 中的 `mio` |
+| 启动参数 | `lsp`、`--stdio` |
+| 通信方式 | stdio |
+| 标准库环境变量 | `MIO_BUNKO` |
+
+例如在终端验证基本环境：
+
+```sh
+mio version
+printf '%s\n' "$MIO_BUNKO"
+```
+
+VS Code 插件可以直接启动 MioCore。JetBrains 的 Mio 插件目前使用自身的编辑器解析与 CLI 集成，不依赖 MioCore LSP。
+
+### 生命周期与退出
+
+LSP 客户端通常先发送 `initialize`，随后发送 `initialized` 并同步打开的文档。
+
+退出时，应先发送 `shutdown` 请求，再发送 `exit` 通知。按此流程关闭时，MioCore 可以正常退出；没有完成 `shutdown` 就发送 `exit`，可能得到失败退出码。
+
+协议实现与维护者测试位于 Mio 核心仓库的 `internal/lsp/` 目录中。

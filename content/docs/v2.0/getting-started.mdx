@@ -129,12 +129,6 @@ mio run hello.mio
 check passed
 ```
 
-`run` 的标准输出：
-
-```text title="output"
-Hello, Mio!
-```
-
 `check` 只做读取、包加载、常量折叠、名称解析和类型检查，不执行程序；成功时输出 `check passed`。`run` 在检查通过后生成字节码并在 Mochi VM 中执行。
 
 `chant(value)` 输出一个值并追加换行。语句以分号结束；Mio 允许直接书写顶层语句，不需要额外的 `main` 函数。
@@ -147,11 +141,7 @@ mio exec hello.mochi
 mio disasm hello.mochi
 ```
 
-`build` 成功时没有标准输出，并在当前目录写出 `hello.mochi`。`exec` 使用 VM 执行该文件，输出与 `run` 相同：
-
-```text title="output"
-Hello, Mio!
-```
+`build` 成功时没有标准输出，并在当前目录写出 `hello.mochi`。`exec` 使用 VM 执行该文件，标准输出与 `run` 相同。
 
 `disasm` 输出字节码结构。上面的程序会得到类似内容：
 
@@ -184,13 +174,6 @@ mio check math.mio
 mio run math.mio
 ```
 
-预期输出：
-
-```text title="output"
-12
-6
-```
-
 `yobu "kiso/math";` 的默认限定名是路径最后一段 `math`，所以调用写作 `math.sqrt(...)`。`sqrt` 是浮点泛型函数，本例从 `float64` 实参推断类型；输出 `12` 不带小数点，但它仍是 `float64` 值。
 
 动态数组操作需要显式导入 `kiso/array`：
@@ -204,13 +187,6 @@ chant(len(numbers));
 chant(numbers[2]);
 ```
 
-预期输出：
-
-```text title="output"
-3
-30
-```
-
 数组采用共享引用语义；`array.push` 修改的是同一个数组，不会返回新数组。
 
 ## 变量、函数与返回
@@ -222,12 +198,6 @@ waza add(a: int64, b: int64) -> int64 {
 
 kaku result = add(20, 22);
 chant(result);
-```
-
-预期输出：
-
-```text title="output"
-42
 ```
 
 参数必须带类型，函数必须声明返回类型。非 `unit` 函数用 `kaesu value;` 返回值；`unit` 函数可以使用 `kaesu;` 或直接结束。

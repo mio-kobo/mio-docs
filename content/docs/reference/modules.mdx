@@ -22,13 +22,6 @@ moshi (item != mu) { chant(item); }
 chant(plus[float32](1.5, 2.5));
 ```
 
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-7
-4
-```
-
 Go 引导编译器采用泛型运行时擦除，每个泛型函数保留一份字节码，调用点静态替换类型。不要将其解释为 Native 全部泛型表示均已验收。
 
 ## 编译期常量

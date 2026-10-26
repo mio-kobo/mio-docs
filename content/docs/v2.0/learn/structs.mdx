@@ -1,0 +1,225 @@
+---
+title: 结构体
+description: Mio V2.0 结构体的声明、构造、字段访问与泛型结构体
+---
+
+## 结构体
+
+结构体（Struct）用于将多个相关的数据组织成一个自定义类型。
+
+在 Mio 中，结构体使用 `kata` 关键字声明，并通过字段（Field）保存不同类型的数据。
+
+例如，我们可以使用一个结构体同时保存用户的姓名和年龄：
+
+```mio title="Struct.mio"
+kata User {
+    name: string;
+    age: int64;
+}
+
+kaku user = User {
+    name: "Mio",
+    age: 18
+};
+
+chant(user.name);
+chant(user.age);
+```
+
+在上述示例中，`User` 是结构体类型，`name` 和 `age` 是它的两个字段。
+
+### 声明结构体
+
+结构体使用 `kata` 关键字声明，基本语法如下：
+
+```text
+kata 类型名 {
+    字段名: 类型;
+}
+```
+
+例如：
+
+```mio title="Struct.mio"
+kata Point {
+    x: int64;
+    y: int64;
+}
+```
+
+在上述示例中，`Point` 包含两个 `int64` 类型的字段。
+
+Mio V2.0 要求用户定义的结构体类型名称以 ASCII 大写字母开头，例如 `Point`、`User` 和 `Config`。
+
+字段声明中的类型必须明确指定，字段之间可以使用分号 `;` 或逗号 `,` 分隔。
+
+### 创建结构体实例
+
+声明结构体后，可以通过 `类型名 { 字段名: 值 }` 创建结构体实例。
+
+```mio title="Struct.mio"
+kata Point {
+    x: int64;
+    y: int64;
+}
+
+kaku point = Point {
+    x: 10,
+    y: 20
+};
+```
+
+其中，`Point { x: 10, y: 20 }` 是一个结构体构造表达式。
+
+Mio 使用字段名称而不是字段位置进行初始化，因此构造时的字段顺序可以与声明顺序不同。
+
+```mio title="Struct.mio"
+kata Point {
+    x: int64;
+    y: int64;
+}
+
+kaku point = Point {
+    y: 20,
+    x: 10
+};
+
+chant(point.x);
+```
+
+需要注意，创建结构体时必须提供声明中要求的全部字段，不能遗漏、重复或增加不存在的字段。
+
+### 访问结构体字段
+
+Mio 使用点运算符 `.` 访问结构体字段。
+
+```mio title="Struct.mio"
+kata Product {
+    name: string;
+    price: float64;
+}
+
+kaku product = Product {
+    name: "Keyboard",
+    price: 99.5
+};
+
+chant(product.name);
+chant(product.price);
+```
+
+其中，`product.name` 读取名称字段，`product.price` 读取价格字段。
+
+每个字段都有独立的数据类型，因此可以在同一个结构体中保存字符串、整数、布尔值、数组以及其他受支持的类型。
+
+### 结构体字段的不可变规则
+
+Mio V2.0 不允许通过字段赋值语句直接修改已经创建的结构体字段。
+
+例如，下面的写法不受支持：
+
+```text
+user.age = 20;
+```
+
+如果需要保存不同的字段值，可以重新创建结构体实例，并将新实例赋给原来的变量。
+
+```mio title="Struct.mio"
+kata User {
+    name: string;
+    age: int64;
+}
+
+kaku user = User { name: "Mio", age: 18 };
+
+user = User { name: "Mio", age: 19 };
+
+chant(user.age);
+```
+
+这里修改的是变量 `user` 保存的整体结构体值，而不是对 `user.age` 进行字段赋值。
+
+### 结构体中的数组与映射表
+
+结构体字段虽然不能直接重新赋值，但字段保存的数组或映射表仍然遵守自身的共享引用语义。
+
+例如：
+
+```mio title="Struct.mio"
+kata Box {
+    values: []int64;
+}
+
+kaku box = Box { values: [10, 20] };
+kaku numbers = box.values;
+
+numbers[0] = 99;
+
+chant(box.values[0]);
+```
+
+在上述示例中，`box.values` 保存数组引用。通过 `numbers` 修改数组元素，会影响结构体字段所引用的同一个数组。
+
+因此，结构体字段不可重新赋值，并不意味着字段内部的引用类型一定是完全不可变的。
+
+### 结构体作为函数参数
+
+结构体可以像其他类型一样用作函数参数和返回类型。
+
+```mio title="Struct.mio"
+kata Point {
+    x: int64;
+    y: int64;
+}
+
+waza total(point: Point) -> int64 {
+    kaesu point.x + point.y;
+}
+
+kaku point = Point { x: 10, y: 20 };
+
+chant(total(point));
+```
+
+在上述示例中，`total` 接收一个 `Point` 类型的参数，并使用该结构体中的两个字段完成计算。
+
+这种方式适合将多个相关参数组织为一个具有明确含义的数据类型。
+
+### 泛型结构体
+
+Mio 还支持在结构体中使用泛型类型参数（Generic Type Parameter）。
+
+例如：
+
+```mio title="Struct.mio"
+kata Box<T> {
+    value: T;
+}
+
+kaku number = Box[int64] { value: 42 };
+kaku message = Box[string] { value: "Mio" };
+
+chant(number.value);
+chant(message.value);
+```
+
+这里的 `T` 表示一个由构造或类型上下文确定的类型参数。
+
+`Box[int64]` 和 `Box[string]` 使用同一个结构体定义，但各自保存不同类型的字段值。
+
+需要注意，声明泛型结构体时使用 `<T>`，在构造表达式中显式指定类型参数时则使用 `[T]`。
+
+### 公开结构体
+
+如果需要让其他包使用某个结构体，可以在声明前添加 `koukai`。
+
+```mio title="models/user.mio"
+koukai kata User {
+    name: string;
+    age: int64;
+}
+```
+
+其他包显式导入包含该声明的包后，就可以通过公开的类型名称使用它。
+
+Mio V2.0 尚未提供结构体字段级别的私有可见性规则，也没有通过结构体定义直接声明成员方法的语法。需要对结构体执行操作时，可以使用接收结构体参数的普通函数。

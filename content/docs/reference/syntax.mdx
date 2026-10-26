@@ -20,15 +20,6 @@ chant('A');
 chant(2.5e1);
 ```
 
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-澪
-Mio
-65
-25
-```
-
 ## 关键字
 
 | 拼写 | 用途 |
@@ -63,17 +54,6 @@ chant(hai || touch());
 chant(calls);
 ```
 
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-14
-3
-hai
-iie
-hai
-0
-```
-
 ## 控制语句
 
 `moshi (condition) { ... } sore { ... }` 中 `sore` 可省略；条件必须是 `bool`。`aida (condition) { ... }` 也是 bool 条件；`nukeru;` 和 `tsuzuku;` 只能出现在循环中。枚举使用 [awase](/docs/reference/collections)，没有 C 风格 `for` 语法。
@@ -88,12 +68,6 @@ aida (i < 5) {
     sum = sum + i;
 }
 chant(sum);
-```
-
-预期 stdout（逐字节匹配，末尾有换行）：
-
-```text title="output"
-8
 ```
 
 证据：`internal/parser/precedence.go`、`parser.go`，`internal/lexer/lexer.go` 与 `internal/token/token.go`。

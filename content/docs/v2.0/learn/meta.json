@@ -1,17 +1,27 @@
 {
-  "title": "Learn",
+  "title": "语法基础",
   "pages": [
     "index",
-    "variables",
-    "control-flow",
-    "functions",
-    "collections",
-    "strings",
-    "maps",
-    "models",
-    "closures",
+    "grammer",
+    "packages",
+    "comments",
+    "identifiers",
+    "operators",
+    "literals",
+    "datatype",
+    "constant-variable",
+    "condition",
+    "loop",
+    "string",
+    "map",
+    "function",
+    "arrays",
+    "closures-function-values",
+    "enums-pattern-matching",
+    "generic-constraints",
     "generics",
-    "modules",
-    "testing"
+    "nullable-types",
+    "scope",
+    "structs"
   ]
 }

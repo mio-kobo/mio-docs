@@ -1,0 +1,207 @@
+---
+title: 包
+description: Mio V2.0 包与模块管理
+---
+
+## 包
+
+包（Package）是 Mio 中用于组织源代码和管理程序模块的基本单位。
+
+Mio 采用「目录即包、显式导入、编译时合并」的包系统。在 Mio 中，一个目录就是一个包，同一目录下的多个 `.mio` 源文件共同组成该包，并共享包级声明，无须额外声明包名。
+
+通过包机制，我们可以将不同功能的代码组织到独立的目录中，并通过导入和公开机制控制模块之间的访问关系，使程序结构更加清晰，也更容易维护和扩展。
+
+### 创建一个包
+
+在 Mio 中，创建一个包只需要建立一个目录，并在其中放置 `.mio` 源文件。
+
+假设我们准备编写一个提供简单数学运算的程序，可以按照以下方式组织项目：
+
+```text
+my-project/
+├── main.mio
+├── bunko/
+└── mathutils/
+    ├── calc.mio
+    └── helpers.mio
+```
+
+在上述目录结构中，`mathutils` 是我们创建的包，其中包含 `calc.mio` 和 `helpers.mio` 两个源文件。
+
+首先，在 `helpers.mio` 中定义一个用于计算数值两倍的函数：
+
+```mio title="mathutils/helpers.mio"
+waza double(value: int64) -> int64 {
+    kaesu value * 2;
+}
+```
+
+接下来，在 `calc.mio` 中定义一个计算两个整数之和再乘以二的函数：
+
+```mio title="mathutils/calc.mio"
+koukai waza double_sum(a: int64, b: int64) -> int64 {
+    kaesu double(a + b);
+}
+```
+
+在上述示例中，`double_sum` 通过调用 `double` 函数完成计算。
+
+虽然两个函数分别定义在不同的源文件中，但由于它们位于同一个目录，因此属于同一个包。
+
+这意味着，`calc.mio` 可以直接使用 `helpers.mio` 中定义的 `double` 函数，而不需要在文件之间额外编写导入语句。
+
+Mio 会在编译时将同一包中的源文件共同处理。因此，包的组织单位是目录，而不是单独的源文件。
+
+### 导入和使用包
+
+Mio 使用 `yobu` 关键字导入其他包。
+
+其基本语法如下：
+
+```text
+yobu "包路径";
+```
+
+例如，我们可以在项目的 `main.mio` 中导入刚才创建的 `mathutils` 包：
+
+```mio title="main.mio"
+yobu "mathutils";
+
+chant(mathutils.double_sum(2, 3));
+```
+
+执行程序：
+
+```shell
+mio run main.mio
+```
+
+预期输出：
+
+```text
+10
+```
+
+在上述示例中，`yobu "mathutils";` 表示导入名为 `mathutils` 的包。
+
+导入后，可以通过 `包名.成员名` 的形式访问包中公开的成员。
+
+例如：
+
+```mio
+mathutils.double_sum(2, 3)
+```
+
+这里的 `mathutils` 是包的限定名，`double_sum` 是该包公开的函数。
+
+Mio 默认使用导入路径的最后一段作为包的限定名。例如，导入 `kiso/math` 后，可以通过 `math.sqrt()` 访问其中公开的数学函数。
+
+需要注意，Mio 不会自动导入子目录中的内容。每个目录都是独立的包，如果需要使用子目录中的功能，应当明确导入对应的包路径。
+
+此外，以 `_test.mio` 结尾的测试文件不会作为普通包源码加载。
+
+### 公开与私有成员
+
+Mio 通过 `koukai` 关键字控制包中声明的可见性。
+
+默认情况下，包内的声明只对当前包可见，其他包无法直接访问。
+
+如果希望将某个函数、类型或常量提供给其他包使用，可以在声明前添加 `koukai` 关键字。
+
+例如：
+
+```mio title="mathutils/visibility.mio"
+waza internal_add(a: int64, b: int64) -> int64 {
+    kaesu a + b;
+}
+
+koukai waza add(a: int64, b: int64) -> int64 {
+    kaesu internal_add(a, b);
+}
+```
+
+在上述示例中，`internal_add` 是包内函数，没有使用 `koukai` 声明，因此只能在当前包中访问。
+
+而 `add` 使用 `koukai` 声明，属于公开函数，可以被其他包调用。
+
+例如：
+
+```mio title="main.mio"
+yobu "mathutils";
+
+chant(mathutils.add(10, 20));
+```
+
+预期输出：
+
+```text
+30
+```
+
+这里可以通过 `mathutils.add()` 调用公开函数，但不能通过 `mathutils.internal_add()` 直接调用未公开的内部函数。
+
+Mio V2.0 支持通过 `koukai` 公开以下声明：
+
+| 声明 | 关键字 | 是否支持公开 |
+| --- | --- | --- |
+| 函数 | `waza` | 支持 |
+| 常量 | `teisu` | 支持 |
+| 结构体 | `kata` | 支持 |
+| 枚举 | `sentaku` | 支持 |
+| 普通变量 | `kaku` | 不支持直接公开 |
+
+例如，可以通过以下方式声明一个公开常量：
+
+```mio title="mathutils/constants.mio"
+koukai teisu max_value: int64 = 100;
+```
+
+其他包导入 `mathutils` 后，就可以通过 `mathutils.max_value` 访问该常量。
+
+需要注意，Mio V2.0 对被导入包的顶层代码存在限制。依赖包应通过函数、类型和常量等声明提供功能，而不能直接在顶层编写普通可执行语句或全局变量声明。
+
+通过公开与私有成员机制，我们可以将内部实现保留在包内，只向其他包提供必要的功能接口。
+
+### 使用标准库
+
+除了自定义包，Mio 还提供名为 Bunko 的标准库。
+
+Bunko 包含多个基础功能模块，例如数学计算、字符串处理和数组操作等。
+
+Mio 使用 `kiso/` 作为基础标准库的公开导入路径。
+
+例如，我们可以导入数学包 `kiso/math`，使用其中的平方根函数：
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+kaku value: float64 = 144.0;
+
+chant(math.sqrt(value));
+```
+
+预期输出：
+
+```text
+12
+```
+
+在上述示例中，`yobu "kiso/math";` 用于导入数学标准库。
+
+由于 Mio 默认使用导入路径的最后一段作为包的限定名，因此我们可以通过 `math.sqrt()` 调用该包中的 `sqrt` 函数。
+
+需要注意，`bunko/` 是标准库在文件系统中的根目录，并不是公开导入路径的一部分。
+
+因此，应当使用：
+
+```mio
+yobu "kiso/math";
+```
+
+而不是：
+
+```text
+yobu "bunko/kiso/math";
+```
+
+通过相同的导入机制，Mio 程序既可以使用开发者自己创建的包，也可以使用 Bunko 提供的标准库。

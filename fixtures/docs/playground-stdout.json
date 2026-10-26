@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "outputs": {
+    "// ASCII 标识符，Unicode 文本与 rune\n/* block comment */\nkaku text = \"澪\\nMio\";\nchant(text);\nchant('A');\nchant(2.5e1);": "澪\nMio\n65\n25\n",
+    "chant(\"Hello, Mio!\");": "Hello, Mio!\n",
+    "chant(2 + 3 * 4);\nchant(7 / 2);\nchant(!iie && (hai || iie));\nkaku calls = 0;\nwaza touch() -> bool { calls = calls + 1; kaesu hai; }\nchant(iie && touch());\nchant(hai || touch());\nchant(calls);": "14\n3\nhai\niie\nhai\n0\n",
+    "kaku age: int64? = mu;\nchant(age == mu);\nage = 18;\nmoshi (age != mu) { chant(age + 1); }\nkaku values: []int64? = [10, mu];\nkaku item = values[0];\nmoshi (item != mu) { chant(item); }\nkaku optional: ([]int64)? = [7];\nmoshi (optional != mu) { chant(len(optional)); }": "hai\n19\n10\n1\n",
+    "kaku count = 3;\ncount = count + 1;\nkaku price: float64 = 2.5;\nkaku total = float64(count) * price;\nchant(count);\nchant(total);": "4\n10\n",
+    "kaku entries = Map[string, int64]();\nentries[\"answer\"] = 42;\nkaku alias = entries;\nalias[\"answer\"] = 43;\nkaku answer = entries[\"answer\"];\nmoshi (answer != mu) { chant(answer); }\nchant(entries[\"missing\"] == mu);": "43\nhai\n",
+    "kaku i = 0;\nkaku sum = 0;\naida (i < 5) {\n    i = i + 1;\n    moshi (i == 2) { tsuzuku; }\n    moshi (i == 5) { nukeru; }\n    sum = sum + i;\n}\nchant(sum);": "8\n",
+    "kaku score = 72;\nmoshi (score >= 60) {\n    chant(\"passed\");\n} sore {\n    chant(\"failed\");\n}\n\nkaku total = 0;\nkaku n = 1;\naida (n <= 3) {\n    total = total + n;\n    n = n + 1;\n}\nchant(total);": "passed\n6\n",
+    "kaku small: int8 = 127;\nchant(small + int8(1));\nkaku f: float32 = 1.5;\nchant(float64(f));\nchant(int64(-2.75));\nteisu answer: int64 = 6 * 7;\nchant(answer);": "-128\n1.5\n-2\n42\n",
+    "kaku value = 10;\nmoshi (hai) { kaku value = 20; chant(value); }\nchant(value);\nvalue = value + 1;\nchant(value);": "20\n10\n11\n",
+    "kaku values = [10, 20, 30];\nkaku alias = values;\nalias[1] = 25;\nchant(values[1]);\nchant(len(values));\n\nkaku answer: int64? = mu;\nanswer = values[0];\nmoshi (answer != mu) {\n    chant(answer + 1);\n}": "25\n3\n11\n",
+    "kaku values: [][]int64 = [[1], [2]];\nkaku inner = values[0];\ninner[0] = 9;\nchant(values[0][0]);\nchant(len(values));": "9\n2\n",
+    "kata Pair<T> { first: T; second: T; }\nsentaku Result<T, E> { Ok(T); Err(E); }\nwaza get(result: Result<int64, string>) -> int64 {\n    awase (result) {\n        baai Ok(value) { kaesu value; }\n        baai Err(message) { chant(message); kaesu 0; }\n    }\n}\nkaku pair = Pair[int64] { second: 22, first: 20 };\nchant(pair.first + pair.second);\nkaku result: Result<int64, string> = Result.Ok(7);\nchant(get(result));": "42\n7\n",
+    "waza add(a: int64, b: int64) -> int64 {\n    kaesu a + b;\n}\n\nkaku result = add(20, 22);\nchant(result);": "42\n",
+    "waza counter() -> () -> int64 {\n    kaku n = 0;\n    kaesu waza () -> int64 { n = n + 1; kaesu n; };\n}\nkaku next = counter();\nchant(next());\nchant(next());": "1\n2\n",
+    "waza factorial(n: int64) -> int64 {\n    moshi (n <= 1) { kaesu 1; }\n    kaesu n * factorial(n - 1);\n}\nwaza show(value: int64) -> unit { chant(value); kaesu; }\nshow(factorial(5));": "120\n",
+    "waza first<T>(values: []T) -> T? {\n    moshi (len(values) == 0) { kaesu mu; }\n    kaesu values[0];\n}\nwaza plus<T: Number>(left: T, right: T) -> T { kaesu left + right; }\nkaku item = first[int64]([7, 8]);\nmoshi (item != mu) { chant(item); }\nchant(plus[float32](1.5, 2.5));": "7\n4\n",
+    "waza square(value: int64) -> int64 {\n    kaesu value * value;\n}\n\nwaza absolute(value: int64) -> int64 {\n    moshi (value < 0) {\n        kaesu -value;\n    } sore {\n        kaesu value;\n    }\n}\n\nchant(square(6));\nchant(absolute(-7));": "36\n7\n",
+    "yobu \"kiso/array\";\n\nkaku numbers = [10, 20];\narray.push(numbers, 30);\nchant(len(numbers));\nchant(numbers[2]);": "3\n30\n",
+    "yobu \"kiso/array\";\nkaku original = [1, 2];\nkaku alias = original;\nalias[0] = 9;\narray.push(alias, 3);\nchant(original[0]);\nchant(len(original));\nkaku copied = array.clone(original);\ncopied[0] = 7;\nchant(original[0]);\narray.append_all(original, original);\nchant(len(original));\narray.truncate(alias, 1);\nchant(len(original));": "9\n3\n9\n6\n1\n",
+    "yobu \"kiso/bytes\";\nkaku buffer = bytes.new_buffer();\nbytes.write_byte(buffer, uint8(65));\nkaku source: []uint8 = [66, 67];\nchant(bytes.write(buffer, source));\nchant(bytes.buffer_len(buffer));\nkaku copied = bytes.buffer_bytes(buffer);\ncopied[0] = 90;\nchant(buffer.data[0]);\nchant(bytes.compare(source, source));\nbytes.reset(buffer);\nchant(bytes.buffer_len(buffer));": "2\n3\n65\n0\n0\n",
+    "yobu \"kiso/math\";\n\nkaku value: float64 = 144.0;\nchant(math.sqrt(value));\nchant(math.gcd(84, 30));": "12\n6\n",
+    "yobu \"kiso/math\";\n\nwaza square(value: float64) -> float64 {\n    kaesu value * value;\n}\n\nkaku area = square(12.0);\nchant(area);\nchant(math.sqrt(area));": "144\n12\n",
+    "yobu \"kiso/math\";\nchant(math.gcd(54, 24));\nchant(math.lcm(6, 8));\nchant(math.clamp(12, 0, 10));\nchant(math.sqrt[float64](9.0));\nchant(math.round[float32](2.5));\nchant(math.checked_abs[int8](-128) == mu);": "6\n24\n10\n3\n2\nhai\n",
+    "yobu \"kiso/string\";\n\nkaku builder = string.new_builder();\nstring.write_string(builder, \"Mio\");\nstring.write_string(builder, \" v2.0.0\");\nchant(string.builder_string(builder));\nchant(string.byte_len(\"澪\"));": "Mio v2.0.0\n3\n",
+    "yobu \"kiso/string\";\nchant(string.byte_len(\"澪A\"));\nchant(string.rune_count(\"澪A\"));\nchant(string.index(\"澪A\", \"A\"));\nkaku builder = string.new_builder();\nstring.write_string(builder, \"Mio\");\nstring.write_rune(builder, '!');\nchant(string.builder_string(builder));\nkaku invalid: []uint8 = [255];\nchant(string.from_utf8(invalid) == mu);": "4\n2\n3\nMio!\nhai\n",
+    "yobu \"kiso/string\";\nyobu \"kiso/utf8\";\nkaku text = \"澪Mio\";\nchant(string.byte_len(text));\nchant(string.rune_count(text));\nkaku data = string.to_bytes(text);\nchant(len(data));\nchant(utf8.valid(data));\nkaku builder = string.new_builder();\nstring.write_string(builder, text);\nstring.write_string(builder, \"!\");\nchant(string.builder_string(builder));": "6\n4\n6\nhai\n澪Mio!\n",
+    "yobu \"kiso/utf8\";\nkaku data = utf8.encode_rune('澪');\nkaku result = utf8.decode_one(data, 0);\nchant(result.valid);\nchant(result.width);\nchant(result.value);\nkaku end = utf8.decode_one(data, len(data));\nchant(end.width);\nkaku invalid: []uint8 = [255];\nchant(utf8.rune_count(invalid) == mu);": "hai\n3\n28586\n0\nhai\n"
+  }
+}

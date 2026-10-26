@@ -30,6 +30,7 @@ def main():
         if input_data is not None: rec['stdin']=input_data.decode()
         report['commands'].append(rec); return rec
     registry = load(ROOT/'content/versions.json')
+    playground_outputs = load(ROOT/'fixtures/docs/playground-stdout.json')['outputs']
     with tempfile.TemporaryDirectory(prefix='mio-quality-') as tmp:
         tmp = Path(tmp)
         for version in registry['versions']:
@@ -96,18 +97,24 @@ def main():
                     content=page.read_text();rel=str(page.relative_to(ROOT));vr['pages'].append({'path':rel,'sha256':sha(page.read_bytes())})
                     for n,match in enumerate(re.finditer(r'^```(mio)([^\n]*)\n(.*?)\n```',content,re.M|re.S)):
                         if 'mode="test"' in match[2]:success(rel+f'#{n}',match[3],None,'test');continue
-                        tail=content[match.end():];out=re.search(r'^```text title="output"\n(.*?)\n```',tail,re.M|re.S)
-                        require(out is not None,rel+': no expected stdout')
-                        if out:success(rel+f'#{n}',match[3],out[1]+'\n')
+                        expected=playground_outputs.get(match[3])
+                        if expected is None:
+                            tail=content[match.end():];out=re.search(r'^```text title="output"\n(.*?)\n```',tail,re.M|re.S)
+                            expected=out[1]+'\n' if out else None
+                        require(expected is not None,rel+': no expected stdout')
+                        if expected is not None:success(rel+f'#{n}',match[3],expected)
             # Legacy pages remain independent migration references; verify their executable fences on V2.
             if vid=='v2.0':
                 for page in sorted((ROOT/'content/docs').rglob('*')):
                     if page.suffix not in ['.md','.mdx'] or any(re.fullmatch(r'v\d+\.\d+(?:\.\d+)?',x) for x in page.parts):continue
                     content=page.read_text()
                     for n,match in enumerate(re.finditer(r'^```mio[^\n]*\n(.*?)\n```',content,re.M|re.S)):
-                        out=re.search(r'^```text title="output"\n(.*?)\n```',content[match.end():],re.M|re.S)
-                        require(out is not None,str(page)+': missing output')
-                        if out:success(str(page.relative_to(ROOT))+f'#{n}',match[1],out[1]+'\n')
+                        expected=playground_outputs.get(match[1])
+                        if expected is None:
+                            out=re.search(r'^```text title="output"\n(.*?)\n```',content[match.end():],re.M|re.S)
+                            expected=out[1]+'\n' if out else None
+                        require(expected is not None,str(page)+': missing output')
+                        if expected is not None:success(str(page.relative_to(ROOT))+f'#{n}',match[1],expected)
             # Original five exercise transformations are verified too; run the existing checker unchanged.
             cp=run(['node','scripts/check-examples.mjs'],ROOT,dict(env,DOCS_VERSION=vid,MIO_CLI=str(cli)))
             require(cp['exit']==0,'original tutorial exercises');vr['originalExercisesCommand']=len(report['commands'])-1
