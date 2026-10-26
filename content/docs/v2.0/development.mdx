@@ -1,50 +1,105 @@
 ---
 title: V2 发布状态与后续范围
-description: v2.0.0 已发布的内容、M18 验收结论，以及仍未完成的开发项。
+description: Mio V2.0.0 的正式发布内容、M18 自举验收、网页 Playground 与尚未覆盖的功能。
 ---
 
-## 已发布
+## Mio V2.0.0 已发布
 
-Mio **v2.0.0** 已于 2026-10-21 正式发布：
+Mio **v2.0.0** 已于 **2026 年 10 月 21 日**正式发布。这一版本包含 Mochi 字节码与虚拟机、静态类型检查、Bunko 标准库、MioCore 语言服务器，以及面向 macOS Apple Silicon 的原生 AOT 编译工具链。
 
-- Tag：[`v2.0.0`](https://github.com/mio-kobo/mio/releases/tag/v2.0.0)
-- 源码提交：`0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`
-- 平台：macOS Apple Silicon / ARM64
-- CLI：`Mio 2.0.0`
+| 项目 | 正式发布信息 |
+| --- | --- |
+| 版本 | `v2.0.0` |
+| 源码提交 | `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a` |
+| CLI 版本信息 | `Mio 2.0.0` |
+| 正式验证平台 | macOS Apple Silicon / ARM64 |
+| 发行页面 | [GitHub Releases](https://github.com/mio-kobo/mio/releases/tag/v2.0.0) |
 
-v2.0.0 的核心成果是 M18 纯 Mio Mochi → Native AOT 自托管，以及 Mochi VM、Native AOT、精确 GC、LSP 和 Bunko 标准库的正式工具链。
+Mio 的语言核心支持固定宽度整数、浮点数、字符串、数组、Map、结构体、枚举、泛型、闭包和可空类型等功能。基础语法可从 [学习 Mio](/docs/v2.0/learn) 开始阅读；标准库的公开接口见 [Bunko 标准库](/docs/v2.0/kiso)。
 
-## M18 结论
+### 编译与运行方式
 
-M18 的正式链为：
+Mio 的不同工具负责不同阶段的工作。
+
+| 工具或命令 | 主要用途 |
+| --- | --- |
+| `mio check` | 解析源代码并进行名称和类型检查，不执行程序 |
+| `mio run` | 将源代码编译为 Mochi 字节码，再通过虚拟机执行 |
+| `mio build` | 生成 `.mochi` 字节码文件 |
+| `mio exec` | 在 Mochi VM 中执行已有的字节码文件 |
+| `mio test` | 发现并运行 Mio 测试 |
+| `mio lsp` | 启动 MioCore 语言服务器 |
+| `mochi-aot` | 由 Go 实现的 Mochi → 原生程序编译工具 |
+| `native-aot` | 由纯 Mio 实现的 Mochi → 原生程序编译工具 |
+
+需要注意，`mio build` 生成的是 Mochi 字节码，而不是可以直接由操作系统执行的 Mach-O 文件。原生编译需要使用独立的 AOT 工具，具体命令见 [CLI 与编译流程](/docs/v2.0/tooling/cli) 和 [Native AOT](/docs/v2.0/internals/native-aot)。
+
+## M18 原生自举验收
+
+M18 验证了纯 Mio Native AOT 编译器的多代自编译能力。
+
+正式验证链可以概括为：
 
 ```text
 Go 源码前端 → native-aot.mochi
 Go AOT → Seed
-Seed → Native Stage 1 → 2 → 3 → 4 → 5
+Seed → Native Stage 1 → Stage 2 → Stage 3 → Stage 4 → Stage 5
 ```
 
-- Stage 1–4 实际执行并生成下一代；
-- Stage 1–5 未签名 Mach-O 完整字节一致；
-- Stage 5 已生成、解析、签名和 strict verify，但未计为已执行代次；
-- 正式链中 Go AOT 只生成 Seed，后续原生生成由纯 Mio 完成；
-- 256 MiB 受限堆见证触发了真实 GC，输出仍与固定点一致。
+其中，Go AOT 只用于生成初始 Seed。随后各代原生程序执行纯 Mio 编写的 AOT 编译逻辑，并生成下一代原生程序。
 
-**边界：** 这不表示从 `.mio` 源码开始的完整工具链已经摆脱 Go。源码前端、VM 和 LSP 仍为 Go 实现；从源码重建工具和首次 Seed 仍需要 Go。
+M18 验收确认了以下行为：
 
-## 仍未完成
+- Stage 1 至 Stage 4 均已实际执行并生成下一代。
+- Stage 1 至 Stage 5 的未签名 Mach-O 文件完整字节一致。
+- Stage 5 已生成、解析并通过签名验证，但不计入已执行代次。
+- 256 MiB 受限堆验证触发了真实垃圾回收，编译结果仍与固定点一致。
 
-| 项目 | 状态 |
+这里的**自举范围是 Mochi 字节码到原生机器码的 AOT 后端**，而不是整个 `.mio` 源码编译流程已经完全不依赖 Go。Mio 的源码前端、Mochi VM 和 LSP 仍有 Go 实现。
+
+## 文档站 Playground
+
+Mio 文档站已经提供基于 WebAssembly 的 **Playground**。对于符合条件的 `mio` 代码块，读者可以在网页上直接检查、编辑和运行代码，无须先安装本地 CLI。
+
+例如，下面的程序可以独立运行：
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+kaku value: float64 = 144.0;
+chant(math.sqrt(value));
+chant(math.pi64);
+```
+
+每个 Playground 代码块都会作为独立程序编译，因此导入标准库时必须在当前代码块中写出完整的 `yobu` 语句，不能依赖页面中其他示例的导入。
+
+当前网页运行环境嵌入的 Bunko 模块包括 `kiso/math`、`kiso/array`、`kiso/string`、`kiso/bytes` 和 `kiso/utf8`。文件系统、输入输出、测试、部分编码库与 AOT 工具链等模块没有全部嵌入浏览器运行环境，相关程序仍应使用本地 CLI。
+
+Playground 是**文档站提供的运行功能**，不代表 `mio` 命令行工具新增了 `playground` 子命令，也不表示所有 VM 或 Native AOT 功能都能在浏览器中运行。了解网页与本地运行的区别，请阅读 [安装与运行](/docs/v2.0/getting-started)。
+
+## 平台与功能边界
+
+Mio v2.0.0 正式发行包面向 **macOS Apple Silicon / ARM64**。Linux、Windows 和 Intel Mac 尚未获得此版本的正式平台支持认证。
+
+| 项目 | v2.0.0 范围 |
 | --- | --- |
-| 分代 GC（M19） | 未启动 |
-| High / Balanced / Low 三档 GC | 未实现 |
-| Intel Mac、Linux、Windows 正式支持 | 未认证 |
-| 完整 `.mio` 源码工具链脱离 Go | 未完成 |
-| WebAssembly Playground | 未发布 |
-| IDE 插件与 v2.0.0 的全面端到端认证 | 未完成；仅有源码与协议层核对 |
+| Mochi 字节码与 VM | 已发布 |
+| macOS ARM64 Native AOT | 已发布并完成对应验证 |
+| 精确 Mark-Sweep GC | 已实现 |
+| 分代垃圾回收（M19） | 不包含在 v2.0.0 中 |
+| High / Balanced / Low 三档 GC | 不包含在 v2.0.0 中 |
+| Windows、Linux 与 Intel Mac 正式发行支持 | 尚未认证 |
+| 从 `.mio` 源码开始的完整纯 Mio 工具链 | 尚未完成 |
+| 所有 Mochi VM 特性都能原生编译 | 不作此承诺 |
+| IDE 插件与 v2.0.0 的全面端到端兼容认证 | 尚未完成 |
+| 文档站 WebAssembly Playground | 已提供，运行范围有限 |
 
-## 与站点版本入口的关系
+需要注意，某项功能在 Mochi VM 中实现，并不意味着对应的 Native AOT 后端也已经完整支持。标准库中的 AOT 模块属于工具链开发接口，不应视为跨平台通用的运行时 API。
 
-本目录是站点当前可读的 V2 文档，内容已按 v2.0.0 正式版核对。站点的默认稳定文档入口、V2.0.0 冻结快照与版本切换验收由文档站发布流程单独管理；这不影响 Mio 语言本身的正式发布事实。
+对于尚未实现或未经认证的功能，本目录不提供虚构的可运行示例，也不将后续开发规划当作当前版本已经支持的能力。
 
-[查看版本状态](/docs/versions)。
+## 文档与版本
+
+本目录的语言及工具链说明以 Mio `v2.0.0` 的正式发布范围为基础。文档站的 WebAssembly 运行环境属于网站功能，可能独立于语言发行包更新，因此请将两者的版本与支持范围分别理解。
+
+如果需要实际安装 Mio，请阅读 [安装与运行](/docs/v2.0/getting-started)；如果需要准确查询命令和参数，请查看 [开发工具](/docs/v2.0/tooling)；相关平台及验收证据见 [验证与来源](/docs/v2.0/tooling/verification)。
