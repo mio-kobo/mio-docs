@@ -1,0 +1,135 @@
+---
+title: 泛型、常量与模块
+description: Mio V2.0 泛型参数、内置数值约束、编译期常量及 Bunko 包导入规则。
+---
+
+## 泛型、常量与模块
+
+Mio 的泛型（Generics）允许相同函数或自定义类型用于不同的具体类型；编译期常量（Constant）通过 `teisu` 定义；包（Package）通过目录组织，并通过 `yobu` 和 `koukai` 管理依赖与公开成员。
+
+### 声明泛型函数
+
+泛型类型参数写在函数名之后的尖括号中。调用时可以通过实参和目标类型进行推断，也可以使用方括号指定类型实参。
+
+```mio title="Generic.mio"
+waza first<T>(values: []T) -> T? {
+    moshi (len(values) == 0) {
+        kaesu mu;
+    }
+    kaesu values[0];
+}
+
+kaku item = first[int64]([7, 8]);
+moshi (item != mu) {
+    chant(item);
+}
+```
+
+`first<T>` 中的 `<T>` 是声明语法，`first[int64](...)` 中的 `[int64]` 是显式调用类型实参，`Pair<int64>` 等类型标注仍使用尖括号。
+
+### 泛型结构体与枚举
+
+结构体和枚举也可以声明 `<T>` 或 `<T, E>` 等类型参数。构造语法由具体类型决定，例如：
+
+```mio title="GenericTypes.mio"
+kata Box<T> {
+    value: T;
+}
+
+sentaku Option<T> {
+    Some(T);
+    None;
+}
+
+kaku box = Box[int64] { value: 42 };
+kaku optional: Option<int64> = Option.Some(box.value);
+
+awase (optional) {
+    baai Some(value) { chant(value); }
+    baai None { chant("empty"); }
+}
+```
+
+如果类型参数不能从实参或目标类型中推断出来，必须明确写出类型参数或目标类型。
+
+### 泛型约束
+
+数值泛型函数可以使用 `T: Constraint`，限制类型实参必须满足的运算能力。
+
+| 约束 | 可接受的类型 |
+| --- | --- |
+| `Number` | 所有已支持的整数和浮点数 |
+| `Integer` | 所有已支持的整数类型 |
+| `Signed` | 有符号整数、`float32`、`float64` |
+| `Float` | `float32`、`float64` |
+
+```mio title="Constraints.mio"
+waza plus<T: Number>(left: T, right: T) -> T {
+    kaesu left + right;
+}
+
+chant(plus[int64](20, 22));
+chant(plus[float32](1.5, 2.5));
+```
+
+`Number` 等是内置数值约束，不是用户自定义 trait 系统。满足同一约束的不同类型不会因此自动隐式转换为同一种类型。当前不支持用户自定义 trait 约束、型变或高阶类型参数。
+
+### 编译期常量
+
+`teisu` 声明的常量在编译阶段求值，声明后不能再次赋值。常量可以引用其他常量，并使用受支持的纯数值或布尔表达式。
+
+```mio title="Constant.mio"
+teisu width: int64 = 10;
+teisu height: int64 = 20;
+teisu area: int64 = width * height;
+
+chant(area);
+```
+
+`teisu` 不支持以普通运行时变量、任意函数调用、数组或 Map 为编译期初始化值。常量可以用 `koukai teisu` 对外公开。
+
+### 目录即包
+
+Mio 的包以目录为单位。以目录为入口时，同一目录下的普通 `.mio` 文件共享包级声明；目录内以 `_test.mio` 结尾的测试文件不会作为普通源码加载。依赖需要通过 `yobu` 显式导入，子目录不会自动合并到父包。
+
+下面展示两个源码文件之间的关系。此例需要按目录保存文件，不能把任何一个代码块单独放进网页 Playground 运行。
+
+```text
+my-project/
+├── bunko/
+├── main.mio
+└── mathutils/
+    └── calc.mio
+```
+
+```mio title="mathutils/calc.mio" no-run
+koukai waza double(value: int64) -> int64 {
+    kaesu value * 2;
+}
+```
+
+```mio title="main.mio" no-run
+yobu "mathutils";
+
+chant(mathutils.double(21));
+```
+
+如果以单个 `.mio` 文件为入口，默认只加载该文件及显式导入的依赖；不能假定同目录所有练习文件都会合并。详细例子见 [包教程](/docs/v2.0/learn/packages)。
+
+### 导入 Bunko
+
+Bunko 是标准库的物理根目录，但源码中的导入路径从 `kiso/` 开始。默认包限定名为导入路径最后一段。
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+chant(math.sqrt(144.0));
+```
+
+若在本地安装目录中需要显式指定 Bunko 根目录，可以设置 `MIO_BUNKO` 环境变量。详细命令参阅 [CLI 文档](/docs/v2.0/tooling/cli)。
+
+### 公开成员
+
+Mio 使用 `koukai` 公开需要提供给其他包的函数、常量、结构体和枚举。普通可变的顶层 `kaku` 变量不能直接导出。
+
+当前依赖包中的顶层代码以声明为主，不支持在普通依赖包顶层直接执行语句或定义普通运行时全局变量。加载器会拒绝循环依赖、绝对路径、包含路径回退的非法导入和越过 Bunko 根的符号链接。

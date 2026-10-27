@@ -55,5 +55,5 @@ test('release routes, noindex, canonical, downloads and SEO exclude development'
   assert.ok(!html.includes('/releases/download/v2.0.0/'));
  }
  const map=await (await fetch(new URL('/sitemap.xml',base))).text();assert.ok(!map.includes('/docs/v2.0'));assert.ok(!map.includes('/releases/2.0.0'));
- for(const query of ['tag=v1.0&tag=v2.0','tag=v2.0.0','tag=v1.0&locale=en']) assert.equal((await fetch(new URL(`/api/search?query=kaku&${query}`,base))).status,400);
+ for(const query of ['tag=v1.0&tag=v2.0','tag=v2.0.0','tag=v1.0&locale=en']) assert.equal((await fetch(new URL(`/api/search?query=kaku&${query}`,base))).status,404);
 });

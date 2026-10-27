@@ -9,3 +9,5 @@ export function generateStaticParams() {
   return [{slug:[]}, ...pages.map(page=>({slug:page.slugs})), ...aliases];
 }
 export async function generateMetadata({ params }: { params:Promise<{slug?:string[]}> }) { return docMetadata((await params).slug); }
+
+export const dynamicParams = false;

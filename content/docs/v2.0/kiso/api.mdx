@@ -9,103 +9,103 @@ description: Mio V2.0.0 标准库公开函数总览
 
 ### kiso/math
 
-[数学模块说明](./math)
+[数学模块说明](/docs/v2.0/kiso/math)
 
 `min`、`max`、`checked_abs`、`abs`、`clamp`、`sqrt`、`floor`、`ceil`、`round`、`trunc`、`is_nan`、`is_inf`、`is_finite`、`checked_gcd`、`gcd`、`checked_lcm`、`lcm`。
 
 ### kiso/array
 
-[数组模块说明](./array)
+[数组模块说明](/docs/v2.0/kiso/array)
 
 `make`、`with_capacity`、`push`、`capacity`、`reserve`、`clone`、`truncate`、`append_all`。
 
 ### kiso/string
 
-[字符串模块说明](./string)
+[字符串模块说明](/docs/v2.0/kiso/string)
 
 `to_bytes`、`from_utf8`、`byte_len`、`rune_count`、`has_prefix`、`has_suffix`、`index`、`contains`、`concat`、`new_builder`、`builder_with_capacity`、`write_string`、`write_rune`、`builder_len`、`builder_capacity`、`builder_reset`、`builder_string`。
 
 ### kiso/bytes
 
-[字节模块说明](./bytes)
+[字节模块说明](/docs/v2.0/kiso/bytes)
 
 `equal`、`compare`、`index`、`contains`、`has_prefix`、`has_suffix`、`copy`、`fill`、`clone`、`new_buffer`、`buffer_with_capacity`、`write_byte`、`write`、`buffer_len`、`buffer_capacity`、`reset`、`buffer_clone`、`buffer_bytes`。
 
 ### kiso/utf8
 
-[UTF-8 编解码模块说明](./utf8)
+[UTF-8 编解码模块说明](/docs/v2.0/kiso/utf8)
 
 `is_valid_rune`、`rune_width`、`decode_one`、`encode_rune`、`append_rune`、`valid`、`rune_count`。
 
 ### kiso/convert
 
-[类型转换模块说明](./convert)
+[类型转换模块说明](/docs/v2.0/kiso/convert)
 
 `parse_int`、`parse_uint`、`format_int`、`format_uint`、`parse_bool`、`format_bool`、`parse_float64`、`parse_float32`、`format_float64`、`format_float32`。
 
 ### kiso/path
 
-[路径模块说明](./path)
+[路径模块说明](/docs/v2.0/kiso/path)
 
 `clean`、`join`、`join_all`、`is_abs`、`base`、`dir`、`ext`、`split`。
 
 ### kiso/io
 
-[输入输出模块说明](./io)
+[输入输出模块说明](/docs/v2.0/kiso/io)
 
 `read`、`write`、`read_full`、`write_all`、`copy_stream`、`reader_from_bytes`、`writer_to_buffer`。
 
 ### kiso/fs
 
-[文件系统模块说明](./fs)
+[文件系统模块说明](/docs/v2.0/kiso/fs)
 
 `open_read`、`open_write`、`open_append`、`read`、`write`、`close`、`reader`、`writer`、`read_all`、`write_all`、`stat`、`exists`、`is_file`、`is_dir`、`create_dir`、`read_dir`。
 
 ### kiso/encoding/binary
 
-[二进制编码模块说明](./encoding-binary)
+[二进制编码模块说明](/docs/v2.0/kiso/encoding-binary)
 
 `read_u8`、`read_u16_le`、`read_u16_be`、`read_u32_le`、`read_u32_be`、`read_i8`、`read_i16_le`、`read_i16_be`、`read_i32_le`、`read_i32_be`、`read_i64_le`、`read_i64_be`、`write_u8`、`write_u16_le`、`write_u16_be`、`write_u32_le`、`write_u32_be`、`write_i8`、`write_i16_le`、`write_i16_be`、`write_i32_le`、`write_i32_be`、`write_i64_le`、`write_i64_be`、`write_var_u32`、`read_var_u32`、`write_var_i64`、`read_var_i64`、`reader`、`reader_offset`、`reader_remaining`、`reader_eof`、`reader_seek`、`reader_skip`、`reader_read_u8`、`reader_read_u16_le`、`reader_read_u16_be`、`reader_read_u32_le`、`reader_read_u32_be`、`reader_read_u64_le`、`reader_read_u64_be`、`reader_read_bytes`、`writer`、`writer_offset`、`writer_reserve`、`writer_write_bytes`、`writer_write_length_prefixed`、`writer_write_u8`、`writer_write_u16_le`、`writer_write_u16_be`、`writer_write_u32_le`、`writer_write_u32_be`、`writer_write_u64_le`、`writer_write_u64_be`、`writer_patch_u16_be`、`writer_patch_u16_le`、`writer_patch_u32_be`、`writer_patch_u32_le`、`writer_patch_u64_be`、`writer_patch_u64_le`、`writer_bytes`。
 
 ### kiso/testing
 
-[测试模块说明](./testing)
+[测试模块说明](/docs/v2.0/kiso/testing)
 
 `expect`、`fail`。
 
 ### kiso/encoding/mochi
 
-[Mochi 格式编码模块说明](./encoding-mochi)
+[Mochi 格式编码模块说明](/docs/v2.0/kiso/encoding-mochi)
 
 `decode`、`error_code`、`canonical_bytes`、`summarize`、`decode_file`。
 
 ### kiso/aot/arm64
 
-[ARM64 指令编码模块说明](./aot-arm64)
+[ARM64 指令编码模块说明](/docs/v2.0/kiso/aot-arm64)
 
 `movz_x`、`movk_x`、`movn_x`、`movz_w`、`add_x`、`sub_x`、`adds_x`、`subs_x`、`and_x`、`orr_x`、`eor_x`、`mul_x`、`sdiv_x`、`udiv_x`、`msub_x`、`cmp_x`、`add_imm_x`、`sub_imm_x`、`cmp_imm_x`、`add_imm_w`、`cset_w`、`lsl_x`、`lsr_x`、`asr_x`、`lsrv_x`、`ldr_x`、`str_x`、`ldrb_w`、`strb_w`、`ldrh_w`、`stp_x`、`ldp_x`、`stp_pre_x`、`ldp_post_x`、`b`、`bl`、`b_cond`、`cbz_x`、`cbnz_x`、`br_x`、`blr_x`、`ret_x`、`ret`、`adr`、`adrp_offset`、`svc`、`fadd_d`、`fsub_d`、`fmul_d`、`fdiv_d`、`fcmp_d`、`scvtf_d`、`fcvtzs_x`、`assembler`、`assembler_emit`、`assembler_label`、`assembler_b`、`assembler_bl`、`assembler_b_cond`、`assembler_cbz_x`、`assembler_cbnz_x`、`assembler_assemble`、`assembler_label_word`。
 
 ### kiso/aot/lower
 
-[AOT 降低编译模块说明](./aot-lower)
+[AOT 降低编译模块说明](/docs/v2.0/kiso/aot-lower)
 
 `error_code`、`error_detail`、`compile`、`compile_gc_stress`、`compile_with_heap`。
 
 ### kiso/aot/lower/nativefs
 
-[AOT NativeFS 桥接模块说明](./aot-lower-nativefs)
+[AOT NativeFS 桥接模块说明](/docs/v2.0/kiso/aot-lower-nativefs)
 
 `operation`、`parameter_count`、`parameter_is_root`、`returns_reference`、`entry_label`、`emit_runtime`。
 
 ### kiso/aot/lower/types
 
-[AOT 类型分析模块说明](./aot-lower-types)
+[AOT 类型分析模块说明](/docs/v2.0/kiso/aot-lower-types)
 
 `type_kind`、`type_nullable`、`type_is_heap_reference`、`type_instruction_width`、`enum_read_tag`、`reachable_functions`、`array_forward_opcode`、`is_float_predicate`、`analyze_types`、`analyze_types_traced`。
 
 ### kiso/aot/macho
 
-[Mach-O 文件生成模块说明](./aot-macho)
+[Mach-O 文件生成模块说明](/docs/v2.0/kiso/aot-macho)
 
 `text_target`、`const_target`、`data_target`、`plan`、`executable`。
 

@@ -19,8 +19,8 @@ function check(url, owner, base = '/docs') {
   if (/^https?:/u.test(url)) { external.add(url); count++; return; }
   if (!/^(?:\/|#)/u.test(url)) throw new Error(`${owner}: unresolved relative link ${url}`);
   const target = new URL(url, 'https://docs.invalid' + base);
-  if (!routes.has(target.pathname)) throw new Error(`${owner}: broken route ${url}`);
-  if (target.hash) fragments.push({ path: target.pathname, hash: decodeURIComponent(target.hash.slice(1)), owner });
+  if (!routes.has(target.pathname.replace(/\/$/u, '') || '/')) throw new Error(`${owner}: broken route ${url}`);
+  if (target.hash) fragments.push({ path: target.pathname.replace(/\/$/u, '') || '/', hash: decodeURIComponent(target.hash.slice(1)), owner });
   count++;
 }
 for (const file of files.filter(f => /\.mdx?$/u.test(f))) {

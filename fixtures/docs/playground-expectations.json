@@ -4,8 +4,125 @@
     "wasmSha256": "6160745215accac6721d21cb71a5c39989842b6fe344d2b473425ae80c76f58a",
     "wasmExecSha256": "0c949f4996f9a89698e4b5c586de32249c3b69b7baadb64d220073cc04acba14"
   },
-  "exampleCount": 51,
+  "exampleCount": 348,
   "examples": {
+    "002debbe9083e4f0d971a812c80543f7470c7a66525204e320e7eb5c85a7efbd": {
+      "preview": "kaku age: int64 = 18;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "18\nMio\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "008064fd165188e741c37bec8b34a0877ad97ddd87c1ff9bdca8cdf5f99637ff": {
+      "preview": "waza greet() -> unit {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello, Mio!\n",
+        "diagnostics": []
+      }
+    },
+    "00946466916f8a762288bd842123a95897b1e1c2c2934e2457d46f5f38826d59": {
+      "preview": "kaku add = waza (a: int64, b: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "30\n",
+        "diagnostics": []
+      }
+    },
+    "011b96f7ecc27082ce153fd4288c83ec8390d882daac0364a1e409c679f07d1b": {
+      "preview": "waza next(value: int64?) -> int64? {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "11\n",
+        "diagnostics": []
+      }
+    },
+    "02ae2988fca17e8bfe0fbd11512019b608e7a5c451746210431f64ed614c0b42": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio!\n",
+        "diagnostics": []
+      }
+    },
+    "02f20707fde4e76e2d7cbb4c98ce0dcebaaf4ca568133b64b17bd51af3fcfa52": {
+      "preview": "kaku numbers = [10, 20, 30];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "99\n",
+        "diagnostics": []
+      }
+    },
+    "03ca7b4f781cb50a98b5c0463d8488e39f7c692766e8ed70600890d5661f5327": {
+      "preview": "waza first<T>(values: []T) -> T? {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n",
+        "diagnostics": []
+      }
+    },
+    "0406cb770af127c862edca2209e358ae6a90729fe7831a396a22eab64b82fd5f": {
+      "preview": "sentaku Result {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "045939cdde117bd7fc3f5ca520a77caae5c79fe4a40e7e9f636e8648f62415d1": {
+      "preview": "kaku number = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "正数\n",
+        "diagnostics": []
+      }
+    },
     "04f3ebd3f18b0400b78cb37de50ee0f41941e6e5fc0352203e4563660b1302b1": {
       "preview": "chant(int64(3.9));",
       "check": {
@@ -16,6 +133,279 @@
       "run": {
         "status": "ok",
         "stdout": "3\n42\n65\n9731\n1.5\n",
+        "diagnostics": []
+      }
+    },
+    "05236dc04591cd669dac9359c814418a5dd61b1172cbebc69d1f3df1eb7e4d70": {
+      "preview": "kaku count = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "20\n10\n",
+        "diagnostics": []
+      }
+    },
+    "053d6aaf213e43ba89b7442131b437c9066205afd5a2a785cf90c39fabd20aca": {
+      "preview": "kaku small: int8 = 100;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "058db8395a2d3eceb0773e515ad943624a1e8ba4a744147c4737526c235d05d2": {
+      "preview": "kaku count = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\n",
+        "diagnostics": []
+      }
+    },
+    "063e1f0e167f3c3fcf1e15fb58c2f444bed89ef9504562631a441f07f77b1eca": {
+      "preview": "sentaku Message {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello, Mio!\n",
+        "diagnostics": []
+      }
+    },
+    "078b497eb5ca8f6186f1bfe4fb34952ea4930384f1b556c5fc7ca06a0ed7fdf5": {
+      "preview": "teisu max_count: int64 = 100;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "0806d283f5b61113c452ba5970e102a895678522b745e4d93996c1bb656457a6": {
+      "preview": "kaku numbers: []int64 = [];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "0\n",
+        "diagnostics": []
+      }
+    },
+    "087e14281421bb1129af50259b02b448d7f1942daab6bb888277418e8871318c": {
+      "preview": "kata Point {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n20\n",
+        "diagnostics": []
+      }
+    },
+    "0881c75ad635c88f6622f3d56c953bcf3c13607b068afad1eb64884e396b282d": {
+      "preview": "kaku scores = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "95\n",
+        "diagnostics": []
+      }
+    },
+    "093bcdc6bd176fc18747c20a86d41cb91cd5114d4c0d1433349e6328e728e601": {
+      "preview": "kaku value: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "0a5154d6022d159ecb44860c25c134606749a7ed253a8ac8f99ad9e0c0cc8836": {
+      "preview": "waza make_counter() -> () -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n2\n3\n",
+        "diagnostics": []
+      }
+    },
+    "0b3e6ded500fe4dc9aa3676698efad46d010886301dca78b55e067d83fcdaf7f": {
+      "preview": "waza factorial(n: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "120\n",
+        "diagnostics": []
+      }
+    },
+    "0f270eb6aca70106fc5c80178a719bafb7ff85892898bd00a874da431062f443": {
+      "preview": "chant(2 + 3 * 4);",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "14\n",
+        "diagnostics": []
+      }
+    },
+    "0f4718e125dee374ba6d794bd6be4852cc2ca6d3ba8bea2bff81a412e22d3e71": {
+      "preview": "kaku name = \"Mio\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n18\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "112ea5bf89e88df36124bda1c98ec6a2f695a004d4d925d8d804303ce207062a": {
+      "preview": "kaku letter: rune = 'A';",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "65\n20013\n",
+        "diagnostics": []
+      }
+    },
+    "116474bbf2e60d4d63675b361a87fc3e15c6fbd871acd4ac4a55511a68beaca6": {
+      "preview": "kaku enabled = hai;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\niie\n",
+        "diagnostics": []
+      }
+    },
+    "12181cdf07aebf9762c57a00f476b180c8c93b184ae2dc1d39e9da734160619c": {
+      "preview": "kaku a: int64 = 7;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n-128\n",
+        "diagnostics": []
+      }
+    },
+    "126c8de2e7c7a97e2830c57fa85fcc2dae39e34bcd49c11b3223d95e5c78a326": {
+      "preview": "// 声明一个整数变量",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n",
+        "diagnostics": []
+      }
+    },
+    "12861a94259d165dba778364fb04b2a5cec7a959a139ec3701b0e012560015bf": {
+      "preview": "kaku scores = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "1319f9c5935468c88f50efd1cf4ca5ae5b9d6aacd5859bd5aa5b50c55be7c66c": {
+      "preview": "sentaku State {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "1342920fc433d9b298b9efda24c10178e6b4b611c89597e89addb75b24f48f52": {
+      "preview": "kata Box<T> {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\nMio\n",
+        "diagnostics": []
+      }
+    },
+    "13aff99b4c345c552eee20f41a9e93518c7ea0d070d157779752b16fbfafe2c3": {
+      "preview": "koukai waza add(a: int64, b: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
         "diagnostics": []
       }
     },
@@ -32,6 +422,19 @@
         "diagnostics": []
       }
     },
+    "152cff156be7e7508efb9c42569ea3d7d29e12bba5138d2f04c51622e1d5e99d": {
+      "preview": "chant(hai && hai);",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\niie\nhai\niie\niie\nhai\n",
+        "diagnostics": []
+      }
+    },
     "1534a760cb064ca2adc012f447261115fc426bdda5a006ae10267f2a82666ce9": {
       "preview": "kaku entries = Map[string, int64]();",
       "check": {
@@ -42,6 +445,71 @@
       "run": {
         "status": "ok",
         "stdout": "42\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "165afe6fed9184f8c1a43283fd7fc0f5cc646c05e5d7ae6eeab45a2329296047": {
+      "preview": "koukai kata User {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "16ed413ba415aa9b29ed8a3fd6908c72292f2b56d73b427f9faf0b22081871c9": {
+      "preview": "chant(7 / 2);",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n-3\n",
+        "diagnostics": []
+      }
+    },
+    "182086ee7853cac07637a75745fdda0afbd160cfbe0280cb4788aaec4ce7a822": {
+      "preview": "sentaku State {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "就绪\n",
+        "diagnostics": []
+      }
+    },
+    "188fbeef2d73bfed18ee479a81dbe301993e618a5b75bfef53c010298cc66720": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello, Mio!\n",
+        "diagnostics": []
+      }
+    },
+    "199ee87d891f939e8da7c40d173cdce4c890e78a3a1bf1ef40c8b450cbd9d5e1": {
+      "preview": "waza apply(value: int64, transform: (int64) -> int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
         "diagnostics": []
       }
     },
@@ -58,6 +526,344 @@
         "diagnostics": []
       }
     },
+    "1bab97fd0b9a5d2351e4299027fdc60dd3fc30f1c9c9b6dffa299f9ed693fb75": {
+      "preview": "kaku ages: Map<string, int64> = Map();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "1bb57319b5c7e57df3a02967d36a60e77838f72fa3080aa6c363d01d0a8b88df": {
+      "preview": "kaku scores: Map<string, int64> = Map();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "1c6605c9dd74795d9c701def02ac24f411f040d2fd3d6ae87c74b25c5d5cfd6d": {
+      "preview": "kaku message = \"Mio says \\\"Hello!\\\"\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio says \"Hello!\"\n",
+        "diagnostics": []
+      }
+    },
+    "1e39bb7d831d1f5d8b98d10b2773121fa6f77bfa2e573a4653e2333597baceb2": {
+      "preview": "kaku age = 18;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n18\n",
+        "diagnostics": []
+      }
+    },
+    "1f636a64e87a169dd8817889407272ab71aeadbc71e34674a13a286b871b281a": {
+      "preview": "kaku large = 1e3;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1000\n0.025\n",
+        "diagnostics": []
+      }
+    },
+    "2190196995081117d37bc45f5e127a68fe6aa36e46adf8a7935fd75321df6439": {
+      "preview": "yobu \"kiso/bytes\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "21b9c3973bfc626545a338f891691e9a89b21321f3d054e3db67b64bebe5d9d7": {
+      "preview": "kaku number = 1;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "15\n",
+        "diagnostics": []
+      }
+    },
+    "22d7bf409e69b5c9003ac44d869f745a0383196784f8e8ce0b0703ec61fb8fd0": {
+      "preview": "kaku age: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "23d8f502ed4b7aed46c34715bac8a4187a7ae9781c38a015072995eb9050869e": {
+      "preview": "kaku number = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "number 不等于零\n",
+        "diagnostics": []
+      }
+    },
+    "2427d94f510fe566b34d24e8d6e9ffa381d7835b639354fd8132e6c0626aba8c": {
+      "preview": "kaku numbers = [10, 20, 30];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n20\n30\n",
+        "diagnostics": []
+      }
+    },
+    "244c6afff456aa83df8ec07b3cc829b3698977a65c747b5f0ea4469f3280dbab": {
+      "preview": "kaku age = 18; // 声明年龄变量",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "18\n",
+        "diagnostics": []
+      }
+    },
+    "24951da831b9b6a8119746fa5fd675eb1d522d897895aa4c34146b6b9152baee": {
+      "preview": "waza identity<T>(value: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\nMio\n",
+        "diagnostics": []
+      }
+    },
+    "24bc57c2c50d2104444c10b1058ece8b07769c20139d76597068c794f60d6c1e": {
+      "preview": "kaku numbers: []int64 = [10, 20, 30];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n3\n99\n",
+        "diagnostics": []
+      }
+    },
+    "25d888674c77ac1d0734345b95bbd73a71422a0f03a85b4d4885d39e64e3830f": {
+      "preview": "kaku count = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n2\n",
+        "diagnostics": []
+      }
+    },
+    "26f9687239691837c0dba96483a963a2182c3d6be8557fd4e3d4e19d6eadf043": {
+      "preview": "kaku scores = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "2774c2b4cf32c5d74849a047f23144ba34cc547767a6ea22aa0a92a1f87a622a": {
+      "preview": "chant(2 + 3 * 4);",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "14\n20\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "28513458deae3be855b7be810a87a2cccb49a399958d2f236f5c737708aeb7a8": {
+      "preview": "kaku is_admin = iie;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "允许操作\n",
+        "diagnostics": []
+      }
+    },
+    "28858a9502baba7f0605b7e770f01accd02563739045765960f40813ae8ea3ec": {
+      "preview": "waza add<T: Number>(left: T, right: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "30\n4\n",
+        "diagnostics": []
+      }
+    },
+    "28979faf11f053934de9360adf3cdb325a12002970bc33d089cf22fe1afe857a": {
+      "preview": "kaku a = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "iie\nhai\niie\nhai\niie\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "2aa97e1457a7449236687c5a3eb20e084d423efdbbf1fe78b338aff659cfb053": {
+      "preview": "kaku values: []int64? = [10, mu, 30];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "2b753d28a2c48f421905868e45a556c64a86112d57b3419b983e7980f725ba6b": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n30\n",
+        "diagnostics": []
+      }
+    },
+    "2c62bf2db8bc22f3c0fc722d2e70ce5846105c90cb18d02df12285c0c16d3357": {
+      "preview": "kaku a = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "13\n7\n30\n3\n-10\n",
+        "diagnostics": []
+      }
+    },
+    "2e6d6c0f6325a960bfb500d8fb864a5481f12dce875d5a9f0994c86137df1453": {
+      "preview": "teisu width: int64 = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "200\n",
+        "diagnostics": []
+      }
+    },
+    "2f9146e0a016b85dbd899886c580c02abc90b877797e8efc0f770c222e481ed1": {
+      "preview": "kaku values: [][]int64 = [[1, 2], [3, 4]];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\n3\n",
+        "diagnostics": []
+      }
+    },
+    "3006bc27a95f9de5253d5bffdf198eff40d9fd960703e4b997e33fbfba4433af": {
+      "preview": "kaku price: float32 = 19.5;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "19.5\n3.141592653589793\n",
+        "diagnostics": []
+      }
+    },
+    "3090eeeb34b19552911da0e428a67f6f8cccae0eedead9e26e9ab9a62f78784c": {
+      "preview": "kaku pi = 3.14;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3.14\n19.99\n0.5\n",
+        "diagnostics": []
+      }
+    },
     "31a054a11c8f87eb4f806263ef59f9f0386b8c88c858c40efa5169227a3a6313": {
       "preview": "kaku age: int64? = mu;",
       "check": {
@@ -71,6 +877,32 @@
         "diagnostics": []
       }
     },
+    "321bb5beb4bdb22fb741e1f03d451d0a67c626f415eeba5d8fe0daeec829cea9": {
+      "preview": "kaku count: int64 = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "0\n",
+        "diagnostics": []
+      }
+    },
+    "322ce4f601f33ebc731923c007fd6aab19f4da1de78623db31741f84ea4da0d9": {
+      "preview": "kaku age: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "19\n",
+        "diagnostics": []
+      }
+    },
     "33cc7ca53921e7c817ccbd013fe0d23d2ddcd2ecfd57a6c846a470a15d5d59d3": {
       "preview": "yobu \"kiso/string\";",
       "check": {
@@ -81,6 +913,19 @@
       "run": {
         "status": "ok",
         "stdout": "6\n4\n6\nhai\n澪Mio!\n",
+        "diagnostics": []
+      }
+    },
+    "3400407fa1a8b4fadb162d5803c8e56dea627c2c30e392864757c93efb39942b": {
+      "preview": "waza twice(value: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
         "diagnostics": []
       }
     },
@@ -101,6 +946,32 @@
         ]
       }
     },
+    "3546858260639a7ce451124ea59d609460ebd1b5eafa36856f40036effee1ce2": {
+      "preview": "kaku multiply = waza (a: int64, b: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "3649c271c642140b6574121b4f0df13fd1fca1688c25af75b32ce512fbdf514d": {
+      "preview": "waza twice(value: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
     "3700da33c6a37f822adfc77d64dc1e61112de36042123f5a0a97d29d3752dc81": {
       "preview": "kaku value = 10;",
       "check": {
@@ -111,6 +982,110 @@
       "run": {
         "status": "ok",
         "stdout": "20\n10\n11\n",
+        "diagnostics": []
+      }
+    },
+    "37d151ace27889d92ac26b3600b37c7329b862b7cb5997fb22b6ab0a0ae2268e": {
+      "preview": "kaku numbers: []int64 = [];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "0\n",
+        "diagnostics": []
+      }
+    },
+    "37eee69da32dacff8179f0974a418ad274e050a3d6fbb6d98139ef2bd4841766": {
+      "preview": "kaku number = 100;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "383cddec0cc419e6630370e0fd6a850603bc1f90a328d3a3e7dfb987c8aa6508": {
+      "preview": "kaku character = 'A';",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "3af1e506d1bf3a8df2b520d88c1ce1ab9d9472819fd80c4887a0ef64e45d8f35": {
+      "preview": "kaku age: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "年龄尚未设置\n19\n",
+        "diagnostics": []
+      }
+    },
+    "3bc197e897dd1078d0dac18e7d44b147ada853ec9c9670744958344657279ffc": {
+      "preview": "kaku number = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "20\n",
+        "diagnostics": []
+      }
+    },
+    "3bf602ad11c78c0f4e0c0a90e217043eb87e003d355a596b8fffadc9aa3f8a65": {
+      "preview": "waza square(value: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "25\n",
+        "diagnostics": []
+      }
+    },
+    "3c1160e1dccb5c3a62650bc4314d98dac3a391589506d4e9f039185bfa795819": {
+      "preview": "yobu \"kiso/math\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\n",
+        "diagnostics": []
+      }
+    },
+    "3c2030930cc15829364d319361b00d8d726060c2fe72adf42f15f073d1b54966": {
+      "preview": "kaku number = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "30\n",
         "diagnostics": []
       }
     },
@@ -127,6 +1102,110 @@
         "diagnostics": []
       }
     },
+    "3d73818c6517d5b3ed85ad64257e0d67eb364921c04aea67b139ed2e6e8e2dc7": {
+      "preview": "kaku message = \"Hello\\nMio!\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello\nMio!\n",
+        "diagnostics": []
+      }
+    },
+    "3ee1d1a63912e98038f895ce6b0cefab0c73d3a46bbdd9e088aab7aec80e6b95": {
+      "preview": "kaku numbers = [10, 20, 30];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n20\n30\n",
+        "diagnostics": []
+      }
+    },
+    "3fe41c7fb72fcbeeb564ee13ce2d0c0df22bb6ef6a38fa2eafaa95c33fa2f954": {
+      "preview": "kata Box<T> {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "41ed31e8595d5057bd32aef8a97288a6f449c0de1056eff20222b5441b8fbed1": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello, Mio!\n",
+        "diagnostics": []
+      }
+    },
+    "424329575712ee16f9ad1cad8a0a28b8318b91fc307a380ac204d52994e868b6": {
+      "preview": "waza make_pair() -> [](() -> int64) {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n1\n2\n",
+        "diagnostics": []
+      }
+    },
+    "424a6148bfa34b4b874dd19800df342ec2872eb689f731856a35249139b76acd": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio!\n",
+        "diagnostics": []
+      }
+    },
+    "425d83d10e74249b16415947da9b564f58e64497fc44a5b7b533bd5ef9e3e965": {
+      "preview": "yobu \"kiso/utf8\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "4311d2b1bb6dc7916083d6d9e932104222826e96d37fcc484c6fde43f52d8d54": {
+      "preview": "sentaku Result<T, E> {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
     "44b4b2d3226918f95f4ccbebf1592b4ae8febbdb8d0ece8e4d3df11b88c9c533": {
       "preview": "kaku i = 0;",
       "check": {
@@ -137,6 +1216,166 @@
       "run": {
         "status": "ok",
         "stdout": "8\n",
+        "diagnostics": []
+      }
+    },
+    "44c5ba2d2bcfc4e4da9f570df59200e8f0fe6cb80f055092a8cd722bf21aca22": {
+      "preview": "kata Product {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Keyboard\n99.5\n",
+        "diagnostics": []
+      }
+    },
+    "460c239fea0f167663b89cd6b5a90b0d263769c0c506e3256b5054e7dc7d4e72": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "4\n40\n",
+        "diagnostics": []
+      }
+    },
+    "46bf536c969192c58b993ccdcb4b434a5a1e1e3ac019c6c46270a3cd61a8455c": {
+      "preview": "kaku double = waza (value: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "47616970e7f4bce0305dee9af677d13a578b59f3c401a5e5f7ad334528a933fd": {
+      "preview": "kaku elements: []int64? = [10, mu, 30];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n2\n",
+        "diagnostics": []
+      }
+    },
+    "478f033dc7fbea44f77aade0d22bdc067bb5a765c6ad57f7d5111338b3db42b5": {
+      "preview": "kaku count = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "20\n",
+        "diagnostics": []
+      }
+    },
+    "47ba8970be496f11ee961dc68c1eaa3e4e4938416b0eb87decbbb0e2307c945f": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "9\n3\n9\n",
+        "diagnostics": []
+      }
+    },
+    "484c23420c97e430963383056ff2a96eb47c24edd0f1602741769df3c0ea9fae": {
+      "preview": "kata User {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n18\n",
+        "diagnostics": []
+      }
+    },
+    "4a821c246d565f64fd9e7055ee74b4013f82340699e47a47cbbf4e677757a439": {
+      "preview": "kaku age: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "年龄尚未设置\n18\n",
+        "diagnostics": []
+      }
+    },
+    "4b2c21b5dd261e157e81aad7aae90093e6417f6842eb970fac89d206e86c243c": {
+      "preview": "identity[int64](100);",
+      "check": {
+        "status": "diagnostic",
+        "stdout": "",
+        "diagnostics": [
+          "E0201: 未定义的变量 \"identity\": undefined identifier \"identity\" at 1:1"
+        ]
+      },
+      "run": {
+        "status": "diagnostic",
+        "stdout": "",
+        "diagnostics": [
+          "E0201: 未定义的变量 \"identity\": undefined identifier \"identity\" at 1:1"
+        ]
+      }
+    },
+    "4b388854fb493fa8f93dae1ac405d5a414095708075a3bd6c2fa7058258213a0": {
+      "preview": "kaku scores = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "没有找到对应的成绩\n",
+        "diagnostics": []
+      }
+    },
+    "4b49f7b3afb6b2ed0114c2bbd2209ef072262a8f56e9402933491f4183abd4f5": {
+      "preview": "kaku count = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "0\n1\n2\n",
+        "diagnostics": []
+      }
+    },
+    "4c065953f2fabf908a05c0687600a6a2483cf5eee468ab716a0eab2e397bcc91": {
+      "preview": "kaku number: int64 = 42;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n42\n",
         "diagnostics": []
       }
     },
@@ -153,6 +1392,19 @@
         "diagnostics": []
       }
     },
+    "4c952262786cc3ee52a60b01177837207749c06eb5663b569689ccefe9eea5f2": {
+      "preview": "waza check() -> bool {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "iie\nhai\n",
+        "diagnostics": []
+      }
+    },
     "4eb527fa03e0dc2dc8d3a43780e298f55d895da6c12bd62ac93a5917247b5c8c": {
       "preview": "kata Pair<T> { first: T; second: T; }",
       "check": {
@@ -166,6 +1418,19 @@
         "diagnostics": []
       }
     },
+    "4eeb034f7b62f84c45c7c093ff0bd04cbccc187686bcd9001e87f4610d3d0e82": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\nHello, Mio\n",
+        "diagnostics": []
+      }
+    },
     "4fb9f9dec02f92d86c68f8def7bf7f3e63ce92c22cea5a9840d61fd2ff0c1cc6": {
       "preview": "yobu \"kiso/utf8\";",
       "check": {
@@ -176,6 +1441,97 @@
       "run": {
         "status": "ok",
         "stdout": "hai\n3\n28586\n0\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "508fa0a0088e30cbacc78581b2486aa044eb943616df0d15163d1fd9fbcde0a9": {
+      "preview": "kaku messages = Map[int64, string]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
+    "515357ab470b95824e8b0042f87d53cc98cd78cc2b0442c90f227d30023869e6": {
+      "preview": "kaku small: int8 = 12;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "12\n12\n",
+        "diagnostics": []
+      }
+    },
+    "517a0515a292baa97f6db2bc4240cdee8a0766c3c00cd7c44806932de7eaee3b": {
+      "preview": "chant(double(21));",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "51fd86237fb4fc99369b4625e92bc6dc16cfc5185ee9cc07e0bbca5150e28497": {
+      "preview": "kaku number = 1;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n2\n3\n4\n5\n循环结束\n",
+        "diagnostics": []
+      }
+    },
+    "52688dda80224dd8f2cbd3c39a89ebff687a560edd79fa459ee88b854ed1e60d": {
+      "preview": "kaku value = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "20\n10\n",
+        "diagnostics": []
+      }
+    },
+    "528c7f495de0ee4583a036a7473b094be84d563a439fdf0d3b79835c4d7149f5": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "543bd04128fa548f636f4a21f6a5c9ca655b71b76489a6bac0165ca137ba921c": {
+      "preview": "chant(\"Mio\" == \"Mio\");",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\nhai\n",
         "diagnostics": []
       }
     },
@@ -206,6 +1562,227 @@
         "diagnostics": []
       }
     },
+    "5576499e2a277b9fa425ab87f80821c2afdc61e13e8225ea34d56548812c9ab8": {
+      "preview": "kaku score = 75;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "及格\n",
+        "diagnostics": []
+      }
+    },
+    "55826adfe5db9680a355f815ed38fac53e740cec9d8ea4b40c664116055bc3c5": {
+      "preview": "kaku scores = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "55b3ddb82e865894abdf8e63a35adb1a935127af9885196a19b1c99b7d485e21": {
+      "preview": "waza greet(name: string) -> unit {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
+    "560707d67998b95b60c8293dc4d3574f97d2281e545e56fb78d184e077ecc0c4": {
+      "preview": "kaku value: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "574e57637a6a98cd79719e337a5fc0a8981c32c87b16f0eb03266df103f606e8": {
+      "preview": "kaku message = \"Hello, Mio!\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "58137e15b464108f896b0b2ab9b2dbd025900428d319a9ae05cdd5ab0ddbaebc": {
+      "preview": "kaku outer = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n2\n11\n12\n",
+        "diagnostics": []
+      }
+    },
+    "58d8adbb1f42bf93abd7624f25de5cd2c69c8a409a144158d1a9c0d55fb5c33d": {
+      "preview": "kaku a = \"Mio\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\nhai\niie\n",
+        "diagnostics": []
+      }
+    },
+    "5940096345fb357d53c56bbc310efa52ca7f88d54274906839d793aa6ebb0784": {
+      "preview": "kaku age: int64 = 18;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "20\n",
+        "diagnostics": []
+      }
+    },
+    "5a56c6038cf5d1057954053ee27e6ff3b715eb297623e16585290f42d23bfae4": {
+      "preview": "kaku scores = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "5ba2d8edb36cae9c0147fa0fef84f7ddba85b699f12bff027d0100f58c99cad8": {
+      "preview": "kaku value: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "5c8d8b0ecb9f51b1e1931d6289f374fc4f91ae0fb8586e9055f0c2249f0f45b3": {
+      "preview": "chant(\"A\");",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "A\n中\n",
+        "diagnostics": []
+      }
+    },
+    "5d658f8b43ea0b6778e0d4147532413763abb785147e0bde6ef539094d89691d": {
+      "preview": "kaku age: int64 = 18;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "18\n",
+        "diagnostics": []
+      }
+    },
+    "5d917faea3d0747ad89ddb11773bacc2774719ecbdd4f457679d55a8bd8a4f22": {
+      "preview": "kaku enabled = iie;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "功能未启用\n",
+        "diagnostics": []
+      }
+    },
+    "5df919ac46d2900b993d822a727465365cc43d14b9354202d2f8bedfb0b8aea0": {
+      "preview": "teisu base: int64 = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "25\n",
+        "diagnostics": []
+      }
+    },
+    "5e35fb0e9c6103d589da762b6207760f8742f518afed4bb3cafa4ea418fe639e": {
+      "preview": "waza apply(value: int64, transform: (int64) -> int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "5e77a1f61fd223dd6b90607c8de341dad9b68f722774189e087f94fbb5dddca9": {
+      "preview": "kaku scores = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "110\n",
+        "diagnostics": []
+      }
+    },
+    "5f8c1ac21fa91a83c82c1da499b6faa8bb8a601cd61fe87001715c9c701841d3": {
+      "preview": "kaku count = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n",
+        "diagnostics": []
+      }
+    },
     "5fb5004d581d66f07aeaae30e31e3e70a8826332dc1ae97edc0eda3c3a988410": {
       "preview": "chant(42);",
       "check": {
@@ -216,6 +1793,32 @@
       "run": {
         "status": "ok",
         "stdout": "42\n7\nMio\n65\nhai\nmu\n",
+        "diagnostics": []
+      }
+    },
+    "6000e815f212789be8f26a0e266f6e1f5f7b07dd8ed076e27290cd21a74f836c": {
+      "preview": "kaku value = 100;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "0\n1\n100\n",
+        "diagnostics": []
+      }
+    },
+    "600825f1f15d15181c4687104f15e4a331961cdb78933a1af4ad21fbe80545ad": {
+      "preview": "kaku count = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\n",
         "diagnostics": []
       }
     },
@@ -232,6 +1835,71 @@
         "diagnostics": []
       }
     },
+    "6075b2c29089abfb61f080f4167d13227453bee1a937d0dcb72f7df8b8f4888f": {
+      "preview": "yobu \"kiso/utf8\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\n3\n28586\n0\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "61d91dccf8484fe47dbcb51ab37b89f52e6a9ec8099f0ef519242dda9f7c4e46": {
+      "preview": "chant(square(6));",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "36\n",
+        "diagnostics": []
+      }
+    },
+    "62285415d8db76b2ff487bf31d926a920de46fb4e4b8ed722b9320b7df2fee85": {
+      "preview": "kaku letter = 'A';",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "65\n20013\n",
+        "diagnostics": []
+      }
+    },
+    "626f4f20f53307a4e2f35519fe847b7efda1c23df4dc3bcff8d372274fcdf476": {
+      "preview": "teisu width: int64 = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "200\n",
+        "diagnostics": []
+      }
+    },
+    "636b062bcdead4ff70395bd91ae146bf1202e9bf110a5564d09f1dd84c6af2ae": {
+      "preview": "kaku count: int64 = 2;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "小于上限\n",
+        "diagnostics": []
+      }
+    },
     "639f508e7021181e4f344b79e8f6a89cba4829f48d08c39a0cfde8f57412f1aa": {
       "preview": "kaku score = 72;",
       "check": {
@@ -242,6 +1910,123 @@
       "run": {
         "status": "ok",
         "stdout": "passed\n",
+        "diagnostics": []
+      }
+    },
+    "6619f660368f1bbb91553288a4054eaba7747f4e73aa3833d968788335616330": {
+      "preview": "kaku count: int64 = 42;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n19.5\nhai\nMio\n65\n",
+        "diagnostics": []
+      }
+    },
+    "661b5dd7757dd45b5fb10f6c4b909ee311d81d5cb18a7ed6dba22004815437fb": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "6\n4\n",
+        "diagnostics": []
+      }
+    },
+    "6732f2696610724ba3d3182f340750d03b7cc6b3552c3fc8ac4dd05efc590ec9": {
+      "preview": "sentaku Result<T, E> {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "680994c5826ded0a2839bf79c17bc8d9b1d2929e6c7786bc01a000f8241de824": {
+      "preview": "aida (iie) {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "程序结束\n",
+        "diagnostics": []
+      }
+    },
+    "687bd5e4c8c420aaa1aad2573fc34f09b8925a9d2f37c94d39c7a4754e4b0c9f": {
+      "preview": "teisu max_count: int64 = 5;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "5\n",
+        "diagnostics": []
+      }
+    },
+    "6895b01e69f42db11081288512fe47cd5803937cf328dd189185371ef8a7e670": {
+      "preview": "waza make_factorial() -> (int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "120\n",
+        "diagnostics": []
+      }
+    },
+    "69db9fe946e8129ea3c7cf13faacf32314d3aeb9330c4c1813aa3a9ac315b1f4": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n",
+        "diagnostics": []
+      }
+    },
+    "6a48c7622afe94e522c4c1299c769c7203f674b9693ea13097c51a17284e87a0": {
+      "preview": "kaku states = Map[bool, string]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "启用\n",
+        "diagnostics": []
+      }
+    },
+    "6acdde1b38cb571aeda3df5fa2ce4cab732207343d346001e48ceed7ac5887cb": {
+      "preview": "kata Point {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
         "diagnostics": []
       }
     },
@@ -258,6 +2043,45 @@
         "diagnostics": []
       }
     },
+    "6dfd7e3aecf2f9ccd649db0ab264d2741d1c5b62bd9b8c3b9ace9432d99eccfd": {
+      "preview": "kaku number = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\nHello\n10\n",
+        "diagnostics": []
+      }
+    },
+    "6e1810721c60489f2d205620d34a62b438d306dd4ac067392e8b744f13b481e2": {
+      "preview": "yobu \"kiso/utf8\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\n3\n",
+        "diagnostics": []
+      }
+    },
+    "6f03fcf2e9af6e682530f3cac87fe57e5aca9f96e502a3d2709209eba1d5ad57": {
+      "preview": "kaku numbers = [1, 2, 3];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
     "6f29b36e7cdd1084c074ccc650699f4f67502c7cbfb090abb3cacd60b618e04d": {
       "preview": "kaku values = [10, 20, 30];",
       "check": {
@@ -268,6 +2092,97 @@
       "run": {
         "status": "ok",
         "stdout": "3\n",
+        "diagnostics": []
+      }
+    },
+    "7074f26d36a3f421747693763eb8f231a5d3456512b5de84a71c36db5dcaa2bf": {
+      "preview": "kaku number = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n2\n4\n5\n",
+        "diagnostics": []
+      }
+    },
+    "70a25587e63aff6dab426847575a1853b9377c0fe1ea88019b8a9efa1129665d": {
+      "preview": "// 这里保存需要输出的数值",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "71f5227803c376959581156034f0a9247badd760876b1fc86f8e22879dbdc509": {
+      "preview": "waza calculate() -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "30\n",
+        "diagnostics": []
+      }
+    },
+    "72852e0115ab9b8f81085e3c467d30599a82d10f658266dc8d162de3cf1fc9be": {
+      "preview": "kaku a: int64 = 20;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "25\n15\n100\n4\n",
+        "diagnostics": []
+      }
+    },
+    "73e1edd5ad50907251549279dbd831778e21a58ffe7163fef5175b4fd337afeb": {
+      "preview": "waza add(a: int64, b: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "30\n",
+        "diagnostics": []
+      }
+    },
+    "7589dab0f463f9da548b93a968f46543f4f8272ff6eacae65e04f467c655acec": {
+      "preview": "kaku outer = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n11\n21\n",
+        "diagnostics": []
+      }
+    },
+    "76c773080a8939e7826bd92bd09652be8b9e1861b1d6a0fed0e57e532f30f3a1": {
+      "preview": "kaku number: int64 = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n",
         "diagnostics": []
       }
     },
@@ -297,6 +2212,19 @@
         "diagnostics": []
       }
     },
+    "7914fbc347b94f94572da4e167fb3f94f5ec9b40f1cfe6531a45cdc1a93dc298": {
+      "preview": "yobu \"kiso/bytes\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\n2\n",
+        "diagnostics": []
+      }
+    },
     "79240455f3ced72e3c11026c112960cf262ba5cfe9774513acd8d584467de5fb": {
       "preview": "chant(2 + 3 * 4);",
       "check": {
@@ -310,6 +2238,19 @@
         "diagnostics": []
       }
     },
+    "7a31d5a421035b9c9dee30a25a7085d99f3af65d0052f5d1710a9d55ea09076b": {
+      "preview": "kaku message: string? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "字符串尚未设置\nHello, Mio!\n",
+        "diagnostics": []
+      }
+    },
     "7a48bdf03193f5b6b587ef1a798e42dd4b97581fdade3fba6465a309fdde7cfc": {
       "preview": "yobu \"kiso/math\";",
       "check": {
@@ -320,6 +2261,32 @@
       "run": {
         "status": "ok",
         "stdout": "6\n24\n10\n3\n2\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "7a4f6c301655582cd4f3cc62cbb8ebc0b40c5094eca533cb68f444ef3aba3186": {
+      "preview": "kaku counter = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n",
+        "diagnostics": []
+      }
+    },
+    "7d3f8aa547b4170966c6d688c1d36ebcec13b8432e551d73987d615ec8ad7b46": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
         "diagnostics": []
       }
     },
@@ -353,6 +2320,19 @@
         "diagnostics": []
       }
     },
+    "806646bff60f32873f6ac8fbc4511f76387ff5cffbf2c1f971a329e77229a5d5": {
+      "preview": "waza make_counter() -> () -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n2\n1\n",
+        "diagnostics": []
+      }
+    },
     "8182dadca128cbe8c195c4eb5e05840c64741d2f93bbeab26dc3157205ca6ed1": {
       "preview": "kaku values = [10, 20, 30];",
       "check": {
@@ -379,6 +2359,227 @@
         "diagnostics": []
       }
     },
+    "820110a6802d5f9559caafc1ce2d86e7b74878c3a3188c92147025c2adf4fd92": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\nhai\nhai\n7\n",
+        "diagnostics": []
+      }
+    },
+    "8254b8c0e543ccd4461c6da731f42a0ef5e095c91661335429eee313039dc7f9": {
+      "preview": "kata Complex {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n4\n",
+        "diagnostics": []
+      }
+    },
+    "846c698cd55945779a040f4a35821b1f7d1a80bece271966fea1cba1c325d811": {
+      "preview": "waza replace(values: []int64) -> unit {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "99\n",
+        "diagnostics": []
+      }
+    },
+    "847fe751d0b521d177421f567c05b7b0a92e221870978cd1e6eac921e6543634": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\n8\n",
+        "diagnostics": []
+      }
+    },
+    "848e163cb040a13a231f9a18ace72cadf41bed250e427cc4fd839abf5e05b6e3": {
+      "preview": "kaku ages = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "86b17fa9c4b7d25c351722abf48ac3347d801906a1dd5ba8f17dd499be96f095": {
+      "preview": "waza set_score(scores: Map<string, int64>, name: string, score: int64) -> unit {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "87d20dbea70e1ce308af5718deb37004c9ad11e879eeddd90393550e76338745": {
+      "preview": "sentaku State {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "87fbd39e748df0ff7a07454e4341c042852e8c8fd0cc33516b00dcaf4bb1b569": {
+      "preview": "kaku double = waza (value: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "20\n40\n",
+        "diagnostics": []
+      }
+    },
+    "883858350b134f993003cb8fb2bf99b8fc9b77ad6a1a408cb153adde17208329": {
+      "preview": "waza multiply<T: Number>(left: T, right: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "88788d58127d59263239daea518ff8d419fd6789e35463364fe792b61537c64a": {
+      "preview": "chant((2 + 3) * 4);",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "20\n",
+        "diagnostics": []
+      }
+    },
+    "8aead3e1e794f5699781c48431b2ff20141c75abe215d4b2c5fe2bbc2a4a0ab0": {
+      "preview": "kata Pair<T> {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "8df681c8fcd25aa93a12d1afca5e04779f569269e9c0795ea651a908440a1675": {
+      "preview": "/*",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "30\n",
+        "diagnostics": []
+      }
+    },
+    "8f6f1e4194d377ac591ae8c14927dc97cd850ba9293609636e1d8da896da9359": {
+      "preview": "waza smaller<T: Number>(a: T, b: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n",
+        "diagnostics": []
+      }
+    },
+    "90b1082d01944cd860df2911959a616bd7e843b455f8988c8526a54765763dd9": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "9\n1\n",
+        "diagnostics": []
+      }
+    },
+    "9170fcc44aa3d0ed62bc0147c78948d40edd46da1f3d6bd12dc3822b4b61685c": {
+      "preview": "waza counter() -> () -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n2\n",
+        "diagnostics": []
+      }
+    },
+    "919be664d812316f586d4c5c3d7b4e2245c134b93a6258c17bad35deb46d4c71": {
+      "preview": "kaku multiply: (int64, int64) -> int64 = waza (a: int64, b: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "9348f33ca1efcdb6cfe5259907469e2f3c51465c7de89b076440039997914109": {
+      "preview": "waza make_counter() -> () -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n2\n",
+        "diagnostics": []
+      }
+    },
     "94f8d0f24643f43e616fb92821989e25946a04d2ac8f25237ebbb0fb35e87a72": {
       "preview": "kaku values = [1, 2, 3];",
       "check": {
@@ -396,6 +2597,175 @@
         ]
       }
     },
+    "9613a6ea98a1857183bfd35e076d6a12b0f26796b9b32146c79dfab5e49dd4cc": {
+      "preview": "kaku enabled: bool = hai;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\niie\n",
+        "diagnostics": []
+      }
+    },
+    "9658345752f48de21be8bbb3535b3a091e76737585d0507ef17144489ed20e48": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "98c797ee1dd5c4215405aa1ca0b3a98bd6da73cc14f22384b2c35336460eb4dd": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n77\n",
+        "diagnostics": []
+      }
+    },
+    "9ae4383b0aba38c67fe76df2734e78ab6e67f9d710b273083deba0adefff460e": {
+      "preview": "kaku score: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "没有分数\n",
+        "diagnostics": []
+      }
+    },
+    "9bf8f438914e62d0a3b81943e833112a1058792834ad10c708aad25fd7d1045b": {
+      "preview": "waza is_adult(age: int64) -> bool {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\niie\n",
+        "diagnostics": []
+      }
+    },
+    "9c14dba06091ceeeaf6d4cc10d30574fb4dfb8b02d5ab70ace944d9296bb6436": {
+      "preview": "sentaku Result<T, E> {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "9c9ad70d59c375e345ce361548bc9316b8c54a07ff0ccfdec14e7f4e0f9624e2": {
+      "preview": "waza apply(",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "9d919fe1a102d440020a650c1a476535e3d16079e9d6d32158fc1a12b24c6332": {
+      "preview": "kaku a: float64 = 7.0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "9da3476e08c75e22c6a5fb8bd6079d44ec7620f2a419a43a6ad7d656a972aa92": {
+      "preview": "kaku a = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n100\n0\n",
+        "diagnostics": []
+      }
+    },
+    "9dc638519eb802bb6cd5e87757b36a8c7a8df85924313e5a3328a4b1b082d6d4": {
+      "preview": "yobu \"kiso/bytes\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\n3\n65\n0\n",
+        "diagnostics": []
+      }
+    },
+    "9ee45de138475831c4f4f6488d5b35180655ddb47d9d050edf05678e06b60612": {
+      "preview": "kaku small: int8 = 100;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "9f067424f3bb89af1115ae28769851deb6aa74be655c42235734e865a7df4723": {
+      "preview": "waza square(value: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "25\n100\n",
+        "diagnostics": []
+      }
+    },
+    "9f63bda6805d05d080aa4acaee4ee82b6ab98ac1d5d3a859ec3b691501b9fdaa": {
+      "preview": "kaku small: int8 = 100;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n1000\n5000\n",
+        "diagnostics": []
+      }
+    },
     "a074a77fbe86155808c1729e5d22e283f1f97d63c61c5a3d7c55141fdd8feb1f": {
       "preview": "yobu \"kiso/array\";",
       "check": {
@@ -406,6 +2776,45 @@
       "run": {
         "status": "ok",
         "stdout": "9\n3\n9\n6\n1\n",
+        "diagnostics": []
+      }
+    },
+    "a1bf140f67c508f57da9730678ae4ce02265065e550ffbe5f2d54a87e63d6d3e": {
+      "preview": "yobu \"kiso/utf8\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "a3c9f7c8c66c39e504e0729d7656c62e9dc69324e7ca10d1af91624b35b3acc8": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "4\n2\n3\nMio!\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "a3d1f444adc78ce896c3b8e4b9a392b65ee05fe20b35bedaef0c04a94f7e0799": {
+      "preview": "kaku numbers = [10, 20, 30];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n",
         "diagnostics": []
       }
     },
@@ -422,6 +2831,19 @@
         "diagnostics": []
       }
     },
+    "a4fde5c5360675e403779ea6fb8e7efba76cbf94e4d2b5f3c1f2097df9034a56": {
+      "preview": "kaku number: int64 = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
     "a522cd7f1cb8679d6f77d4af2ce7b39ce8885b26ab376cbcce35a0ed7e2f6a39": {
       "preview": "yobu \"kiso/math\";",
       "check": {
@@ -435,6 +2857,58 @@
         "diagnostics": []
       }
     },
+    "a528495f6bd32a28424a4422105c99247d1b5577ede7de81218d1e163fc1f34b": {
+      "preview": "kaku temperature = 28;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "温度正常\n",
+        "diagnostics": []
+      }
+    },
+    "a549989b0ec0cac69783f6134920fa43411ac407e3ac7dca29312e380e8c3c39": {
+      "preview": "waza choose<T>(first: T, second: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n",
+        "diagnostics": []
+      }
+    },
+    "a6291b1b229001ac315a19ee569d6c604985384e804abbf17972a0f708b68292": {
+      "preview": "kaku age = 20;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "年龄符合要求\n允许进入\n",
+        "diagnostics": []
+      }
+    },
+    "a931c09dfd78123a0034d59803221274a8dd2989275b3f126499a5122fe3758c": {
+      "preview": "kata Box {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "99\n",
+        "diagnostics": []
+      }
+    },
     "aa0226dfe18661a821497ed1957d1ca0d0e04df8006e6217dc9ae224b03db5a0": {
       "preview": "yobu \"kiso/math\";",
       "check": {
@@ -445,6 +2919,19 @@
       "run": {
         "status": "ok",
         "stdout": "12\n6\n",
+        "diagnostics": []
+      }
+    },
+    "aaebc13ae67ba5f6204d4e52938501e86b6036fdb8cb34ac73c93f230bcdb7ad": {
+      "preview": "kaku a = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "30\nhai\n",
         "diagnostics": []
       }
     },
@@ -465,6 +2952,344 @@
         ]
       }
     },
+    "ab4b6c9860c2a53bf6aa2acdf14131e7528878b4e5ef4ac98a5c4dc3f18a2fbb": {
+      "preview": "chant(1e3);",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1000\n25\n0.25\n",
+        "diagnostics": []
+      }
+    },
+    "ab4bfce159872e00925f507563c7180a59992c49ce727089d7e35f0d1d7106b4": {
+      "preview": "kaku name = \"Mio\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\nHello, 世界！\n",
+        "diagnostics": []
+      }
+    },
+    "ac19a0239ae9c90290c572c5def227424939c381ac96a9606e63a9697eded07b": {
+      "preview": "waza identity<T>(value: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "ac2abee8d1beeaadcfa318488b15caf792d1e417895de42403fdd8a2c2eff4dc": {
+      "preview": "yobu \"kiso/math\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "12\n",
+        "diagnostics": []
+      }
+    },
+    "acae16755407d7e27301e4b4d38c8cb0505dca885d81e3630ed44df206212e44": {
+      "preview": "kaku name: string = \"Mio\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\nMio Language\n\n",
+        "diagnostics": []
+      }
+    },
+    "afad441f611cc76cb6318be0c6189a0eec4a18375be5c40e370be4edcac33b2c": {
+      "preview": "waza echo<T>(value: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\nHello\n",
+        "diagnostics": []
+      }
+    },
+    "aff85ebdba3ac107306f64c5a01d7021f4ef5ffa8d4098ecd43ef481cf2fa1e4": {
+      "preview": "koukai teisu max_value: int64 = 100;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "b10b249850544b41234cc6b86012ceeec14fadf6fc125581f053dffc6de4b03b": {
+      "preview": "kaku number = 100;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "b1d75607e8bb02d3b6e519c0c8c8de35bb725e6806fbdb7e62eb26562a5bca74": {
+      "preview": "waza display(message: string) -> unit {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
+    "b1d864e4067d77042776b6d1371bbe1075ca2ab1e6dd0c03b3a5b893abb26237": {
+      "preview": "chant(20 / 2 * 2);",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "20\n5\n",
+        "diagnostics": []
+      }
+    },
+    "b2327fd200e469fde5cd44beb457f1e126b848e49378d2744a2e4c1db94eab25": {
+      "preview": "yobu \"kiso/math\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "12\n3\n",
+        "diagnostics": []
+      }
+    },
+    "b2da379ed5b70c9e5b3e6315fe51fd038ffdeb0fe5f8be7d3408fe0c52de172a": {
+      "preview": "waza echo(message: string) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello, 世界🌍！\n",
+        "diagnostics": []
+      }
+    },
+    "b38e36e0772a6146f11dc23f010293a97f8af6483091c84d5b209817a1f4eda0": {
+      "preview": "yobu \"kiso/math\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "12\n",
+        "diagnostics": []
+      }
+    },
+    "b4afe6162283126919a07e15f763d9271d17f1da6661681d697e3329da40b3f0": {
+      "preview": "kaku score: int64? = 85;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "90\n",
+        "diagnostics": []
+      }
+    },
+    "b4b6baeb888c15ce2d87de14df4be97076981d546bfc0dfa33700c37b8ca2858": {
+      "preview": "waza show_message(message: string) -> unit {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello!\nWelcome to Mio!\n",
+        "diagnostics": []
+      }
+    },
+    "b5e79a9e2795080313029b9d0c988308b225872a1c5a3ce804b74cfa3ecbe6e9": {
+      "preview": "yobu \"kiso/math\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "12\n3.141592653589793\n",
+        "diagnostics": []
+      }
+    },
+    "b61bca77a9fdb50fd7ed4b91a64419b25aa2805e64c3277b9ba94fbbb893218f": {
+      "preview": "kaku age = 18;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "18\n3.14\n",
+        "diagnostics": []
+      }
+    },
+    "b73eaec8dd4046ddf1ad9027b8668ceba6bfa4e232aa02b9d92421c4db70daf4": {
+      "preview": "waza choose<T: Number, U>(number: T, fallback: U) -> U {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
+    "b7aa8d713c862c46c0afe5e1f85171998b6a09ca1370858420fdd0c0808abf0a": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n10\n",
+        "diagnostics": []
+      }
+    },
+    "b7d4fd3b336664705a9dedfbaec3e51eb961cc5a8d8f56d91a704700930ad9bc": {
+      "preview": "kaku age: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "年龄尚未设置\n",
+        "diagnostics": []
+      }
+    },
+    "b856c8bc6b23cf6808ad2bd8a446b50819af55ba38f89bc1f179c7af253b0644": {
+      "preview": "kaku score: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "尚未设置分数\n",
+        "diagnostics": []
+      }
+    },
+    "b89483875b181f9060c70ab1187fa592bd64ac8560a7093d39014333427cee4a": {
+      "preview": "kaku index = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n3\n4\n",
+        "diagnostics": []
+      }
+    },
+    "b89a2d9cdf82088ecf2e45b14a0907f3ca331bf2aa86920aa745895c6595bc3d": {
+      "preview": "waza add(a: int64, b: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "30\n",
+        "diagnostics": []
+      }
+    },
+    "b8cf0e8a294dee0318fd318684396addc907b6c651107a6ad8e656b420fd9f05": {
+      "preview": "kaku age: int64 = 18;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "b983b1a973b826f0d78d8e772c6ba18055f7c1d78c14e53441c6cc66bb9e1c55": {
+      "preview": "kaku age: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "19\n",
+        "diagnostics": []
+      }
+    },
+    "b99dbcd60774f6c28750b77e1d69d864adec76cc25a69ac6c97f75f4b3f4da21": {
+      "preview": "kaku numbers = [10, 20, 30, 40];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "4\n",
+        "diagnostics": []
+      }
+    },
     "b9de13766abaee9017c0de3a1a59583ba4700776210e91c7e0396e9e07fb406e": {
       "preview": "waza counter() -> () -> int64 {",
       "check": {
@@ -475,6 +3300,45 @@
       "run": {
         "status": "ok",
         "stdout": "1\n2\n",
+        "diagnostics": []
+      }
+    },
+    "bae686a829925cbcc97ccd8af90ab958e2807a4ab27900de7dcc6e2c0085580b": {
+      "preview": "waza quotient<T: Integer>(left: T, right: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "5\n",
+        "diagnostics": []
+      }
+    },
+    "bbdd25cd1116a35e9f24bb9b06b76fba4897beb0190cceba9507f4e27d316c45": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "6\n4\n",
+        "diagnostics": []
+      }
+    },
+    "bbf0a15252666f4cff5a23602d867742bdbd9bdee8750e642732ab7616da9d83": {
+      "preview": "waza first<T>(values: []T) -> T? {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "7\n",
         "diagnostics": []
       }
     },
@@ -491,6 +3355,244 @@
         "diagnostics": []
       }
     },
+    "bcf3e90d6d5cb4ac97f2b30cc43cf00c3d06d19cf789255133173a0414d966eb": {
+      "preview": "kaku number = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "20\n10\n",
+        "diagnostics": []
+      }
+    },
+    "bd357177d5e150862ed9c1829c124eddae1f21ce58aaba15707ffdc82441f13a": {
+      "preview": "kaku score = 85;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "考试及格\n程序结束\n",
+        "diagnostics": []
+      }
+    },
+    "beeb715052d57511b423889ec877ad6a1cc2c5be0f92abe63bbd13645ac10b71": {
+      "preview": "waza greet(name: string) -> unit {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
+    "bf4c058077dd5ab20c032be429247a171928c513179003087bb8b008b8414820": {
+      "preview": "sentaku Result<T, E> {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "bf4d250c425b4f5a9f3dbccf56fd3f2593f10cf4a419995f729eaf23279f3139": {
+      "preview": "kaku language = \"Mio\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "当前使用 Mio 语言\n",
+        "diagnostics": []
+      }
+    },
+    "c0857e74a19b66c57c362ab182b082cf45146014352c67bd09178767d296319c": {
+      "preview": "yobu \"kiso/bytes\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n",
+        "diagnostics": []
+      }
+    },
+    "c11643b9acce92b445abfff40d760742c24c8f0628c740f168797d0294d8fb31": {
+      "preview": "waza factorial(n: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "120\n",
+        "diagnostics": []
+      }
+    },
+    "c29c7feb7f3cbb1357fa97fe05524c4778c16d1ce668f1f0e50b53370309e9eb": {
+      "preview": "kaku age = 18;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "已成年\n",
+        "diagnostics": []
+      }
+    },
+    "c40711871d5e0ebfb379cb1f42884ecb0c99df5b92c5f50755d51a8286e20820": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\n",
+        "diagnostics": []
+      }
+    },
+    "c43cc5cc1b29798dbfc7300e6f8abdb8088d2d229a901dd5c221fe2e7456642c": {
+      "preview": "sentaku TaskStatus {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "c4cddebd952a5ab4d9f0b4d0d4e618b3954d4dda87b981cb6f7358decb038fd8": {
+      "preview": "kaku name = \"Mio\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\nHello\nWorld\n",
+        "diagnostics": []
+      }
+    },
+    "c4d2e780a3099c3d29355ab15266674c187127a3044cd9d7af08aa9674975812": {
+      "preview": "kaku index = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "0\n1\n2\n",
+        "diagnostics": []
+      }
+    },
+    "c5fefe131df4ce89d450bdcb367a6aa3aefb0afbfebde16720087d101be55679": {
+      "preview": "/*",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello, Mio!\n",
+        "diagnostics": []
+      }
+    },
+    "c60d8fc6cf402dd9d0dcab5001f6b3d62d73aabbcb66fb22fe7e3ab5e20c28ce": {
+      "preview": "kaku age: int64? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "18\n",
+        "diagnostics": []
+      }
+    },
+    "c64e671ee72cac488cc96ba0f46498b2f3d699ca5c66cb19a872459467840b62": {
+      "preview": "chant(\"Hello, Mio!\");",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello, Mio!\n42\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "c65d41861861b21fe119995316a8147041663dffe3a43784466d842038f8a0d4": {
+      "preview": "waza apply(value: int64, transform: (int64) -> int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "15\n",
+        "diagnostics": []
+      }
+    },
+    "c7076e17ebccdb7bccd1d96976261536a89c8e79916e7c2a06fce081b1080429": {
+      "preview": "kaesu;",
+      "check": {
+        "status": "diagnostic",
+        "stdout": "",
+        "diagnostics": [
+          "E0204: kaesu 只能在函数内使用: kaesu outside function at 1:1"
+        ]
+      },
+      "run": {
+        "status": "diagnostic",
+        "stdout": "",
+        "diagnostics": [
+          "E0204: kaesu 只能在函数内使用: kaesu outside function at 1:1"
+        ]
+      }
+    },
+    "c7ba6886624148d6f2cd2d3cff37f2a60244ff984ea9ac026f2cb6fe854d9f76": {
+      "preview": "waza apply<T, U>(value: T, transform: (T) -> U) -> U {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
     "c822c091b43d03b7f4b195da32412dde37e356a0cc04ddf7125316e66e7c4512": {
       "preview": "kaku values: [][]int64 = [[1], [2]];",
       "check": {
@@ -501,6 +3603,175 @@
       "run": {
         "status": "ok",
         "stdout": "9\n2\n",
+        "diagnostics": []
+      }
+    },
+    "c91a38cdecd9f502b88b285df45be838d15f91a8245e108b1f6359221f82118f": {
+      "preview": "kaku a: float64 = 7.0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "9\n3.5\n",
+        "diagnostics": []
+      }
+    },
+    "c91bbc6905986773388f4a1b0b7c4e79b8048435ebf5b635b4119493294a5527": {
+      "preview": "kaku scores = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "ca853e32b658d9e136ccb31292c4c5786765ccc210f410eb455bda795b4b64f7": {
+      "preview": "waza make_counter() -> () -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n2\n3\n",
+        "diagnostics": []
+      }
+    },
+    "cb48ca9277a272bf1015a1be1ce1ab58e47d7d446b8454a6db1b3d6d24cf5a10": {
+      "preview": "kaku numbers = [10, 20, 30];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n",
+        "diagnostics": []
+      }
+    },
+    "cce111ce641fd9effdda467f2cf0808f7259f2d50918df4c4d9dd939d0dbdfb0": {
+      "preview": "kaku count = 3;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n2\n1\n",
+        "diagnostics": []
+      }
+    },
+    "cd48086f20b0bde718cf7af2cc322d0e25786e2a62b29e95bd2a7260e146d0ca": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
+    "cf7960f7fd645e00e78d1c391c32e695bb059fd47d5fdcbfd2b1512e7fdd3072": {
+      "preview": "kaku colors = [\"red\", \"green\", \"blue\"];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "red\nblue\n",
+        "diagnostics": []
+      }
+    },
+    "cfb8dd312f37abec5cb5e466a26961bf9f203223348a90d189c7cd0bdc1844e2": {
+      "preview": "kaku number = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n2\n3\n循环结束\n",
+        "diagnostics": []
+      }
+    },
+    "cfe7c77af858d53495d3a08cd78c6cee6ac714d0b635be3c27581f775864f6cb": {
+      "preview": "sentaku Event {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "30\n",
+        "diagnostics": []
+      }
+    },
+    "cff48d11f5821e12bae4d687ad04c003d8917a5fa94b694c32735b46cdef4277": {
+      "preview": "waza negate<T: Signed>(value: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "-10\n-2.5\n",
+        "diagnostics": []
+      }
+    },
+    "d01a1a656a220cb4855982ddea487364fcbb45f87988240bf404c9b41b41d2d3": {
+      "preview": "kaku age = 20;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "允许进入\n",
+        "diagnostics": []
+      }
+    },
+    "d21190a21c4d1ecf4bbf754919890ccec4dfa506f3535f165d507830d2fba50c": {
+      "preview": "kaku count = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n2\n3\n",
+        "diagnostics": []
+      }
+    },
+    "d3141a3bb639551c4aa421ac2a80d7630dce70c11910f97b90beeac4b65b0bea": {
+      "preview": "kaku age = 18;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "已成年\n",
         "diagnostics": []
       }
     },
@@ -530,6 +3801,45 @@
         "diagnostics": []
       }
     },
+    "d72efe0325aeac426263e1d7335bb8e525caba367fcee364968fb7b2b345ccbb": {
+      "preview": "waza first<T>(values: []T) -> T? {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "7\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "d74609bc0064615a07e6e411a202f290a6ed7d5d0f55770c34e578b9f7a3fb29": {
+      "preview": "kaku rate: float32 = 0.5;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "d755a0abdeae8a6059bc9a5cd800294483c360e1eb7dbc6b8ab87b0ae6d4fe11": {
+      "preview": "waza greet(name: string) -> unit {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
     "d75feb7716af97b8b0b29592b7ec0ef994edc3358c2e9c5f2e5b8b676e66744a": {
       "preview": "chant(2 + 3 * 4);",
       "check": {
@@ -543,6 +3853,19 @@
         "diagnostics": []
       }
     },
+    "d78b8c6309f34125d03a8a0e80a9a098c853a8ba35889dd9a68e1a0d3686f65c": {
+      "preview": "sentaku Status {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "准备完成\n",
+        "diagnostics": []
+      }
+    },
     "d7c826ea589a4e24946810a4d4a49a599f4f9505208f0b05c02c0576c4d54a2c": {
       "preview": "kaku entries = Map[string, int64]();",
       "check": {
@@ -553,6 +3876,136 @@
       "run": {
         "status": "ok",
         "stdout": "43\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "d8415fb0889047dff0a5863b49304f5b1b579ad4fe75f4c16c0735fd1f1dc2b0": {
+      "preview": "kaku numbers: []int64 = [10, 20, 30];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n20\n",
+        "diagnostics": []
+      }
+    },
+    "d84f2b881d37eac5dab2110e7f683406c37c0de8495fd7d1b6937b0226a96ce4": {
+      "preview": "waza count<T>(values: []T) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n2\n",
+        "diagnostics": []
+      }
+    },
+    "d8afbdc82b707b8647c5facfc20f59beca02fd4f3490552ad08a4b4945677ce6": {
+      "preview": "waza divide<T: Float>(left: T, right: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n3\n",
+        "diagnostics": []
+      }
+    },
+    "dad0247a6cf044be595e5978e5ddaef7d1f20e704698dfdb3122c272ac6ee295": {
+      "preview": "kaku numbers = [10, 20, 30];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "99\n",
+        "diagnostics": []
+      }
+    },
+    "db18a355439c8d2268945febf813dd26742c0e5f8e19c0bcd0cf48baa49560ad": {
+      "preview": "sentaku TaskStatus {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "执行完成\n",
+        "diagnostics": []
+      }
+    },
+    "db4c1c067c7579da587c184beda91be2f65dca857aec09dd387a983f98e42e21": {
+      "preview": "kaku offset = 5;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "15\n",
+        "diagnostics": []
+      }
+    },
+    "dc1f8bf2ff203bcd0fb7c1896924a7545f42f3b3b418bbc161350b676373ea04": {
+      "preview": "kaku number: int64 = 0;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "dc49a2477822b760489fdd07f508f6d1ea2052d492f8344bb1a8f79dada78564": {
+      "preview": "kata User {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "19\n",
+        "diagnostics": []
+      }
+    },
+    "dc7b65d942841a97ce61b8303f012e69e51c6a34a35004ecf2bb658a27dc91b1": {
+      "preview": "kaku value = 100;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n100\n",
+        "diagnostics": []
+      }
+    },
+    "dca1be4449542f10a9bfcff7f35fc09a92861b42b98f264bba7fca53e524a87c": {
+      "preview": "waza add(a: int64, b: int64) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
         "diagnostics": []
       }
     },
@@ -595,6 +4048,32 @@
         "diagnostics": []
       }
     },
+    "e0b8b886cf4c6dc4e1de214b5f2d0472f8191ee08514eeb1495b03fedc518bc0": {
+      "preview": "waza plus<T: Number>(left: T, right: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n4\n",
+        "diagnostics": []
+      }
+    },
+    "e10ec627358f0e8eca47e52a1b75bc7549892147bd61bc4d54ec416d220b3efd": {
+      "preview": "teisu max_count = 100;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n3.14\nMio\n",
+        "diagnostics": []
+      }
+    },
     "e42973418e48611c55bfc8e79490da1403bcc5ed30ff11b180a8466bb5a491e6": {
       "preview": "yobu \"kiso/array\";",
       "check": {
@@ -621,6 +4100,123 @@
         "diagnostics": []
       }
     },
+    "e590add57d94994291f273c0c9ba939b02755f7246418e881b41eeeed5db818c": {
+      "preview": "kaku scores = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "e69e7901b3bc29fc6f991f806cb35d9cee69b0e35620f54c5b263cfdbef3fea2": {
+      "preview": "yobu \"kiso/math\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "6\n24\n10\n3\n2\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "e7c08f473c2de7c64d67ed9d0f908ab0055f7d2c99d5bcb3c4cb1f6a5a3d2519": {
+      "preview": "kaku count = 10;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "20\n",
+        "diagnostics": []
+      }
+    },
+    "e8486b182e6070fbeb13b360766962d1270399810ee78ef71e2e97be3f641a66": {
+      "preview": "kaku score: int64? = 90;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "e86f27de7e24a67039ef44914a0aacb3d956f6fd2f7158994e247d6b1677e3ab": {
+      "preview": "kaku score = 75;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "及格\n",
+        "diagnostics": []
+      }
+    },
+    "e882086665f1b9d7152c51d6bedf4a5d756666aadeb428dd5c61724dc87d4ddd": {
+      "preview": "sentaku TaskStatus {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "e960ce72dab2726356baee96015c9e60d1c3c11ee4fa516c69d08e65e7f72791": {
+      "preview": "waza add<T: Number>(left: T, right: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "30\n4\n",
+        "diagnostics": []
+      }
+    },
+    "ea4f68a95eb7f08edc8dbaf00d442ac89424a4fc5280999ff277b7ec9e72b3ff": {
+      "preview": "kaku message = \"Hello\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello, Mio!\n",
+        "diagnostics": []
+      }
+    },
+    "eae9dbc6676e0cb070ea65727ffadd14f2ec390bcc010b684f757f942376a9b4": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n99\n",
+        "diagnostics": []
+      }
+    },
     "ebd7e7b3ad46a9783efafa65aa5d188be1877a68a4159dbe2c1f2bfec5cbc4fd": {
       "preview": "kaku count = 1;",
       "check": {
@@ -631,6 +4227,45 @@
       "run": {
         "status": "ok",
         "stdout": "2\n",
+        "diagnostics": []
+      }
+    },
+    "ecf1c89472e0b497351f9784b9c91aa4452b02535c60dca6878895c3df391784": {
+      "preview": "waza answer() -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "edd5935ad09ad8958b5aba57668ed11dd4cb501263849f4f8155604b552484f3": {
+      "preview": "kaku score = 75;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "及格\n",
+        "diagnostics": []
+      }
+    },
+    "eec5edc65734563ea37ce15b0ad53396036951d000fe98fb900a08c2a9cef443": {
+      "preview": "waza make_pair() -> [](() -> int64) {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "1\n1\n",
         "diagnostics": []
       }
     },
@@ -647,6 +4282,32 @@
         "diagnostics": []
       }
     },
+    "f1bb8195643cb69c71f37dc7b141ff9129e2d80c283e82f3492162aa2f8ef751": {
+      "preview": "sentaku Status {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "f1f45997d31d152ca695994d6afca9a0247a7af0c7acbbda50cca9984ed31a4b": {
+      "preview": "kaku optional: ([]int64)? = mu;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\n",
+        "diagnostics": []
+      }
+    },
     "f2f0f22b016d10e6264f257bb3a15afee804a7940394d769893069a48616e19c": {
       "preview": "yobu \"kiso/string\";",
       "check": {
@@ -657,6 +4318,97 @@
       "run": {
         "status": "ok",
         "stdout": "Mio v2.0.0\n3\n",
+        "diagnostics": []
+      }
+    },
+    "f35d1b759eb03e8fd85c0dc0cbe9a856ecb4a78d44c5d81311e92ac6de85ded5": {
+      "preview": "kata Point {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "30\n",
+        "diagnostics": []
+      }
+    },
+    "f6e2c5f4f69dcefffe54dd8eba798fd276b17d4f273e8b877465733184cce8de": {
+      "preview": "yobu \"kiso/math\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n10\n",
+        "diagnostics": []
+      }
+    },
+    "f7075b874ad8f25238dc280a5d5ba73d780cda3da48cbb2dc84538e79ed14aa8": {
+      "preview": "yobu \"kiso/math\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3.141592653589793\n6.2831855\n",
+        "diagnostics": []
+      }
+    },
+    "f734a0a7d38ceb623f23a4d293b63c6c546a79573a3591803a86d87bba823422": {
+      "preview": "waza introduce(name: string, age: int64) -> unit {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n18\n",
+        "diagnostics": []
+      }
+    },
+    "f923b5546000dde1b7fa0b5089bb5f4805bb17299fa7caa58e557f0525eac15f": {
+      "preview": "kaku message: string = \"Hello, Mio!\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello, Mio!\n",
+        "diagnostics": []
+      }
+    },
+    "f9251c125bc498fc87f3eb283ab2d1fd061209bee2c348b2b3665deb2d70f330": {
+      "preview": "kaku numbers: []int64 = [1, 2, 3];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "f985c2194fae4f401b192479b7f329b6e027d0a004dc7086dde225e2bd20c8e5": {
+      "preview": "kaku is_ready = hai;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "准备完成\n",
         "diagnostics": []
       }
     },
@@ -673,6 +4425,58 @@
         "diagnostics": []
       }
     },
+    "fb18fc00412347df912f76a3ab4c3bd4ebc704d0245bf4ba1892f68c51308e6a": {
+      "preview": "waza identity<T>(value: T) -> T {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\nMio\n",
+        "diagnostics": []
+      }
+    },
+    "fbe198616a4cd98df56ec244c3e1ca43feed155b59d549e45d06acaa626f0628": {
+      "preview": "kata Point {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n",
+        "diagnostics": []
+      }
+    },
+    "fcfe0d6056492f7f4f8456748a0b78115269bd1beab9b980e586f7e979792eef": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
+    "fdc2745dfd6e7bd99424d0bae9bdf9af9cbe2e2fd6bddf181cd2cd87c8618cdf": {
+      "preview": "waza show() -> unit {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
     "fdd98019036d669487a3e09670e9db39c2f20677860dcf11df59dc73ada67669": {
       "preview": "waza double(value: int64) -> int64 {",
       "check": {
@@ -683,6 +4487,71 @@
       "run": {
         "status": "ok",
         "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
+    "fe9b41d5ba575437d5dc3d41550cf8259e6320216fd424cc60cb8c5836bbd3ea": {
+      "preview": "kaku scores = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "ff1469242f977f6186cfd6a4a4e052d1781872facf0d8f64ebec8efd99bad277": {
+      "preview": "kata Point {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "ff1bd19dacb1cf2fd4bff4a5c4ed0bb72688e412e23cef944fcbeee698341734": {
+      "preview": "kaku numbers = [10, 20, 30, 40];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n20\n30\n40\n",
+        "diagnostics": []
+      }
+    },
+    "ff38af76a9c75235b42e4f5b47594fd75317d0d76e80057e2b26987deca050ea": {
+      "preview": "kaku values: []int64 = [];",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "0\n",
+        "diagnostics": []
+      }
+    },
+    "fff02864e3dd6d8577c0087f3de07d453651f288372dff64589eb6b7d37585ca": {
+      "preview": "kaku age = 18;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "18\nMio\nhai\n",
         "diagnostics": []
       }
     }

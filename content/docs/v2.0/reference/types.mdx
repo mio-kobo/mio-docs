@@ -1,0 +1,141 @@
+---
+title: 类型与可空值
+description: Mio V2.0 基础类型、复合类型、显式转换、可空值和资源类型。
+---
+
+## 类型与可空值
+
+Mio 是静态强类型语言。每个变量在声明时确定类型，可通过 `: 类型` 明确标注，也可根据初始化表达式推断。变量允许重新赋值，但不能随意改变类型。
+
+### 基础类型
+
+| 类型 | 用途 | 说明 |
+| --- | --- | --- |
+| `int8`、`int16`、`int32`、`int64` | 有符号整数 | 位宽分别为 8、16、32、64 |
+| `uint8`、`uint16`、`uint32` | 无符号整数 | 位宽分别为 8、16、32 |
+| `float32`、`float64` | 浮点数 | IEEE 754 单精度与双精度 |
+| `bool` | 布尔值 | 使用 `hai`、`iie` |
+| `string` | 文本 | 不可变的 UTF-8 字符串 |
+| `rune` | Unicode 字符 | `int32` 的别名 |
+
+Mio V2.0 没有公开内置 `uint64` 或复数数值类型。没有额外类型上下文的整数字面量默认推断为 `int64`，浮点数字面量默认推断为 `float64`。
+
+```mio title="Types.mio"
+kaku count: int64 = 42;
+kaku price: float32 = 19.5;
+kaku enabled: bool = hai;
+kaku title: string = "Mio";
+kaku letter: rune = 'A';
+
+chant(count);
+chant(price);
+chant(enabled);
+chant(title);
+chant(letter);
+```
+
+`rune` 按整数输出 Unicode 码点，例如 `'A'` 对应整数 `65`。
+
+### 数值运算与转换
+
+普通数值运算通常要求操作数类型一致，已经确定类型的整数和浮点变量不会隐式相互转换。可通过显式数值转换语法指定目标类型。
+
+```mio title="Conversion.mio"
+kaku small: int8 = 12;
+kaku integer: int64 = int64(small);
+kaku decimal: float64 = float64(integer);
+
+chant(integer);
+chant(decimal);
+```
+
+将数值转换到整数类型时会进行范围验证；浮点数转整数向零截断，超出目标范围以及 NaN、Infinity 等不可转换输入会产生错误。整数加减乘与有符号取负采用对应位宽回绕语义，整数除法向零截断；整数除以零属于运行时错误。
+
+```mio title="Integer.mio"
+kaku a: int64 = 7;
+kaku b: int64 = 2;
+chant(a / b);
+
+kaku small: int8 = 127;
+chant(small + int8(1));
+```
+
+浮点运算按对应精度舍入；浮点除零可能产生 Infinity 或 NaN。数值转换的详细用法可结合 [数学标准库](/docs/v2.0/kiso/math) 阅读。
+
+### 复合类型
+
+Mio V2.0 支持以下复合类型：
+
+| 形式 | 含义 | 示例 |
+| --- | --- | --- |
+| `[]T` | 数组 | `[]int64` |
+| `Map<K, V>` | 键值映射 | `Map<string, int64>` |
+| 自定义 `kata` | 结构体 | `Point` |
+| 自定义 `sentaku` | 枚举 | `State` |
+| `(T) -> R` | 函数类型 | `(int64) -> bool` |
+| `T?` | 可空类型 | `string?` |
+
+数组和 Map 采用共享引用语义。结构体字段在构造后不能重新赋值，但字段中保存的数组或 Map 仍然可以发生共享修改。具体规则见 [集合与自定义类型](/docs/v2.0/reference/collections)。
+
+### 可空类型与 mu
+
+`T?` 表示值可以是 `T`，也可以是 `mu`。非空 `T` 可以赋给 `T?`；从 `T?` 当作普通 `T` 使用之前，需要证明其不为空。
+
+```mio title="Nullable.mio"
+kaku age: int64? = mu;
+
+age = 18;
+moshi (age != mu) {
+    chant(age + 1);
+}
+```
+
+`mu` 本身无法提供足够的类型信息，因此 `kaku value = mu;` 不合法，应写成 `kaku value: int64? = mu;` 等具有明确类型上下文的形式。
+
+`moshi (value != mu)` 的成立分支，以及 `moshi (value == mu)` 的 `sore` 分支，可以对可靠变量引用进行非空类型收窄。随后重新赋值或执行可能修改捕获状态的函数调用时，原有收窄事实可能失效。
+
+### 可空数组与可空元素
+
+`[]T?` 表示数组非空、数组中的元素可以为空；`([]T)?` 表示数组本身可以为空、元素类型非空。两者不能混淆。
+
+```mio title="NullableArray.mio"
+kaku elements: []int64? = [10, mu, 30];
+kaku item = elements[0];
+moshi (item != mu) {
+    chant(item);
+}
+
+kaku optional: ([]int64)? = mu;
+optional = [7, 8];
+moshi (optional != mu) {
+    chant(len(optional));
+}
+```
+
+`unit?` 和重复可空标注 `T??` 均不合法。数组索引和可变字段的值可能在检查后变化，应先保存到局部变量再判断。
+
+### 初始化与 unit
+
+Mio 的 `kaku` 声明需要初始化表达式。它不会像 Go 那样自动为没有赋值的普通变量填入零值。
+
+```mio title="InitialValue.mio"
+kaku count: int64 = 0;
+kaku message: string = "";
+kaku values: []int64 = [];
+chant(len(values));
+```
+
+`unit` 表示函数没有普通返回值。它不能作为普通变量值传递给 `chant`，也不等于 `mu`。
+
+```mio title="Unit.mio"
+waza display(message: string) -> unit {
+    chant(message);
+    kaesu;
+}
+
+display("Mio");
+```
+
+### resource
+
+`resource` 是宿主提供的受信任、不透明资源句柄类型，用于 `kiso/fs` 等模块。普通 Mio 代码不能直接构造受信任资源，也不能将其作为任意内存地址操作；`[]resource` 当前不受支持。普通文件访问应通过 [文件系统标准库](/docs/v2.0/kiso/fs) 完成。

@@ -1,0 +1,89 @@
+---
+title: 内置函数
+description: Mio V2.0 无须导入即可使用的输出、数组长度和 Map 构造能力。
+---
+
+## 内置函数
+
+内置函数（Built-in Function）由 Mio 语言运行环境直接提供，不需要通过 `yobu` 导入 Bunko 模块。
+
+Mio V2.0 直接向普通用户程序提供 `chant()` 和 `len()`，并提供 `Map` 类型及其构造表达式。数值类型转换也采用内建转换语法。
+
+### chant
+
+`chant(value)` 用于输出一个值，并在末尾添加换行。
+
+```mio title="Chant.mio"
+chant("Hello, Mio!");
+chant(42);
+chant(hai);
+```
+
+`chant` 接受已支持的固定宽度整数、浮点数、`bool`、`string` 和 `rune`（作为整数类型）等基础值，也可以输出字面量 `mu`。它不能直接输出数组、Map、结构体、枚举、函数值或带可空类型的变量。
+
+可空变量需要先判断非空，并在类型收窄后输出：
+
+```mio title="NullableChant.mio"
+kaku value: int64? = mu;
+value = 42;
+
+moshi (value != mu) {
+    chant(value);
+}
+```
+
+### len
+
+`len(values)` 返回数组当前的元素数量，结果类型为 `int64`。
+
+```mio title="Len.mio"
+kaku numbers = [10, 20, 30];
+chant(len(numbers));
+```
+
+`len` 当前只接受非空数组类型 `[]T`，不能直接用于 `string`、Map 或可空数组。字符串的字节长度和 Unicode 标量值数量由 `kiso/string` 中的 `byte_len()` 与 `rune_count()` 提供。
+
+```mio title="StringLength.mio"
+yobu "kiso/string";
+
+kaku text = "澪Mio";
+chant(string.byte_len(text));
+chant(string.rune_count(text));
+```
+
+### Map 构造
+
+`Map<K, V>` 是映射表类型。创建映射表时使用 `Map[K, V]()`；目标类型明确时也可通过 `Map()` 构造。
+
+```mio title="MapConstructor.mio"
+kaku scores: Map<string, int64> = Map();
+scores["Mio"] = 100;
+
+kaku score = scores["Mio"];
+moshi (score != mu) {
+    chant(score);
+}
+```
+
+映射表键只允许当前支持的整数、`bool` 和 `string` 等可哈希类型。读取结果为 `V?`，缺失键返回 `mu`。详细规则见 [集合与自定义类型](/docs/v2.0/reference/collections)。
+
+### 数值显式转换
+
+固定宽度数值类型及 `rune` 可以通过 `目标类型(表达式)` 的形式显式转换。这属于语言的转换表达式，并非 Bunko 中的文本解析函数。
+
+```mio title="NumericConversion.mio"
+kaku number: int64 = 42;
+kaku decimal: float64 = float64(number);
+kaku short: int8 = int8(number);
+
+chant(decimal);
+chant(short);
+```
+
+目标整数范围不允许的值会导致转换错误；浮点数到整数的转换向零截断。文本和数值之间的转换应使用 [kiso/convert](/docs/v2.0/kiso/convert)。
+
+### 内部原语与公共 API 的区别
+
+Mio 编译器还注册了以 `$math.*`、`$array.*`、`$data.*` 等形式命名的内部原语。这些是供编译器和 Bunko 实现使用的接口，**不属于普通用户程序的稳定内置 API**。
+
+例如，程序需要平方根或数组追加时，应分别使用 `kiso/math` 的 `sqrt()` 和 `kiso/array` 的 `push()`，不要直接使用内部原语名称。

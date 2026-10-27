@@ -18,7 +18,7 @@ export async function HomeCode() {
     <CodeBlock title="hello-math.mio" icon={<Terminal size={15} aria-hidden="true" />} viewportProps={{ 'aria-label': 'Mio 数学示例，可横向滚动' }}>
       {code}
     </CodeBlock>
-    <div className="code-output"><span>运行结果</span><pre tabIndex={0} aria-label="程序输出">{example.output}</pre></div>
-    <Link href="/docs/learn/modules">读懂这段程序 <ArrowRight size={16} aria-hidden="true" /></Link>
+    <div className="code-output"><span>示例输出</span><pre tabIndex={0} aria-label="程序输出">{example.output}</pre></div>
+    <Link href="/docs/v2.0/learn/packages">读懂这段程序 <ArrowRight size={16} aria-hidden="true" /></Link>
   </div>;
 }

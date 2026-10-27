@@ -3,3 +3,5 @@ import { siteUrl } from '@/lib/seo';
 export default function robots(): MetadataRoute.Robots {
   return { rules: {userAgent:'*',allow:'/',disallow:'/api/'}, ...(siteUrl ? {sitemap:new URL('/sitemap.xml',siteUrl).href} : {}) };
 }
+
+export const dynamic = 'force-static';

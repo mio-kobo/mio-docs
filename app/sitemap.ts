@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { source } from '@/lib/source';
 import { getVersion } from '@/lib/versions.mjs';
 import { releasePlan } from '@/lib/releases.mjs';
-import { siteUrl } from '@/lib/seo';
+import { canonicalPath, siteUrl } from '@/lib/seo';
 export default function sitemap(): MetadataRoute.Sitemap {
   if (!siteUrl) return [];
   const paths = ['/', '/download', '/docs/versions', ...(releasePlan.mode === 'live' ? ['/releases/2.0.0','/releases/2.0.0/migration','/download/2.0.0'] : [])];
@@ -10,5 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const version = getVersion(page.slugs[0]);
     if (version && ['Stable','Legacy'].includes(version.status)) paths.push(page.url);
   }
-  return [...new Set(paths)].map(path => ({url:new URL(path,siteUrl).href}));
+  return [...new Set(paths)].map(path => ({url:new URL(canonicalPath(path),siteUrl).href}));
 }
+
+export const dynamic = 'force-static';

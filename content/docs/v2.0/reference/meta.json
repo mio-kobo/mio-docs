@@ -1,0 +1,12 @@
+{
+  "title": "语言参考",
+  "pages": [
+    "index",
+    "syntax",
+    "types",
+    "builtins",
+    "functions",
+    "collections",
+    "modules"
+  ]
+}

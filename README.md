@@ -4,7 +4,7 @@
 
 ## 本地运行
 
-使用 Node.js 22 或更新的兼容 LTS 与现有 npm 锁文件：
+使用 Node.js 24 LTS 与 `package-lock.json` 安装依赖：
 
 ```sh
 npm ci
@@ -27,7 +27,7 @@ CHECK_EXTERNAL=1 npm run check:links
 
 注册表 `content/versions.json` 支持 `2.1`、`2.10`、`3.1.2` 等数字版本，不为示例版本生成公开空页。旧 URL 和 B 的未版本化资料保留；它们不自动归属稳定版本，也不混入版本搜索。
 
-侧栏顶部原生版本下拉框在桌面/手机上均可用；切换优先投影同名章节，缺页回目标版本首页并提示。可从 `/docs/v2.0/development` 切到 V1.0 验证真实回退。搜索默认当前版本，服务端也强制单一版本过滤，并标明每条结果的版本。
+侧栏顶部原生版本下拉框在桌面/手机上均可用；切换优先投影同名章节，缺页回目标版本首页并提示。可从 `/docs/v2.0/development` 切到 V1.0 验证真实回退。搜索默认当前版本，使用构建期生成的静态数据库在客户端筛选版本与中文 locale，并标明结果版本。独立课程入口已移除，Learn 学习文档与 Playground 保留。
 
 当前只提供中文。英文/日文路由已预留，未翻译路径返回 404，source 禁止中文 fallback 假装译文。
 
@@ -145,3 +145,55 @@ SEO 使用 `MIO_DOCS_SITE_URL` 的真实 HTTPS 站点源；未配置时 canonica
 6. 本轮不提交、不推送、不部署。回滚需同时恢复 release-plan、versions 默认值与 downloads；不要删除旧 URL 或修改历史正文锁。
 
 新增补丁与次版本同样使用 `2.0.1`、`2.1.0` 等完整版本号；测试 fixture 不产生公共空页面。发布状态支持 Development、Release Candidate、Stable、Legacy，兼容原 EOL；RC 必须有实际 prerelease，不接管稳定入口。
+
+## GitHub Pages 生产部署
+
+目标为 `main → GitHub Actions → Next.js export → GitHub Pages → Cloudflare → https://mio.kaelexvp.cc`。`next.config.mjs` 使用 `output: 'export'`、`trailingSlash: true`、`images.unoptimized: true`。站点位于自定义域名根路径，没有 `/mio-docs` basePath 或 assetPrefix。Node.js 24 的 `npm ci` 安装锁定依赖，`npm run build` 保留版本与发行检查并生成 `out/`；postbuild 会验证页面、搜索数据库、SEO 和 WASM 文件一致性。
+
+`npm start` 只用于本地预览 `out/`，不启动 Next.js 服务端。默认地址为 `http://127.0.0.1:3210`，可用 `--hostname`、`--port` 指定地址。深层路由实际对应 `<route>/index.html`；未知路径返回 `404.html` 和 HTTP 404。生产环境由 GitHub Pages 提供文件，不需要 Node.js 服务器。
+
+搜索实现使用已锁定的 Fumadocs 16.17.7 `createSearchAPI(...).staticGET` 与 `staticClient`，数据库为 `/api/search/index.json`。该路径是静态 JSON 文件，不处理请求参数；中文分词、版本标签和语言筛选均在浏览器执行。`lib/static-search.ts` 对结果再次检查版本和语言，并为所有结果附加版本标识。未版本化文档不混入搜索。
+
+`/docs/` 和旧入口由构建期生成的页面承接，浏览器跳转到原有默认版本并保留 query/hash；禁用 JavaScript 时仍有目标链接。`/zh-CN/docs/...` 也有静态跳转页。仅生成已发布语言，英文、日文和未知版本返回 404。V1.0 / V2.0 注册表、默认版本与历史冻结数据不因部署改变。
+
+WASM 直接发布自 `public/wasm/`，运行、诊断、停止和 Worker 重启仍由原始运行器完成；不需要 Cloudflare Worker、跨源隔离或服务端 API。`public/.nojekyll` 随产物发布，确保 `_next` 可用。`public/CNAME` 记录目标域名，但 Actions 部署仍必须在 GitHub Pages 控制台绑定域名。
+
+### 发布前验证
+
+```sh
+npm ci
+npm run types:check
+npm run check:links
+npm run check:playground
+npm run check:tutorial
+npm run test:versions
+npm run test:release
+MIO_DOCS_SITE_URL=https://mio.kaelexvp.cc npm run build
+npm start
+# 在另一个终端对纯静态产物验证：
+BASE_URL=http://127.0.0.1:3210 npm run check:links
+BASE_URL=http://127.0.0.1:3210 npm run test:versions
+```
+
+Playground 的预期记录已按当前文档使用原始 WASM 补齐；既有记录保持原值。部分语法片段会报告真实编译诊断，这些也有明确预期。
+
+### 必须手动完成的控制台操作
+
+1. GitHub `mio-kobo/mio-docs → Settings → Pages → Build and deployment → Source` 选择 **GitHub Actions**，允许仓库运行 Actions，并允许 `github-pages` 环境从 `main` 部署。由维护者提交并推送代码后，工作流自动构建；也可手动运行 **Deploy GitHub Pages**。
+2. 在 GitHub Pages 的 **Custom domain** 保存 `mio.kaelexvp.cc`。建议先在组织的 Pages 设置按 GitHub 提示验证域名所有权，再配置 DNS。Actions 部署不会根据 CNAME 文件自动完成控制台绑定。
+3. Cloudflare 的 `kaelexvp.cc` DNS 中设置 `CNAME mio → mio-kobo.github.io`，目标不带协议或 `/mio-docs`。清理该主机名的冲突记录。先设 DNS only，等待 GitHub DNS 检查及证书签发完成，并在 GitHub 启用 **Enforce HTTPS**。
+4. GitHub HTTPS 正常后，按目标架构将该 CNAME 切换为 **Proxied**。Cloudflare SSL/TLS 选择 **Full (strict)**，确认边缘证书覆盖该域名；使用 Universal SSL 时检查其启用状态。避免 Flexible 模式导致重定向循环。
+5. 不要配置将所有路径回退到首页的 SPA 重写。保持默认静态资源路径和查询字符串；如果有 Cache Everything / 自定义缓存规则，不要把 HTML、搜索 JSON 或固定文件名的 WASM 长期缓存。发布后按需清理旧缓存，并检查首页、深层文档、搜索和 `/wasm/mio.wasm`。
+
+参考：[Fumadocs Static Search](https://www.fumadocs.dev/docs/headless/search/orama)、[GitHub 自定义域名](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site)、[Cloudflare Full (strict)](https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/full-strict/)。
+
+### 本次部署适配文件清单
+
+- 构建与依赖：`next.config.mjs`、`package.json`、`package-lock.json`、`tsconfig.json`、`.gitignore`。
+- 自动部署：`.github/workflows/deploy-pages.yml`。
+- 搜索：移除动态 `app/api/search/route.ts`，新增 `app/api/search/index.json/route.ts` 与 `lib/static-search.ts`，修改 `components/search-dialog.tsx`。
+- 静态路由：`app/docs/[[...slug]]/page.tsx`、`app/[lang]/docs/[[...slug]]/page.tsx`、`lib/render-doc.tsx`、新增 `components/static-redirect.tsx`。
+- SEO 与域名：`lib/seo.ts`、`app/sitemap.ts`、`app/robots.ts`、`app/not-found.tsx`、新增 `public/CNAME` 与 `public/.nojekyll`。
+- 链接与来源：`components/home-code.tsx` 修复模块链接；`content/docs/v2.0/kiso/api.mdx` 修复内部链接；`content/docs/v2.0/index.mdx` 补充固定源码提交；`content/docs/meta.json` 按要求移除课程入口。
+- 验证与预览：新增 `scripts/check-export.mjs`、`scripts/serve-static.mjs`；修改 `scripts/check-links.mjs`、`scripts/versioning.test.mjs`、`scripts/release.test.mjs`，补齐 `fixtures/docs/playground-expectations.json`。
+- 说明：`README.md`。开始本次工作前已存在的首页样式、Learn 与 Reference 文档等改动继续保留，不归入本次新增变更。未改动 `public/wasm/`、`content/versions.json` 或历史版本冻结数据。

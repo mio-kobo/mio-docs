@@ -1,0 +1,167 @@
+---
+title: 函数与闭包
+description: Mio V2.0 具名函数、返回类型、递归、匿名函数、函数值和词法捕获。
+---
+
+## 函数与闭包
+
+Mio 使用 `waza` 定义函数（Function），使用 `kaesu` 返回结果。函数可以接收明确类型的参数，返回一个值，或通过 `unit` 表示没有普通返回值。
+
+### 具名函数
+
+具名函数声明位于文件顶层，参数类型和返回类型都必须明确给出。格式如下：
+
+```text
+waza 函数名(参数名: 类型) -> 返回类型 {
+    // 函数体
+}
+```
+
+例如：
+
+```mio title="Function.mio"
+waza add(a: int64, b: int64) -> int64 {
+    kaesu a + b;
+}
+
+chant(add(20, 22));
+```
+
+调用时，实参数量及类型必须与函数签名匹配。对非 `unit` 函数，所有静态可见的执行路径都需要返回符合声明类型的值。
+
+### 无返回值函数
+
+返回类型为 `unit` 的函数不需要返回普通值，可以在函数体结束时自动返回，也可以使用 `kaesu;` 提前结束。
+
+```mio title="UnitFunction.mio"
+waza greet(name: string) -> unit {
+    moshi (name == "") {
+        kaesu;
+    }
+    chant(name);
+}
+
+greet("Mio");
+```
+
+`unit` 不是普通数值类型，不能将 `unit` 函数调用的结果保存为变量或传递给 `chant`。
+
+### 条件返回与递归
+
+Mio 支持递归（Recursion）和相互递归。具名函数可以在源文件顶层先调用、后声明，因为函数签名在执行类型检查前会被登记。
+
+```mio title="Factorial.mio"
+waza factorial(n: int64) -> int64 {
+    moshi (n <= 1) {
+        kaesu 1;
+    }
+    kaesu n * factorial(n - 1);
+}
+
+chant(factorial(5));
+```
+
+递归仍受到虚拟机调用深度和执行预算限制，不能依赖无限递归自动完成计算。
+
+### 函数类型
+
+函数也可以作为值保存到变量、数组或结构体字段。函数类型使用 `(参数类型...) -> 返回类型` 表示。
+
+```mio title="FunctionValue.mio"
+waza twice(value: int64) -> int64 {
+    kaesu value * 2;
+}
+
+kaku transform: (int64) -> int64 = twice;
+chant(transform(21));
+```
+
+空参数列表的函数类型写成 `() -> T`。函数类型要求参数列表和返回类型匹配，函数值不能直接通过 `==` 比较。
+
+### 匿名函数
+
+匿名函数是没有独立名称的 `waza` 表达式。它可以直接赋值给变量并随后调用。
+
+```mio title="AnonymousFunction.mio"
+kaku multiply = waza (a: int64, b: int64) -> int64 {
+    kaesu a * b;
+};
+
+chant(multiply(6, 7));
+```
+
+与具名函数不同，匿名函数表达式可以写在局部作用域内；当前不支持在普通函数体中声明另一个具名 `waza` 函数。
+
+### 将函数作为参数
+
+通过在参数列表中使用函数类型，可以编写接收函数值的高阶函数。
+
+```mio title="HigherOrder.mio"
+waza apply(value: int64, transform: (int64) -> int64) -> int64 {
+    kaesu transform(value);
+}
+
+kaku triple = waza (value: int64) -> int64 {
+    kaesu value * 3;
+};
+
+chant(apply(14, triple));
+```
+
+函数还可以返回函数类型，使调用方决定何时执行其返回的行为。
+
+### 闭包与捕获
+
+闭包（Closure）将函数与其可见的词法环境联系起来。匿名函数可以读取及修改外层作用域中的可变变量；外层调用结束后，这些被捕获的变量仍然可以保留。
+
+```mio title="Counter.mio"
+waza make_counter() -> () -> int64 {
+    kaku count = 0;
+
+    kaesu waza () -> int64 {
+        count = count + 1;
+        kaesu count;
+    };
+}
+
+kaku next = make_counter();
+chant(next());
+chant(next());
+```
+
+每次调用 `make_counter()` 都会创建独立的局部捕获状态。如果多个闭包在同一作用域内捕获同一个可变局部变量，它们共享该变量，而不是各自复制一份旧值。
+
+```mio title="SharedCapture.mio"
+waza make_pair() -> [](() -> int64) {
+    kaku number = 0;
+    kaku increment = waza () -> int64 {
+        number = number + 1;
+        kaesu number;
+    };
+    kaku current = waza () -> int64 {
+        kaesu number;
+    };
+    kaesu [increment, current];
+}
+
+kaku pair = make_pair();
+chant(pair[0]());
+chant(pair[1]());
+```
+
+调用闭包可能修改捕获变量，因此对可空变量此前建立的类型收窄，在闭包调用之后可能失效。
+
+### 泛型函数
+
+泛型函数通过 `<T>` 声明类型参数，允许相同代码适用于不同的具体类型；调用时通常可推断类型，也可以通过 `[T]` 显式指定。
+
+```mio title="GenericFunction.mio"
+waza identity<T>(value: T) -> T {
+    kaesu value;
+}
+
+chant(identity(42));
+chant(identity[string]("Mio"));
+```
+
+受数值运算约束的泛型可以使用 `T: Number` 等形式，详见 [泛型、常量与模块](/docs/v2.0/reference/modules)。

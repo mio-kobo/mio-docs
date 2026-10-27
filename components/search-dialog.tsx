@@ -2,7 +2,7 @@
 import type { DefaultSearchDialogProps } from 'fumadocs-ui/components/dialog/search-default';
 import { SearchDialog, SearchDialogOverlay, SearchDialogContent, SearchDialogHeader, SearchDialogIcon, SearchDialogInput, SearchDialogClose, SearchDialogList, SearchDialogFooter, TagsList, TagsListItem } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { versionSearchClient } from '@/lib/static-search';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { defaultVersion, getVersion, parseDocsPath, versions, versionLabel } from '@/lib/versions.mjs';
@@ -14,7 +14,7 @@ export function VersionSearchDialog(props: DefaultSearchDialogProps) {
 }
 function ScopedSearch({version,locale,open,onOpenChange}:{version:string;locale:string}&DefaultSearchDialogProps) {
   const [tag,setTag] = useState(version);
-  const search = useDocsSearch({client:fetchClient({api:'/api/search',locale,tag}),delayMs:100});
+  const search = useDocsSearch({client:versionSearchClient(tag,locale),delayMs:100});
   return <SearchDialog {...search} open={open} onOpenChange={onOpenChange}>
     <SearchDialogOverlay />
     <SearchDialogContent>

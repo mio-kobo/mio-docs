@@ -1,0 +1,51 @@
+---
+title: 语言参考
+description: Mio V2.0 语言语法、类型、函数、集合、泛型和模块的规则索引。
+---
+
+## 语言参考
+
+语言参考（Language Reference）用于查询 Mio V2.0 已实现的语法、类型和语义规则。与循序渐进的 [学习教程](/docs/v2.0/learn) 不同，本栏目更关注声明格式、合法类型、操作限制和行为边界。
+
+本文档以 [Mio v2.0.0](https://github.com/mio-kobo/mio/releases/tag/v2.0.0) 发布标签为基线。Mochi VM 与 Native AOT 的功能覆盖范围并不完全相同，原生后端的限制请参阅 [Native AOT](/docs/v2.0/internals/native-aot)。
+
+### 参考章节
+
+| 章节 | 内容 |
+| --- | --- |
+| [语法与表达式](/docs/v2.0/reference/syntax) | 关键字、字面量、运算符、条件、循环与模式匹配 |
+| [类型与可空值](/docs/v2.0/reference/types) | 数值、字符串、复合类型、类型转换、`T?` 与 `mu` |
+| [内置函数](/docs/v2.0/reference/builtins) | `chant`、`len`、`Map` 构造及公开接口边界 |
+| [函数与闭包](/docs/v2.0/reference/functions) | 函数声明、返回、函数类型、递归和捕获 |
+| [集合与自定义类型](/docs/v2.0/reference/collections) | 数组、Map、结构体、枚举和穷尽匹配 |
+| [泛型、常量与模块](/docs/v2.0/reference/modules) | 泛型声明、数值约束、`teisu`、`yobu` 和 `koukai` |
+
+### 最小程序
+
+Mio 可以直接执行文件顶层的语句，无需额外定义 `main` 函数。
+
+```mio title="Hello.mio"
+chant("Hello, Mio!");
+```
+
+要在本地检查并运行，请将上述代码保存为 `Hello.mio`，然后执行：
+
+```sh
+mio check Hello.mio
+mio run Hello.mio
+```
+
+网页中带有 Playground 的完整 `mio` 代码块可以单独检查和运行。每个代码块都是独立程序，不能继承其他代码块的变量、函数和导入语句。
+
+### 与标准库的关系
+
+`chant`、`len` 和 `Map` 构造由语言直接提供。数学、数组、字符串等常用功能通过 Bunko 标准库导入，例如：
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+kaku value: float64 = 144.0;
+chant(math.sqrt(value));
+```
+
+标准库公开 API 见 [Kiso 模块文档](/docs/v2.0/kiso) 和 [Bunko API 索引](/docs/v2.0/kiso/api)；命令行与编辑器用法见 [开发工具](/docs/v2.0/tooling)。

@@ -1,85 +1,84 @@
 ---
 title: Learn · 学习 Mio
-description: 从基础语法出发，逐步掌握 Mio V2.0 的集合、自定义类型、泛型、模块与测试。
+description: 从 Mio V2.0 基础语法开始，学习变量、函数、集合、自定义类型、泛型和标准库。
 ---
 
 欢迎来到 Mio V2.0 学习指南。
 
-Mio 是一门使用日语罗马字关键字的静态强类型编程语言。本栏目将从基础语法开始，逐步介绍程序控制、数据结构、自定义类型和进阶特性，最后学习如何使用 Bunko 标准库和开发工具。
+Mio 是一门使用日语罗马字关键字的静态强类型编程语言。本栏目从基础语法开始，逐步介绍程序控制、数据类型、集合、自定义类型和进阶特性，再学习如何组织包和使用 Bunko 标准库。
 
-如果你还没有安装 Mio，建议先阅读 [安装与运行](/docs/v2.0/getting-started)。第一次学习可以按照下方顺序阅读；如果已经有编程基础，也可以直接选择感兴趣的章节。
+建议先阅读 [安装与运行](/docs/v2.0/getting-started)。如果只想快速体验，可以直接运行页面中带有 Playground 的完整 Mio 示例。
 
 ## 基础语法
 
-首先了解 Mio 的基本代码结构、命名规则和表达式，再学习如何使用变量、函数与控制语句编写程序。
+先了解 Mio 的程序结构、命名规则和表达式，再学习变量、常量、函数及控制语句。
 
 | 章节 | 学习内容 |
 | --- | --- |
-| [标识符](/docs/v2.0/learn/identifiers) | 命名规则、大小写与保留关键字 |
-| [注释](/docs/v2.0/learn/comments) | 单行注释、块注释与代码说明 |
+| [基本语法](/docs/v2.0/learn/grammer) | 第一个 Mio 程序、函数声明与输出 |
+| [注释](/docs/v2.0/learn/comments) | 单行注释、块注释和代码说明 |
+| [标识符](/docs/v2.0/learn/identifiers) | 命名规则、大小写和保留关键字 |
 | [字面量](/docs/v2.0/learn/literals) | 整数、浮点数、字符串、字符、布尔值和空值 |
 | [运算符](/docs/v2.0/learn/operators) | 算术、比较、逻辑运算与优先级 |
-| [变量与类型](/docs/v2.0/learn/variables) | `kaku`、`teisu`、类型推断与类型检查 |
-| [条件与循环](/docs/v2.0/learn/control-flow) | `moshi`、`sore`、`aida`、`nukeru` 和 `tsuzuku` |
-| [函数与返回值](/docs/v2.0/learn/functions) | `waza`、函数参数、返回类型与递归 |
-| [作用域](/docs/v2.0/learn/scope) | 局部变量、全局变量、名称遮蔽与词法作用域 |
+| [数据类型](/docs/v2.0/learn/datatype) | 基础类型、派生类型和初始化规则 |
+| [常量和变量](/docs/v2.0/learn/constant-variable) | `kaku`、`teisu`、推断、修改和作用域 |
+| [条件控制](/docs/v2.0/learn/condition) | `moshi`、`sore` 和条件分支 |
+| [循环控制](/docs/v2.0/learn/loop) | `aida`、`nukeru` 和 `tsuzuku` |
+| [函数](/docs/v2.0/learn/function) | `waza`、参数、返回类型与递归 |
+| [作用域](/docs/v2.0/learn/scope) | 全局与局部变量、名称遮蔽、捕获生命周期 |
 
-## 集合与数据类型
+## 集合与自定义类型
 
-掌握基本语法后，可以学习如何组织一组数据，以及如何通过结构体和枚举表达更复杂的程序状态。
+掌握基本语法后，学习如何组织多组数据，并通过结构体和枚举描述程序状态。
 
 | 章节 | 学习内容 |
 | --- | --- |
-| [数组](/docs/v2.0/learn/arrays) | `[]T`、数组索引、共享引用和动态操作 |
-| [字符串与 UTF-8](/docs/v2.0/learn/strings) | 字节长度、Unicode 标量值和字符串构造 |
-| [映射表](/docs/v2.0/learn/maps) | `Map<K, V>`、键值对、更新与缺失键处理 |
-| [结构体](/docs/v2.0/learn/structs) | `kata`、字段声明、构造与字段访问 |
-| [枚举与模式匹配](/docs/v2.0/learn/enums-pattern-matching) | `sentaku`、`awase`、`baai` 和穷尽匹配 |
-| [可空类型](/docs/v2.0/learn/nullable-types) | `T?`、`mu`、非空判断与类型收窄 |
-
-也可以结合 [数组与空值综合练习](/docs/v2.0/learn/collections) 和 [结构体与枚举综合练习](/docs/v2.0/learn/models)，通过完整程序理解这些类型的使用场景。
+| [数组](/docs/v2.0/learn/arrays) | `[]T`、索引、动态数组和共享引用 |
+| [字符串](/docs/v2.0/learn/string) | UTF-8、字符串操作与 StringBuilder |
+| [映射表](/docs/v2.0/learn/map) | `Map<K, V>`、键值对和缺失键处理 |
+| [结构体](/docs/v2.0/learn/structs) | `kata`、字段声明、构造和字段访问 |
+| [枚举与模式匹配](/docs/v2.0/learn/enums-pattern-matching) | `sentaku`、`awase`、`baai` 和完整匹配 |
+| [可空类型](/docs/v2.0/learn/nullable-types) | `T?`、`mu`、非空判断及类型收窄 |
 
 ## 进阶语法
 
-进阶部分主要介绍代码复用、类型参数和函数值，适合已经熟悉函数、数组和自定义类型的读者。
+进阶部分介绍类型安全的代码复用，以及将函数本身作为值使用的方法。
 
 | 章节 | 学习内容 |
 | --- | --- |
-| [泛型](/docs/v2.0/learn/generics) | `<T>`、泛型函数、泛型结构体与泛型枚举 |
-| [泛型约束](/docs/v2.0/learn/generic-constraints) | `Number`、`Integer`、`Signed` 和 `Float` |
-| [闭包与函数值](/docs/v2.0/learn/closures-function-values) | 匿名函数、函数类型、捕获变量与高阶函数 |
-
-如果想先从一个较短的例子开始，可以阅读 [函数值与闭包入门练习](/docs/v2.0/learn/closures)。
+| [泛型](/docs/v2.0/learn/generics) | 泛型函数、结构体、枚举与类型推断 |
+| [泛型约束](/docs/v2.0/learn/generic-constraints) | `Number`、`Integer`、`Signed` 与 `Float` |
+| [闭包与函数值](/docs/v2.0/learn/closures-function-values) | 函数类型、匿名函数、捕获变量和高阶函数 |
 
 ## 包、标准库与测试
 
-这一部分介绍如何把源代码组织成独立的包、导入其他模块，并利用标准库和测试工具编写更完整的程序。
+Mio 以目录组织包，通过 `yobu` 显式导入依赖，并使用 `koukai` 管理公开声明。
 
-| 章节 | 学习内容 |
+| 内容 | 学习入口 |
 | --- | --- |
-| [包](/docs/v2.0/learn/packages) | 目录即包、`yobu` 导入与 `koukai` 公开声明 |
-| [模块与数学库](/docs/v2.0/learn/modules) | 导入 Bunko、调用公开函数和管理依赖 |
-| [编写测试](/docs/v2.0/learn/testing) | `_test.mio`、`mio test` 与断言 |
-
-深入了解已经实现的标准库接口，请访问 [Bunko 标准库](/docs/v2.0/kiso)。有关 CLI、编辑器和语言服务器的使用方法，请参阅 [开发工具](/docs/v2.0/tooling)。
+| 包与模块组织 | [包](/docs/v2.0/learn/packages) |
+| 常用标准库及 API | [Bunko / Kiso](/docs/v2.0/kiso) |
+| 测试环境与断言 | [kiso/testing](/docs/v2.0/kiso/testing) |
+| CLI 命令与测试执行 | [开发工具](/docs/v2.0/tooling/cli) |
+| 精确语法与类型规则 | [语言参考](/docs/v2.0/reference) |
 
 ## 如何运行示例
 
-学习页面中的 Mio 示例通常可以作为独立的 `.mio` 文件运行。例如：
+学习页面中的可运行示例一般可以保存为独立的 `.mio` 文件，例如：
 
 ```mio title="Hello.mio"
 chant("Hello, Mio!");
 ```
 
-将代码保存为 `Hello.mio`，然后在终端执行：
+在本地终端执行：
 
 ```sh
 mio check Hello.mio
 mio run Hello.mio
 ```
 
-如果页面提供 **Playground**，也可以直接在浏览器中检查、编辑和运行对应的完整程序。各个代码块独立执行，使用标准库时必须在代码块中写出相应的 `yobu` 导入语句。
+如果代码块显示 **Playground**，还可以在网页中直接检查、编辑和运行。每个代码块都是独立程序，使用标准库时必须在代码块内部包含相应的 `yobu` 导入。
 
-网页 Playground 当前支持 `kiso/math`、`kiso/array`、`kiso/string`、`kiso/bytes` 和 `kiso/utf8`。文件系统、测试和其他未嵌入浏览器运行环境的模块，应使用本地 Mio CLI；测试程序请使用 `mio test`，而不是普通的 `mio run`。
+浏览器目前只嵌入 `kiso/math`、`kiso/array`、`kiso/string`、`kiso/bytes` 和 `kiso/utf8`。依赖其他包、多个源文件或特殊测试环境的示例，需要保存到本地并使用 CLI 执行。测试文件应通过 `mio test` 运行，而不是普通的 `mio run`。
 
-所有章节以 Mio V2.0.0 已实现的语言特性为基础。需要查询更精确的语法规则时，可查阅 [语言参考](/docs/v2.0/reference)；如果遇到编译或运行问题，可以参考 [故障排查](/docs/v2.0/tooling/troubleshooting)。
+如果遇到导入、类型或运行错误，可参阅 [故障排查](/docs/v2.0/tooling/troubleshooting)。

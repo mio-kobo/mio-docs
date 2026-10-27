@@ -1,0 +1,158 @@
+---
+title: 集合与自定义类型
+description: Mio V2.0 数组、Map、结构体、枚举、构造与穷尽匹配。
+---
+
+## 集合与自定义类型
+
+Mio 支持通过数组和 Map 保存多个值，也可以通过结构体（Struct）与枚举（Enum）定义具有明确含义的数据类型。
+
+### 数组
+
+数组类型写作 `[]T`，其中 `T` 是元素类型。字面量使用 `[value1, value2]`，元素类型需要一致。
+
+```mio title="Array.mio"
+kaku numbers: []int64 = [10, 20, 30];
+chant(numbers[0]);
+chant(len(numbers));
+
+numbers[1] = 99;
+chant(numbers[1]);
+```
+
+数组索引类型必须是 `int64`，并且必须位于实际长度范围内。负索引或越界访问属于运行时错误。空字面量 `[]` 无法自行推断元素类型，需要明确的目标类型。
+
+```mio title="EmptyArray.mio"
+kaku values: []int64 = [];
+chant(len(values));
+```
+
+### 动态数组与共享引用
+
+数组赋值和函数传参使用共享引用语义，不会自动复制后备存储。动态追加、容量预留、截断等操作由 `kiso/array` 提供。
+
+```mio title="DynamicArray.mio"
+yobu "kiso/array";
+
+kaku numbers = [1, 2];
+kaku alias = numbers;
+
+array.push(alias, 3);
+alias[0] = 9;
+chant(numbers[0]);
+chant(len(numbers));
+
+kaku copied = array.clone(numbers);
+copied[0] = 7;
+chant(numbers[0]);
+```
+
+`array.clone()` 创建独立的外层数组存储，但对于内层数组等引用类型，仅执行浅复制。Mio 支持数组的数组，例如 `[][]int64`，但没有独立的切片语法 `values[start:end]`，也不能使用 `==` 比较两个数组的内容。
+
+### Map 映射表
+
+映射表类型写作 `Map<K, V>`，其中键类型只能使用已支持的整数、`bool` 或 `string` 等可哈希类型。构造时使用 `Map[K, V]()`；已有明确目标类型时也可以写 `Map()`。
+
+```mio title="Map.mio"
+kaku scores = Map[string, int64]();
+scores["Mio"] = 100;
+scores["Haruka"] = 95;
+
+kaku value = scores["Mio"];
+moshi (value != mu) {
+    chant(value);
+}
+```
+
+`map[key] = value;` 用于插入或更新。读取时键可能不存在，所以返回 `V?`，键不存在时为 `mu`。赋值或传参不会自动复制 Map；修改同一映射表的其他引用可以被观察到。
+
+Map 当前没有公开的删除键、遍历所有键值对或直接查询长度的 API。
+
+### 结构体声明
+
+使用 `kata` 声明结构体。自定义类型名必须以 ASCII 大写字母开头，字段必须有明确类型，字段声明以 `;` 或 `,` 分隔。
+
+```mio title="Struct.mio"
+kata Point {
+    x: int64;
+    y: int64;
+}
+
+kaku point = Point {
+    x: 10,
+    y: 20
+};
+
+chant(point.x);
+chant(point.y);
+```
+
+构造时必须提供全部字段，不能重复或额外指定字段，字段顺序可以与声明顺序不同。结构体字段构造后不能通过 `point.x = 30;` 重新赋值；不过，如果字段保存的是数组或 Map，仍可以通过它操作集合内的数据。
+
+### 泛型结构体
+
+结构体可以声明类型参数，使用时通过 `Pair[int64] { ... }` 显式指定，或在类型上下文充分明确时进行推断。
+
+```mio title="GenericStruct.mio"
+kata Pair<T> {
+    first: T;
+    second: T;
+}
+
+kaku pair = Pair[int64] {
+    first: 20,
+    second: 22
+};
+
+chant(pair.first + pair.second);
+```
+
+### 枚举与变体
+
+使用 `sentaku` 声明枚举。变体可以不携带数据，也可以使用括号保存关联数据。
+
+```mio title="Enum.mio"
+sentaku Status {
+    Waiting;
+    Finished(int64);
+    Failed(string);
+}
+
+kaku status: Status = Status.Finished(42);
+```
+
+上例中 `Waiting` 没有关联数据，`Finished` 带一个 `int64`，`Failed` 带一个 `string`。构造枚举值时使用 `类型名.变体名(...)`，并提供对应数量和类型的参数。
+
+### awase 穷尽匹配
+
+`awase` 只能匹配非空枚举值。每个 `baai` 分支对应一个枚举变体；关联数据可以绑定成该分支中的局部变量。
+
+```mio title="EnumMatch.mio"
+sentaku Result<T, E> {
+    Ok(T);
+    Err(E);
+}
+
+waza get_or_zero(result: Result<int64, string>) -> int64 {
+    awase (result) {
+        baai Ok(value) {
+            kaesu value;
+        }
+        baai Err(message) {
+            chant(message);
+            kaesu 0;
+        }
+    }
+}
+
+kaku result: Result<int64, string> = Result.Ok(42);
+chant(get_or_zero(result));
+```
+
+匹配必须覆盖枚举的所有变体，不能重复声明相同分支，也不能给变体绑定错误数量的值。`awase` 不是针对任意整数、字符串或结构体的通用 `switch` 语法。
+
+可空枚举应先通过 `value != mu` 判断并收窄，再交给 `awase` 匹配。
+
+### 类型可见性
+
+结构体和枚举声明默认只在当前包内可见。需要从其他包访问时，可以在顶层使用 `koukai kata` 或 `koukai sentaku`。导入与公开的约定见 [泛型、常量与模块](/docs/v2.0/reference/modules)。

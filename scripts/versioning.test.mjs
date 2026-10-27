@@ -64,24 +64,34 @@ test('every published root uses native version metadata and independent owned co
   assert.ok(!roots.includes('v2.10')); // Fixtures never become fake public versions.
 });
 const base = process.env.BASE_URL;
-test('production routes, redirects, dev boundaries, untranslated 404 and version-isolated search', {skip:!base}, async () => {
-  const response = await fetch(new URL('/docs',base),{redirect:'manual'});
-  assert.ok([307,308].includes(response.status)); assert.equal(response.headers.get('location'),'/docs/v1.0');
-  for (const path of ['/docs/v1.0','/docs/v2.0','/docs/v1.0/learn/variables','/docs/v2.0/learn/variables','/docs/v2.0/development']) {
+test('static production routes, redirects, untranslated 404 and version-isolated Chinese search', {skip:!base}, async () => {
+  const response = await fetch(new URL('/docs/',base));
+  assert.equal(response.status,200);
+  const redirectHtml = await response.text();
+  assert.ok(redirectHtml.includes(`/docs/${registry.defaultVersion}/`));
+  assert.ok(redirectHtml.includes('继续阅读文档'));
+  for (const path of ['/docs/v1.0/','/docs/v2.0/','/docs/v1.0/learn/variables/','/docs/v2.0/learn/grammer/','/docs/v2.0/development/']) {
     const r = await fetch(new URL(path,base)); assert.equal(r.status,200,path);
     const html = await r.text(); assert.ok(html.includes(path.includes('v2.0') ? 'Development' : 'Stable'));
   }
-  for (const path of ['/docs/v3.1.2','/docs/v1.0/development','/en/docs/v1.0/learn/variables','/ja/docs/v2.0/learn/variables']) assert.equal((await fetch(new URL(path,base))).status,404,path);
+  for (const path of ['/docs/v3.1.2/','/docs/v1.0/development/','/en/docs/v1.0/learn/variables/','/ja/docs/v2.0/learn/grammer/']) assert.equal((await fetch(new URL(path,base))).status,404,path);
+  const { versionSearchClient } = await import('../lib/static-search.ts');
   for (const version of registry.versions) {
-    const r = await fetch(new URL(`/api/search?query=kaku&tag=${version.id}&locale=zh-CN`,base));
-    assert.equal(r.status,200);const results = await r.json();assert.ok(results.length > 0);
-    for (const result of results) { assert.equal(parseDocsPath(result.url).version,version.id);assert.ok(result.breadcrumbs[0].includes(`V${version.version}`)); }
+    const client = versionSearchClient(version.id,'zh-CN',new URL('/api/search/index.json',base).href);
+    for (const query of ['kaku','函数','变量']) {
+      const results = await client.search(query);
+      assert.ok(results.length > 0, `${version.id}: ${query}`);
+      for (const result of results) {
+        assert.equal(parseDocsPath(result.url).version,version.id);
+        assert.ok(result.breadcrumbs[0].includes(`V${version.version}`));
+        assert.equal((await fetch(new URL(result.url,base))).status,200,result.url);
+      }
+    }
   }
-  const defaultResults = await (await fetch(new URL('/api/search?query=kaku',base))).json();
-  assert.ok(defaultResults.length); assert.ok(defaultResults.every(r=>parseDocsPath(r.url).version==='v1.0'));
-  for (const query of ['tag=v3.1.2','tag=v1.0,v2.0','tag=v1.0&locale=en']) assert.equal((await fetch(new URL(`/api/search?query=kaku&${query}`,base))).status,400);
-  const devOnly = await (await fetch(new URL('/api/search?query=M17e&tag=v1.0',base))).json();
-  assert.ok(devOnly.every(r=>parseDocsPath(r.url).version==='v1.0'));
+  for (const tag of ['v3.1.2','v1.0,v2.0']) {
+    assert.deepEqual(await versionSearchClient(tag,'zh-CN',new URL('/api/search/index.json',base).href).search('变量'),[]);
+  }
+  assert.deepEqual(await versionSearchClient('v1.0','en',new URL('/api/search/index.json',base).href).search('kaku'),[]);
 });
 
 test('version scaffolding stays unpublished, refuses duplicates and blocks unreviewed activation', async () => {

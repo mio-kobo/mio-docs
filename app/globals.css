@@ -108,6 +108,66 @@ button { cursor: pointer; }
 .home-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-top: 3rem; padding: 1.8rem 0; border-top: 1px solid var(--color-fd-border); color: var(--color-fd-muted-foreground); font-size: .75rem; }
 .home-footer a { display: inline-flex; align-items: center; gap: .3rem; }
 
+/* Homepage review: compact release hierarchy and balanced reading widths. */
+.hikari-home .home-release { gap: .6rem 2rem; padding: 1rem 1.25rem; grid-template-columns: 1fr auto; background: color-mix(in srgb, var(--hikari-lilac) 5%, var(--color-fd-background)); }
+.home-release .release-banner-copy { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem 1rem; min-width: 0; }
+.home-release .release-heading { gap: .65rem; margin: 0; }
+.home-release .release-heading h2 { font-size: 1.05rem; letter-spacing: -.02em; line-height: 1.6; }
+.home-release .release-banner-copy > p:not(.release-eyebrow) { font-size: .75rem; }
+.home-release .release-summary { min-height: 44px; margin: 0; font-size: .75rem; }
+.home-release .release-banner-nav { min-width: 0; }
+.home-release .release-links { display: flex; flex-wrap: wrap; gap: .25rem .8rem; }
+.home-release .release-links a { padding: .25rem 0; min-height: 44px; border: 0; background: transparent; gap: .3rem; border-radius: .2rem; }
+.home-release .release-links strong { display: none; }
+.home-release .release-links small { font-size: .75rem; }
+.hikari-home .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1.04fr); gap: clamp(2rem, 4vw, 4rem); padding-block: 3.5rem; }
+.hikari-home .hero h1 { line-height: 1.35; }
+.hikari-home .hero h1 .hero-name { font-size: 1.55em; margin-bottom: .25em; }
+.hikari-home .hero-actions > a { flex-shrink: 0; }
+.hikari-home :is(.primary-action, .secondary-action, .section-links > a, .code-window > a) { transition: background .15s, border-color .15s, color .15s; }
+.hikari-home .code-window { max-width: 100%; }
+.hikari-home .code-window .shiki [role='region'] { max-width: 100%; overflow-x: auto; }
+.hikari-home .code-window .shiki button { min-width: 44px; min-height: 44px; }
+.hikari-home .code-window :focus-visible { outline-offset: -3px; }
+.hikari-home .learning-path { display: block; padding-block: 3.5rem; }
+.learning-path > div:first-child { max-width: 42rem; }
+.hikari-home .learning-path h2 { text-wrap: pretty; }
+.hikari-home .section-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin-top: 1.75rem; }
+.hikari-home .section-links > a { min-width: 0; padding: 1.25rem; border: 1px solid var(--color-fd-border); border-radius: var(--hikari-radius); align-items: start; background: var(--color-fd-card); }
+.hikari-home .section-links > a:nth-child(3n + 2) { background: color-mix(in srgb, var(--hikari-lilac) 5%, var(--color-fd-background)); }
+.hikari-home .section-links > a:nth-child(3n) { background: color-mix(in srgb, var(--hikari-mist) 5%, var(--color-fd-background)); }
+.hikari-home .section-links > a:hover { border-color: var(--color-fd-primary); background: var(--color-fd-muted); }
+.hikari-home .section-links strong { display: flex; flex-direction: column; gap: .2rem; }
+.hikari-home .section-links small { margin-left: 0; font-size: .7rem; }
+.hikari-home .path-description { margin-top: .65rem; }
+.hikari-home .section-links > a > svg { margin-top: .15rem; }
+.hikari-home .status-note a { min-height: 44px; }
+@media (max-width: 1100px) {
+  .hikari-home .home-release { grid-template-columns: 1fr; }
+  .home-release .release-banner-nav { display: flex; flex-wrap: wrap; gap: .25rem 1rem; align-items: center; border-top: 1px solid var(--color-fd-border); padding-top: .3rem; }
+}
+@media (max-width: 900px) {
+  .hikari-home .hero { grid-template-columns: minmax(0, 1fr); gap: 2rem; padding-block: 2.75rem; }
+  .hikari-home .hero-copy { max-width: 38rem; }
+  .hikari-home .hero-intro { max-width: 35rem; }
+  .hikari-home .section-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 540px) {
+  .hikari-home .home-release { padding: .85rem 1rem; margin-top: 1rem; }
+  .home-release .release-banner-copy { gap: .25rem .75rem; }
+  .home-release .release-banner-copy > p:not(.release-eyebrow) { flex-basis: 100%; order: 1; }
+  .home-release .release-links { column-gap: 1rem; }
+  .hikari-home .hero { padding-block: 2.25rem; }
+  .hikari-home .hero h1 { font-size: clamp(1.9rem, 7.5vw, 2.5rem); }
+  .hikari-home .hero-actions > a { flex: 1 1 9rem; padding-inline: .8rem; font-size: .85rem; }
+  .hikari-home .learning-path { padding-block: 2.5rem; }
+  .hikari-home .section-links { grid-template-columns: minmax(0, 1fr); gap: .65rem; }
+  .hikari-home .section-links > a { padding: 1rem; }
+  .hikari-home .section-links strong { flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: .3rem .75rem; }
+  .hikari-home .path-description { margin-top: .35rem; }
+  .hikari-home .code-output { grid-template-columns: 4rem minmax(0, 1fr); gap: .75rem; }
+}
+
 /* Reading surface: scope to Fumadocs' documented content and navigation slots. */
 [data-layout-content] { max-width: 800px; }
 [data-layout-content] > h1 { font-size: clamp(1.65rem, 2.4vw, 2.1rem); line-height: 1.4; letter-spacing: -.025em; text-wrap: balance; }
