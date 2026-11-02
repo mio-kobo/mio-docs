@@ -14,7 +14,7 @@ export function DocsShell({ tree, children }: { tree: Root; children: ReactNode 
     if (folder.root !== 'version') return option;
     const version = getVersion(folder.$ref?.folder);
     if (!version) return null;
-    return { ...option, title: <span className="version-label"><span>V{version.version}</span><span className={`version-badge ${version.status === 'Development' ? 'is-development' : ''}`}>{version.status}</span>{versionLabel(version).includes('Latest') && <span className="version-latest">Latest</span>}</span>, description: version.release ? `发布于 ${version.release.publishedAt.slice(0,10)} · 维护：${version.maintenance === 'unspecified' ? '未声明' : version.maintenance}` : '站点开发快照 · 内容已按 v2.0.0 正式版核对', props: {
+    return { ...option, title: <span className="version-label"><span>V{version.version}</span><span className={`version-badge ${version.status === 'Development' ? 'is-development' : ''}`}>{version.status === 'EOL' ? 'EOL · 已停止维护' : version.status}</span>{versionLabel(version).includes('Latest') && <span className="version-latest">Latest</span>}</span>, description: version.release ? `发布于 ${version.release.publishedAt.slice(0,10)} · 维护：${version.maintenance === 'unsupported' ? '已停止维护，不再更新' : version.maintenance === 'maintained' ? '维护中' : version.maintenance === 'unspecified' ? '未声明' : version.maintenance}` : '站点开发快照 · 内容已按 v2.0.0 正式版核对', props: {
       className: 'version-option',
       'aria-label': `切换到 V${version.version} ${version.status}`,
       onClickCapture: () => {

@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { downloadManifest, releasePlan } from '@/lib/releases.mjs';
 export function Downloads({version}:{version:string}) {
-  const release = version === releasePlan.version && releasePlan.mode !== 'live' ? undefined : downloadManifest.releases.find(r => r.version === version);
+  const release = version === releasePlan.version && releasePlan.mode === 'prepared' ? undefined : downloadManifest.releases.find(r => r.version === version);
+  if (release?.docsVersion === 'v2.0') return <section><h2>V{release.version} 安装包</h2><p>正式支持 macOS Apple Silicon / ARM64。安装包已核对字节大小与 SHA256。</p>{release.assets.map(asset => <article className="download-asset" key={asset.name}><h3>{asset.platform} · {asset.architecture}</h3><p>{asset.name}</p><a className="secondary-action" href={asset.url}>下载 · {(asset.size/1048576).toFixed(2)} MiB</a><dl><div><dt>文件大小</dt><dd>{asset.size.toLocaleString('en-US')} bytes</dd></div><div><dt>SHA256</dt><dd><code>{asset.sha256}</code></dd></div></dl></article>)}<p><Link href="/download/2.0.0">校验与安装步骤 →</Link> · <Link href="/docs/v2.0/getting-started">开始使用 V2.0 →</Link></p></section>;
   if (!release) return <aside className="release-callout"><strong>尚无已核验的 V{version} 构建产物</strong><p>平台、架构、文件大小与 SHA256 等待正式产物确认；当前不提供 V{version} 下载链接。</p><Link href="/download">获取当前稳定版 →</Link></aside>;
   const mac = release.assets.find(a => a.platform === 'macOS' && a.architecture === 'arm64');
   const windows = release.assets.find(a => a.platform === 'Windows' && a.architecture === 'x86_64');

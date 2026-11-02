@@ -1,6 +1,6 @@
 {
-  "title": "V1.0 · Stable",
-  "description": "正式发布文档",
+  "title": "V1.0 · EOL",
+  "description": "历史文档，已停止维护，不再更新",
   "root": "version",
   "pages": [
     "index",

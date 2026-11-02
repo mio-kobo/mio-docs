@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ReleaseShell } from '@/components/release-shell';
 import { releasePlan } from '@/lib/releases.mjs';
 import { pageMetadata } from '@/lib/seo';
-export const metadata = pageMetadata('下载 Mio v2.0.0', 'Mio v2.0.0 官方发行包、平台、校验与安装说明。', '/download/2.0.0', releasePlan.mode !== 'live');
+export const metadata = pageMetadata('下载 Mio v2.0.0', 'Mio v2.0.0 官方发行包、平台、校验与安装说明。', '/download/2.0.0', releasePlan.mode === 'prepared');
 const asset = {
   name: 'mio-2.0.0-darwin-arm64.tar.gz',
   size: 3645944,

@@ -12,15 +12,15 @@ test('numeric ordering supports minor 10, optional patch and future majors', () 
   assert.throws(() => numericVersion('2.01'));
 });
 test('default never follows an unreleased higher development version', () => {
-  assert.equal(latestStable(registry).id, 'v1.0');
-  assert.equal(registry.defaultVersion, 'v1.0');
-  const changed = structuredClone(registry); changed.defaultVersion = 'v2.0';
+  assert.equal(latestStable(registry).id, 'v2.0');
+  assert.equal(registry.defaultVersion, 'v2.0');
+  const changed = structuredClone(registry); changed.defaultVersion = 'v3.0';
   assert.throws(() => validateRegistry(changed), /latest formally released/);
 });
 test('release evidence, duplicate URL identities, maintenance and EOL are validated', () => {
   for (const mutate of [
     r => { r.versions[0].release.prerelease = true; },
-    r => { r.versions[1].release = r.versions[0].release; },
+    r => { r.versions[1].release = null; },
     r => { r.versions.push({...r.versions[1]}); },
     r => { r.versions[1].status = 'EOL'; },
     r => { r.versions[0].maintenance = 'made-up'; },
@@ -72,7 +72,7 @@ test('static production routes, redirects, untranslated 404 and version-isolated
   assert.ok(redirectHtml.includes('继续阅读文档'));
   for (const path of ['/docs/v1.0/','/docs/v2.0/','/docs/v1.0/learn/variables/','/docs/v2.0/learn/grammer/','/docs/v2.0/development/']) {
     const r = await fetch(new URL(path,base)); assert.equal(r.status,200,path);
-    const html = await r.text(); assert.ok(html.includes(path.includes('v2.0') ? 'Development' : 'Stable'));
+    const html = await r.text(); assert.ok(html.includes(path.includes('v1.0') ? 'EOL' : 'Stable'));
   }
   for (const path of ['/docs/v3.1.2/','/docs/v1.0/development/','/en/docs/v1.0/learn/variables/','/ja/docs/v2.0/learn/grammer/']) assert.equal((await fetch(new URL(path,base))).status,404,path);
   const { versionSearchClient } = await import('../lib/static-search.ts');
@@ -126,7 +126,7 @@ test('reviewed development activation registers a real directory without changin
     writeFileSync(join(draft,'version.json'),JSON.stringify(version));
     const target=await activateDraft(root,'v3.1.2');assert.ok(readFileSync(join(target,'index.mdx'),'utf8').includes('Fixture content'));
     const updated=JSON.parse(readFileSync(join(root,'content/versions.json')));
-    assert.equal(updated.defaultVersion,'v1.0');assert.ok(updated.versions.some(v=>v.id==='v3.1.2'&&v.status==='Development'));
+    assert.equal(updated.defaultVersion,registry.defaultVersion);assert.ok(updated.versions.some(v=>v.id==='v3.1.2'&&v.status==='Development'));
     await assert.rejects(activateDraft(root,'v3.1.2'),/never overwrite/);
   } finally {rmSync(root,{recursive:true,force:true});}
 });
@@ -143,7 +143,7 @@ test('frozen historical content rejects changed semantics and deletion', async (
       writeFileSync(join(directory,'meta.json'),JSON.stringify({root:'version'}));writeFileSync(join(directory,'index.mdx'),'Original signature');
       if(version.frozen)writeFileSync(join(root,'content/version-locks',version.id+'.json'),JSON.stringify({sourceCommit:version.source.commit,files:snapshotFiles(directory)}));
     }
-    assert.equal(checkVersions(root),2);
+    assert.equal(checkVersions(root),registry.versions.length);
     writeFileSync(join(root,'content/docs/v1.0/index.mdx'),'Changed API signature');assert.throws(()=>checkVersions(root),/frozen semantics changed/);
     rmSync(join(root,'content/docs/v1.0/index.mdx'));assert.throws(()=>checkVersions(root),/missing version home/);
   } finally {rmSync(root,{recursive:true,force:true});}
