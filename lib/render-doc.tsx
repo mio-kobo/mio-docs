@@ -45,7 +45,7 @@ export function renderDoc(slugs?: string[], locale = 'zh-CN') {
   const MDX = page.data.body;
   return <DocsPage id="main-content" toc={page.data.toc}>
     <VersionNotice />
-    {version?.id !== 'v2.0' && (version ? <aside className={`version-status ${version.status === 'Development' ? 'is-development' : ''}`} aria-label="文档版本状态"><strong>{versionLabel(version)}</strong><span>{version.status === 'Release Candidate' ? '候选发布，尚非稳定版。' : version.status === 'Development' ? '开发预览，尚未正式发布。' : `正式发布 ${version.release?.tag} · 文档内容固定于本版本。`}</span><Link href="/docs/versions">版本与来源</Link></aside> : page.slugs[0] !== 'versions' && <aside className="version-status is-development"><strong>未版本化迁移资料</strong><span>本页保留旧 URL；不将其自动归属到任何正式版本，也不混入版本搜索。</span><Link href="/docs/versions">选择版本化文档</Link></aside>)}
+    {version ? <aside className={`version-status ${version.status === 'Development' ? 'is-development' : ''}`} aria-label="文档版本状态"><strong>{versionLabel(version)}</strong><span>{version.status === 'EOL' ? '此版本已过时，已停止维护，不再更新。请使用当前稳定版 V2.0。' : version.status === 'Release Candidate' ? '候选发布，尚非稳定版。' : version.status === 'Development' ? '开发预览，尚未正式发布。' : `正式发布 ${version.release?.tag} · 文档内容固定于本版本。`}</span><Link href="/docs/versions">版本与来源</Link></aside> : page.slugs[0] !== 'versions' && <aside className="version-status is-development"><strong>未版本化迁移资料</strong><span>本页保留旧 URL；不将其自动归属到任何正式版本，也不混入版本搜索。</span><Link href="/docs/versions">选择版本化文档</Link></aside>}
     <DocsTitle>{page.data.title}</DocsTitle><DocsDescription>{page.data.description}</DocsDescription><DocsBody><MDX components={mdxComponents} /></DocsBody>
   </DocsPage>;
 }

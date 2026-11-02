@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ReleaseShell } from '@/components/release-shell';
 import { pageMetadata } from '@/lib/seo';
 import { releasePlan } from '@/lib/releases.mjs';
-export const metadata = pageMetadata('迁移到 Mio v2.0.0', '从 V1.0 迁移到 v2.0.0：安装、VM 验证、Native AOT 与兼容边界。', '/releases/2.0.0/migration', releasePlan.mode !== 'live');
+export const metadata = pageMetadata('迁移到 Mio v2.0.0', '从 V1.0 迁移到 v2.0.0：安装、VM 验证、Native AOT 与兼容边界。', '/releases/2.0.0/migration', releasePlan.mode === 'prepared');
 export default function Page() {
  return <ReleaseShell title="迁移到 Mio v2.0.0" description={releasePlan.released ? '面向 V1.0 用户的正式迁移指南。先保留 V1 工具链，再在独立目录安装 v2.0.0。' : '迁移准备。'}>
   <aside className="release-callout"><strong>{releasePlan.released ? 'Stable · 正式迁移指南' : 'Development'}</strong><p>保留可用的 V1 工具链与 Bunko，使用独立的 <code>MIO_BUNKO</code>。不要混用两个版本的标准库。</p></aside>

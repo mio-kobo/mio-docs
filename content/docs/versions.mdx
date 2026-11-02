@@ -7,15 +7,12 @@ description: 正式版本、开发预览、Mio v2.0.0 的发布事实与长期�
 
 | 文档版本 | 状态 | 来源 |
 | --- | --- | --- |
-| [V1.0](/docs/v1.0) | Stable · Latest（站点默认） | [v1.0.0 正式发布](https://github.com/mio-kobo/mio/releases/tag/v1.0.0)，2026-10-17 |
-| [V2.0](/docs/v2.0) | 站点 Development 快照；内容已按 v2.0.0 核对 | [v2.0.0 正式发布](https://github.com/mio-kobo/mio/releases/tag/v2.0.0)，2026-10-21，提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a` |
+| [V1.0](/docs/v1.0) | EOL · 已停止维护，不再更新 | [v1.0.0 正式发布](https://github.com/mio-kobo/mio/releases/tag/v1.0.0)，2026-10-17 |
+| [V2.0](/docs/v2.0) | Stable · Latest（站点默认主发布版本） | [v2.0.0 正式发布](https://github.com/mio-kobo/mio/releases/tag/v2.0.0)，2026-10-21，提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a` |
 
-**Mio v2.0.0 已正式发布。** 本节区分两件事：
+**V2.0 是本站主发布版本。** `/docs` 默认进入 `/docs/v2.0`，未指定版本的章节入口也指向 V2.0。
 
-- **语言发布状态**：v2.0.0 是正式、非 prerelease 的 GitHub Release。
-- **文档站版本状态**：`/docs/v2.0` 仍是站点当前的 V2 文档目录；默认稳定入口和 V2.0.0 冻结快照的切换由文档站发布验收单独管理。内容本身已按正式 Tag 核对，不能把站点版本标签误读成语言未发布。
-
-`/docs` 当前自动进入站点默认稳定版 V1.0。精确版本 URL 长期保留；新增正式快照不会改变旧 URL 所指向的正文。
+自 2026 年 11 月 3 日起，V1.0 标记为 **EOL**，已停止维护，不再更新；旧 URL 与正文保留，供历史查阅。版本生命周期依据维护者决定记录在 `content/version-lifecycle.json`。
 
 ## v2.0.0 的发布事实
 
@@ -33,8 +30,8 @@ M18 已通过验收：纯 Mio Native AOT 完成 Mochi → Native 的多代自编
 - **Latest**：从已发布且标记 Stable 的版本按数字语义计算出的最新稳定版标记，不是独立发布状态。
 - **Stable**：有非预发布的正式 Release 证据。
 - **Legacy**：已有正式发布、仍保留的旧文档；是否维护需另查维护字段。
-- **Development**：站点尚未完成正式版本切换的文档快照；必须显式标注，不能把它当作语言未发布。
-- **EOL**：有明确维护终止记录后才能标记。当前没有依据标记任何版本为 EOL。
+- **Development**：开发预览，尚未正式发布。
+- **EOL**：已停止维护、不再更新的历史版本；当前为 V1.0。
 
 维护状态独立记录；`unspecified` 表示目前没有官方维护期限承诺，不意味着长期支持。版本注册表位于 `content/versions.json`。
 

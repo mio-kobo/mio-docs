@@ -2,12 +2,12 @@ import Link from 'next/link';
 import { ReleaseShell } from '@/components/release-shell';
 import { releaseDocs, releasePlan } from '@/lib/releases.mjs';
 import { pageMetadata } from '@/lib/seo';
-export const metadata = pageMetadata('Mio v2.0.0 · Release Notes', 'Mio v2.0.0 正式发布：M18 纯 Mio Native AOT 自编译、macOS ARM64 平台边界与已知限制。', '/releases/2.0.0', releasePlan.mode !== 'live');
+export const metadata = pageMetadata('Mio v2.0.0 · Release Notes', 'Mio v2.0.0 正式发布：M18 纯 Mio Native AOT 自编译、macOS ARM64 平台边界与已知限制。', '/releases/2.0.0', releasePlan.mode === 'prepared');
 const commit = releaseDocs!.source.commit;
 const source = `https://github.com/mio-kobo/mio/tree/${commit}`;
 export default function Page() {
   return <ReleaseShell title="Mio v2.0.0" description={releasePlan.released ? '正式发布。M18 纯 Mio Native AOT 自编译已验收；首发平台为 macOS Apple Silicon ARM64。' : 'V2.0.0 发布信息。'}>
-    <aside className="release-callout"><strong>{releasePlan.released ? 'Stable · 2026-10-21 正式发布' : 'Development'}</strong><p>正式 Tag 为 <code>v2.0.0</code>，源码提交 <code>{commit}</code>。CLI 输出 <code>Mio 2.0.0</code>。本站默认稳定文档入口仍由版本注册表管理；这不影响语言本身的正式发布事实。</p></aside>
+    <aside className="release-callout"><strong>{releasePlan.released ? 'Stable · 2026-10-21 正式发布' : 'Development'}</strong><p>正式 Tag 为 <code>v2.0.0</code>，源码提交 <code>{commit}</code>。CLI 输出 <code>Mio 2.0.0</code>。本站主发布版本为 V2.0，默认文档入口指向 V2.0；V1.0 已停止维护。</p></aside>
     <section><p className="release-eyebrow">RELEASE HIGHLIGHTS</p><h2>v2.0.0 的主要成果</h2>
       <div className="release-facts">
         <article><span>01 / NATIVE AOT</span><h3>M18 纯 Mio 自编译通过</h3><p>正式链为 Go 前端生成 <code>native-aot.mochi</code>，Go AOT 只生成 Seed；Seed 及后续 Stage 1–4 由纯 Mio 生成，Stage 1–5 未签名字节一致。Stage 5 已生成并签名验证，但未计为已执行代次。</p><Link href="/docs/v2.0/internals/native-aot">阅读 Native AOT →</Link></article>
