@@ -1,0 +1,27 @@
+{
+  "title": "语法基础",
+  "pages": [
+    "index",
+    "grammer",
+    "comments",
+    "identifiers",
+    "literals",
+    "operators",
+    "datatype",
+    "constant-variable",
+    "condition",
+    "loop",
+    "function",
+    "scope",
+    "arrays",
+    "string",
+    "map",
+    "structs",
+    "enums-pattern-matching",
+    "nullable-types",
+    "generics",
+    "generic-constraints",
+    "closures-function-values",
+    "packages"
+  ]
+}

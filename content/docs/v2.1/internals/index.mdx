@@ -1,0 +1,26 @@
+---
+title: Internals · 执行系统与内部实现
+description: 区分 Mio V2.1 的 Mochi 格式、原生编译管线、精确分代 GC 与开发中的并发 Runtime。
+---
+
+## 内部实现
+
+本栏目面向希望研究 Mio 编译器、Mochi 字节码与原生运行时的读者。V2.1 延续 V2.0 已有的 VM 和 Native AOT，同时整合完整纯 Mio 源码工具链，并扩展非移动式分代 GC。
+
+阅读内部实现时，需要区分**已经发布的 V2.0 机制**、**V2.1 已提交的实现**和**尚未完成整体验收的工作区开发**。
+
+| 方向 | 资料 | 与用户 API 的区别 |
+| --- | --- | --- |
+| [Mochi 格式与 VM](/docs/v2.1/internals/mochi) | 旧 Go 路径的 v14 与纯 Mio v15/v16 扩展 | 字节码版本不同于语言版本 |
+| [Native AOT](/docs/v2.1/internals/native-aot) | V2.0 后端、多代自举与 V2.1 源码到 Native 管线 | 另有实验性 Linux / Windows AMD64 后端 |
+| [M19 分代 GC](/docs/v2.1/internals/gc) | Young / Old、Minor / Major、Remembered Set、LOS | 非移动式精确 GC 的开发增强 |
+| [内存预算与压力观测](/docs/v2.1/internals/memory-policy) | Arena、Hard Cap、Goal、四级压力 | 不是公开三档 GC 模式 |
+| [纯 Mio 工具链](/docs/v2.1/tooling/selfhost) | 源码前端、LSP、CLI、测试运行器 | 开发候选，验收依赖具体源码快照 |
+
+### 从 V2.0 到 V2.1
+
+V2.0 的原生 GC 以精确根和非移动式 Mark-Sweep 为基础；V2.1 增加分代和内存预算，但并没有改成移动式复制回收。分代回收已有源码，M19b 的历史 race 验收仍有未通过项，M19c 独立功能 `PASS` 不等于 M19 总门禁通过。
+
+另有已提交的 Native Thread、TLS、安全点、SATB 并发标记和并发清扫实现。这些入口属于内部 Runtime 集成，历史 M19e 报告为 `NOT_ACCEPTED`，本轮未确认更新的整体接纳报告；普通 CLI 不会因源码存在而自动切换成并发 GC。具体见 [开发状态](/docs/v2.1/development)。
+
+V2.0 M18 的历史多代自编译与 V2.1 纯 Mio 完整管线是两个不同的里程碑。阅读 [V2.0 原生 AOT](/docs/v2.0/internals/native-aot) 可以了解前者的验证范围，后者则需要结合 [工具链](/docs/v2.1/tooling) 和最新源码进行判断。

@@ -1,0 +1,176 @@
+---
+title: 二进制编码
+description: Mio V2.0 二进制编码标准库 kiso/encoding/binary
+---
+
+> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+
+
+## 二进制编码
+
+二进制编码标准库（Binary Encoding）用于读取和写入有符号整数、无符号整数、大小端数据与可变长度整数，并提供具有偏移状态的 Reader 和 Writer。
+
+二进制偏移都按**字节**计算。本包提供 `U64` 结构表示无符号 64 位位模式，不表示 Mio 存在内置的 `uint64` 数值类型。
+
+本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
+
+### 导入包
+
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+
+通过 `yobu "kiso/encoding/binary";` 导入本包，随后使用 `binary.函数名(...)` 调用。
+
+```mio title="Stdlib.mio" no-run
+yobu "kiso/encoding/binary";
+yobu "kiso/array";
+```
+
+### 读取定宽数据
+
+例如，`read_i64_be` 按大端规则读取八个字节并返回 `I64Result`。所有读取都应检查结果中的 `error`，不能仅凭 `value` 判断成功。
+
+```mio title="Binary.mio" no-run
+yobu "kiso/encoding/binary";
+yobu "kiso/array";
+
+kaku data: []uint8 = [0, 0, 0, 0, 0, 0, 0, 42];
+kaku result = binary.read_i64_be(data, 0);
+chant(result.error == mu);
+```
+
+### 写入定宽数据
+
+写入函数修改已有的 `[]uint8` 元素，不会自动扩容。在写入前应确保数组有足够长度，错误通过 `BinaryError?` 返回。
+
+```mio title="Binary.mio" no-run
+yobu "kiso/encoding/binary";
+yobu "kiso/array";
+
+kaku data = array.make[uint8](8, uint8(0));
+kaku error = binary.write_i64_be(data, 0, -42);
+chant(error == mu);
+```
+
+### 可变长度整数
+
+`read_var_u32`、`read_var_i64` 与配套的 `write_var_*` 函数用于可变长度编码。读取结果提供 `count`，表示本次消费的字节数。
+
+### BinaryReader 与 BinaryWriter
+
+Reader 保存当前位置，读取会推进游标；Writer 可顺序追加、预留、补丁式覆盖已经生成的字段。需要检查每一步返回的可空错误，最终通过 `writer_bytes` 导出副本。
+
+```mio title="Binary.mio" no-run
+yobu "kiso/encoding/binary";
+yobu "kiso/array";
+
+kaku writer = binary.writer(16);
+kaku error = binary.writer_write_u32_be(writer, uint32(42));
+kaku reader = binary.reader(binary.writer_bytes(writer));
+kaku result = binary.reader_read_u32_be(reader);
+```
+
+### 公开类型
+
+- `BinaryError`：解码、编码与越界类错误枚举。
+- `U8Result`、`U16Result`、`U32Result`：无符号整数读取结果。
+- `I8Result`、`I16Result`、`I32Result`、`I64Result`：有符号整数读取结果。
+- `BytesResult { data: []uint8; error: BinaryError?; }`：字节编码结果。
+- `VarU32Result`、`VarI64Result`：含 `value`、`count` 和错误的可变整数读取结果。
+- `U64 { high: uint32; low: uint32; }`：无符号 64 位位模式。
+- `U64Result`：64 位无符号读取结果。
+- `BinaryReader { data: []uint8; state: []int64; }`：共享数组与游标状态的读取器。
+- `BinaryWriter { data: []uint8; max_length: int64; }`：具有最大长度限制的写入器。
+
+### 公开函数（61 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `read_u8` | `read_u8(data: []uint8, offset: int64) -> U8Result` | 从字节偏移读取无符号 8 位整数；错误记录在结果中。 |
+| `read_u16_le` | `read_u16_le(data: []uint8, offset: int64) -> U16Result` | 从字节偏移读取无符号 16 位整数，小端；错误记录在结果中。 |
+| `read_u16_be` | `read_u16_be(data: []uint8, offset: int64) -> U16Result` | 从字节偏移读取无符号 16 位整数，大端；错误记录在结果中。 |
+| `read_u32_le` | `read_u32_le(data: []uint8, offset: int64) -> U32Result` | 从字节偏移读取无符号 32 位整数，小端；错误记录在结果中。 |
+| `read_u32_be` | `read_u32_be(data: []uint8, offset: int64) -> U32Result` | 从字节偏移读取无符号 32 位整数，大端；错误记录在结果中。 |
+| `read_i8` | `read_i8(data: []uint8, offset: int64) -> I8Result` | 从字节偏移读取有符号 8 位整数。 |
+| `read_i16_le` | `read_i16_le(data: []uint8, offset: int64) -> I16Result` | 从字节偏移读取有符号 16 位整数（小端）。 |
+| `read_i16_be` | `read_i16_be(data: []uint8, offset: int64) -> I16Result` | 从字节偏移读取有符号 16 位整数（大端）。 |
+| `read_i32_le` | `read_i32_le(data: []uint8, offset: int64) -> I32Result` | 从字节偏移读取有符号 32 位整数（小端）。 |
+| `read_i32_be` | `read_i32_be(data: []uint8, offset: int64) -> I32Result` | 从字节偏移读取有符号 32 位整数（大端）。 |
+| `read_i64_le` | `read_i64_le(data: []uint8, offset: int64) -> I64Result` | 从字节偏移读取有符号 64 位整数（小端）。 |
+| `read_i64_be` | `read_i64_be(data: []uint8, offset: int64) -> I64Result` | 从字节偏移读取有符号 64 位整数（大端）。 |
+| `write_u8` | `write_u8(destination: []uint8, offset: int64, value: uint8) -> BinaryError?` | 写入无符号 8 位整数，返回可空错误。 |
+| `write_u16_le` | `write_u16_le(destination: []uint8, offset: int64, value: uint16) -> BinaryError?` | 写入无符号 16 位整数（小端），返回可空错误。 |
+| `write_u16_be` | `write_u16_be(destination: []uint8, offset: int64, value: uint16) -> BinaryError?` | 写入无符号 16 位整数（大端），返回可空错误。 |
+| `write_u32_le` | `write_u32_le(destination: []uint8, offset: int64, value: uint32) -> BinaryError?` | 写入无符号 32 位整数（小端），返回可空错误。 |
+| `write_u32_be` | `write_u32_be(destination: []uint8, offset: int64, value: uint32) -> BinaryError?` | 写入无符号 32 位整数（大端），返回可空错误。 |
+| `write_i8` | `write_i8(destination: []uint8, offset: int64, value: int8) -> BinaryError?` | 写入有符号 8 位整数。 |
+| `write_i16_le` | `write_i16_le(destination: []uint8, offset: int64, value: int16) -> BinaryError?` | 写入有符号 16 位整数（小端）。 |
+| `write_i16_be` | `write_i16_be(destination: []uint8, offset: int64, value: int16) -> BinaryError?` | 写入有符号 16 位整数（大端）。 |
+| `write_i32_le` | `write_i32_le(destination: []uint8, offset: int64, value: int32) -> BinaryError?` | 写入有符号 32 位整数（小端）。 |
+| `write_i32_be` | `write_i32_be(destination: []uint8, offset: int64, value: int32) -> BinaryError?` | 写入有符号 32 位整数（大端）。 |
+| `write_i64_le` | `write_i64_le(destination: []uint8, offset: int64, value: int64) -> BinaryError?` | 写入有符号 64 位整数（小端）。 |
+| `write_i64_be` | `write_i64_be(destination: []uint8, offset: int64, value: int64) -> BinaryError?` | 写入有符号 64 位整数（大端）。 |
+| `write_var_u32` | `write_var_u32(value: uint32) -> BytesResult` | 按可变长度无符号整数形式编码并返回字节数组。 |
+| `read_var_u32` | `read_var_u32(data: []uint8, offset: int64) -> VarU32Result` | 从字节偏移读取可变长度无符号整数，记录消费字节数。 |
+| `write_var_i64` | `write_var_i64(value: int64) -> BytesResult` | 将有符号 64 位整数进行可变长度编码。 |
+| `read_var_i64` | `read_var_i64(data: []uint8, offset: int64) -> VarI64Result` | 解码可变长度有符号整数并记录消费字节数。 |
+| `reader` | `reader(data: []uint8) -> BinaryReader` | 创建具有共享字节数据与游标状态的读取器。 |
+| `reader_offset` | `reader_offset(value: BinaryReader) -> int64` | 返回读取游标的当前位置。 |
+| `reader_remaining` | `reader_remaining(value: BinaryReader) -> int64` | 返回当前游标之后剩余的字节数。 |
+| `reader_eof` | `reader_eof(value: BinaryReader) -> bool` | 判断游标是否已处于输入末尾。 |
+| `reader_seek` | `reader_seek(value: BinaryReader, offset: int64) -> BinaryError?` | 将读取游标移动到指定位置。 |
+| `reader_skip` | `reader_skip(value: BinaryReader, count: int64) -> BinaryError?` | 将游标前进指定字节数。 |
+| `reader_read_u8` | `reader_read_u8(value: BinaryReader) -> U8Result` | 从读取器读取 u8 数值，并推进游标。 |
+| `reader_read_u16_le` | `reader_read_u16_le(value: BinaryReader) -> U16Result` | 从读取器读取 u16_le 数值，并推进游标。 |
+| `reader_read_u16_be` | `reader_read_u16_be(value: BinaryReader) -> U16Result` | 从读取器读取 u16_be 数值，并推进游标。 |
+| `reader_read_u32_le` | `reader_read_u32_le(value: BinaryReader) -> U32Result` | 从读取器读取 u32_le 数值，并推进游标。 |
+| `reader_read_u32_be` | `reader_read_u32_be(value: BinaryReader) -> U32Result` | 从读取器读取 u32_be 数值，并推进游标。 |
+| `reader_read_u64_le` | `reader_read_u64_le(value: BinaryReader) -> U64Result` | 从读取器读取 u64_le 数值，并推进游标。 |
+| `reader_read_u64_be` | `reader_read_u64_be(value: BinaryReader) -> U64Result` | 从读取器读取 u64_be 数值，并推进游标。 |
+| `reader_read_bytes` | `reader_read_bytes(value: BinaryReader, count: int64) -> BytesResult` | 读取指定数量的字节。 |
+| `writer` | `writer(max_length: int64) -> BinaryWriter` | 建立具有最大长度上限的二进制写入器。 |
+| `writer_offset` | `writer_offset(value: BinaryWriter) -> int64` | 获得当前写入字节偏移。 |
+| `writer_reserve` | `writer_reserve(value: BinaryWriter, count: int64) -> I64Result` | 预留指定字节数并返回起始位置或错误。 |
+| `writer_write_bytes` | `writer_write_bytes(value: BinaryWriter, source: []uint8) -> BinaryError?` | 向末尾写入整段字节数组。 |
+| `writer_write_length_prefixed` | `writer_write_length_prefixed(value: BinaryWriter, source: []uint8) -> BinaryError?` | 将数据按长度前缀形式写入。 |
+| `writer_write_u8` | `writer_write_u8(value: BinaryWriter, number: uint8) -> BinaryError?` | 按 u8 格式追加数值。 |
+| `writer_write_u16_le` | `writer_write_u16_le(value: BinaryWriter, number: uint16) -> BinaryError?` | 按 u16_le 格式追加数值。 |
+| `writer_write_u16_be` | `writer_write_u16_be(value: BinaryWriter, number: uint16) -> BinaryError?` | 按 u16_be 格式追加数值。 |
+| `writer_write_u32_le` | `writer_write_u32_le(value: BinaryWriter, number: uint32) -> BinaryError?` | 按 u32_le 格式追加数值。 |
+| `writer_write_u32_be` | `writer_write_u32_be(value: BinaryWriter, number: uint32) -> BinaryError?` | 按 u32_be 格式追加数值。 |
+| `writer_write_u64_le` | `writer_write_u64_le(value: BinaryWriter, number: U64) -> BinaryError?` | 按 u64_le 格式追加数值。 |
+| `writer_write_u64_be` | `writer_write_u64_be(value: BinaryWriter, number: U64) -> BinaryError?` | 按 u64_be 格式追加数值。 |
+| `writer_patch_u16_be` | `writer_patch_u16_be(value: BinaryWriter, offset: int64, number: uint16) -> BinaryError?` | 在已经写入的指定字节位置覆盖 u16_be 数值。 |
+| `writer_patch_u16_le` | `writer_patch_u16_le(value: BinaryWriter, offset: int64, number: uint16) -> BinaryError?` | 在已经写入的指定字节位置覆盖 u16_le 数值。 |
+| `writer_patch_u32_be` | `writer_patch_u32_be(value: BinaryWriter, offset: int64, number: uint32) -> BinaryError?` | 在已经写入的指定字节位置覆盖 u32_be 数值。 |
+| `writer_patch_u32_le` | `writer_patch_u32_le(value: BinaryWriter, offset: int64, number: uint32) -> BinaryError?` | 在已经写入的指定字节位置覆盖 u32_le 数值。 |
+| `writer_patch_u64_be` | `writer_patch_u64_be(value: BinaryWriter, offset: int64, number: U64) -> BinaryError?` | 在已经写入的指定字节位置覆盖 u64_be 数值。 |
+| `writer_patch_u64_le` | `writer_patch_u64_le(value: BinaryWriter, offset: int64, number: U64) -> BinaryError?` | 在已经写入的指定字节位置覆盖 u64_le 数值。 |
+| `writer_bytes` | `writer_bytes(value: BinaryWriter) -> []uint8` | 导出独立的字节数组副本。 |
+
+### 完整示例
+
+```mio title="Binary.mio" no-run
+yobu "kiso/encoding/binary";
+yobu "kiso/array";
+
+kaku data = array.make[uint8](8, uint8(0));
+kaku error = binary.write_i64_be(data, 0, -42);
+chant(error == mu);
+kaku result = binary.read_i64_be(data, 0);
+chant(result.value);
+kaku bad = binary.read_u32_le(data, 6);
+chant(bad.error != mu);
+kaku writer = binary.writer(16);
+kaku write_error = binary.writer_write_u32_be(writer, uint32(42));
+kaku reader = binary.reader(binary.writer_bytes(writer));
+kaku read_result = binary.reader_read_u32_be(reader);
+chant(read_result.value);
+```
+
+### 使用限制
+
+偏移与长度需要落在数据边界内，读取或写入失败不会自动抛出可由 Mio 捕获的异常，而是返回 `BinaryError`。`BinaryReader` 和 `BinaryWriter` 包含共享存储，复制变量时须理解其游标和内容的别名关系；不要把容量当作有效长度。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/encoding/binary`](https://github.com/mio-kobo/mio/tree/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/encoding/binary)。

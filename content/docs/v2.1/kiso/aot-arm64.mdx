@@ -1,0 +1,153 @@
+---
+title: ARM64 指令编码
+description: Mio V2.0 AOT ARM64 指令编码库 kiso/aot/arm64
+---
+
+> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+
+
+## ARM64 指令编码
+
+ARM64 指令编码模块提供 Darwin ARM64 AOT 编译器使用的指令字生成函数、错误枚举与带标签修补的汇编器。
+
+它主要面向编译器工具链开发，不是高层数值运算库。所有编码函数返回 `Instruction`，应在使用 `word` 之前检查其可空的 `error` 字段。
+
+本模块属于 **AOT 编译工具链接口**，其公开声明不等于稳定的应用层 API；以下内容对应 `v2.0.0` 发布标签。
+
+### 导入包
+
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+
+通过 `yobu "kiso/aot/arm64";` 导入本包，随后使用 `arm64.函数名(...)` 调用。
+
+```mio title="Stdlib.mio" no-run
+yobu "kiso/aot/arm64";
+```
+
+### 基础指令编码
+
+`movz_x`、`movk_x`、`add_x`、`sub_x`、`ldr_x` 等函数接收寄存器编号和偏移量，按架构规则计算 32 位机器指令字。非法寄存器或超范围操作数通过 `EncodeError` 报告。
+
+```mio title="Arm64.mio" no-run
+yobu "kiso/aot/arm64";
+
+kaku instruction = arm64.ret();
+chant(instruction.error == mu);
+```
+
+### 分支与地址
+
+`b`、`bl`、`b_cond` 及 `cbz_x`、`cbnz_x` 等函数接收相对偏移。需要按名称建立分支时，可通过汇编器标签与修补列表处理，而不是手工猜测距离。
+
+### 使用 Assembler
+
+汇编器可接收指令、标签和延后解析的分支。`assembler_assemble` 返回 `AssembleResult`；有任何编码错误时，应当检查 `error` 而不是直接使用 `words`。
+
+```mio title="Arm64.mio" no-run
+yobu "kiso/aot/arm64";
+
+kaku code = arm64.assembler();
+kaku step = arm64.ret();
+kaku error = arm64.assembler_emit(code, step);
+chant(error == mu);
+```
+
+### v2.0.0 新增查询
+
+本标签还公开 `assembler_label_word`，用于按标签名称查询汇编器内部的指令字位置。某些旧版文档未列出它，本文以 `v2.0.0` 源码为准。
+
+### 公开类型
+
+- `EncodeError`：包含非法寄存器、立即数、偏移和标签问题的枚举。
+- `Instruction { word: uint32; error: EncodeError?; }`：单条编码结果。
+- `Label { name: string; word: int64; }`：标签名称与指令字索引。
+- `Fixup { at_word: int64; target: string; kind: int64; operand: int64; }`：分支修补项。
+- `Assembler { words: []uint32; labels: []Label; label_index: [][]int64; fixups: []Fixup; errors: []EncodeError; }`：汇编缓冲区。
+- `AssembleResult { words: []uint32; error: EncodeError?; }`：汇编完成结果。
+
+### 公开函数（63 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `movz_x` | `movz_x(rd: int64, immediate: int64, shift: int64) -> Instruction` | 64 位立即数段装入；需要合法寄存器、立即数和位移。 |
+| `movk_x` | `movk_x(rd: int64, immediate: int64, shift: int64) -> Instruction` | 64 位立即数段覆盖；需要合法寄存器、立即数和位移。 |
+| `movn_x` | `movn_x(rd: int64, immediate: int64, shift: int64) -> Instruction` | 64 位按位取反立即数构造；需要合法寄存器、立即数和位移。 |
+| `movz_w` | `movz_w(rd: int64, immediate: int64) -> Instruction` | 编码 32 位寄存器的 MOVZ。 |
+| `add_x` | `add_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成64 位加法指令。 |
+| `sub_x` | `sub_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成64 位减法指令。 |
+| `adds_x` | `adds_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成设置标志位的 64 位加法指令。 |
+| `subs_x` | `subs_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成设置标志位的 64 位减法指令。 |
+| `and_x` | `and_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成按位与指令。 |
+| `orr_x` | `orr_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成按位或指令。 |
+| `eor_x` | `eor_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成按位异或指令。 |
+| `mul_x` | `mul_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成乘法指令。 |
+| `sdiv_x` | `sdiv_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成有符号除法指令。 |
+| `udiv_x` | `udiv_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成无符号除法指令。 |
+| `msub_x` | `msub_x(rd: int64, rn: int64, rm: int64, ra: int64) -> Instruction` | 生成乘减指令。 |
+| `cmp_x` | `cmp_x(rn: int64, rm: int64) -> Instruction` | 比较两个 64 位寄存器并更新条件标志。 |
+| `add_imm_x` | `add_imm_x(rd: int64, rn: int64, immediate: int64, shift12: bool) -> Instruction` | 生成64 位立即数加法指令；`shift12` 控制立即数字段位移。 |
+| `sub_imm_x` | `sub_imm_x(rd: int64, rn: int64, immediate: int64, shift12: bool) -> Instruction` | 生成64 位立即数减法指令；`shift12` 控制立即数字段位移。 |
+| `cmp_imm_x` | `cmp_imm_x(rn: int64, immediate: int64, shift12: bool) -> Instruction` | 比较寄存器与立即数，支持 12 位位移形式。 |
+| `add_imm_w` | `add_imm_w(rd: int64, rn: int64, immediate: int64) -> Instruction` | 生成 32 位立即数加法指令。 |
+| `cset_w` | `cset_w(rd: int64, condition: int64) -> Instruction` | 根据条件标志设置 32 位寄存器布尔值。 |
+| `lsl_x` | `lsl_x(rd: int64, rn: int64, shift: int64) -> Instruction` | 生成 64 位逻辑左移指令。 |
+| `lsr_x` | `lsr_x(rd: int64, rn: int64, shift: int64) -> Instruction` | 生成 64 位逻辑右移指令。 |
+| `asr_x` | `asr_x(rd: int64, rn: int64, shift: int64) -> Instruction` | 生成 64 位算术右移指令。 |
+| `lsrv_x` | `lsrv_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 按寄存器给出的位移量执行逻辑右移。 |
+| `ldr_x` | `ldr_x(rt: int64, rn: int64, byte_offset: int64) -> Instruction` | 编码读取 64 位寄存器的内存访问操作。 |
+| `str_x` | `str_x(rt: int64, rn: int64, byte_offset: int64) -> Instruction` | 编码写入 64 位寄存器的内存访问操作。 |
+| `ldrb_w` | `ldrb_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction` | 编码读取一个无符号字节的内存访问操作。 |
+| `strb_w` | `strb_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction` | 编码写入一个字节的内存访问操作。 |
+| `ldrh_w` | `ldrh_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction` | 编码读取 16 位半字的内存访问操作。 |
+| `stp_x` | `stp_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction` | 生成存储双寄存器操作。 |
+| `ldp_x` | `ldp_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction` | 生成加载双寄存器操作。 |
+| `stp_pre_x` | `stp_pre_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction` | 生成预索引双寄存器存储操作。 |
+| `ldp_post_x` | `ldp_post_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction` | 生成后索引双寄存器加载操作。 |
+| `b` | `b(delta_words: int64) -> Instruction` | 按指令字偏移编码无条件分支。 |
+| `bl` | `bl(delta_words: int64) -> Instruction` | 按指令字偏移编码带链接的函数调用分支。 |
+| `b_cond` | `b_cond(condition: int64, delta_words: int64) -> Instruction` | 按条件码及相对指令偏移生成分支。 |
+| `cbz_x` | `cbz_x(rt: int64, delta_words: int64) -> Instruction` | 生成寄存器为零时分支指令。 |
+| `cbnz_x` | `cbnz_x(rt: int64, delta_words: int64) -> Instruction` | 生成寄存器非零时分支指令。 |
+| `br_x` | `br_x(rn: int64) -> Instruction` | 生成间接跳转指令。 |
+| `blr_x` | `blr_x(rn: int64) -> Instruction` | 生成间接调用指令。 |
+| `ret_x` | `ret_x(rn: int64) -> Instruction` | 生成寄存器指定的返回地址指令。 |
+| `ret` | `ret() -> Instruction` | 生成使用默认链接寄存器的返回指令。 |
+| `adr` | `adr(rd: int64, delta_bytes: int64) -> Instruction` | 按字节偏移生成 ADR 地址计算。 |
+| `adrp_offset` | `adrp_offset(rd: int64, pc_offset: int64, target_offset: int64) -> Instruction` | 根据 PC 与目标字节偏移编码 ADRP 页地址。 |
+| `svc` | `svc(immediate: int64) -> Instruction` | 生成 SVC 系统调用指令。 |
+| `fadd_d` | `fadd_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 生成双精度浮点加法指令。 |
+| `fsub_d` | `fsub_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 生成双精度浮点减法指令。 |
+| `fmul_d` | `fmul_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 生成双精度浮点乘法指令。 |
+| `fdiv_d` | `fdiv_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 生成双精度浮点除法指令。 |
+| `fcmp_d` | `fcmp_d(vn: int64, vm: int64) -> Instruction` | 比较两个双精度浮点寄存器。 |
+| `scvtf_d` | `scvtf_d(vd: int64, rn: int64) -> Instruction` | 将带符号整数转换成双精度浮点。 |
+| `fcvtzs_x` | `fcvtzs_x(rd: int64, vn: int64) -> Instruction` | 将双精度浮点向零转换为带符号整数。 |
+| `assembler` | `assembler() -> Assembler` | 创建一个空的汇编器。 |
+| `assembler_emit` | `assembler_emit(value: Assembler, encoded: Instruction) -> EncodeError?` | 向汇编器追加已编码指令并记录错误。 |
+| `assembler_label` | `assembler_label(value: Assembler, name: string) -> EncodeError?` | 在当前位置声明标签。 |
+| `assembler_b` | `assembler_b(value: Assembler, target: string) -> EncodeError?` | 添加指向标签的无条件分支占位。 |
+| `assembler_bl` | `assembler_bl(value: Assembler, target: string) -> EncodeError?` | 添加带链接的标签分支。 |
+| `assembler_b_cond` | `assembler_b_cond(value: Assembler, condition: int64, target: string) -> EncodeError?` | 添加按条件码跳转的标签分支。 |
+| `assembler_cbz_x` | `assembler_cbz_x(value: Assembler, reg: int64, target: string) -> EncodeError?` | 添加寄存器为零的分支修补记录。 |
+| `assembler_cbnz_x` | `assembler_cbnz_x(value: Assembler, reg: int64, target: string) -> EncodeError?` | 添加寄存器非零的分支修补记录。 |
+| `assembler_assemble` | `assembler_assemble(value: Assembler) -> AssembleResult` | 解析标签和修补记录，返回指令字数组或错误。 |
+| `assembler_label_word` | `assembler_label_word(value: Assembler, name: string) -> int64` | 查询标签对应的指令字位置。 |
+
+### 完整示例
+
+```mio title="Arm64.mio" no-run
+yobu "kiso/aot/arm64";
+
+kaku good = arm64.ret();
+chant(good.error == mu);
+kaku bad = arm64.movz_x(-1, 0, 0);
+chant(bad.error != mu);
+```
+
+### 使用限制
+
+寄存器编号、立即数字宽度、偏移方向和字节/指令字单位都必须符合 ARM64 架构规则。该模块只负责编码与汇编辅助，不负责生成可执行文件的完整布局或代码签名；输出原始指令字时仍须经过调用方校验。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/aot/arm64/arm64.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/aot/arm64/arm64.mio)。

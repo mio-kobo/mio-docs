@@ -1,0 +1,68 @@
+---
+title: V2.1 开发状态
+description: Mio-2.1 的源码基线、发布边界、M19 状态及已知限制。
+---
+
+## 开发版本与正式版本的区别
+
+| 项目 | 当前确认情况（2026-11-06） |
+| --- | --- |
+| 开发分支 | [`Mio-2.1`](https://github.com/mio-kobo/mio/tree/Mio-2.1) |
+| 本轮源码核对提交 | `59002db2c9dc0c6dd11ff0f4341de42f79677df2` |
+| 文档状态 | `Development`，预览、可调整 |
+| 正式发布 | [Releases](https://github.com/mio-kobo/mio/releases) 最新稳定版仍为 `v2.0.0`，未发布正式 V2.1 包 |
+| macOS ARM64 | 原生 CLI、多代固定点与候选包已有 CI 验证，V2.1 尚未正式发布 |
+| Linux AMD64 | 已实现并通过候选 CI，仍属实验性；原生构建、运行须显式指定 `--target=linux-amd64` |
+| Windows AMD64 | 已实现 PE 生成和原生固定点并通过候选 CI，仍属实验性；`run` / `exec` / `test` 子进程启动与 LSP stdin polling 尚未实现 |
+| Core / Full | 打包、外置 Bunko 与迁移目录验证已实现，候选 CI 已通过；尚无正式下载资产 |
+| Docker | Linux AMD64 Full 镜像构建、断网测试与 save/load 已实现，候选 CI 已通过；正式 GHCR 标签仍属规划 |
+
+候选验证依据：[Core / Full CI 42192548134](https://github.com/mio-kobo/mio/actions/runs/42192548134)，源提交 `0c5fbe3998d054dd743d6693d0031977e53a4af2`（已合入上述核对提交）。三个原生平台、候选打包与 `docker-full-offline` 均成功。此结果只覆盖该次候选验证，不等于 V2.1 正式发布或全部 Runtime 功能通过验收。
+
+### 已提交的 V2.1 工作
+
+与 `v2.0.0` 比较，当前已提交源码主要增加或完善了：
+
+- 纯 Mio 源码前端、原生构建管线、CLI、LSP、测试运行器及 Mach-O ad-hoc 签名；
+- 具体泛型实例、跨包类型信息、Map 和数组布局等 Native 编译路径；
+- Mochi v15 / v16 的类型与调用元数据；
+- Young / Old 分代 GC、LOS、大对象与托管内存预算；
+- Bunko 中的 JSON、正则表达式、SHA-256、OS 服务以及少量原有模块扩展。
+
+上述内容表示**源码已进入分支**，并非宣称全部功能都具备最终版本的稳定性和验收结论。
+
+### M19 的阶段证据 <FeatureBadge status="experimental" since="2.1" />
+
+`benchmarks/native-gc/m19c-acceptance.json` 是 2026-10-26 的历史记录：M19c 独立功能为 `PASS`，当时的 M19 总门禁为 `BLOCKED`，M19b 历史整体验收为 `NOT_ACCEPTED`。这些字段只描述该次验收，不能直接作为当前总门禁结论。
+
+当前分支已包含分代 GC、LOS、预算、并发 Old Mark、SATB 与 Concurrent Sweep 相关源码及 E6 测试。三平台候选 CI 不覆盖全部长期并发 GC 接纳；本轮没有取得可证明 M19 整体已接纳的新报告，仍按实验性能力介绍。
+
+`Normal / Elevated / High / Critical` 是内部内存压力等级。`High / Balanced / Low` 三档 GC 模式仍属后续工作，不能作为已发布用户选项。
+
+详见 [M19 分代 GC](/docs/v2.1/internals/gc) 和 [内存预算与压力](/docs/v2.1/internals/memory-policy)。
+
+### 工具链的实际阶段 <FeatureBadge status="experimental" since="2.1" />
+
+`selfhost/cli/main.mio` 明确将自身标注为 **GF3 development candidate**。其版本输出仍为 `mio v2.0.0-dev (pure Mio Native AOT; GF3 candidate)`，并没有使用正式的 `Mio 2.1.0` 字符串。
+
+候选打包脚本会把上述版本模板替换为含源码提交的 `mio v2.1.0-pr.<commit> (candidate; commit ...; pure Mio Native AOT)`。当前已有三平台原生固定点与候选验证；命令和平台限制见 [Native CLI](/docs/v2.1/tooling/native-cli)，不能把候选接口等同于 V2.0 正式 CLI。
+
+详情见 [原生 CLI 开发记录](/docs/v2.1/tooling/native-cli)。
+
+### 已提交但仍需分项验证的开发
+
+当前核对提交已包含 `kiso/net/tcp`、Native 实参检查修复、LSP 取消处理与并发 GC 集成源码。早期文档把这些工作描述为“尚未提交”，该状态已过时；各项能力的完整验收仍需匹配源码和测试报告，不能仅依据合入分支判断稳定性。
+
+TCP 的当前公开接口为阻塞 IPv4，不能据此推断 UDP、DNS、IPv6、TLS 支持；并发 GC 内部入口也不等于普通 CLI 默认启用。
+
+### 文档与 Playground
+
+本站的 WebAssembly Playground 与 `Mio-2.1` 分支采用不同的版本基线。新版标准库模块不在当前 V2.0 浏览器包中；示例用 `no-run` 显示源码，避免让 V2.0 WASM 误报“找不到包”。
+
+发布前应单独完成：目标平台实际构建、完整 CLI 和 Bunko 示例验证、M19 发布门禁、IDE 协议兼容检查、文档静态链接校验，以及部署页面的浏览器检查。**本文引用的测试结果来自历史记录，不等于已经对当前工作区重新运行编译、自举或集成测试。**
+
+### 版本依据
+
+- [固定源码提交](https://github.com/mio-kobo/mio/tree/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f)
+- [M19c 验收记录](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/benchmarks/native-gc/m19c-acceptance.json)
+- [M19c 设计与限制](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/benchmarks/native-gc/M19c.md)

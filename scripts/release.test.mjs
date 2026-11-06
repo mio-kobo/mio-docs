@@ -77,6 +77,6 @@ test('published routes, canonical, downloads and SEO promote V2 and exclude deve
   assert.ok(!/<meta name="robots" content="noindex/.test(html));
   if(path==='/download') assert.ok(html.includes('/releases/download/v2.0.0/'));
  }
- const map=await (await fetch(new URL('/sitemap.xml',base))).text();assert.ok(map.includes('/docs/v2.0'));assert.ok(map.includes('/releases/2.0.0'));assert.ok(!map.includes('/docs/v1.0'));
+ const map=await (await fetch(new URL('/sitemap.xml',base))).text();assert.ok(map.includes('/docs/v2.0'));assert.ok(map.includes('/releases/2.0.0'));assert.ok(!map.includes('/docs/v2.1'));assert.ok(!map.includes('/docs/v1.0'));
  for(const query of ['tag=v1.0&tag=v2.0','tag=v2.0.0','tag=v1.0&locale=en']) assert.equal((await fetch(new URL(`/api/search?query=kaku&${query}`,base))).status,404);
 });

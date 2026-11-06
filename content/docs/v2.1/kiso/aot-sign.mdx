@@ -1,0 +1,55 @@
+---
+featureBadge: new
+title: Mach-O ad-hoc 签名
+description: V2.1 新增的 Mach-O ad-hoc 代码签名辅助模块。
+---
+
+## AOT Mach-O 签名 <FeatureBadge status="new" since="2.1" />
+
+`kiso/aot/sign` 提供 **Darwin ARM64 Mach-O ad-hoc 签名**，将代码页哈希与必要的 Mach-O 签名命令组织为文件字节，供原生编译工具使用。
+
+它不提供 Apple Developer ID、CMS 身份签名、entitlements、notarization，也不构成第三方身份认证。
+
+### 公开类型与函数
+
+```mio title="SignTypes.mio" no-run
+// 公开结构的源码摘录，不是独立程序。
+koukai kata SignResult {
+    bytes: []uint8;
+    error: string;
+}
+```
+
+| 函数 | 源码签名 | 说明 |
+| --- | --- | --- |
+| `adhoc` | `adhoc(image: []uint8) -> SignResult` | 将有效、尚未签名的受支持 Mach-O 生成本地 ad-hoc 签名镜像 |
+
+`error == ""` 才表示返回的 `bytes` 可用。输入必须满足模块规定的 Mach-O 头、load commands、段布局和大小约束。已经签过名的镜像会被拒绝。
+
+### 与 Mach-O Writer 组合
+
+```mio title="SignMachO.mio" no-run
+yobu "kiso/aot/arm64";
+yobu "kiso/aot/macho";
+yobu "kiso/aot/sign";
+
+kaku instruction = arm64.ret();
+moshi (instruction.error == mu) {
+    kaku image = macho.executable(macho.ImageSpec {
+        words: [instruction.word],
+        constants: [],
+        globals: 0,
+        patches: []
+    });
+    moshi (image.error == mu) {
+        kaku result = sign.adhoc(image.bytes);
+        chant(result.error == "");
+    }
+}
+```
+
+该示例只展示**内存中生成和检查镜像字节**的调用方式，并不代表单条 `ret` 就是一份可安全执行的用户程序。要启动可执行文件仍需有效的程序入口、运行时和宿主许可；发布前应使用 `codesign --verify --strict` 等工具独立验证真实产物。
+
+签名器假设编译器已经处理完指令标签和镜像地址补丁，不负责把任意有重定位的 Mach-O 转换为可签名版本。输出字节的签名结构和平台要求，以固定源码和真实验证为准。
+
+来源：[`sign.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/aot/sign/sign.mio)。

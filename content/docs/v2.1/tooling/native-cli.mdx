@@ -1,0 +1,74 @@
+---
+featureBadge: experimental
+title: Native CLI（开发候选）
+description: V2.1 的 selfhost/cli/main.mio 已实现命令解析和主要路径，尚非正式发行接口。
+---
+
+## 原生 CLI 开发候选 <FeatureBadge status="experimental" since="2.1" />
+
+此页记录 `selfhost/cli/main.mio` 对应的 CLI 开发快照。文件中标注为 **GF3 development candidate**，当时的 `version` 输出为：
+
+```text
+mio v2.0.0-dev (pure Mio Native AOT; GF3 candidate)
+```
+
+本轮按 `59002db2c9dc0c6dd11ff0f4341de42f79677df2` 核对；候选打包脚本会替换上述模板，输出含提交号的 `v2.1.0-pr.<commit>` 版本。以下命令描述开发候选，GitHub Releases 尚未正式发布 V2.1.0。
+
+### 命令及用途
+
+| 命令 | 开发候选的实现路径 |
+| --- | --- |
+| `version`、`help` | 版本与帮助信息 |
+| `check` | 检查源码并输出诊断 |
+| `build` | 默认走原生构建；`--emit=mochi` 可生成 Mochi 字节码 |
+| `run` | 从源码构建签名的原生镜像，写入私有临时目录并启动子进程 |
+| `exec` | 读取 Mochi 字节码，再编译/启动原生程序 |
+| `disasm` | 查看字节码结构 |
+| `test` | 交由 `selfhost/testrunner` |
+| `lsp` | 交由 `selfhost/lsp/rpc` 的 stdio 服务器 |
+
+注意：V2.0.0 正式 Go CLI 的 `mio run` 与 `mio exec` 使用 Mochi VM；这里的候选代码则采用**原生编译与进程启动**流程，不能混为一谈。
+
+### 已有命令选项
+
+| 选项 | 使用方式 |
+| --- | --- |
+| `-o <path>` | 指定 build 输出文件；`run` 与 `exec` 自行管理原生临时路径 |
+| `--emit=mochi` | 在 `build` 中选择 Mochi 输出 |
+| `--bunko-root <directory>` | 显式指定 Bunko 路径 |
+| `--target=darwin-arm64\|linux-amd64\|windows-amd64` | 选择原生目标；也接受 `--target <value>`，默认仍为 `darwin-arm64` |
+| `--gc-stress` | 源码原生构建的 GC 压力测试选项 |
+| `--observe`、`--emit-symbols <file>` | 仅用于 Darwin ARM64 源码原生 `build`，不能与 `--emit=mochi` 合用 |
+| `--format=human\|short\|json` | 选择源码诊断形式 |
+| `--color=auto\|always\|never` | 控制诊断颜色形式 |
+| `--verbose` | 开启详细诊断 |
+| `--` | 对 `run` / `exec` 分隔后续用户程序参数 |
+
+`test` 与 `lsp` 使用独立的子命令解析逻辑。候选源码对错误参数使用 `E_OPTIONS` 等诊断并可能以 `2` 退出，对编译或 I/O 失败可能以 `1` 退出；这些不能代替正式版的完整选项/退出码兼容矩阵。
+
+### 开发命令示意
+
+以下命令适用于与本文快照匹配的 **V2.1 开发版 CLI**，不适用于 V2.0 正式 CLI 的全部命令选项。
+
+```sh
+mio version
+mio check Hello.mio --bunko-root ./bunko
+mio build Hello.mio -o Hello-native
+mio build Hello.mio -o Hello.mochi --emit=mochi
+mio run Hello.mio -- one two
+```
+
+原生目标已扩展到 macOS ARM64、Linux AMD64 与 Windows AMD64；后两者仍属实验性。默认目标仍为 Darwin，Linux 本机原生操作需要显式传入目标，例如：
+
+```sh
+mio build Hello.mio --target=linux-amd64 -o Hello-native
+mio run Hello.mio --target=linux-amd64
+```
+
+Windows 目标当前用于 `build --target=windows-amd64 -o Hello.exe`；生成的 PE 应在 Windows 上执行。Windows CLI 的 `run` / `exec` / `test` 子进程启动及 LSP stdin polling 尚未实现，不能按完整开发工具支持理解。网页 Playground 也不能运行这些原生命令。
+
+### 开发边界
+
+CLI 由编译前端、原生构建流程、字节码工具、测试运行器和语言服务器等组件组成。有关实现结构、完整自举与版本验证的技术细节，请阅读 [自托管工具链](/docs/v2.1/tooling/selfhost) 和 [验证与来源](/docs/v2.1/tooling/verification)。
+
+来源：[`selfhost/cli/main.mio`](https://github.com/mio-kobo/mio/blob/59002db2c9dc0c6dd11ff0f4341de42f79677df2/selfhost/cli/main.mio)。

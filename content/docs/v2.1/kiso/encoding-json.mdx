@@ -1,0 +1,93 @@
+---
+featureBadge: experimental
+title: JSON 编解码
+description: V2.1 开发包 kiso/encoding/json 的节点表示、解析与渲染接口。
+---
+
+## JSON <FeatureBadge status="experimental" since="2.1" />
+
+这是 V2.1 新增的开发能力，尚未完成 V2.1 最终验收，保持 BETA 定位。
+
+JSON 包以 `Document` 表示一个解析后的文档。它不把 JSON 对象直接转换为 Mio 的 `Map`，而是把每个节点存进 `Document.values` 数组，并用整数索引引用子节点。这允许数字保留原始 JSON 文本，不会因先转为浮点数而丢失大整数精度。
+
+### 导入
+
+```mio title="JSON.mio" no-run
+yobu "kiso/encoding/json";
+yobu "kiso/string";
+```
+
+`no-run` 只表示网站现有 WASM 未嵌入此 V2.1 包。完整 Bunko 环境中的用法见下文。
+
+### 公开类型
+
+```mio title="JSONTypes.mio" no-run
+// 以下为源码声明摘录，不是独立程序。
+koukai kata Value {
+    kind: int64;
+    text: string;
+    children: []int64;
+    keys: []string;
+}
+
+koukai kata Document {
+    values: []Value;
+    root: int64;
+    error: string;
+    offset: int64;
+}
+```
+
+`Value.kind` 的实际编码是：`0` 为 null、`1` 为 bool、`2` 为 number、`3` 为 string、`4` 为 array、`5` 为 object。`children` 存节点索引；对象的 `keys` 与 `children` 对齐。
+
+`Document.error` 为空字符串表示解析成功；失败时包含文本错误，`root` 不应被当作有效节点使用。某个查找函数返回 `-1` 表示节点不存在，与 `T?` 的 `mu` 不同。
+
+### 公开函数
+
+| 函数 | 精确签名 | 说明 |
+| --- | --- | --- |
+| `parse` | `parse(data: []uint8) -> Document` | 解析 UTF-8 JSON 字节，返回文档和错误信息 |
+| `member` | `member(document: Document, object: int64, key: string) -> int64` | 查找对象字段；失败返回 `-1`；重名键从后向前查找 |
+| `text` | `text(document: Document, node: int64) -> string` | 获取节点文本，索引无效时返回空字符串 |
+| `integer` | `integer(document: Document, node: int64) -> int64?` | 仅对 number 节点尝试解析 `int64`，失败返回 `mu` |
+| `quote` | `quote(text: string) -> string` | 对字符串生成 JSON 引号及必要的转义 |
+| `render` | `render(document: Document, node: int64) -> string` | 将有效节点渲染为紧凑 JSON 文本 |
+
+### 读取对象和数值
+
+```mio title="ReadJSON.mio" no-run
+yobu "kiso/encoding/json";
+yobu "kiso/string";
+
+kaku bytes = string.to_bytes("{\"id\":42,\"name\":\"Mio\"}");
+kaku doc = json.parse(bytes);
+moshi (doc.error == "") {
+    kaku id_node = json.member(doc, doc.root, "id");
+    kaku id = json.integer(doc, id_node);
+    moshi (id != mu) { chant(id); }
+
+    kaku name_node = json.member(doc, doc.root, "name");
+    chant(json.text(doc, name_node));
+}
+```
+
+`integer` 不会自动解析带小数或指数的 JSON 数字；可以读取其原始文本，再由调用方按照需要转换。`member` 查找重复键时采用**最后一个同名成员**。
+
+### 渲染已有文档
+
+```mio title="RenderJSON.mio" no-run
+yobu "kiso/encoding/json";
+yobu "kiso/string";
+
+kaku doc = json.parse(string.to_bytes("{\"a\":[true,null,7]}"));
+moshi (doc.error == "") {
+    chant(json.render(doc, doc.root));
+    chant(json.quote("Hello\nMio"));
+}
+```
+
+### 输入范围和限制
+
+源码在解析前验证 UTF-8，拒绝大于 `67,108,864` 字节的输入；解析结构层数超过 `256` 或节点过多也会失败。JSON 数字原样保存以保持表示精度；`render` 面向有效的解析结果，**不会保证手工伪造的节点图都安全**。本包没有公开直接把任意 Mio `Map` 自动序列化的接口。
+
+源码：[`bunko/kiso/encoding/json/json.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/encoding/json/json.mio)，测试：[`json_test.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/encoding/json/json_test.mio)。

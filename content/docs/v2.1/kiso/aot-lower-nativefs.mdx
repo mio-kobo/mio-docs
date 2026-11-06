@@ -1,0 +1,76 @@
+---
+title: AOT NativeFS 桥接
+description: Mio V2.0 AOT NativeFS 桥接库 kiso/aot/lower/nativefs
+---
+
+> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+
+
+## AOT NativeFS 桥接
+
+NativeFS 桥接模块面向 AOT 代码生成器，用于识别文件系统宿主调用、判断参数根位置以及发射 NativeFS 运行时代码。
+
+它不是应用层文件 API。普通文件的读写、状态查询和目录操作应使用 `kiso/fs`。
+
+本模块属于 **AOT 编译工具链接口**，其公开声明不等于稳定的应用层 API；以下内容对应 `v2.0.0` 发布标签。
+
+### 导入包
+
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+
+通过 `yobu "kiso/aot/lower/nativefs";` 导入本包，随后使用 `nativefs.函数名(...)` 调用。
+
+```mio title="Stdlib.mio" no-run
+yobu "kiso/aot/lower/nativefs";
+```
+
+### 操作编号
+
+`operation(name)` 根据宿主接口完整签名识别操作；不能识别的名称返回 `op_none`。编号是模块内的工具链约定。
+
+```mio title="Nativefs.mio" no-run
+yobu "kiso/aot/lower/nativefs";
+
+kaku op = nativefs.operation("not-a-native-signature");
+chant(op == nativefs.op_none);
+```
+
+### 参数和返回引用
+
+`parameter_count` 返回操作需要的参数数目；`parameter_is_root` 和 `returns_reference` 提供编译器精确根追踪所需的信息，不应用于业务数据检查。
+
+### 运行时发射
+
+`entry_label` 返回运行时代码入口标签，`emit_runtime` 向传入的 ARM64 Assembler 添加代码。应检查后续编码和汇编结果。
+
+### 公开常量
+
+`op_none`、`op_close`、`op_dir_close`、`op_dir_is_dir`、`op_dir_is_file`、`op_dir_name`、`op_dir_next`、`op_dir_status`、`op_file_status`、`op_mkdir`、`op_open`、`op_open_dir`、`op_read`、`op_stat`、`op_write`。以上 15 个公开整数常量从 0 到 14 依序编号。
+
+### 公开函数（6 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `operation` | `operation(name: string) -> int64` | 根据完整宿主签名识别操作；未知返回 `op_none`。 |
+| `parameter_count` | `parameter_count(op: int64) -> int64` | 查询操作参数数量。 |
+| `parameter_is_root` | `parameter_is_root(op: int64, index: int64) -> bool` | 判断某参数是否应作为精确 GC 根。 |
+| `returns_reference` | `returns_reference(op: int64) -> bool` | 判断该操作是否返回受管理引用。 |
+| `entry_label` | `entry_label(op: int64) -> string` | 查询运行时代码入口标签。 |
+| `emit_runtime` | `emit_runtime(code: arm64.Assembler, empty_tagged: int64) -> unit` | 向汇编器写入 NativeFS 运行时代码。 |
+
+### 完整示例
+
+```mio title="Nativefs.mio" no-run
+yobu "kiso/aot/lower/nativefs";
+
+kaku op = nativefs.operation("not-a-native-signature");
+chant(op == nativefs.op_none);
+```
+
+### 使用限制
+
+导出的 `op_*` 常量和函数是 AOT 实现细节，调用方不能将其当作可扩展或稳定的外部文件系统 ABI。不能凭操作名称猜测宿主可用的功能；仍应遵循 Runtime 的完整签名和参数表示约定。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/aot/lower/nativefs/nativefs.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/aot/lower/nativefs/nativefs.mio)。

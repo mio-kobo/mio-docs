@@ -1,0 +1,169 @@
+---
+title: 编辑器支持
+description: Mio V2.0 VS Code 与 JetBrains 插件的安装、配置和语言功能
+---
+
+> **版本说明：** 本页主要保留 V2.0 正式工具与插件的用法。V2.1 CLI、LSP 和测试工具的变化见 [开发工具](/docs/v2.1/tooling)。
+
+
+## 编辑器支持
+
+编辑器（Editor）是编写 Mio 程序的主要工作环境。除了直接在终端运行源码，开发者还可以使用 Mio 编辑器插件获得语法高亮、错误诊断、代码补全和跳转等功能。
+
+Mio 目前提供适用于 VS Code 和 JetBrains IDE 的独立插件项目。插件与 Mio 语言核心分别维护，因此插件版本号不需要与 `Mio 2.0.0` 相同。
+
+本章节根据现有插件源码和 Mio V2.0.0 核心能力介绍配置方式。插件实际能否运行，还取决于所使用的 IDE 版本及 Mio CLI 安装环境。
+
+### 准备 Mio CLI
+
+在编辑器中使用 Mio 之前，应先安装与当前语言文档对应的 CLI 和 Bunko 标准库。
+
+使用终端确认版本：
+
+```sh
+mio version
+```
+
+如果使用 macOS Apple Silicon 的 V2.0.0 发行包，可以将其安装根目录加入环境变量：
+
+```sh
+export MIO_HOME="$HOME/.local/share/mio-2.0.0/mio-2.0.0-darwin-arm64"
+export PATH="$MIO_HOME:$PATH"
+export MIO_BUNKO="$MIO_HOME/bunko"
+```
+
+以上目录是示例安装位置，实际位置应以你的安装目录为准。
+
+目前 v2.0.0 预编译发行包的正式验证平台是 macOS Apple Silicon ARM64。其他平台可以尝试自行构建，但不应直接理解为已有同等级别的官方发行支持。
+
+### VS Code 插件
+
+Mio 的 VS Code 插件名为 **Mio Language Support**，扩展标识为 `exmikupro.mio-language-support`。
+
+可以在 VS Code 扩展市场中搜索该扩展，或从 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=exmikupro.mio-language-support) 打开插件页面。
+
+安装后，打开 `.mio` 文件即可使用基础语法高亮。需要语言服务器和检查、运行功能时，还必须让插件能够找到 Mio CLI。
+
+### 配置 VS Code
+
+VS Code 可以通过 `settings.json` 明确指定 Mio 可执行文件的位置。
+
+例如：
+
+```json title="settings.json"
+{
+  "mio.executablePath": "/Users/you/.local/share/mio-2.0.0/mio-2.0.0-darwin-arm64/mio",
+  "mio.languageServer.enabled": true,
+  "mio.diagnostics.enabled": true,
+  "mio.diagnostics.onSave": true,
+  "mio.outputDirectory": ""
+}
+```
+
+请将 `mio.executablePath` 替换为本机实际路径。如果不填写，插件会尝试在 `PATH` 中寻找 `mio`。
+
+常用设置包括：
+
+| 设置 | 作用 |
+| --- | --- |
+| `mio.executablePath` | Mio CLI 可执行文件路径 |
+| `mio.languageServer.enabled` | 是否启动 MioCore LSP |
+| `mio.diagnostics.enabled` | 是否启用代码诊断 |
+| `mio.diagnostics.onSave` | 在 LSP 不可用时保存后使用 CLI 检查 |
+| `mio.outputDirectory` | `mio build` 的输出目录；空值为源文件旁边 |
+
+VS Code 插件没有独立的 `mio.bunkoPath` 设置。如果标准库没有放在项目目录中，可以在启动 VS Code 前设置 `MIO_BUNKO`：
+
+```sh
+export MIO_BUNKO="$MIO_HOME/bunko"
+code .
+```
+
+从图形界面直接启动的 VS Code 不一定继承终端的环境变量。在这种情况下，应检查编辑器进程能否找到 CLI 和标准库。
+
+### VS Code 命令
+
+插件向命令面板提供以下命令：
+
+| 命令 | 功能 |
+| --- | --- |
+| `Mio: Check Current File` | 检查当前文件 |
+| `Mio: Run Current File` | 运行当前文件 |
+| `Mio: Build Current File` | 编译当前文件为 Mochi |
+| `Mio: Show Compiler Version` | 查看编译器版本 |
+| `Mio: Open Output` | 打开 Mio 输出面板 |
+
+运行和编译当前文件时，插件会先保存尚未写入磁盘的编辑内容。
+
+VS Code 插件通过 `mio lsp` 接入 MioCore。语言服务可以提供诊断、悬停信息、定义跳转、引用查询、文档符号、补全和函数签名提示。
+
+当 LSP 不可用时，插件可以回退使用 `mio check --format=json` 进行保存后检查，避免同时展示来自两个检查来源的重复错误。
+
+目前 MioCore 不提供重命名、语义标记、自动格式化、代码修复和调试器协议，因此这些功能不能作为该语言服务器已经实现的能力来介绍。
+
+### 从源码构建 VS Code 插件
+
+如果需要自行打包扩展，可以从插件仓库构建：
+
+```sh
+git clone https://github.com/mio-kobo/mio-vscode.git
+cd mio-vscode
+npm ci
+npm run compile
+npx vsce package
+```
+
+之后使用 VS Code 的“从 VSIX 安装”功能安装生成的文件。
+
+历史文档核对的插件源码清单版本为 `0.3.0`，要求 VS Code `^1.85.0`；具体市场发布版本应以插件项目当前发布信息为准，不应将其直接当作 Mio 语言版本。
+
+### JetBrains 插件
+
+Mio 也提供 JetBrains IDE 插件，显示名称为 **Mio - Programming Language Tools**，插件 ID 为 `com.exmikupro.mio`。
+
+可以从 [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/35197-mio-language-support) 获取该插件，或在 IDE 的 **Settings → Plugins** 中搜索 Mio。
+
+现有插件源码清单版本为 `0.6.1`，目标平台是 IntelliJ IDEA / GoLand 2025.3 系列（平台分支 253）。具体安装兼容性仍应以所使用的 IDE 和插件版本为准。
+
+### 配置 Mio SDK
+
+JetBrains 插件通过自己的 SDK 设置管理 Mio CLI 和 Bunko。
+
+在 IDE 中打开 **Settings → Languages & Frameworks → Mio SDK**，为当前项目选择 Mio SDK，指定 CLI 可执行文件和对应的 Bunko 根目录。
+
+JetBrains 插件寻找 CLI 时，会优先使用运行配置中明确指定的路径，其次选择当前项目的 Mio SDK，最后尝试其他兼容路径与 `PATH`。
+
+JetBrains 插件并不是 MioCore LSP 客户端，它使用自身的代码分析与 `mio check --format=json` 集成。
+
+插件提供的主要功能包括 `.mio` 文件识别、语法高亮、基础代码补全、定义跳转、查找用法、Quick Documentation、导入辅助以及文件或包目录运行配置。
+
+需要注意，这不等于已经实现完整的重命名重构、调试器或全部表达式的精确类型推断。
+
+### 从源码构建 JetBrains 插件
+
+如果需要从源码构建，可以获取仓库后执行：
+
+```sh
+git clone https://github.com/mio-kobo/mio-jetbrains.git
+cd mio-jetbrains
+./gradlew test
+./gradlew buildPlugin
+./gradlew verifyPlugin
+```
+
+生成的插件包通常位于 `build/distributions/`，可以通过 IDE 的 **Install Plugin from Disk** 功能安装。
+
+### 编辑器与 CLI 的关系
+
+编辑器插件只是开发工具的接入层，不会替代 Mio 的编译器与运行时。
+
+当编辑器显示无法运行、无法补全或找不到标准库时，建议先在终端执行：
+
+```sh
+mio version
+mio check Hello.mio
+```
+
+如果终端中也无法检查同一个文件，应优先解决 CLI 或 Bunko 配置问题，再检查编辑器插件的设置。
+
+编辑器扩展的源码功能声明不等于所有版本已完成端到端验收；独立发布状态和兼容性请以相应插件仓库为准。

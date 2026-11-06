@@ -1,0 +1,116 @@
+---
+featureBadge: updated
+title: 数学
+description: Mio V2.1 数学标准库 kiso/math，包含新增的 fail 入口。
+---
+
+## 数学
+
+数学标准库（Math）提供数值比较、绝对值、取整、最大公约数和最小公倍数等常用运算。Mio 使用 `kiso/math` 作为公开导入路径，导入后通过 `math.函数名()` 调用。
+
+本包的泛型数学函数保留传入的数值类型，不会自动在整数、`float32` 和 `float64` 之间执行隐式转换。
+
+### fail <FeatureBadge status="new" since="2.1" />
+
+基础数值函数沿用 Mio V2.0 的接口。V2.1 新增 `math.fail(message: string) -> unit`，用于在运行时触发失败；它不会返回可供检查的错误值。普通数学计算仍使用本页原有函数，完整增量见 [标准库变化](/docs/v2.1/kiso/changes)。
+
+### 导入包
+
+> **网页运行说明：** 本页的 Playground 代码块都是独立程序，已分别加入所需的 `yobu` 导入语句。点击「运行」时不会继承页面中其他代码块的状态。
+
+通过 `yobu "kiso/math";` 导入本包，随后使用 `math.函数名(...)` 调用。
+
+```mio title="Stdlib.mio"
+yobu "kiso/math";
+```
+
+### 数学常量
+
+包中公开 `pi32`、`pi64`、`tau32` 和 `tau64`。`pi` 表示圆周率，`tau` 表示其两倍；后缀 `32` 和 `64` 分别对应浮点精度。
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+chant(math.pi64);
+chant(math.tau32);
+```
+
+### 比较与取值
+
+`min`、`max` 返回两个同类型数字中的较小值或较大值；`clamp` 将一个数限制在指定上下界内。浮点 NaN 和正负零有明确的特殊处理。
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+chant(math.min[int64](3, 8));
+chant(math.clamp(12, 0, 10));
+```
+
+### 浮点函数
+
+平方根、取整与特殊值检测使用 `Float` 约束，接受 `float32` 或 `float64`。`round` 在恰好位于两个整数中间时采用 ties-to-even 规则。
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+chant(math.sqrt[float64](144.0));
+chant(math.floor[float32](3.5));
+```
+
+### 可空的数学运算
+
+`checked_abs`、`checked_gcd` 和 `checked_lcm` 在结果不能表示时返回 `mu`。不带 `checked_` 的对应运算可能触发运行时错误。
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+kaku absolute = math.checked_abs[int8](-128);
+chant(absolute == mu);
+```
+
+### 公开常量
+
+`pi32: float32`、`pi64: float64`、`tau32: float32`、`tau64: float64`。
+
+### 公开函数（17 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `min` | `min<T: Number>(left: T, right: T) -> T` | 返回较小值；NaN 传播，遇相等的正负零时选择负零。 |
+| `max` | `max<T: Number>(left: T, right: T) -> T` | 返回较大值；NaN 传播，遇相等的正负零时选择正零。 |
+| `checked_abs` | `checked_abs<T: Signed>(value: T) -> T?` | 计算绝对值，无法表示时返回 `mu`。 |
+| `abs` | `abs<T: Signed>(value: T) -> T` | 计算绝对值，无法表示时发生运行时错误。 |
+| `clamp` | `clamp<T: Number>(value: T, lower: T, upper: T) -> T` | 将数值约束到给定区间；上下界顺序错误会报错。 |
+| `sqrt` | `sqrt<T: Float>(value: T) -> T` | 计算平方根；负数按浮点语义得到 NaN。 |
+| `floor` | `floor<T: Float>(value: T) -> T` | 向负无穷方向取整。 |
+| `ceil` | `ceil<T: Float>(value: T) -> T` | 向正无穷方向取整。 |
+| `round` | `round<T: Float>(value: T) -> T` | 就近取整，半数采用 ties-to-even。 |
+| `trunc` | `trunc<T: Float>(value: T) -> T` | 向零截断小数部分。 |
+| `is_nan` | `is_nan<T: Float>(value: T) -> bool` | 判断是否为 NaN。 |
+| `is_inf` | `is_inf<T: Float>(value: T) -> bool` | 判断是否为正或负无穷。 |
+| `is_finite` | `is_finite<T: Float>(value: T) -> bool` | 判断数值是否有限。 |
+| `checked_gcd` | `checked_gcd(left: int64, right: int64) -> int64?` | 求非负最大公约数，无法表示时返回 `mu`。 |
+| `gcd` | `gcd(left: int64, right: int64) -> int64` | 求非负最大公约数，无法表示时发生运行时错误。 |
+| `checked_lcm` | `checked_lcm(left: int64, right: int64) -> int64?` | 求非负最小公倍数，溢出时返回 `mu`。 |
+| `lcm` | `lcm(left: int64, right: int64) -> int64` | 求非负最小公倍数，溢出时发生运行时错误。 |
+
+### 完整示例
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+chant(math.gcd(54, 24));
+chant(math.lcm(6, 8));
+chant(math.clamp(12, 0, 10));
+chant(math.sqrt[float64](9.0));
+chant(math.round[float32](2.5));
+chant(math.checked_abs[int8](-128) == mu);
+```
+
+### 使用限制
+
+`Number`、`Signed`、`Float` 是 Mio 已实现的泛型数值约束，不是任意用户定义的接口。整数数值范围与浮点舍入遵循语言自身规则。分配、指令预算与不同后端支持范围仍以实际运行环境为准。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/math`](https://github.com/mio-kobo/mio/tree/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/math)。

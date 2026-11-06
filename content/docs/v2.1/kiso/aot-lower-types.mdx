@@ -1,0 +1,86 @@
+---
+title: AOT 类型分析
+description: Mio V2.0 AOT 类型分析库 kiso/aot/lower/types
+---
+
+> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+
+
+## AOT 类型分析
+
+AOT 类型分析模块读取 Mochi 文件并构造供 Lowering 使用的类型和控制流信息，包括节点表示、可空性、可达函数及其它内部判定结果。
+
+这是编译器内部表示分析接口，**不是**通用对象反射功能。使用者不能把分析节点编号与 Mio 运行时对象地址混为一谈。
+
+本模块属于 **AOT 编译工具链接口**，其公开声明不等于稳定的应用层 API；以下内容对应 `v2.0.0` 发布标签。
+
+### 导入包
+
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+
+通过 `yobu "kiso/aot/lower/types";` 导入本包，随后使用 `types.函数名(...)` 调用。
+
+```mio title="Stdlib.mio" no-run
+yobu "kiso/aot/lower/types";
+```
+
+### 表示类别
+
+本包公开 `type_integer`、`type_float32`、`type_array_ref` 等常量表示内部分析结果。`type_kind`、`type_nullable` 和 `type_is_heap_reference` 可查询已建立分析中的节点状态。
+
+```mio title="Types.mio" no-run
+yobu "kiso/aot/lower/types";
+
+chant(types.type_unknown);
+chant(types.type_integer);
+```
+
+### 分析程序
+
+`analyze_types` 返回包含内部 arena、全局值、函数局部值与控制流信息的 `TypeAnalysis`。`analyze_types_traced` 可以开启分析追踪配置。
+
+### 辅助判定
+
+`reachable_functions` 用于函数可达性分析，`enum_read_tag` 辅助枚举标签读取，`type_instruction_width` 提供指令宽度信息。它们应处理已验证的 Mochi 输入。
+
+### 公开类型
+
+- `TypeArena`：保存节点并查集、种类、宽度和引用信息的分析存储。
+- `TypeBlock`：表示控制流基本块的内部结构。
+- `TypeAnalysis`：保存 arena、函数可达与槽位/返回值分析及错误详情。
+
+### 公开常量
+
+`type_unknown`、`type_integer`、`type_float32`、`type_float64`、`type_bool`、`type_string_id`、`type_array_ref`、`type_struct_ref`、`type_enum_ref`、`type_function_ref`、`type_nil`、`type_float_any`，共 12 个公开类型分类常量。
+
+### 公开函数（10 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `type_kind` | `type_kind(analysis: TypeAnalysis, node: int64) -> int64` | 返回分析节点的表示类别编号。 |
+| `type_nullable` | `type_nullable(analysis: TypeAnalysis, node: int64) -> bool` | 查询分析节点是否标记为可空。 |
+| `type_is_heap_reference` | `type_is_heap_reference(analysis: TypeAnalysis, node: int64) -> bool` | 判断节点表示是否需要作为受管理的堆引用追踪。 |
+| `type_instruction_width` | `type_instruction_width(opcode: int64) -> int64` | 返回分析使用的操作码编码宽度。 |
+| `enum_read_tag` | `enum_read_tag(file: mochi.File, data: []uint8, at: int64) -> int64` | 读取分析所需的枚举标签信息。 |
+| `reachable_functions` | `reachable_functions(file: mochi.File) -> []bool` | 返回函数可达性标记数组。 |
+| `array_forward_opcode` | `array_forward_opcode(function: mochi.Function) -> int64` | 查询函数在数组前向分析中的相关操作码信息。 |
+| `is_float_predicate` | `is_float_predicate(function: mochi.Function) -> bool` | 判断函数是否符合内部浮点谓词形态。 |
+| `analyze_types` | `analyze_types(file: mochi.File) -> TypeAnalysis` | 执行类型与控制流信息分析。 |
+| `analyze_types_traced` | `analyze_types_traced(file: mochi.File, trace: bool) -> TypeAnalysis` | 在给定追踪配置下执行类型分析。 |
+
+### 完整示例
+
+```mio title="Types.mio" no-run
+yobu "kiso/aot/lower/types";
+
+chant(types.type_unknown);
+chant(types.type_integer);
+```
+
+### 使用限制
+
+`node` 必须来自同一次有效的分析结果；使用非法编号或破坏内部数组约束可能触发越界错误。不能仅凭 `type_is_heap_reference` 断言任意运行时指针合法，且分析 API 不承诺用户级动态类型信息。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/aot/lower/types/types.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/aot/lower/types/types.mio)。

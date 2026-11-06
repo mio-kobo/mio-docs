@@ -1,0 +1,53 @@
+---
+title: 自托管开发工具组件
+description: V2.1 的纯 Mio 源码前端、Native Pipeline、语言服务器和测试运行器布局。
+---
+
+## 自托管工具链的组成 <FeatureBadge status="updated" since="2.1" />
+
+V2.0 已经验证纯 Mio 的 Mochi → Native AOT 后端自编译。V2.1 继续把**源码前端、原生输出和开发工具**连接起来，使完整的 `.mio` → Native 编译不再必须在中途调用 Go 前端。
+
+这一变化指的是开发分支已经存在的管线实现，并不是 Mio 第一次具备 AOT，也不表示在任意平台上都能脱离可信 Seed 从零完成引导。
+
+| 模块位置 | 当前源码中的职责 |
+| --- | --- |
+| `selfhost/frontend/compiler.mio` | 把工程入口与 Bunko 路径解析为源码分析/编译结果，输出 Mochi 字节 |
+| `selfhost/frontend-driver/main.mio` | GF1 的 stdin 四行路径传输与字节输出 |
+| `selfhost/pipeline/compiler.mio` | 将源码编译结果进一步传给原生构建链 |
+| `selfhost/native-driver/main.mio` | GF2 开发传输；支持可选堆容量与 GC stress 字段 |
+| `selfhost/cli/main.mio` | GF3 Native CLI 用户命令分发 |
+| `selfhost/lsp/rpc/` | JSON-RPC 文档同步、诊断、Hover、补全、引用和签名提示相关源码 |
+| `selfhost/testrunner/` | 测试命令、隔离执行与报告 |
+| `selfhost/disasm/disasm.mio` | Mochi 反汇编文本生成 |
+| `selfhost/resources/` | 工具链资源和 Bunko 数据构造 |
+| `tools/native-ci/` | 纯 Mio 原生候选 CI 与验证辅助 |
+
+### 源码到原生镜像 <FeatureBadge status="updated" since="2.1" />
+
+`selfhost/pipeline/compiler.mio` 将源码分析结果保留在内存中，交给 Mochi 解码、Native lowering、Mach-O 生成和 ad-hoc 签名。正常构建不必依赖落盘的中间 Mochi 文件，也不需要另起 VM、编译器子进程或外部链接器完成这一段交接。
+
+纯 Mio CLI 的 `build` 默认生成原生程序，`run` 和 `exec` 也使用原生构建与子进程路径。传统 VM 和 Go 参考工具仍然保留；具体差异见 [Native CLI](/docs/v2.1/tooling/native-cli)。
+
+### Mochi 与泛型信息 <FeatureBadge status="updated" since="2.1" />
+
+新前端能把具体泛型实例、跨包类型和数组布局信息传给原生代码生成。Mochi v15 / v16 增加了字段类型约束和带返回形状的间接调用元数据。旧 Go 解码器最高支持 v14，因此两类工具不能混用任意新版中间文件。
+
+### GF1 与 GF2 的传输
+
+`selfhost/frontend-driver/main.mio` 读取**四个以换行结尾的 UTF-8 路径字段**：工程根、入口文件、Bunko 根和输出路径。该入口自身不处理普通用户 CLI 参数，而是面向管线驱动。
+
+`selfhost/native-driver/main.mio` 接受四个字段，或附带堆容量与 `normal` / `stress` 的六字段形式。它们属于开发协议，不应作为 V2.1 稳定 API 写进应用教程。
+
+### LSP 和测试的开发进展 <FeatureBadge status="updated" since="2.1" />
+
+`selfhost/lsp/rpc/` 已包含 stdio、session、diagnostics、completion、hover、navigation、references、signature 相关源码和若干测试。它使用共享前端，处理编辑器中的未保存文档、UTF-16 位置、依赖变化、有限容量缓存及协作式取消。
+
+`selfhost/testrunner/` 已包含发现、执行与报告的候选实现。测试在独立原生子进程中运行，分别处理断言记录、stdout、stderr、异常退出和资源限制。这些是既有 `mio test` 的执行方式改进，不能称为 V2.1 才第一次支持测试。
+
+Hover、定义跳转、引用、补全和签名提示在旧 Go LSP 中已经存在；V2.1 主要完成它们的纯 Mio 移植。当前纯 Mio LSP 不宣告重命名、格式化和语义 Token provider，也不能把分析缓存直接等同于完整增量编译。
+
+### 安装和发布限制
+
+当前分支已有三平台原生固定点与候选打包 CI 记录，范围见 [开发状态](/docs/v2.1/development)；历史 GF4 记录仍只覆盖其冻结源码。本批文档也没有对当前工作区重新执行完整原生多代构建。不能把已有源码清单等同于 V2.1 发布已完成或所有平台可安装的结论。
+
+源码入口：[selfhost/cli](https://github.com/mio-kobo/mio/tree/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/selfhost/cli)、[selfhost/frontend](https://github.com/mio-kobo/mio/tree/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/selfhost/frontend)、[selfhost/lsp](https://github.com/mio-kobo/mio/tree/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/selfhost/lsp)。

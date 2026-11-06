@@ -1,0 +1,16 @@
+{
+  "title": "V2.1 · 开发预览",
+  "description": "固定 Mio-2.1 源码快照（非正式发布）",
+  "root": "version",
+  "pages": [
+    "index",
+    "development",
+    "getting-started",
+    "learn",
+    "reference",
+    "migration",
+    "kiso",
+    "tooling",
+    "internals"
+  ]
+}

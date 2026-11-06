@@ -1,8 +1,9 @@
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { loader } from 'fumadocs-core/source';
+import { docsSchema } from './docs-schema';
 import { i18n } from './i18n';
 import { docsUrl } from './versions.mjs';
-const docs = defineDocs({ dir: 'content/docs' });
+const docs = defineDocs({ dir: 'content/docs', docs: { schema: docsSchema } });
 export const source = loader({
   baseUrl: '/docs',
   source: docs.toFumadocsSource(),

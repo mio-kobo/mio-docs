@@ -1,0 +1,131 @@
+---
+featureBadge: updated
+title: 字符串
+description: Mio V2.1 字符串标准库 kiso/string，包含 Unicode 空白裁剪。
+---
+
+## 字符串
+
+字符串标准库（String）提供 UTF-8 字节长度、Unicode 标量值计数、前后缀判断、查找、字符串拼接和 `StringBuilder`。
+
+Mio 的 `string` 是不可变的 UTF-8 文本，语言本身没有字符串 `+` 拼接运算符。
+
+### trim_space <FeatureBadge status="new" since="2.1" />
+
+本页的基本字符串 API 沿用 Mio V2.0。V2.1 新增 `trim_space(value: string) -> string`，用于移除文本两端的 Unicode 空白字符；它不是 Unicode 规范化或大小写转换函数。
+
+```mio title="TrimSpace.mio" no-run
+yobu "kiso/string";
+
+chant(string.trim_space("  Mio  "));
+```
+
+这段新增 API 目前不能通过网站的 V2.0 WASM 运行。其他变化见 [标准库变化](/docs/v2.1/kiso/changes)。
+
+### 导入包
+
+> **网页运行说明：** 本页的 Playground 代码块都是独立程序，已分别加入所需的 `yobu` 导入语句。点击「运行」时不会继承页面中其他代码块的状态。
+
+通过 `yobu "kiso/string";` 导入本包，随后使用 `string.函数名(...)` 调用。
+
+```mio title="Stdlib.mio"
+yobu "kiso/string";
+```
+
+### 字节与字符数量
+
+`byte_len` 计算编码后占用的字节数；`rune_count` 计算 Unicode 标量值数量。两者不同，尤其在中文、日文与 Emoji 文本中。
+
+```mio title="String.mio"
+yobu "kiso/string";
+
+kaku text = "澪Mio";
+chant(string.byte_len(text));
+chant(string.rune_count(text));
+```
+
+### 查找与拼接
+
+`has_prefix`、`has_suffix` 和 `contains` 返回布尔值。`index` 返回首次匹配的 UTF-8 **字节偏移量**，找不到返回 `-1`。`concat` 返回新的字符串。
+
+```mio title="String.mio"
+yobu "kiso/string";
+
+chant(string.index("你Mio", "Mio"));
+chant(string.concat("Hello, ", "Mio"));
+```
+
+### 字符串与字节数组
+
+`to_bytes` 生成独立的 `[]uint8`；`from_utf8` 严格检查编码，有效时生成独立的字符串，无效时返回 `mu`。
+
+```mio title="String.mio"
+yobu "kiso/string";
+
+kaku data = string.to_bytes("Mio");
+kaku decoded = string.from_utf8(data);
+moshi (decoded != mu) { chant(decoded); }
+```
+
+### 使用 StringBuilder
+
+`StringBuilder` 可以逐段追加字符串或 Unicode 标量值。写入和重置会修改共享的内部缓冲区；`builder_string` 返回独立的不可变文本。
+
+```mio title="String.mio"
+yobu "kiso/string";
+
+kaku builder = string.new_builder();
+string.write_string(builder, "Mio");
+string.write_rune(builder, '!');
+chant(string.builder_string(builder));
+```
+
+### 公开类型
+
+- `StringBuilder { buffer: bytes.ByteBuffer; }`：共享字节缓冲区的字符串构造器。
+
+### 公开函数（17 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `to_bytes` | `to_bytes(value: string) -> []uint8` | 将 UTF-8 文本复制到独立字节数组。 |
+| `from_utf8` | `from_utf8(data: []uint8) -> string?` | 严格解码；非法 UTF-8 返回 `mu`。 |
+| `byte_len` | `byte_len(value: string) -> int64` | 获取 UTF-8 字节长度。 |
+| `rune_count` | `rune_count(value: string) -> int64` | 获取 Unicode 标量值数量。 |
+| `has_prefix` | `has_prefix(value: string, prefix: string) -> bool` | 判断前缀。 |
+| `has_suffix` | `has_suffix(value: string, suffix: string) -> bool` | 判断后缀。 |
+| `index` | `index(value: string, pattern: string) -> int64` | 返回首次匹配的字节偏移，缺失为 `-1`，空模式为零。 |
+| `contains` | `contains(value: string, pattern: string) -> bool` | 判断是否包含指定内容，空模式为真。 |
+| `concat` | `concat(left: string, right: string) -> string` | 拼接成独立字符串。 |
+| `new_builder` | `new_builder() -> StringBuilder` | 创建空字符串构造器。 |
+| `builder_with_capacity` | `builder_with_capacity(capacity: int64) -> StringBuilder` | 创建并按字节预留容量的构造器。 |
+| `write_string` | `write_string(builder: StringBuilder, value: string) -> unit` | 向构造器追加文本。 |
+| `write_rune` | `write_rune(builder: StringBuilder, value: rune) -> unit` | 向构造器追加编码后的单个 Unicode 标量。 |
+| `builder_len` | `builder_len(builder: StringBuilder) -> int64` | 获取已写入的字节长度。 |
+| `builder_capacity` | `builder_capacity(builder: StringBuilder) -> int64` | 获取字节容量。 |
+| `builder_reset` | `builder_reset(builder: StringBuilder) -> unit` | 清空缓冲区长度并保留容量。 |
+| `builder_string` | `builder_string(builder: StringBuilder) -> string` | 导出独立不可变字符串，非法 UTF-8 缓冲内容报错。 |
+
+### 完整示例
+
+```mio title="String.mio"
+yobu "kiso/string";
+
+chant(string.byte_len("澪A"));
+chant(string.rune_count("澪A"));
+chant(string.index("澪A", "A"));
+kaku builder = string.new_builder();
+string.write_string(builder, "Mio");
+string.write_rune(builder, '!');
+chant(string.builder_string(builder));
+kaku invalid: []uint8 = [255];
+chant(string.from_utf8(invalid) == mu);
+```
+
+### 使用限制
+
+字符串操作以 UTF-8 字节与 Unicode 标量为单位，不处理 Unicode 规范化、字素簇或语言相关的大小写匹配。`StringBuilder` 的赋值共享内部缓冲区，不等于生成独立副本。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/string/string.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/string/string.mio)。

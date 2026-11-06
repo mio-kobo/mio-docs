@@ -1,4 +1,5 @@
 import { defineConfig } from 'fumadocs-mdx/config';
+import { remarkFeatureBadge, remarkRestoreFeatureBadge, rehypeFeatureBadgeToc, rehypeRestoreFeatureBadge } from './lib/feature-badge-mdx.mjs';
 import mio from './syntaxes/mio.tmLanguage.json';
 import { shouldAttachPlayground } from './lib/mio-example-policy.mjs';
 
@@ -18,6 +19,8 @@ const mioPlaygroundTransformer = {
 
 export default defineConfig({
   mdxOptions: {
+    remarkPlugins: defaults => [remarkFeatureBadge, ...defaults, remarkRestoreFeatureBadge],
+    rehypePlugins: defaults => [rehypeFeatureBadgeToc, ...defaults, rehypeRestoreFeatureBadge],
     rehypeCodeOptions: {
       themes: { light: 'github-light', dark: 'github-dark' },
       langs: [{ ...mio, name: 'mio', aliases: ['Mio'] }],

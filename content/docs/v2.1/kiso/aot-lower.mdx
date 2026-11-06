@@ -1,0 +1,46 @@
+---
+title: AOT Lowering 新接口
+description: V2.1 新增的 GC 观测、自动预算和显式内存硬限制编译入口。
+---
+
+## Lowering 与内存预算
+
+`kiso/aot/lower` 接收已解码的 `mochi.File`，生成 ARM64 机器指令字、常量区、地址补丁和全局槽位数量。调用者通过 `LowerResult.error` 判断失败，不能在出错时直接使用 `words`。
+
+### 公开编译入口
+
+| 函数 | 源码签名 | 作用 |
+| --- | --- | --- |
+| `compile` | `compile(file: mochi.File) -> LowerResult` | 默认 lowering |
+| `compile_gc_stress` | `compile_gc_stress(file: mochi.File) -> LowerResult` | 增加 GC 压力的验证入口 |
+| `compile_with_heap` | `compile_with_heap(file: mochi.File, capacity: int64, gc_stress: bool) -> LowerResult` | 显式有界对象容量 |
+| `compile_with_observation` | `compile_with_observation(file: mochi.File, capacity: int64, gc_stress: bool) -> LowerResult` | 生成带内存观测的运行时 |
+| `compile_with_adaptive_heap` | `compile_with_adaptive_heap(file: mochi.File, maximum: int64, gc_stress: bool, observation: bool) -> LowerResult` | 内部自适应对象预算 |
+| `compile_with_memory_budget` | `compile_with_memory_budget(file: mochi.File, hard_cap: int64, gc_stress: bool, observation: bool) -> LowerResult` | 以托管费用上限推导容量 |
+
+同一个包还公开 `error_code(LowerError) -> int64` 与 `error_detail(LowerError) -> int64`，用于内部诊断分类。
+
+### 错误类型
+
+```mio title="LowerTypes.mio" no-run
+// 结构布局摘录。具体 Mach-O AddressPatch 类型来自 kiso/aot/macho。
+koukai kata LowerResult {
+    words: []uint32;
+    constants: []uint8;
+    patches: []macho.AddressPatch;
+    globals: int64;
+    error: LowerError?;
+}
+```
+
+这里的代码是**签名资料**，不是建议用户自行构造任意 `LowerResult` 或手工伪造类型分析结果。需要先解码、验证 Mochi 输入，再检查各阶段错误。
+
+### 版本行为差异
+
+与 V2.0 不同，V2.1 的 lowering 已出现分代 GC、LOS、原生内存观测和 Map 表示分析所需的代码路径。`compile_with_adaptive_heap`、`compile_with_memory_budget` 是**源码层公开函数**，不等于已发布的 CLI 选项。
+
+特别注意：M19c 的记录将整体 M19 发布门禁标为 `BLOCKED`，因此这里不是对全部用户程序的原生兼容保证。
+
+了解预算含义：[内存预算和压力等级](/docs/v2.1/internals/memory-policy)。
+
+来源：[`lower.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/aot/lower/lower.mio)。

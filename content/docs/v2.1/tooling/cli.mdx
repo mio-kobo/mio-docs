@@ -1,0 +1,261 @@
+---
+title: Go 参考 CLI 与 Mochi VM
+description: 保留 Mio V2.0 Go CLI 的字节码编译、VM 执行和测试命令，供 V2.1 开发者对照。
+---
+
+## Go 参考 CLI 与编译流程
+
+**请先确认使用的是哪一个版本的 `mio`。** 本页保留 V2.0.0 正式 CLI 的操作说明。V2.1 的 [Native CLI](/docs/v2.1/tooling/native-cli) 默认使用原生编译；`build` 可通过 `--emit=mochi` 显式输出字节码。
+
+以下不带 `--emit=mochi` 的构建示例，**只适用于 V2.0 Go CLI**，不能直接当作 V2.1 Native CLI 的默认行为。
+
+命令行工具（Command-Line Interface，CLI）用于在终端中检查、编译、运行和测试 Mio 程序。
+
+Mio V2.0.0 使用 `mio` 作为主命令。该命令负责 Mio 源码的加载、语法解析、名称解析、类型检查、Mochi 字节码生成以及 Mochi VM 执行。
+
+本章介绍 `v2.0.0` 已实现的命令和参数，不使用尚未提供的 `--watch`、`--release` 等选项。
+
+### 查看版本与帮助
+
+安装完成后，可以通过以下命令检查 Mio 是否可用：
+
+```sh
+mio version
+mio help
+```
+
+也可以使用 `mio --version` 和 `mio --help`。
+
+如果终端提示找不到 `mio` 命令，应确认安装目录已经加入 `PATH`，或直接使用二进制文件的绝对路径。
+
+### 检查源代码
+
+Mio 使用 `check` 命令进行静态检查。
+
+基本用法：
+
+```sh
+mio check Hello.mio
+```
+
+例如，在 `Hello.mio` 中编写：
+
+```mio title="Hello.mio"
+kaku message: string = "Hello, Mio!";
+chant(message);
+```
+
+执行 `mio check Hello.mio` 时，编译器会加载源码及其导入依赖，并完成常量折叠、语法解析、名称解析和类型检查。
+
+`check` 不会运行程序。检查通过时输出 `check passed`；出现错误时会向标准错误输出写入诊断信息。
+
+除了单个 `.mio` 文件，`check` 也支持以包目录作为入口：
+
+```sh
+mio check ./my-package
+```
+
+需要注意，以目录作为入口会加载该目录中的普通 `.mio` 文件；以单个文件作为入口时，不会自动将旁边所有练习文件合并到一起。
+
+### 运行源代码
+
+使用 `run` 命令可以直接编译并运行 Mio 源文件：
+
+```sh
+mio run Hello.mio
+```
+
+程序在通过静态检查后，会被编译为 Mochi 字节码并交给虚拟机执行。
+
+例如：
+
+```mio title="Run.mio"
+kaku count = 0;
+
+aida (count < 3) {
+    count = count + 1;
+    chant(count);
+}
+```
+
+对于这段程序，可以使用：
+
+```sh
+mio check Run.mio
+mio run Run.mio
+```
+
+`run` 不支持将额外命令行参数作为 Mio 程序的 `argv` 传入，不能将 `mio run program.mio extra` 当作已实现的用法。
+
+### 编译 Mochi 字节码
+
+`build` 用于将 Mio 源代码编译为 `.mochi` 文件。
+
+例如：
+
+```sh
+mio build Hello.mio
+```
+
+该命令默认生成 `Hello.mochi`。如果需要指定输出位置，可以使用 `-o`：
+
+```sh
+mkdir -p build
+mio build -o build/Hello.mochi Hello.mio
+```
+
+`-o` 可以位于源文件前面或后面，但输出目录必须事先存在。
+
+需要注意，`.mochi` 是 Mio 的字节码文件，不是可以使用 `./Hello.mochi` 直接启动的系统可执行文件。
+
+### 执行字节码
+
+已经生成的 `.mochi` 文件可以通过 `exec` 执行：
+
+```sh
+mio exec build/Hello.mochi
+```
+
+`exec` 会读取、解码并验证字节码，然后使用 Mochi VM 运行它，而不再重复执行 Mio 源码前端的分析流程。
+
+当字节码格式不正确、验证失败或执行发生错误时，命令会返回失败状态。
+
+### 查看字节码
+
+使用 `disasm` 可以查看 `.mochi` 中保存的字节码指令：
+
+```sh
+mio disasm build/Hello.mochi
+```
+
+其内容包括全局变量槽位、常量表、主指令流和函数信息等。
+
+`disasm` 主要用于研究 Mochi 编译结果和排查编译器问题。它不是 Mio 源码反编译器，不能将字节码还原为原始 `.mio` 源文件。
+
+### 诊断格式
+
+`check` 和 `run` 支持修改错误诊断的显示方式。
+
+| 参数 | 作用 |
+| --- | --- |
+| `--color=auto` | 根据终端自动使用颜色，默认值 |
+| `--color=always` | 始终使用颜色 |
+| `--color=never` | 不使用颜色 |
+| `--format=human` | 人类可读格式，默认值 |
+| `--format=short` | 单行简短诊断 |
+| `--format=json` | JSON 结构化诊断 |
+| `--verbose` | 显示更详细的诊断信息 |
+
+例如：
+
+```sh
+mio check --format=short --color=never Hello.mio
+mio check --format=json Hello.mio
+mio run --verbose Hello.mio
+```
+
+其中，`--format` 和 `--color` 必须采用 `--参数=值` 的形式，而不是 `--format json`。
+
+`build`、`exec` 和 `disasm` 目前没有提供相同的诊断格式选项。
+
+Mio 的当前诊断管线主要报告遇到的第一条错误。因此，在修复错误后可能还需要再次运行 `check`。
+
+### 运行测试
+
+Mio 使用 `test` 命令发现并执行测试程序。
+
+测试文件需要以 `_test.mio` 结尾，测试函数名需要以 `test_` 开头，并且是无参数、非泛型、返回 `unit` 的顶层函数。
+
+例如，新建 `math_test.mio`：
+
+```mio title="math_test.mio" mode=test no-run
+yobu "kiso/testing";
+
+waza test_add() -> unit {
+    testing.expect(1 + 1 == 2, "加法结果应当为 2");
+}
+```
+
+在终端中执行：
+
+```sh
+mio test .
+mio test ./...
+mio test . --run='^test_add$'
+```
+
+`./...` 表示递归查找测试包。`--run` 用于根据测试函数名筛选执行的测试。
+
+常用测试选项：
+
+| 参数 | 作用 |
+| --- | --- |
+| `--run=<regexp>` | 按函数名称的正则表达式筛选测试 |
+| `--format=human\|short\|json` | 选择测试报告格式 |
+| `--lang=zh-CN\|ja-JP\|en-US` | 选择测试报告语言 |
+| `--color=auto\|always\|never` | 控制测试报告颜色 |
+| `--verbose` | 显示更多诊断信息 |
+
+`kiso/testing` 只在 `mio test` 环境下注册。普通 `mio run` 和网页 Playground 不能替代测试运行器，因此上述测试代码标记为 `mode=test no-run`。
+
+如果没有发现测试，或 `--run` 没有匹配到任何测试，命令仍可能以退出码 `0` 结束。需要结合报告中的实际执行数量判断测试是否真正运行。
+
+### 启动语言服务器
+
+MioCore LSP 可以通过以下命令启动：
+
+```sh
+mio lsp
+mio lsp --stdio
+```
+
+`--stdio` 是当前支持的传输方式，语言服务器通过标准输入、标准输出交换带 `Content-Length` 的 JSON-RPC 消息。
+
+它是供编辑器调用的后台协议服务，不能当作普通交互式终端命令输入一行 Mio 代码。
+
+### 命令退出码
+
+Mio CLI 使用以下退出码表示执行状态：
+
+| 退出码 | 说明 |
+| --- | --- |
+| `0` | 命令成功完成 |
+| `1` | 源码加载、静态检查、执行、测试或文件处理失败 |
+| `2` | 命令或参数用法错误 |
+
+测试命令在没有测试或没有匹配项时也可能返回 `0`，因此退出码并不总能说明已实际执行测试。
+
+### Bunko 根目录
+
+如果 Mio 程序导入标准库，CLI 需要能够定位对应的 Bunko 目录。
+
+可以使用环境变量 `MIO_BUNKO` 显式指定：
+
+```sh
+export MIO_BUNKO="$MIO_HOME/bunko"
+```
+
+如果没有设置，CLI 会尝试从入口所在目录向上查找 `bunko/`，最终回退到当前工作目录的 `bunko`。
+
+源码中的导入写法仍然是：
+
+```mio title="Bunko.mio"
+yobu "kiso/math";
+
+chant(math.sqrt(144.0));
+```
+
+不能把物理目录名称拼进导入路径，例如 `yobu "bunko/kiso/math";` 不属于受支持的写法。
+
+### 从源码构建 CLI
+
+如果需要自己编译 Mio 工具，可以获取与 V2.0.0 对应的源码：
+
+```sh
+git clone --branch v2.0.0 https://github.com/mio-kobo/mio.git mio-source
+cd mio-source
+go build -o mio ./cmd/mio
+./mio version
+```
+
+`go.mod` 的基线是 Go `1.22.2`。从源码构建得到的是 Go 实现的 `mio` 前端和虚拟机入口；`mochi-aot`、`native-aot` 的构建流程属于独立的原生编译工具链。

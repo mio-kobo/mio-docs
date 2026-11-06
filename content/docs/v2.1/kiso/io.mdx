@@ -1,0 +1,115 @@
+---
+title: 输入输出
+description: Mio V2.0 字节流标准库 kiso/io
+---
+
+> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+
+
+## 输入输出
+
+输入输出标准库（I/O）以 Reader 和 Writer 表示同步字节流，可以组合内存缓冲区或文件对象完成读取、写入和流复制。
+
+与依赖继承或接口对象的做法不同，Mio 的 `Reader`、`Writer` 使用函数类型字段构成，用户可以传入与签名匹配的函数值。
+
+本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
+
+### 导入包
+
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+
+通过 `yobu "kiso/io";` 导入本包，随后使用 `io.函数名(...)` 调用。
+
+```mio title="Stdlib.mio" no-run
+yobu "kiso/io";
+yobu "kiso/bytes";
+```
+
+### 读取和写入
+
+`io.read` 与 `io.write` 接受目标/来源字节数组，以及 `offset` 和 `length`。它们允许部分成功，因此调用方应检查返回的 `count` 与 `error`。
+
+```mio title="Io.mio" no-run
+yobu "kiso/io";
+yobu "kiso/bytes";
+
+kaku source: []uint8 = [65, 66];
+kaku reader = io.reader_from_bytes(source);
+kaku target: []uint8 = [0, 0];
+kaku result = io.read(reader, target, 0, 2);
+chant(result.count);
+```
+
+### 完整读取与写入
+
+`read_full` 尝试取得指定长度，提前到达文件末尾可能返回 `UnexpectedEOF`；`write_all` 在必要时重复写入，直到完成或发生错误。
+
+```mio title="Io.mio" no-run
+yobu "kiso/io";
+yobu "kiso/bytes";
+
+kaku source: []uint8 = [65, 66, 67];
+kaku reader = io.reader_from_bytes(source);
+kaku target: []uint8 = [0, 0, 0];
+kaku result = io.read_full(reader, target, 0, 3);
+chant(result.error == mu);
+```
+
+### 流复制
+
+`copy_stream` 使用内部缓冲区将 Reader 数据复制到 Writer。成功或出错时均通过 `CopyResult` 返回累计字节数和错误。
+
+```mio title="Io.mio" no-run
+yobu "kiso/io";
+yobu "kiso/bytes";
+
+kaku source: []uint8 = [65, 66, 67];
+kaku reader = io.reader_from_bytes(source);
+kaku buffer = bytes.new_buffer();
+kaku copied = io.copy_stream(reader, io.writer_to_buffer(buffer));
+chant(copied.error == mu);
+```
+
+### 公开类型
+
+- `Reader { read: ([]uint8, int64, int64) -> ReadResult; }`：包含读取函数的结构体。
+- `Writer { write: ([]uint8, int64, int64) -> WriteResult; }`：包含写入函数的结构体。
+- `ReadResult { count: int64; eof: bool; error: IoError?; }`：读取结果。
+- `WriteResult { count: int64; error: IoError?; }`：写入结果。
+- `CopyResult { count: int64; error: IoError?; }`：流复制结果。
+- `IoError`：包含参数错误、EOF、无进展等失败情形的枚举。
+
+### 公开函数（7 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `read` | `read(reader: Reader, destination: []uint8, offset: int64, length: int64) -> ReadResult` | 从 Reader 读取到目标区间，可部分成功。 |
+| `write` | `write(writer: Writer, source: []uint8, offset: int64, length: int64) -> WriteResult` | 将来源区间写入 Writer，可部分写入。 |
+| `read_full` | `read_full(reader: Reader, destination: []uint8, offset: int64, length: int64) -> ReadResult` | 尝试完整读取目标区间，提前 EOF 可返回错误。 |
+| `write_all` | `write_all(writer: Writer, source: []uint8, offset: int64, length: int64) -> WriteResult` | 重复写入直到全部完成或出错。 |
+| `copy_stream` | `copy_stream(reader: Reader, writer: Writer) -> CopyResult` | 用内部缓冲区复制字节流并返回累计字节数。 |
+| `reader_from_bytes` | `reader_from_bytes(source: []uint8) -> Reader` | 构造共享来源数组、独立游标的内存读取器。 |
+| `writer_to_buffer` | `writer_to_buffer(buffer: bytes.ByteBuffer) -> Writer` | 构造向共享 ByteBuffer 追加的写入器。 |
+
+### 完整示例
+
+```mio title="Io.mio" no-run
+yobu "kiso/io";
+yobu "kiso/bytes";
+
+kaku source: []uint8 = [65, 66, 67];
+kaku reader = io.reader_from_bytes(source);
+kaku buffer = bytes.new_buffer();
+kaku result = io.copy_stream(reader, io.writer_to_buffer(buffer));
+chant(result.count);
+chant(result.error == mu);
+chant(bytes.equal(buffer.data, source));
+```
+
+### 使用限制
+
+本包规定 `error = mu` 表示当前操作没有报告错误；返回的 `count` 可能在错误出现前已经大于零。自定义 Reader/Writer 回调必须返回有效的读取或写入计数，不能凭空报告已处理超过请求范围的字节。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/io/io.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/io/io.mio)。

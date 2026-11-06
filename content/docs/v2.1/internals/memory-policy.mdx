@@ -1,0 +1,54 @@
+---
+title: 内存预算与压力观测
+description: M19c 的自适应预算、LOS、压力等级与快照边界。
+---
+
+## 原生内存预算
+
+M19c 把普通对象区、Side Metadata 与大对象映射的费用纳入有界管理。**对象占用上限、托管页预算、Reserved 和 RSS 并不是同一个数值。**
+
+### 关键概念
+
+| 名称 | 含义 |
+| --- | --- |
+| `Occupied` | 尚未回收的对象跨度，包含头部与对齐 |
+| `Reserved` | Arena、Side Metadata、固定元数据及 LOS 映射预留的虚拟范围 |
+| `Committed` | 已开放普通页与 LOS 完整映射的保守**托管页费用上界**，不是精确 RSS |
+| `Goal` | 用于回收或增长判断的软目标，可调整和收缩 |
+| `Hard Cap` | 托管内存费用的硬上限，包含相关元数据 |
+| `RSS` | 操作系统观测的进程驻留量，仍包含栈、代码等非托管部分 |
+
+当前原生对象区上限仍以实现记录中的最大 **1 GiB** 约束。默认托管 Hard Cap 按 `3 × round_page(object_capacity) + 64 KiB` 估算；显式 Hard Cap 需要反推出页对齐对象容量。
+
+### 页开放与扩展
+
+系统先预留地址范围，仅开放至多 1 MiB 的初始对象区前缀。未开放后缀使用 `PROT_NONE`；增长时按 Darwin ARM64 的 16 KiB 页粒度调用 `mprotect`。地址不因扩展而移动。
+
+已开放的普通 Arena 高水位页目前不会随着软目标收缩自动归还；死亡的 LOS 映射则通过有界同步释放路径尝试回收。
+
+### 自动预算
+
+源码包含自动预算候选：读取物理内存与相关进程软限制，先为非托管部分预留余量，再在请求最大容量和预算候选之间取更保守的值。查询失败时使用保守的内部候选值。
+
+公开在 `kiso/aot/lower` 的 `compile_with_adaptive_heap` 和 `compile_with_memory_budget` 是**编译器开发接口**，并没有新增稳定的用户 CLI `--heap-max` 选项。详见 [AOT Lowering 接口](/docs/v2.1/kiso/aot-lower)。
+
+### 内存压力状态
+
+| 内部等级 | 数值 | 含义 |
+| --- | --- | --- |
+| `Normal` | `0` | 当前指标未触发较高等级 |
+| `Elevated` | `1` | 压力相对升高 |
+| `High` | `2` | 压力较大 |
+| `Critical` | `3` | 压力判定非常高，需要谨慎处理 |
+
+策略综合对象占用率、页费用、分配速率、低回收效率与可用的系统压力信号。等级升级可以立即发布，回落需要多个采样周期；系统压力信号不可用时应标明未知，不能自动当作 Normal。
+
+M19c 开发记录中的只读 `memory.snapshot` 拷贝八个 64 位字段：压力等级、原因、已占用、已提交、限制、分配速率、GC 活动与序号。**这是原生运行时内部观测协议，不是普通 Mio 应用可任意导入的公开标准库函数。** 旧单线程快照约定本身没有多线程原子操作和内存屏障保证。
+
+此后已提交的 M19e 集成增加了所有权保护的内存快照入口，并有定向验证记录。但新入口不等于旧 ABI 自动拥有并发读保证，本轮也未确认更新的 E6 总门禁接纳报告。应用层不应自行通过原始地址读取这些内部字段。
+
+### 和用户三档模式的区别
+
+`Normal / Elevated / High / Critical` 是内部压力状态，不等于 `High / Balanced / Low` GC 用户配置。M19f 的三档自动调优仍属于后续阶段，不能在文档中提供虚构的运行参数或优化效果数据。
+
+来源：[M19c.md](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/benchmarks/native-gc/M19c.md) 与 [验收 JSON](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/benchmarks/native-gc/m19c-acceptance.json)。

@@ -1,0 +1,107 @@
+---
+title: Docker 离线开发（V2.1 候选）
+description: 将验证过的 Mio Linux Full 发行包封装成容器镜像，在断网环境中编译与运行 Mio。
+---
+
+> **候选状态（2026-11-06）：** 镜像构建、断网测试及 save/load 复验已实现，并通过 [候选 CI 的 docker-full-offline 任务](https://github.com/mio-kobo/mio/actions/runs/42192548134)。正式名称 `ghcr.io/mio-kobo/mio:2.1.0-full` 仍属规划，不能视为已可拉取的镜像；当前只上传候选 artifact，不推送正式 GHCR 标签。
+
+## 设计目标
+
+在一台已经安装 Docker 的机器上，提前获取镜像，然后离线编写、编译和运行 Mio 程序。
+
+镜像以 **Linux AMD64 Full 发行包**为输入：容器中的 `mio` 与归档中的原生编译器应该具有完全一致的 SHA-256。Bunko 以独立目录提供，不能为了制作镜像重新嵌入编译器，也不能在启动时从网络下载。
+
+当前候选镜像包含：
+
+- 原生 Mio 编译器与必要运行组件；
+- 独立的 Bunko 标准库；
+- 已经验证的 Full 包工具与示例；
+- 能够交互式使用的 Shell 和必要的基础开发工具。
+
+镜像已将 `/opt/mio/bin` 加入 `PATH`，将 `MIO_BUNKO` 指向 `/opt/mio/bunko`，默认工作目录为 `/workspace`。
+
+## 使用已验证的候选镜像
+
+从成功 CI 的 `mio-docker-linux-amd64-candidate-*` artifact 下载候选归档与 `SHA256SUMS`，在下载目录校验并加载：
+
+```sh
+sha256sum -c SHA256SUMS
+docker load -i mio-linux-amd64-full-candidate.docker.tar
+```
+
+随后在项目目录启动离线环境：
+
+```sh
+docker run --rm -it --platform linux/amd64 --network none \
+  -v "$PWD:/workspace" -w /workspace mio:2.1.0-full-pr-candidate
+```
+
+镜像默认使用 UID/GID `1000:1000`。Linux 绑定目录需允许该用户写入；必要时添加与宿主匹配的 `--user` 参数及 `--env HOME=/tmp`。候选用法及构建来源见 [源码中的 Docker 说明](https://github.com/mio-kobo/mio/blob/59002db2c9dc0c6dd11ff0f4341de42f79677df2/docker/README.md)。
+
+## 正式镜像发布后的第一次下载
+
+正式发布、且镜像公开可读后，在**有网络连接**的机器上运行：
+
+```sh
+docker pull --platform linux/amd64 ghcr.io/mio-kobo/mio:2.1.0-full
+```
+
+第一次下载镜像需要网络；“离线”指镜像已经存在于本机后的使用过程。
+
+## 在本地项目目录中开发
+
+在 macOS 或 Linux 的 Shell 中，进入存放 `.mio` 源码的目录，再运行：
+
+```sh
+docker run --rm -it \
+  --platform linux/amd64 \
+  --network none \
+  -v "$PWD:/workspace" \
+  -w /workspace \
+  ghcr.io/mio-kobo/mio:2.1.0-full
+```
+
+下面的正式镜像操作示例均以未来正式发布为前提。进入容器后，例如执行：
+
+```sh
+mio version
+mio check hello.mio
+mio run hello.mio --target=linux-amd64
+```
+
+CLI 当前默认目标仍是 Darwin；容器中执行原生 `build` / `run` / `exec` 须显式指定 `--target=linux-amd64`。
+
+使用 `--network none` 可以避免容器通过外部网络访问依赖；标准库与工具必须已经包含在镜像内。`-v` 会把当前目录挂载到容器的 `/workspace`，因此源文件和编译产物保留在宿主机上；如果不挂载目录且使用 `--rm`，容器退出时内部修改通常不会保留。
+
+Windows 用户可以在 Docker Desktop 的 Linux 容器环境下使用相同镜像，但目录挂载参数应按 PowerShell 的路径写法调整。macOS Apple Silicon 需要 Linux AMD64 模拟执行，可能明显慢于原生 ARM64 程序。此镜像**不是** macOS 或 Windows 的原生二进制发行包，也不表示目前已经提供 Linux ARM64 原生镜像。
+
+## 在完全断网的电脑上使用
+
+可以在一台联网且已拉取镜像的电脑上将镜像导出为文件：
+
+```sh
+docker save -o mio-2.1.0-full-docker.tar \
+  ghcr.io/mio-kobo/mio:2.1.0-full
+```
+
+通过移动硬盘或其他文件传输方式将 `.tar` 复制到目标电脑，再导入：
+
+```sh
+docker load -i mio-2.1.0-full-docker.tar
+```
+
+导入后就可以使用上面的 `docker run --network none` 命令。目标电脑仍然需要事先安装、配置好 Docker；镜像不负责安装 Docker 本身。
+
+## 候选 CI 与正式发布前验证
+
+当前 GitHub Actions 已在 Linux AMD64 Runner 上检查以下项目；正式发布仍须匹配最终源码与归档重新验证：
+
+1. 镜像中的编译器 SHA-256 与相同 Commit 的 Linux AMD64 Full 归档一致。
+2. 在 `--network none` 下执行 `mio version`、无 Bunko Hello World、Bunko 导入示例，以及实际支持的开发子命令。
+3. 在仓库之外的工作目录挂载 `/workspace`，确认可以读取源文件并写入构建产物。
+4. 执行 `docker save`、`docker load`，重新导入后仍能离线编译与运行。
+5. 记录基础镜像版本与 digest，验证镜像没有隐含的首次启动下载步骤，且不包含 CI 密钥。
+
+如果某项离线能力没有验证通过，不应将其标记为已支持。第一阶段 PR 应将镜像归档作为候选产物上传供人工检查，而不是自动推送到正式 GHCR。
+
+有关原生 Core / Full 发行包的说明，参见 [Core、Full 与发行包](/docs/v2.1/tooling/distribution)。

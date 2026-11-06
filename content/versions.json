@@ -45,6 +45,22 @@
         "cliVersion": "Mio 2.0.0"
       },
       "frozen": true
+    },
+    {
+      "id": "v2.1",
+      "version": "2.1",
+      "status": "Development",
+      "maintenance": "preview",
+      "locales": [
+        "zh-CN"
+      ],
+      "release": null,
+      "source": {
+        "commit": "59002db2c9dc0c6dd11ff0f4341de42f79677df2",
+        "ref": "Mio-2.1",
+        "cliVersion": "mio v2.0.0-dev (pure Mio Native AOT; GF3 candidate)"
+      },
+      "frozen": false
     }
   ]
 }
