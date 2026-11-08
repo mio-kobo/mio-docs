@@ -87,3 +87,86 @@ test('all V2.1 documents compile; V2.0 content never opts into the new component
   }
   for (const file of files('content/docs/v2.0')) assert.ok(!readFileSync(file, 'utf8').includes('<FeatureBadge'), file);
 });
+
+const { PlatformBadge } = await loadTs('components/platform-badge.tsx');
+const { PlatformSupport } = await loadTs('components/platform-support.tsx');
+const { summarizeSupport } = await loadTs('lib/platform-support.ts');
+const platformComponents = { FeatureBadge, PlatformBadge, PlatformSupport };
+const exampleSystems = { macos: { arm64: 'full' }, windows: { x86_64: { status: 'partial', note: 'fixture restriction' } }, linux: { arm64: 'unknown', x86_64: 'full' } };
+
+test('platform frontmatter is optional, strictly validated, and retains architecture evidence', () => {
+  assert.deepEqual(docsSchema.parse({ title: 'Old' }), { title: 'Old' });
+  assert.deepEqual(docsSchema.parse({ title: 'New', platforms: { systems: exampleSystems } }).platforms.systems, exampleSystems);
+  for (const platforms of [
+    { systems: { android: { arm64: 'full' } } },
+    { systems: { linux: { arm: 'full' } } },
+    { systems: { linux: { arm64: 'yes' } } },
+    { systems: { linux: { arm64: { status: 'partial', reason: 'typo' } } } },
+    { showArch: 'false', systems: {} }, { systems: null }, { system: {} },
+  ]) assert.throws(() => docsSchema.parse({ title: 'Invalid', platforms }), /platforms/);
+});
+
+test('separate platforms, showArch and optional systems render deterministic accessible badges', () => {
+  const hidden = render(createElement(PlatformSupport, { systems: exampleSystems }));
+  assert.equal((hidden.match(/<button /g) || []).length, 3);
+  assert.equal((hidden.match(/<svg /g) || []).length, 3);
+  for (const label of ['macOS：未验证', 'Windows：未验证', 'Linux：未验证', 'fixture restriction', 'aria-describedby=', 'role="tooltip"']) assert.ok(hidden.includes(label), label);
+  assert.ok(!hidden.includes('<span>arm64</span>'));
+  assert.ok(hidden.includes('未配置，未验证'));
+  assert.ok(render(createElement(PlatformSupport, {systems: {linux: {arm64: 'full', x86_64: 'full'}}})).includes('Linux：完整支持'));
+  const shown = render(createElement(PlatformSupport, { systems: exampleSystems, showArch: true }));
+  assert.equal((shown.match(/<button /g) || []).length, 4);
+  assert.ok(shown.includes('Linux arm64：未验证'));
+  assert.ok(shown.includes('Linux x86_64：完整支持'));
+  for (const system of ['macos', 'windows', 'linux']) {
+    const html = render(createElement(PlatformSupport, { systems: { [system]: { arm64: 'full' } } }));
+    assert.equal((html.match(/<button /g) || []).length, 1);
+  }
+  assert.equal(render(createElement(PlatformSupport, { systems: { linux: {} } })), '');
+  assert.equal(render(createElement(PlatformSupport, { systems: {} })), '');
+});
+
+test('architecture summary never upgrades mixed or unknown evidence to full', () => {
+  assert.equal(summarizeSupport([]), 'unknown');
+  assert.equal(summarizeSupport(['full', 'full']), 'full');
+  assert.equal(summarizeSupport(['unsupported', 'unsupported']), 'unsupported');
+  assert.equal(summarizeSupport(['full', 'unsupported']), 'partial');
+  assert.equal(summarizeSupport(['full', 'partial']), 'partial');
+  assert.equal(summarizeSupport(['full', 'unknown']), 'unknown');
+});
+
+test('platform MDX in body and H2/H3 preserves anchors, explicit IDs, TOC and search text', async () => {
+  const badge = '<PlatformBadge system="windows" status="partial" note="fixture restriction" />';
+  const support = '<PlatformSupport showArch={true} systems={{linux: {arm64: "unknown", x86_64: "full"}}} />';
+  const plain = '## 标题\n\n### `api`\n\n### 重复\n\n### 重复\n\n### 固定 [#fixed]';
+  const decorated = plain.replace(/^(#{2,3} .+)$/gm, `$1 <FeatureBadge status="updated" /> ${badge} ${support}`);
+  const [before, after] = await Promise.all([compile(plain), compile(decorated)]);
+  assert.deepEqual(after.toc.map(x => x.url), before.toc.map(x => x.url));
+  assert.deepEqual(after.toc.map(x => render(x.title).trim()), before.toc.map(x => render(x.title).trim()));
+  assert.deepEqual(after.structuredData, before.structuredData);
+  const html = render(createElement(after.default, { components: platformComponents }));
+  assert.equal((html.match(/<button /g) || []).length, 15);
+  assert.ok(html.includes('id="fixed"'));
+  const body = await compile(`Text ${badge}\n\n${support}`);
+  const bodyHtml = render(createElement(body.default, { components: platformComponents }));
+  assert.equal((bodyHtml.match(/<button /g) || []).length, 3);
+  for (const unwanted of ['fixture restriction', 'unknown', 'PlatformSupport', 'PlatformBadge']) assert.ok(!JSON.stringify(body.structuredData).includes(unwanted));
+});
+
+test('invalid platform JSX fails MDX compilation instead of reaching production', async () => {
+  for (const jsx of [
+    '<PlatformBadge system="android" status="full" />',
+    '<PlatformBadge system="linux" arch="arm" status="full" />',
+    '<PlatformBadge system="linux" status="yes" />',
+    '<PlatformBadge system="linux" status={getStatus()} />',
+    '<PlatformBadge system="linux" status="full" {...props} />',
+    '<PlatformBadge system="linux" status="full" status="unknown" />',
+    '<PlatformBadge system="linux" status="full">text</PlatformBadge>',
+    '<PlatformSupport systems={{linux: {arm64: "bad"}}} />',
+    '<PlatformSupport systems={{linux: {arm: "full"}}} />',
+    '<PlatformSupport systems={{android: {arm64: "full"}}} />',
+    '<PlatformSupport showArch="false" systems={{}} />',
+    '<PlatformSupport systems={{...systems}} />',
+    '<PlatformSupport systems={systems} />',
+  ]) await assert.rejects(compile(jsx), /Platform/);
+});

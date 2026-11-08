@@ -522,3 +522,24 @@ button:has(.version-label) > div > p:last-child:not(:first-child) { display: non
 .feature-badge-since { margin-inline-start: .35em; opacity: .8; }
 .prose .feature-badge { vertical-align: middle; }
 .prose :is(h1, h2, h3, h4, h5, h6) .feature-badge { margin-inline-start: .5em; vertical-align: .15em; }
+
+/* Independent platform pills share the feature badge rhythm. */
+.platform-support { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .35rem; max-width: 100%; vertical-align: middle; }
+.platform-badge-wrap { display: inline-flex; position: relative; max-width: 100%; vertical-align: middle; font-size: .7rem; font-weight: 600; line-height: 1.4; letter-spacing: normal; }
+.platform-status-full { --platform-ink: #20633b; }
+.platform-status-partial { --platform-ink: #795600; }
+.platform-status-unsupported { --platform-ink: #aa3040; }
+.platform-status-unknown { --platform-ink: #586171; }
+.dark .platform-status-full { --platform-ink: #8bd7a5; }
+.dark .platform-status-partial { --platform-ink: #eed080; }
+.dark .platform-status-unsupported { --platform-ink: #ffa5b0; }
+.dark .platform-status-unknown { --platform-ink: #bdc6d5; }
+.platform-badge { display: inline-flex; align-items: center; justify-content: center; gap: .3rem; border: 0; border-radius: 999px; padding: .18rem .5rem; min-height: 24px; color: var(--platform-ink); background: color-mix(in srgb, var(--platform-ink) 10%, var(--color-fd-background)); font: inherit; cursor: pointer; }
+.platform-badge svg { flex-shrink: 0; }
+.platform-badge:focus-visible { outline: 2px solid var(--platform-ink); outline-offset: 3px; }
+.platform-badge-detail { position: fixed; z-index: 50; width: min(18rem, calc(100vw - 2rem)); max-height: min(18rem, 50vh); overflow-y: auto; padding: .5rem .65rem; border: 1px solid var(--platform-ink); border-radius: .5rem; color: var(--color-fd-foreground); background: var(--color-fd-background); box-shadow: 0 4px 16px #0002; white-space: normal; overflow-wrap: anywhere; text-align: start; font-size: .75rem; font-weight: 400; }
+.platform-badge-detail[hidden] { display: none; }
+.prose :is(h1, h2, h3, h4, h5, h6) :is(.platform-support, .platform-badge-wrap) { vertical-align: middle; }
+.prose :is(h1, h2, h3, h4, h5, h6) > :is(.platform-support, .platform-badge-wrap) { margin-inline-start: .5em; }
+.prose .platform-heading { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .5rem; margin-block: 1.5em .75em; min-width: 0; }
+.prose .platform-heading > :is(h1, h2, h3, h4, h5, h6) { margin-block: 0; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
