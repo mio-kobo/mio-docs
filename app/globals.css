@@ -543,3 +543,45 @@ button:has(.version-label) > div > p:last-child:not(:first-child) { display: non
 .prose :is(h1, h2, h3, h4, h5, h6) > :is(.platform-support, .platform-badge-wrap) { margin-inline-start: .5em; }
 .prose .platform-heading { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .5rem; margin-block: 1.5em .75em; min-width: 0; }
 .prose .platform-heading > :is(h1, h2, h3, h4, h5, h6) { margin-block: 0; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+
+/* Mermaid diagrams keep Fumadocs' card rhythm and scroll instead of shrinking
+   below a readable size on narrow screens. */
+.mermaid-diagram {
+  margin: 1.5rem 0;
+  border: 1px solid var(--color-fd-border);
+  border-radius: var(--hikari-radius);
+  background: color-mix(in srgb, var(--color-fd-card) 72%, var(--color-fd-background));
+  overflow: hidden;
+}
+.mermaid-diagram-canvas {
+  overflow-x: auto;
+  padding: 1rem;
+  overscroll-behavior-x: contain;
+}
+.mermaid-diagram-svg { display: block; }
+.mermaid-diagram-svg svg { display: block; width: auto; max-width: none; height: auto; margin-inline: auto; }
+.mermaid-diagram-status {
+  min-height: 12rem;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 1rem;
+  color: var(--color-fd-muted-foreground);
+  font-size: .8rem;
+  text-align: center;
+}
+.mermaid-diagram-status.is-error { color: var(--color-fd-foreground); }
+.mermaid-diagram figcaption {
+  border-top: 1px solid var(--color-fd-border);
+  padding: .55rem 1rem;
+  color: var(--color-fd-muted-foreground);
+  font-size: .75rem;
+  line-height: 1.7;
+  text-align: center;
+}
+.mermaid-diagram-canvas:focus-visible { outline: 2px solid var(--color-fd-primary); outline-offset: -2px; }
+.mermaid-diagram-scroll-hint { display: none; }
+@media (max-width: 640px) {
+  .mermaid-diagram-canvas { padding: .75rem; }
+  .mermaid-diagram-scroll-hint { display: inline; }
+}

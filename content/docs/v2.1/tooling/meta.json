@@ -9,6 +9,7 @@
     "verification",
     "native-cli",
     "distribution",
+    "bunko-review",
     "docker",
     "selfhost"
   ]
