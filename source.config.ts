@@ -17,14 +17,34 @@ const mioPlaygroundTransformer = {
   },
 };
 
+/**
+ * Mermaid fences stay ordinary MDX fences. A tiny grammar keeps Shiki from
+ * throwing on the language name, while the raw fence source is forwarded to
+ * the client component that replaces the block with a rendered SVG.
+ */
+const mermaidLanguage = {
+  name: 'mermaid',
+  scopeName: 'source.mermaid',
+  patterns: [],
+  repository: {},
+};
+
+const mermaidSourceTransformer = {
+  name: 'bunko-mermaid-source',
+  pre(this: { options: { lang?: string }; source: string }, node: { properties: Record<string, unknown> }) {
+    if (this.options.lang?.toLowerCase() !== 'mermaid') return;
+    node.properties['data-mermaid-source'] = this.source;
+  },
+};
+
 export default defineConfig({
   mdxOptions: {
     remarkPlugins: defaults => [remarkFeatureBadge, ...defaults, remarkRestoreFeatureBadge],
     rehypePlugins: defaults => [rehypeFeatureBadgeToc, ...defaults, rehypeRestoreFeatureBadge],
     rehypeCodeOptions: {
       themes: { light: 'github-light', dark: 'github-dark' },
-      langs: [{ ...mio, name: 'mio', aliases: ['Mio'] }],
-      transformers: [mioPlaygroundTransformer],
+      langs: [{ ...mio, name: 'mio', aliases: ['Mio'] }, mermaidLanguage],
+      transformers: [mioPlaygroundTransformer, mermaidSourceTransformer],
     },
   },
 });
