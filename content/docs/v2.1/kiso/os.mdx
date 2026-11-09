@@ -1,10 +1,10 @@
 ---
 featureBadge: new
 title: 操作系统接口
-description: V2.1 开发中的 kiso/os：参数、环境、进程与文件操作。
+description: V2.1 的 kiso/os：参数、环境、进程与文件操作。
 ---
 
-## 操作系统接口 <FeatureBadge status="new" since="2.1" />
+## 操作系统接口 <FeatureBadge status="new" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "partial" } }} />
 
 `kiso/os` 通过 `mio/os/runtime` 宿主入口访问系统环境，面向**支持这些 Native OS 运行时入口的开发环境**。它不是无宿主依赖的纯算法包，也不能据导入成功推断可在浏览器 WASM、所有 Go VM 或任意平台运行。
 
@@ -43,7 +43,7 @@ moshi (home != mu) { chant(home); }
 | `executable_path` | `executable_path() -> string?` | 获取当前可执行文件的实际路径；失败返回 `mu` |
 | `canonical_path` | `canonical_path(path: string) -> string?` | 获取已存在路径的物理绝对身份；失败返回 `mu` |
 
-Windows AMD64 的进程启动与标准输入轮询尚未实现；不能将这些函数的公开声明等同于全平台运行支持。平台状态见 [开发状态](/docs/v2.1/development)。
+正式版三平台均通过进程协议测试。Windows 的 `exec` 启动子进程、等待并以其状态退出，不会像 POSIX 那样替换当前进程；测试超时按墙钟计算，标准输入就绪状态按管道、文件或控制台分别判断。见 [Windows 进程实现](https://github.com/mio-kobo/mio/blob/v2.1.0/bunko/kiso/aot/lowerwinrt/winprocess.mio)。
 
 ### 文件与进程的返回值
 
@@ -65,4 +65,4 @@ chant(ready);
 
 `canonical_path` 针对真实存在的路径；不可解析、非 UTF-8 或超出当前缓冲限制时返回 `mu`。`stdin_wait` 接受毫秒超时；源码拒绝小于 `-1` 或超出有符号 32 位上限的参数。
 
-来源：[`os.mio`](https://github.com/mio-kobo/mio/blob/59002db2c9dc0c6dd11ff0f4341de42f79677df2/bunko/kiso/os/os.mio)。
+来源：[`os.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/os/os.mio)。

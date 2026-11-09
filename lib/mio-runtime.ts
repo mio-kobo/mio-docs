@@ -1,3 +1,5 @@
+import { playgroundAssetPath, type MioPlaygroundVersion } from './mio-playground-version.mjs';
+
 export type MioOperation = 'run' | 'check';
 
 export type MioStatus = 'ok' | 'checked' | 'diagnostic' | 'error';
@@ -20,7 +22,6 @@ export interface MioRunOptions {
   signal?: AbortSignal;
 }
 
-const WORKER_URL = '/wasm/mio-worker.js';
 const MAX_SOURCE_BYTES = 64 * 1024;
 const MAX_OUTPUT_CHARS = 64 * 1024;
 const MAX_ERROR_CHARS = 8 * 1024;
@@ -100,6 +101,8 @@ class MioRuntime {
   private executionTimer: ReturnType<typeof setTimeout> | null = null;
   private state: 'idle' | 'initializing' | 'ready' | 'executing' = 'idle';
 
+  constructor(private readonly version: MioPlaygroundVersion) {}
+
   run(operation: MioOperation, source: string, options: MioRunOptions = {}): Promise<MioResult> {
     if (typeof source !== 'string' || new TextEncoder().encode(source).byteLength > MAX_SOURCE_BYTES) {
       return Promise.resolve(failure('源码超过 64 KiB 限制。', 'limit'));
@@ -149,7 +152,7 @@ class MioRuntime {
     const generation = ++this.workerGeneration;
     let worker: Worker;
     try {
-      worker = new Worker(WORKER_URL);
+      worker = new Worker(`${playgroundAssetPath(this.version)}/mio-worker.js`);
     } catch (error) {
       const message = `无法创建 Mio WebAssembly Worker：${error instanceof Error ? error.message : String(error)}`;
       this.failActive(message, 'load');
@@ -260,7 +263,10 @@ class MioRuntime {
     if (!request) return;
     this.active = null;
     this.detachAbort(request);
-    this.state = 'ready';
+    // The release controller uses a fresh Go/WASM instance per request so
+    // grown linear memory is reclaimed instead of accumulating across runs.
+    if (this.version === 'v2.1') this.terminateWorker();
+    else this.state = 'ready';
     request.resolve(result);
     this.pump();
   }
@@ -324,14 +330,14 @@ class MioRuntime {
   }
 }
 
-const runtime = new MioRuntime();
+const runtimes = { legacy: new MioRuntime('legacy'), 'v2.1': new MioRuntime('v2.1') };
 
 /** Compile and execute Mio source in the shared, serialized WebAssembly runtime. */
-export function runMio(source: string, options?: MioRunOptions): Promise<MioResult> {
-  return runtime.run('run', source, options);
+export function runMio(source: string, options?: MioRunOptions, version: MioPlaygroundVersion = 'legacy'): Promise<MioResult> {
+  return runtimes[version].run('run', source, options);
 }
 
 /** Compile Mio source without executing it. */
-export function checkMio(source: string, options?: MioRunOptions): Promise<MioResult> {
-  return runtime.run('check', source, options);
+export function checkMio(source: string, options?: MioRunOptions, version: MioPlaygroundVersion = 'legacy'): Promise<MioResult> {
+  return runtimes[version].run('check', source, options);
 }

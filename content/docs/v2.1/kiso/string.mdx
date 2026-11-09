@@ -14,13 +14,13 @@ Mio 的 `string` 是不可变的 UTF-8 文本，语言本身没有字符串 `+` 
 
 本页的基本字符串 API 沿用 Mio V2.0。V2.1 新增 `trim_space(value: string) -> string`，用于移除文本两端的 Unicode 空白字符；它不是 Unicode 规范化或大小写转换函数。
 
-```mio title="TrimSpace.mio" no-run
+```mio title="TrimSpace.mio"
 yobu "kiso/string";
 
 chant(string.trim_space("  Mio  "));
 ```
 
-这段新增 API 目前不能通过网站的 V2.0 WASM 运行。其他变化见 [标准库变化](/docs/v2.1/kiso/changes)。
+此示例可在 V2.1 Playground 运行。其他变化见 [标准库变化](/docs/v2.1/kiso/changes)。
 
 ### 导入包
 

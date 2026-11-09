@@ -4,7 +4,9 @@ title: M19 原生分代 GC（开发中）
 description: 非移动式精确分代回收、LOS、SATB 并发开发和 M19 验收边界。
 ---
 
-## M19：原生分代垃圾回收 <FeatureBadge status="experimental" since="2.1" />
+## M19：原生分代垃圾回收 <FeatureBadge status="experimental" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "partial" }, linux: { x86_64: "partial" }, windows: { x86_64: "partial" } }} />
+
+v2.1.0 三平台已通过 Runtime ABI 和所覆盖的原生差分测试。macOS ARM64 的有界分配样例在默认和 `--gc-stress` 两种模式下结果一致；这些证据不覆盖长期并发回收的接纳。
 
 V2.1 分支新增了分代回收和大对象内存预算相关实现。其目的是在保留**精确对象扫描、引用分类与非移动对象地址**的基础上，减少某些场景下扫描旧对象的工作，并对大对象、堆增长和内存预算分别进行管理。
 

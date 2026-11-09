@@ -54,7 +54,7 @@ chant(numbers[0]);
 
 ### Map 映射表
 
-映射表类型写作 `Map<K, V>`，其中键类型只能使用已支持的整数、`bool` 或 `string` 等可哈希类型。构造时使用 `Map[K, V]()`；已有明确目标类型时也可以写 `Map()`。
+映射表类型写作 `Map<K, V>`，其中键类型只能使用已支持的整数、`bool` 或 `string` 等可哈希类型。构造时使用 `Map[K, V]()`；v2.1.0 Native CLI 不从赋值目标推断构造参数。
 
 ```mio title="Map.mio"
 kaku scores = Map[string, int64]();
@@ -129,6 +129,8 @@ kaku status: Status = Status.Finished(42);
 ### awase 穷尽匹配
 
 `awase` 只能匹配非空枚举值。每个 `baai` 分支对应一个枚举变体；关联数据可以绑定成该分支中的局部变量。
+
+此示例可在 Web Playground 中运行。v2.1.0 Native CLI 无法从这个构造调用推断泛型枚举的全部类型参数（`E0306`）。
 
 ```mio title="EnumMatch.mio"
 sentaku Result<T, E> {

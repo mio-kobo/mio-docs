@@ -12,7 +12,7 @@ Mochi 是 Mio 的中间字节码格式。V2.1 的纯 Mio 编译器将它用于�
 | v15 | `OP_TYPE_CONSTRAINT = 66` | 携带字段结果的类型表示约束，不是运行时转换 |
 | v16 | `OP_CALL_TYPED = 67` | 为间接调用明确标注返回形状，辅助类型和栈分析 |
 
-当前纯 Mio Decoder 可读取到 v16，Native 管线也使用这一格式；但是旧 Go `internal/mochi` 解码器仍以 **v14** 为上限。生成新版 Mochi 后，不应将文件交给旧 Go VM、反汇编器或 AOT 工具并假设兼容。`Mochi v16` 是格式版本，和 `Mio V2.1` 的语言版本不是同一概念。
+v2.1.0 的 Native 与 Web 参考解码器支持 v16；v2.0.0 的 Go 解码器以 **v14** 为上限。生成新版 Mochi 后，不应将文件交给旧 Go VM、反汇编器或 AOT 工具并假设兼容。`Mochi v16` 是格式版本，和 `Mio V2.1` 的语言版本不是同一概念。
 
 以下主体保留 **Mio v2.0.0 的 Mochi v14 格式与 Go VM 参考**（历史源码记录为 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`）。其数据格式、版本门槛和指令说明应按旧工具理解；Go AOT 与纯 Mio Native AOT 的边界见 [Native AOT](/docs/v2.1/internals/native-aot)。
 

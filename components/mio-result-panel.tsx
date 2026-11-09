@@ -56,8 +56,10 @@ export function MioResultPanel({ result, label = 'Mio Playground 结果' }: { re
     </div>}
 
     {isError && <div className="mio-result-error">
-      <pre>{result.error || 'Mio 运行时返回了未知错误。'}</pre>
-      {showLoadHint && <p>请确认部署后的 <code>/wasm/mio.wasm</code> 与 <code>/wasm/wasm_exec.js</code> 可以访问。</p>}
+      {result.diagnostics.length
+        ? result.diagnostics.map((diagnostic, index) => <pre className="mio-diagnostic" key={index}>{diagnostic}</pre>)
+        : <pre>{result.error || 'Mio 运行时返回了未知错误。'}</pre>}
+      {showLoadHint && <p>请确认当前文档版本的 WASM 资源可以访问。</p>}
       {result.failureKind === 'timeout' && <p>执行超时后 Worker 已被终止；再次运行会重新初始化运行时。</p>}
       {result.failureKind === 'cancelled' && <p>Worker 已被终止；再次运行会重新初始化运行时。</p>}
     </div>}

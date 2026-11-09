@@ -1,15 +1,13 @@
 ---
 title: Mio V2.1 · 开始了解 Mio
-description: 认识 Mio 的语言特性，以及 V2.1 开发版的原生工具链、内存管理和 Bunko 扩展。
+description: 认识 Mio 的语言特性，以及 V2.1 的原生工具链、内存管理和 Bunko 扩展。
 ---
 
 Mio 是一门使用**日语罗马字关键字**的静态强类型编程语言。它以小巧的语言核心、明确的类型与数值语义，以及按需导入的标准库为设计方向。编写程序时，类型转换需要明确表达；文件、网络等能力则由 Bunko 提供。
 
 V2.1 延续 V2.0 的语言语法，重点完善**从 Mio 源码到原生程序的工具链**，并扩展原生编译、内存管理和标准库。对于已经使用 V2.0 的读者，可以直接阅读 [版本变化](/docs/v2.1/migration)；第一次接触 Mio，则可以从本页开始。
 
-当前开发状态按 [`Mio-2.1` 的 `59002db2` 提交](https://github.com/mio-kobo/mio/commit/59002db2c9dc0c6dd11ff0f4341de42f79677df2)（2026 年 11 月 6 日）核对。部分 API 和内部实现章节保留 10 月 27 日的固定源码引用；历史阶段记录不代表当前版本整体验收。
-
-> **开发版本：** V2.1 尚未完成整体验收与正式发布。本目录是 **Development** 文档，接口及行为可能调整；需要稳定发行包时，请使用 [Mio v2.0.0](https://github.com/mio-kobo/mio/releases/tag/v2.0.0)。
+本目录的功能说明以 [Mio v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0)（`74e461b2985886160a285c7104d2a41090d0f548`）为验证基线。现有版本登记保留原开发快照 `59002db2c9dc0c6dd11ff0f4341de42f79677df2`；正式包与验收范围见 [版本状态](/docs/v2.1/development)。
 
 ## Mio 特性
 
@@ -29,11 +27,11 @@ Mio 支持显式类型标注与类型推断，也提供固定宽度整数、`flo
 
 ### Mochi 与原生编译 <FeatureBadge status="updated" since="2.1" />
 
-Mochi 是 Mio 的中间字节码格式。V2.1 完善了源码检查、字节码生成与原生编译之间的流程，让命令行工具可以直接构建原生可执行文件。<FeatureBadge status="experimental" since="2.1" />
+Mochi 是 Mio 的中间字节码格式。V2.1 完善了源码检查、字节码生成与原生编译之间的流程，让命令行工具可以直接构建原生可执行文件。
 
 V2.1 CLI 默认生成原生程序，也可以使用 `--emit=mochi` 输出 Mochi 文件。与 V2.0 CLI 的命令差异见 [Native CLI](/docs/v2.1/tooling/native-cli)。
 
-截至 2026 年 11 月 6 日，原生构建已在 **macOS ARM64、Linux AMD64 与 Windows AMD64** 上接受 CI 验证，其中 Linux 与 Windows 仍属实验性平台，尚未正式发布。详细平台状态见 [开发状态](/docs/v2.1/development)。
+正式归档及原生 CI 覆盖 **macOS ARM64、Linux AMD64 和 Windows AMD64**。见 [Native AOT](/docs/v2.1/internals/native-aot) 和 [发行包说明](/docs/v2.1/tooling/distribution)。
 
 ### 内存管理 <FeatureBadge status="experimental" since="2.1" />
 
@@ -51,13 +49,13 @@ V2.0 的原生运行时已经实现精确、非移动式 Mark-Sweep GC。V2.1 �
 | 数值与系统基础库 | `string.trim_space`、`fs.is_character_device`、`math.fail` 等公开扩展 | [标准库变更](/docs/v2.1/kiso/changes) |
 | 原生内存管理 | 分代 GC、Minor / Major、LOS 和内存预算策略 | [GC 设计](/docs/v2.1/internals/gc) |
 | 原生工具链 | Native CLI、测试运行器与 LSP | [工具链进展](/docs/v2.1/tooling) |
-| Mochi | 增加 v15 / v16 元数据；旧 Go 解码器仍以 v14 为上限 | [Mochi 格式变化](/docs/v2.1/kiso/encoding-mochi) |
+| Mochi | 增加 v15 / v16 元数据；v2.1.0 Web 参考 VM 支持读取带类型元数据的格式 | [Mochi 格式变化](/docs/v2.1/kiso/encoding-mochi) |
 
 ## 使用 Mio
 
 ### 安装与准备
 
-目前可用的 V2.0.0 正式安装包面向 macOS ARM64；V2.1 发行包仍在准备中，已实现 Core 与 Full 候选包及独立 Bunko 目录，尚未正式发布。安装方法见 [快速开始](/docs/v2.1/getting-started) 和 [发行包说明](/docs/v2.1/tooling/distribution)。需要容器环境时，可查看 [Docker 离线开发](/docs/v2.1/tooling/docker)。
+从 [快速开始](/docs/v2.1/getting-started) 试用 Playground，或按 [发行包说明](/docs/v2.1/tooling/distribution) 选择 Core 或 Full。需要容器时，可查看 [Docker 离线开发](/docs/v2.1/tooling/docker)。
 
 ### 继续学习
 
@@ -112,8 +110,8 @@ v2.1.0 还提供 [阻塞 IPv4 TCP](/docs/v2.1/kiso/net-tcp)。
 
 先读 [当前开发状态](/docs/v2.1/development)，再看 [与 V2.0.0 的变化](/docs/v2.1/migration)。使用新标准库时查阅 [Bunko](/docs/v2.1/kiso)；研究原生后端时阅读 [Internals](/docs/v2.1/internals) 和 [Tooling](/docs/v2.1/tooling)。
 
-网站现有 WebAssembly Playground 只内嵌 V2.0 的部分 Bunko。新模块的代码示例标记 `no-run`，不意味着 API 未实现，也不代表 V2.1 原生工具链已经完成发布验收。
+V2.1 Playground 支持 JSON、正则表达式、SHA-256 以及其他纯 Mio 模块。涉及宿主文件、进程、网络和原生编译的示例请在本地运行。
 
 ## 文档来源
 
-本轮状态核对基线为 `v2.0.0` → `59002db2c9dc0c6dd11ff0f4341de42f79677df2`。各页保留的早期固定源码链接用于解释当时的实现；平台、候选包与发布状态统一见 [开发状态](/docs/v2.1/development)。
+对照标签为 [v2.0.0](https://github.com/mio-kobo/mio/releases/tag/v2.0.0) 与 [v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0)。历史开发记录仅用于说明当时的设计和测试范围。

@@ -1,9 +1,9 @@
 ---
-title: Core、Full 与发行包（V2.1 候选）
+title: Core、Full 与发行包
 description: Mio V2.1 原生发行包的内容边界、Bunko 查找规则、平台范围和验证要求。
 ---
 
-> **候选状态（2026-11-06）：** Core / Full 打包、外置 Bunko 和三平台迁移目录验证已实现，并通过 [候选 CI](https://github.com/mio-kobo/mio/actions/runs/42192548134)。当前源码核对提交为 `59002db2c9dc0c6dd11ff0f4341de42f79677df2`，尚未正式发布 `v2.1.0`。正式下载以 [GitHub Releases](https://github.com/mio-kobo/mio/releases) 为准。
+[Mio v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0) 提供 Core 和 Full 归档。三平台原生归档的校验、执行与 Bunko 路径解析见 [正式版 CI](https://github.com/mio-kobo/mio/actions/runs/42384976176)。
 
 ## 为什么拆分 Core 与 Full？
 
@@ -19,7 +19,7 @@ description: Mio V2.1 原生发行包的内容边界、Bunko 查找规则、平�
 
 **注意：** `mio test`、`mio lsp` 等如果实现为同一编译器可执行文件的子命令，Core 仍可能识别这些命令。“不带工具”指不附带额外的独立工具和标准库，不表示从编译器二进制中删去已有子命令。
 
-## 平台与预定文件名
+## 平台与下载文件名 <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
 
 | 原生目标 | Core | Full |
 | --- | --- | --- |
@@ -27,11 +27,11 @@ description: Mio V2.1 原生发行包的内容边界、Bunko 查找规则、平�
 | Linux x86-64 / AMD64 | `mio-2.1.0-linux-amd64-core.tar.gz` | `mio-2.1.0-linux-amd64-full.tar.gz` |
 | Windows x86-64 / AMD64 | `mio-2.1.0-windows-amd64-core.zip` | `mio-2.1.0-windows-amd64-full.zip` |
 
-这六个名称是 V2.1 的**预定正式发布资产**，不是现有下载链接。当前 Actions 候选使用 `2.1.0-pr.<源码提交前12位>` 版本号，可在成功运行的 `mio-candidates-*` artifact 中查看归档、`SHA256SUMS` 与验证记录。Linux 和 Windows 仍属实验性，Linux ARM64 不在本次矩阵内。Windows 尚不支持 CLI 的 `run` / `exec` / `test` 子进程启动与 LSP stdin polling。
+表中的六个归档都可在 v2.1.0 的发布页下载。Windows 还提供安装程序；归档验证不代表已在所有软件包管理器和系统版本中验收。Intel Mac、Linux ARM64 与 Windows ARM64 不在本次发行归档清单。
 
 ## 目录布局
 
-候选包已采用编译器与标准库的相对目录布局（目录名以实际候选版本为准）：
+发行包采用编译器与标准库的相对目录布局：
 
 ```text
 mio-2.1.0-linux-amd64-full/
@@ -46,7 +46,7 @@ mio-2.1.0-linux-amd64-full/
 └── provenance.json
 ```
 
-Core 保留编译器、必要的运行文件与发行许可信息，但不带 `bunko/`。上面的目录树对应候选打包实现；实际文件与摘要以归档内 `manifest.json` 为准。
+Core 保留编译器、必要的运行文件与发行许可信息，但不带 `bunko/`。上面的目录树对应正式归档；实际文件与摘要以归档内 `manifest.json` 为准。
 
 Bunko 的导入路径始终使用 `kiso/...`，例如：
 
@@ -60,7 +60,7 @@ chant(math.gcd(84, 30));
 
 ## Bunko 路径解析
 
-V2.1 候选通过共享的 `selfhost/bunkopath` 解析标准库位置，优先级从高到低为：
+V2.1 CLI 通过共享的 `selfhost/bunkopath` 解析标准库位置，优先级从高到低为：
 
 1. 用户显式传入的 `--bunko-root`（仅适用于接受此参数的命令）。
 2. 环境变量 `MIO_BUNKO`。
@@ -69,11 +69,11 @@ V2.1 候选通过共享的 `selfhost/bunkopath` 解析标准库位置，优先�
 
 显式指定不存在或无效的 Bunko 路径时必须报错；不能静默回退到其他目录。自动解析应依据**可执行文件的实际位置**，而不是当前工作目录或不可靠的 `argv[0]` 字符串。
 
-这一顺序已在当前候选实现，并经过迁移目录与错误路径测试；源码见 [`selfhost/bunkopath`](https://github.com/mio-kobo/mio/tree/59002db2c9dc0c6dd11ff0f4341de42f79677df2/selfhost/bunkopath)。
+这一顺序已在 v2.1.0 实现，并经过迁移目录与错误路径测试；源码见 [`selfhost/bunkopath`](https://github.com/mio-kobo/mio/tree/74e461b2985886160a285c7104d2a41090d0f548/selfhost/bunkopath)。
 
 ## 如何安装与校验？
 
-正式版发布后，先在 [Releases](https://github.com/mio-kobo/mio/releases) 中选择自己的操作系统、架构和 Core / Full 类型，再下载相应归档及 `SHA256SUMS`。
+从 [v2.1.0 发布页](https://github.com/mio-kobo/mio/releases/tag/v2.1.0) 下载归档和 `SHA256SUMS`。解压前，使用 macOS 的 `shasum -a 256 <文件>`、Linux 的 `sha256sum <文件>` 或 PowerShell 的 `Get-FileHash <文件> -Algorithm SHA256`，与清单中对应文件的摘要比较。
 
 解压后将包内 `bin` 目录加入 `PATH`，执行：
 
@@ -83,19 +83,8 @@ mio version
 
 不必为预编译原生发行包安装 Go。若使用 Full，请保持 `bin/` 与 `bunko/` 的相对目录结构；也可以通过 `MIO_BUNKO` 明确指定 Bunko 根目录。
 
-正式发布前，应对归档校验和、目录内容、平台二进制格式、无 Bunko 的 Core、独立 Bunko 的 Full，以及原生 CLI 的构建与运行分别进行实际验证。当前尚不提供未经验证的一键安装脚本。
+## 发行验证范围
 
-## 发行验证要求
-
-当前打包和候选 CI 检查以下条件；这些验证不能代替正式发布：
-
-- 同一平台 Core 与 Full 中 `mio` 的 SHA-256 完全一致。
-- Core 不包含可供用户导入的 Bunko 标准库，并能编译一个不导入 Bunko 的程序。
-- Full 能从发行目录以外的任意工作目录找到随包提供的 Bunko。
-- 显式错误的 Bunko 根目录有明确错误消息。
-- 三个平台分别在原生 CI 环境中完成相应测试；不能用交叉编译成功代替目标平台运行验证。
-- 发布资产有 `SHA256SUMS`、源码 Commit 与构建来源记录。
-
-在 PR 阶段，这些内容应先作为 GitHub Actions 的可下载候选产物与验证结果提供，**不直接创建正式版本 Tag、Release 或自动合并 PR**。
+[正式版 CI](https://github.com/mio-kobo/mio/actions/runs/42384976176) 在 macOS ARM64、Linux AMD64、Windows AMD64 原生环境分别检查归档摘要、内容、Core 与 Full 的编译器哈希、Hello 程序构建和运行、Full 自动查找 Bunko 以及无效路径诊断。三个目标均通过。验证范围和报告入口见 [验证与来源](/docs/v2.1/tooling/verification)。
 
 Docker 离线开发环境见 [Docker 开发镜像](/docs/v2.1/tooling/docker)。

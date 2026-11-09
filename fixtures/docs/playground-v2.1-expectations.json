@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "examples": {
+    "0be3db94aa72d1d8b6e405a3110ce6c23549fe846e47d4e1ab3b03e7ba1dbced": {
+      "preview": "yobu \"kiso/encoding/json\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
+    "1e8a04f9f164333a2f6b079638b64e5def106eee1eaaad4622de1c5e466459de": {
+      "preview": "kaku ages: Map<string, int64> = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "",
+        "diagnostics": []
+      }
+    },
+    "2067e59cb8578f39618b1a845231d28d47daf51346410321fc7441071e2ce859": {
+      "preview": "yobu \"kiso/crypto/sha256\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "32\n",
+        "diagnostics": []
+      }
+    },
+    "2122d0ea8cb5f553ccf1b8284199e48258ea7002fcaedfaf076cefaf895ad5ab": {
+      "preview": "yobu \"kiso/crypto/sha256\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "32\n",
+        "diagnostics": []
+      }
+    },
+    "2190196995081117d37bc45f5e127a68fe6aa36e46adf8a7935fd75321df6439": {
+      "preview": "yobu \"kiso/bytes\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\n",
+        "diagnostics": []
+      }
+    },
+    "2c07306daecc42d45b737971d1c86fa089c3ff58c193e3e7f96a49086f00e94f": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
+    "3d5aa893dd7c60f3f5ecbbc93656f83bc569faee748fae3e81a0f385871135c6": {
+      "preview": "yobu \"kiso/regexp\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "57f0dc0246d730d6bd4c12c6d28392afe55b142c3b1b456c4042030d31644122": {
+      "preview": "yobu \"kiso/encoding/json\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\nMio\n",
+        "diagnostics": []
+      }
+    },
+    "60257eab8204d4701556dfede6420634ba9ed83c9f185fa69249ef6d9a3e8da5": {
+      "preview": "yobu \"kiso/encoding/json\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "{\"a\":[true,null,7]}\n\"Hello\\nMio\"\n",
+        "diagnostics": []
+      }
+    },
+    "7a477d40056f8c6ca0775a711a3bb565207b2e8c5f38a2a164f5322215d81015": {
+      "preview": "waza count<T>(values: []T) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n2\n",
+        "diagnostics": []
+      }
+    },
+    "8a17646a1c71ebd70924467f4b1c64c5c8559e205b76c368b037dd16a47feba1": {
+      "preview": "waza first<T>(values: []T) -> T? {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n",
+        "diagnostics": []
+      }
+    },
+    "9508c05f05f57fb7cb99c33cde2e949d57b471a11f471f8e898995af7beff39a": {
+      "preview": "yobu \"kiso/crypto/sha256\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "32\n186\n",
+        "diagnostics": []
+      }
+    },
+    "a09b8d6bc7749204fe1a4ce4f5370f8b0466bd3734b63f9b84bbcd420d02a1cb": {
+      "preview": "yobu \"kiso/regexp\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\n",
+        "diagnostics": []
+      }
+    },
+    "b2da379ed5b70c9e5b3e6315fe51fd038ffdeb0fe5f8be7d3408fe0c52de172a": {
+      "preview": "waza echo(message: string) -> int64 {",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello, 世界🌍！\n0\n",
+        "diagnostics": []
+      }
+    },
+    "c0857e74a19b66c57c362ab182b082cf45146014352c67bd09178767d296319c": {
+      "preview": "yobu \"kiso/bytes\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n2\n",
+        "diagnostics": []
+      }
+    },
+    "c4cafcf75d25c111993fb3bb48c6795d43a04c05e5e94922915568ef7533d736": {
+      "preview": "yobu \"kiso/regexp\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\niie\n",
+        "diagnostics": []
+      }
+    },
+    "e04b337b8458abc2eecf471f0613aabb17d1054625c0f5c72c748c6852f0f5d4": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
+    "e521cc8f7ea339d4a4ac09f2934b98e92130133a046de4c5f8076f1314ce711d": {
+      "preview": "kaku scores: Map<string, int64> = Map[string, int64]();",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "100\n",
+        "diagnostics": []
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 ---
-title: Mochi v16 开发格式
+title: Mochi v16 格式
 description: V2.1 分支的 Mochi 解码器版本常量及兼容性边界。
 ---
 
@@ -13,7 +13,7 @@ yobu "kiso/encoding/mochi";
 chant(mochi.VERSION);
 ```
 
-`VERSION` 的实际值为 **16**。这一变化反映了开发分支的 Decoder 上限，**不构成所有工具链、旧版 VM 或现有 Playground 都能读取 v16 的保证**。
+`VERSION` 的实际值为 **16**。这一变化反映了v2.1.0 的 Decoder 上限，**不构成所有工具链、旧版 VM 或现有 Playground 都能读取 v16 的保证**。
 
 ### 新增的格式信息
 
@@ -22,7 +22,7 @@ chant(mochi.VERSION);
 | v15 | `OP_TYPE_CONSTRAINT = 66` | 记录字段结果的类型表示约束，不执行运行时类型转换 |
 | v16 | `OP_CALL_TYPED = 67` | 间接调用附带是否返回值的信息 |
 
-V2.1 Native 编译入口使用 v16；旧 Go Mochi Decoder 仍以 v14 为上限。另有旧的 `encode_layout` API 保留 v14 输出，不能仅凭库内常量 `VERSION = 16` 推断任意编码入口一定会生成 v16 文件。
+V2.1 的 Native 与 Web 参考解码器支持读取 v16；V2.0 的 Go Mochi Decoder 以 v14 为上限。另有旧的 `encode_layout` API 保留 v14 输出，不能仅凭库内常量 `VERSION = 16` 推断任意编码入口一定会生成 v16 文件。
 
 ### 保留的公开 API
 

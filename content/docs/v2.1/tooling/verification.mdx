@@ -1,6 +1,6 @@
 ---
 title: 验证与来源
-description: Mio V2.1 开发版的源码、阶段验收与 V2.0 历史验证边界。
+description: Mio V2.1 正式版的源码、平台验收与 V2.0 历史验证边界。
 ---
 
 ## 验证与来源
@@ -9,9 +9,22 @@ Mio 的功能与工具链会随着版本变化，因此编写官方文档时，�
 
 ### V2.1 的验证范围
 
-本轮状态核对提交为 `Mio-2.1` 的 `59002db2c9dc0c6dd11ff0f4341de42f79677df2`。平台、Core / Full 与 Docker 候选已通过 [CI 42192548134](https://github.com/mio-kobo/mio/actions/runs/42192548134)，但 V2.1 尚未正式发布。部分内部章节保留 10 月 27 日的源码引用和更早的 M19 报告；它们描述历史范围，不能代替当前整体验收。TCP、Native 参数检查、LSP 取消处理及并发 GC 源码现已提交；并发 GC 与长期压力接纳仍需独立报告。详细区分见 [开发状态](/docs/v2.1/development)。
+正式基线：[v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0)，提交 `74e461b2985886160a285c7104d2a41090d0f548`。平台图标指明功能已验证的系统、CPU 和范围。
 
-**下文保留的是 V2.0.0 Go CLI 与 VM 的历史验证方法**。使用 V2.1 纯 Mio Native CLI 时，`build`、`run` 和 `exec` 的行为已变化，不能直接照搬其中的命令输出预期；请参阅 [Native CLI](/docs/v2.1/tooling/native-cli) 与 [开发状态](/docs/v2.1/development)。
+| 能力 | 证据及范围 |
+| --- | --- |
+| Native AOT、Runtime、Bunko | 三平台原生固定点、Runtime ABI、原生差分与模块测试；见发布页中的 `darwin-arm64-native-report.json`、`linux-amd64-native-report.json`、`windows-amd64-native-report.json` |
+| Core / Full、CLI、测试、LSP | [发行工作流](https://github.com/mio-kobo/mio/actions/runs/42384976176) 及三份对应的 `*-verification.json`，验证归档、构建运行、Bunko 路径、测试与 LSP 握手 |
+| Linux AMD64 Full Docker | 同一工作流的 `docker-full-offline` 与 `docker-verification.json`，验证断网运行、归档保存与重新导入 |
+| Web 参考 VM | [v2.1.0 Web CI](https://github.com/mio-kobo/mio/actions/runs/42384113383) 覆盖 Chromium、原生 Mochi 生产端与参考 VM 差分 |
+| Mach-O 签名 | macOS ARM64 用正式 CLI 构建后执行 `codesign --verify --strict`；签名 API 另检查合法和无效输入 |
+| 并发 GC | ABI、有限分配和已有差分用例不能代替长期并发回收的接纳 |
+
+#### 未验证的架构 <PlatformSupport showArch={false} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
+
+三平台均有通过验证的正式目标，但不能把一个架构的结果推广到整个系统。只显示系统汇总时，缺少对应架构的证据会显示为「未验证」；具体架构见 [发行包说明](/docs/v2.1/tooling/distribution)。
+
+下文标明历史验证的部分使用 V2.0.0 Go CLI 语义。V2.1 的本机命令见 [Native CLI](/docs/v2.1/tooling/native-cli)。
 
 ### V2.0 历史基线
 
@@ -99,19 +112,20 @@ node scripts/check-examples.mjs
 
 ### 网页 Playground 验证
 
-文档站中的 Playground 依赖浏览器 WASM 运行环境，并不等同于安装在本机的完整 CLI。
+V2.1 页使用 v2.1.0 Go Web 参考 VM。V1.0 和 V2.0 页继续使用原来的浏览器资源。V2.1 加载失败时会显示错误，不会改用旧版 VM。网页只提供运行和静态检查；Native AOT、文件、网络、进程、测试运行器与字节码文件操作请使用本机工具。
 
-当前网页内置的 Bunko 模块仅包含 `kiso/math`、`kiso/array`、`kiso/string`、`kiso/bytes` 和 `kiso/utf8`。
+| 已验证的浏览器模块 | 检查内容 |
+| --- | --- |
+| `kiso/array`、`kiso/bytes` | 追加、空数组、负长度诊断、空字节序列查找 |
+| `kiso/convert`、`kiso/math` | 整数解析与溢出、最大公约数、负数平方根 |
+| `kiso/encoding/binary`、`kiso/encoding/json` | 大端读取与短输入、JSON 解析与渲染、无效 JSON |
+| `kiso/regexp`、`kiso/regexp/unicode_data` | Unicode 属性匹配、非法模式、规范化表键及未知键 |
+| `kiso/crypto/sha256` | `abc` 的完整摘要、无效范围 |
+| `kiso/path`、`kiso/string`、`kiso/utf8` | 斜杠路径、非 ASCII 字符、无效 UTF-8 |
 
-为了让示例尽量可以直接运行，应遵循以下要求：
+`kiso/fs`、`kiso/io`、`kiso/os`、`kiso/net/tcp`、`kiso/testing` 等依赖宿主的模块没有嵌入。文档中相应代码以静态代码块展示。
 
-- 每个可运行的 `mio` 代码块都是完整程序，不依赖同一页面其他代码块的导入或变量。
-- 使用标准库时在代码块内部写入完整的 `yobu` 语句。
-- 无法在网页独立运行的片段应标注 `no-run`，测试文件还应标注 `mode=test`。
-- CLI 命令使用 `sh` 代码块，不作为 Mio 源码运行。
-- 故意演示编译错误的 Mio 代码也应标注 `no-run`。
-
-Playground 的自动启用条件由文档仓库中的 `source.config.ts` 和 `components/mio-code-block.tsx` 控制。
+每个可运行的 `mio` 代码块应为完整程序，在同一代码块写出依赖的 `yobu`。上下文片段、故意出错的示例和只能在本机运行的测试可标注 `no-run`。站点用 `npm run check:playground` 校验每个可运行代码块。
 
 ### 测试命令验证
 

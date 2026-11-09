@@ -3,7 +3,7 @@ title: 内存预算与压力观测
 description: M19c 的自适应预算、LOS、压力等级与快照边界。
 ---
 
-## 原生内存预算
+## 原生内存预算 <PlatformSupport showArch={true} systems={{ macos: { arm64: "partial" }, linux: { x86_64: "partial" }, windows: { x86_64: "partial" } }} />
 
 M19c 把普通对象区、Side Metadata 与大对象映射的费用纳入有界管理。**对象占用上限、托管页预算、Reserved 和 RSS 并不是同一个数值。**
 

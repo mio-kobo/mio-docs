@@ -56,10 +56,10 @@ chant(string.rune_count(text));
 
 ### Map 构造
 
-`Map<K, V>` 是映射表类型。创建映射表时使用 `Map[K, V]()`；目标类型明确时也可通过 `Map()` 构造。
+`Map<K, V>` 是映射表类型。创建映射表时使用 `Map[K, V]()`，在构造表达式中写出两个类型参数。
 
 ```mio title="MapConstructor.mio"
-kaku scores: Map<string, int64> = Map();
+kaku scores: Map<string, int64> = Map[string, int64]();
 scores["Mio"] = 100;
 
 kaku score = scores["Mio"];

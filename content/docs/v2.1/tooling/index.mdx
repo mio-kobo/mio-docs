@@ -11,7 +11,7 @@ V2.1 提供原生编译流程，并完善 CLI、语言服务器和测试工具�
 
 ### 命令行工具
 
-| 命令 | V2.0 正式 CLI | V2.1 开发版 CLI |
+| 命令 | V2.0 正式 CLI | V2.1 正式 CLI |
 | --- | --- | --- |
 | `mio check` | 源码静态检查 | 检查源码，不生成程序 |
 | `mio build` | 默认生成 `.mochi` | 默认生成原生程序；可用 `--emit=mochi` |
@@ -25,7 +25,7 @@ V2.1 的选项、输出与退出码仍可能调整。详细用法见 [Native CLI
 
 ### 从源码到原生程序 <FeatureBadge status="updated" since="2.1" />
 
-V2.1 的原生编译流程将源码转换为对应平台的可执行文件。macOS ARM64、Linux AMD64 与 Windows AMD64 已有 CI 验证；后两者仍属实验性，正式支持情况见 [发行包说明](/docs/v2.1/tooling/distribution)。
+V2.1 的原生编译流程将源码转换为对应平台的可执行文件。macOS ARM64、Linux AMD64 与 Windows AMD64 已有 CI 验证；发行与验收范围见 [发行包说明](/docs/v2.1/tooling/distribution)。
 
 不同版本的工具对 Mochi 格式的支持范围可能不同，详见 [Mochi 格式](/docs/v2.1/internals/mochi)。
 
@@ -39,8 +39,8 @@ Mio 提供 VS Code 和 JetBrains 插件。V2.1 LSP 支持编辑器中未保存�
 
 | 页面 | 内容 |
 | --- | --- |
-| [Core、Full 与发行包](/docs/v2.1/tooling/distribution) | V2.1 发行包内容边界、Bunko 外置方案与发布验收（候选已验证，未正式发布） |
-| [Docker 离线开发](/docs/v2.1/tooling/docker) | 复用 Linux Full 发行包的离线容器开发流程（候选已验证，未正式发布） |
+| [Core、Full 与发行包](/docs/v2.1/tooling/distribution) | V2.1 发行包内容边界、Bunko 外置方案与发布验收 |
+| [Docker 离线开发](/docs/v2.1/tooling/docker) | 复用 Linux Full 发行包的离线容器开发流程 |
 | [Native CLI](/docs/v2.1/tooling/native-cli) | V2.1 原生命令、选项与 V2.0 的区别 |
 | [自托管编译器与语言服务](/docs/v2.1/tooling/selfhost) | 前端、Native Pipeline、LSP、测试与字节码工具 |
 | [Go 参考 CLI](/docs/v2.1/tooling/cli) | 沿用的 V2.0 Go CLI 命令与 Mochi VM 路径 |

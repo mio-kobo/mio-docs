@@ -14,6 +14,8 @@ description: Mio V2.0 枚举变体、关联数据与 awase 模式匹配
 
 例如：
 
+此示例可在 Web Playground 中运行。在 macOS ARM64 上，v2.1.0 Native CLI 通过静态检查，但生成原生程序时返回 `E_LOWER`。
+
 ```mio title="Enum.mio"
 sentaku Status {
     Ready;
@@ -125,6 +127,8 @@ awase (status) {
 
 例如：
 
+此示例可在 Web Playground 中运行。在 macOS ARM64 上，v2.1.0 Native CLI 通过静态检查，但生成原生程序时返回 `E_LOWER`。
+
 ```mio title="Enum.mio"
 sentaku Message {
     Text(string);
@@ -193,6 +197,8 @@ sentaku State {
 枚举适合表示函数可能返回的不同结果，例如成功得到数据，或者得到错误信息。
 
 Mio 可以通过泛型枚举表达这样的数据：
+
+此示例可在 Web Playground 中运行。v2.1.0 Native CLI 无法从这个构造调用推断泛型枚举的全部类型参数（`E0306`）。
 
 ```mio title="Enum.mio"
 sentaku Result<T, E> {

@@ -10,7 +10,7 @@ description: V2.1 的 kiso/regexp：Thompson NFA、Unicode 属性和布尔匹配
 
 ### 导入与类型
 
-```mio title="Regexp.mio" no-run
+```mio title="Regexp.mio"
 yobu "kiso/regexp";
 
 kaku pattern = regexp.compile("^Mio[0-9]+$");
@@ -35,7 +35,7 @@ moshi (pattern.error == "") {
 
 ### 基本匹配、重复与分支
 
-```mio title="RegexpBasics.mio" no-run
+```mio title="RegexpBasics.mio"
 yobu "kiso/regexp";
 
 kaku pattern = regexp.compile("^(?:ab|a){2,4}c+$");
@@ -49,7 +49,7 @@ moshi (pattern.error == "") {
 
 ### Unicode 与模式标志
 
-```mio title="RegexpUnicode.mio" no-run
+```mio title="RegexpUnicode.mio"
 yobu "kiso/regexp";
 
 kaku han = regexp.compile("^\\p{Han}+$");
@@ -66,4 +66,4 @@ moshi (han.error == "" && fold.error == "") {
 
 无效字符集合、非法转义、未支持的反向引用（例如 `\1`）等通过 `Program.error` 报告。不要认为它支持 PCRE 的回溯、反向引用、任意环视或替换接口。模式和语法树受源码中的资源与深度上限约束。
 
-来源：[`regexp.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/regexp/regexp.mio)、[`regexp_test.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/regexp/regexp_test.mio)。
+来源：[`regexp.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/regexp/regexp.mio)、[`regexp_test.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/regexp/regexp_test.mio)。

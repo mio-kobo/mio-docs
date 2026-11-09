@@ -1,15 +1,15 @@
 ---
 title: 既有标准库的变化
-description: Mio-2.1 分支新增的公开函数与原有模块行为边界。
+description: Mio v2.1.0 新增的公开函数与原有模块行为边界。
 ---
 
 ## 已有标准库的增量变化
 
-这部分只记录与 `v2.0.0` Tag 相比，在固定 `Mio-2.1` 提交中**可以找到明确公开声明**的变化。其余 API 不在本页重复抄写。
+本页对照 `v2.0.0` 与 `v2.1.0` 的公开接口；字符设备判断和运行时失败依赖本机执行环境。其余 API 不在本页重复抄写。
 
 ### kiso/string：`trim_space` <FeatureBadge status="new" since="2.1" />
 
-```mio title="TrimSpace.mio" no-run
+```mio title="TrimSpace.mio"
 yobu "kiso/string";
 
 kaku text = string.trim_space("  Mio  ");
@@ -44,7 +44,7 @@ chant(fs.is_character_device("/dev/null"));
 
 具体源码见：
 
-- [string.mio](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/string/string.mio)
-- [fs.mio](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/fs/fs.mio)
-- [math/fail.mio](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/math/fail.mio)
-- [aot/lower/types.mio](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/aot/lower/types/types.mio)
+- [string.mio](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/string/string.mio)
+- [fs.mio](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/fs/fs.mio)
+- [math/fail.mio](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/math/fail.mio)
+- [aot/lower/types.mio](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/aot/lower/types/types.mio)

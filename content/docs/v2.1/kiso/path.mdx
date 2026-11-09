@@ -6,7 +6,7 @@ description: Mio V2.0 路径处理标准库 kiso/path
 > **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
 
 
-## 路径
+## 路径 <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
 
 路径标准库（Path）提供路径清理、拼接、扩展名提取、目录与文件名分离等操作。
 
@@ -93,6 +93,6 @@ chant(result.base);
 
 ### 使用限制
 
-这里的路径算法不认识 Windows 盘符、UNC 路径或反斜杠，也不验证文件是否存在。特别注意 `join("a", "/b")` 的规则不同于某些语言的路径库：第二段以 `/` 开头不代表自动抛弃第一段。
+正式版三平台的路径包测试均通过。本包只处理以 `/` 分隔的路径文本；算法不认识 Windows 盘符、UNC 路径或反斜杠，也不验证文件是否存在。特别注意 `join("a", "/b")` 的规则不同于某些语言的路径库：第二段以 `/` 开头不代表自动抛弃第一段。
 
 源码依据：[Mio v2.0.0 · `bunko/kiso/path/path.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/path/path.mio)。

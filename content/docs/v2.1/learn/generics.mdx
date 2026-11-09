@@ -48,7 +48,7 @@ waza first<T>(values: []T) -> T? {
     kaesu values[0];
 }
 
-kaku number = first([10, 20, 30]);
+kaku number = first[int64]([10, 20, 30]);
 
 moshi (number != mu) {
     chant(number);
@@ -157,6 +157,8 @@ chant(message.value);
 
 枚举也可以通过类型参数让不同的变体保存不同类型的数据。
 
+此示例可在 Web Playground 中运行。v2.1.0 Native CLI 无法从这个构造调用推断泛型枚举的全部类型参数（`E0306`）。
+
 ```mio title="Generic.mio"
 sentaku Result<T, E> {
     Ok(T);
@@ -188,11 +190,11 @@ waza count<T>(values: []T) -> int64 {
     kaesu len(values);
 }
 
-chant(count([1, 2, 3]));
-chant(count(["A", "B"]));
+chant(count[int64]([1, 2, 3]));
+chant(count[string](["A", "B"]));
 ```
 
-`count` 不需要知道元素的具体类型，只需要数组支持 `len()` 操作。
+`count` 的函数体只使用数组长度。调用时显式写出元素类型，避免 v2.1.0 Native CLI 无法从直接传入的数组字面量推断 `T`。
 
 对于依赖算术运算的泛型函数，则需要使用 Mio 已支持的泛型约束，例如 `T: Number`。泛型约束的具体规则可以在「泛型约束」章节中进一步了解。
 

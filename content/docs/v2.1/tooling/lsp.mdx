@@ -1,15 +1,15 @@
 ---
 title: MioCore LSP
-description: MioCore LSP 的已发布协议能力，以及 V2.1 LSP 开发版的变化。
+description: MioCore LSP 的已发布协议能力，以及 V2.1 的协议变化。
 ---
 
-> **版本说明：** 本页主要介绍 V2.0 已发布的 MioCore LSP。V2.1 LSP 开发版继续支持 Hover、跳转、引用、补全和签名提示，并增加了未保存文档处理与缓存等改进；重命名、格式化和语义 Token 尚不能视为已完成。参见 [自托管工具链](/docs/v2.1/tooling/selfhost)。
+本页介绍 v2.1.0 的 MioCore。正式发行归档在三平台通过 LSP 握手与协议测试；macOS ARM64 本机额外验证了 Hover、定义跳转和诊断发布。编辑器扩展版本需单独核对。
 
-## MioCore LSP
+## MioCore LSP <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
 
 语言服务器协议（Language Server Protocol，LSP）用于在编程语言与编辑器之间提供统一的代码分析能力。
 
-Mio V2.0.0 内置了 MioCore 语言服务器，它可以为编辑器提供语法检查、类型诊断、代码补全、定义跳转和函数签名提示等功能。
+Mio v2.1.0 内置了 MioCore 语言服务器，它可以为编辑器提供语法检查、类型诊断、代码补全、定义跳转和函数签名提示等功能。
 
 MioCore 使用标准输入输出（stdio）作为通信通道，并通过 JSON-RPC 协议交换消息。
 
@@ -27,7 +27,7 @@ mio lsp
 mio lsp --stdio
 ```
 
-`--stdio` 是 Mio V2.0.0 当前支持的语言服务器传输方式。
+`--stdio` 是 Mio v2.1.0 支持的语言服务器传输方式。
 
 需要注意，启动后程序会等待 LSP 客户端发送协议消息。这不是交互式 Mio 解释器，不能直接在终端中逐行输入普通源码。
 
@@ -44,11 +44,11 @@ MioCore 的消息采用 JSON-RPC，并使用 `Content-Length` 标头标记消息
 ```json
 {
   "name": "MioCore",
-  "version": "2.0.0"
+  "version": "2.0.0-dev"
 }
 ```
 
-这是初始化响应中的 `serverInfo` 内容，不是单独发送的完整 JSON-RPC 响应。
+这是 v2.1.0 实际返回的历史 serverInfo 版本标识；CLI 发行版本请用 `mio version` 核对。这是初始化响应中的 `serverInfo` 内容，不是单独发送的完整 JSON-RPC 响应。
 
 ### 文档同步
 

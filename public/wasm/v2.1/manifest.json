@@ -1,0 +1,16 @@
+{
+  "version": "v2.1.0",
+  "source": "74e461b2985886160a285c7104d2a41090d0f548",
+  "sourceRepository": "https://github.com/mio-kobo/mio",
+  "engine": "go-reference-vm/js-wasm",
+  "go": "go1.27.3",
+  "buildHost": "darwin/arm64",
+  "buildCommand": "bash scripts/web/build.sh",
+  "sourceMethod": "git archive v2.1.0",
+  "wasmBytes": 7771054,
+  "files": {
+    "mio.wasm": "7196d8cdabc0349b4350e4754cf35190d8fe3aeb91755cb2d49a0619adb891ce",
+    "wasm_exec.js": "0c949f4996f9a89698e4b5c586de32249c3b69b7baadb64d220073cc04acba14",
+    "mio-worker.js": "751a51af633de7f6d3de55f2b018cff5c71d1800d8459df9ab5741a222c4575a"
+  }
+}

@@ -1,12 +1,12 @@
 ---
-featureBadge: experimental
+featureBadge: new
 title: JSON 编解码
-description: V2.1 开发包 kiso/encoding/json 的节点表示、解析与渲染接口。
+description: V2.1 的 kiso/encoding/json 的节点表示、解析与渲染接口。
 ---
 
-## JSON <FeatureBadge status="experimental" since="2.1" />
+## JSON <FeatureBadge status="new" since="2.1" />
 
-这是 V2.1 新增的开发能力，尚未完成 V2.1 最终验收，保持 BETA 定位。
+这是 v2.1.0 新增的模块，两个完整示例可在本页的 Playground 运行。
 
 JSON 包以 `Document` 表示一个解析后的文档。它不把 JSON 对象直接转换为 Mio 的 `Map`，而是把每个节点存进 `Document.values` 数组，并用整数索引引用子节点。这允许数字保留原始 JSON 文本，不会因先转为浮点数而丢失大整数精度。
 
@@ -17,7 +17,7 @@ yobu "kiso/encoding/json";
 yobu "kiso/string";
 ```
 
-`no-run` 只表示网站现有 WASM 未嵌入此 V2.1 包。完整 Bunko 环境中的用法见下文。
+导入片段没有可执行语句；完整示例见下文。
 
 ### 公开类型
 
@@ -55,7 +55,7 @@ koukai kata Document {
 
 ### 读取对象和数值
 
-```mio title="ReadJSON.mio" no-run
+```mio title="ReadJSON.mio"
 yobu "kiso/encoding/json";
 yobu "kiso/string";
 
@@ -75,7 +75,7 @@ moshi (doc.error == "") {
 
 ### 渲染已有文档
 
-```mio title="RenderJSON.mio" no-run
+```mio title="RenderJSON.mio"
 yobu "kiso/encoding/json";
 yobu "kiso/string";
 
@@ -90,4 +90,4 @@ moshi (doc.error == "") {
 
 源码在解析前验证 UTF-8，拒绝大于 `67,108,864` 字节的输入；解析结构层数超过 `256` 或节点过多也会失败。JSON 数字原样保存以保持表示精度；`render` 面向有效的解析结果，**不会保证手工伪造的节点图都安全**。本包没有公开直接把任意 Mio `Map` 自动序列化的接口。
 
-源码：[`bunko/kiso/encoding/json/json.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/encoding/json/json.mio)，测试：[`json_test.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/encoding/json/json_test.mio)。
+源码：[`bunko/kiso/encoding/json/json.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/encoding/json/json.mio)，测试：[`json_test.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/encoding/json/json_test.mio)。

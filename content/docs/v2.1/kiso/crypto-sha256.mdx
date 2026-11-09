@@ -10,7 +10,7 @@ SHA-256 用于生成固定的 256 位（32 字节）哈希摘要。`kiso/crypto/
 
 ### 导入
 
-```mio title="SHA256.mio" no-run
+```mio title="SHA256.mio"
 yobu "kiso/crypto/sha256";
 yobu "kiso/string";
 
@@ -41,7 +41,7 @@ koukai kata Context {
 
 ### 只计算一部分内容
 
-```mio title="SHA256Range.mio" no-run
+```mio title="SHA256Range.mio"
 yobu "kiso/crypto/sha256";
 yobu "kiso/string";
 
@@ -57,4 +57,4 @@ chant(len(digest));
 
 源码测试包括空消息、`abc`、跨两个块的标准消息、百万个 `a`，以及上下文复用。这里的 SHA-256 是**无密钥摘要函数**，不是 HMAC、数字签名或加密算法。`Context` 中的公开数组用于计算内部常量，调用者不应随意修改。
 
-来源：[`sha256.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/crypto/sha256/sha256.mio)、[`sha256_test.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/crypto/sha256/sha256_test.mio)。
+来源：[`sha256.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/crypto/sha256/sha256.mio)、[`sha256_test.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/crypto/sha256/sha256_test.mio)。

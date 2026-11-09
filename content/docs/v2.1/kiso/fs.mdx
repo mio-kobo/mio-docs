@@ -4,7 +4,9 @@ title: 文件系统
 description: Mio V2.1 文件系统标准库 kiso/fs，包含字符设备判断。
 ---
 
-## 文件系统
+## 文件系统 <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
+
+正式版三平台通过普通文件、追加写入、目录及 Unicode 文件名测试。浏览器不提供文件系统接口。
 
 文件系统标准库（File System）提供同步文件打开、读写、关闭、目录创建、文件状态与目录列表等操作。
 
@@ -24,7 +26,7 @@ chant(fs.is_character_device("/dev/null"));
 
 ### 导入包
 
-> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio v2.1.0 Native CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
 
 通过 `yobu "kiso/fs";` 导入本包，随后使用 `fs.函数名(...)` 调用。
 

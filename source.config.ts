@@ -1,7 +1,7 @@
 import { defineConfig } from 'fumadocs-mdx/config';
 import { remarkFeatureBadge, remarkRestoreFeatureBadge, rehypeFeatureBadgeToc, rehypeRestoreFeatureBadge } from './lib/feature-badge-mdx.mjs';
 import mio from './syntaxes/mio.tmLanguage.json';
-import { shouldAttachPlayground } from './lib/mio-example-policy.mjs';
+import { isPlaygroundCandidate } from './lib/mio-example-policy.mjs';
 
 /**
  * Runs inside Fumadocs' build-time rehype pipeline. `this.source` is the raw
@@ -12,7 +12,7 @@ const mioPlaygroundTransformer = {
   name: 'mio-playground-source',
   pre(this: { options: { lang?: string; meta?: Record<string, unknown> }; source: string }, node: { properties: Record<string, unknown> }) {
     if (this.options.lang?.toLowerCase() !== 'mio') return;
-    if (!shouldAttachPlayground(this.source, this.options.meta)) return;
+    if (!isPlaygroundCandidate(this.source, this.options.meta)) return;
     node.properties['data-mio-source'] = this.source;
   },
 };

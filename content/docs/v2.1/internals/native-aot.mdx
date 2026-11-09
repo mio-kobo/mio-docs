@@ -3,7 +3,7 @@ title: Native AOT · 从 V2.0 后端到 V2.1 工具链
 description: 区分 V2.0 Mochi VM、Go AOT、M18 自编译与 V2.1 纯 Mio 源码到 Native 管线。
 ---
 
-## V2.1 增加了什么 <FeatureBadge status="updated" since="2.1" />
+## V2.1 增加了什么 <FeatureBadge status="updated" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
 
 V2.0 已经具备 Mochi VM、Go AOT 和纯 Mio Native AOT 后端，M18 验证的是**Mochi → 原生程序**的多代自编译。V2.1 的主要变化，是把此前独立的源码前端、Mochi 生成、Native lowering、Mach-O 生成和本地 ad-hoc 签名接入一条纯 Mio 管线。
 
@@ -11,11 +11,11 @@ V2.0 已经具备 Mochi VM、Go AOT 和纯 Mio Native AOT 后端，M18 验证的
 | --- | --- | --- |
 | V2.0 Go CLI + Mochi VM | `.mio` → `.mochi` → VM 执行 | 保留的参考执行路径 |
 | V2.0 Go AOT / 纯 Mio 后端 | `.mochi` → macOS ARM64 原生程序 | M18 已有成果 |
-| V2.1 纯 Mio Native CLI | `.mio` → Mochi IR → Mach-O → ad-hoc 签名 | 源码工具链开发候选 |
+| V2.1 纯 Mio Native CLI | `.mio` → Mochi IR → Mach-O、ELF 或 PE | v2.1.0 正式 Native CLI |
 
-V2.1 的 `build` 默认原生输出，`run` 和 `exec` 使用原生启动流程。旧 Go CLI 默认生成字节码的说明在下文继续保留，**不适用于新的 Native CLI**。若需要字节码输出，请在开发候选中显式选择 `--emit=mochi`。
+V2.1 的 `build` 默认原生输出，`run` 和 `exec` 使用原生启动流程。旧 Go CLI 默认生成字节码的说明在下文继续保留，**不适用于新的 Native CLI**。若需要字节码输出，请在 Native CLI 中显式选择 `--emit=mochi`。
 
-当前目标包含 macOS ARM64 和实验性的 Linux / Windows AMD64 后端；对应产物分别为 Mach-O、ELF 与 PE。三平台固定点及候选包 CI 的验证范围见 [开发状态](/docs/v2.1/development)。历史 GF4 记录只覆盖其冻结源码，不能代替后续并发 Runtime 的整体接纳。
+v2.1.0 原生目标包含 macOS ARM64、Linux AMD64 和 Windows AMD64，对应产物为 Mach-O、ELF 与 PE。三平台正式 CI 均通过原生自举固定点和 Runtime ABI 验证。历史 GF4 记录只覆盖其冻结源码，不能代替后续并发 Runtime 的整体接纳。
 
 下面保留 V2.0 的三个执行路径、M18 验收与原生工具用法，供对照旧版实现。
 
@@ -75,7 +75,7 @@ Native Stage 4 → Native Stage 5         # 额外生成见证，未计为已执
 | macOS Apple Silicon / ARM64 | v2.0.0 唯一正式验证目标 |
 | 更早的 macOS 版本 | 未建立最低支持版本 |
 | Intel Mac | 没有 v2.0.0 支持认证 |
-| Linux、Windows | 没有 v2.0.0 支持认证，不生成正式支持包 |
+| Linux AMD64、Windows AMD64 | v2.1.0 提供正式归档，分别生成 ELF 和 PE，不使用 Mach-O 签名 |
 | 无 `codesign` 的环境 | 原生产物无法按本页流程完成签名与验证 |
 
 官方发行包使用 **ad-hoc 签名**，没有 Developer ID，也没有 notarization。`codesign --verify --strict` 通过表示镜像的结构与 ad-hoc 签名自洽，不代表 Apple 已认可发布者。互联网下载后的 Gatekeeper 首次运行体验尚未认证。

@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { architectures, platforms, supportStatuses, type Architecture, type Platform, type SupportStatus } from '@/lib/platform-support';
 
 // Local monochrome silhouettes; no network assets or icon font required.
@@ -11,20 +11,33 @@ const logos: Record<Platform, React.ReactNode> = {
 };
 export type PlatformBadgeProps = { system: Platform; status: SupportStatus; arch?: Architecture; note?: string };
 
+// A hover must not leave the previous badge's keyboard tooltip covering it.
+let dismissActiveDetail: (() => void) | undefined;
+
 /** A button makes details available on touch, hover and keyboard focus. */
 export function PlatformBadge({ system, status, arch, note }: PlatformBadgeProps) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
   const [position, setPosition] = useState({ left: 16, top: 16 });
+  const dismiss = useCallback(() => {
+    if (dismissActiveDetail === dismiss) dismissActiveDetail = undefined;
+    setOpen(false);
+  }, []);
+  useEffect(() => () => {
+    if (dismissActiveDetail === dismiss) dismissActiveDetail = undefined;
+  }, [dismiss]);
+
   function reveal() {
+    if (dismissActiveDetail !== dismiss) dismissActiveDetail?.();
+    dismissActiveDetail = dismiss;
     const rect = button.current?.getBoundingClientRect();
     if (rect) setPosition({ left: Math.max(16, Math.min(rect.left, window.innerWidth - Math.min(288, window.innerWidth - 32) - 16)), top: Math.max(16, Math.min(rect.bottom, window.innerHeight - 160)) });
     setOpen(true);
   }
   const label = `${platforms[system].label}${arch ? ` ${architectures[arch].label}` : ''}：${supportStatuses[status].label}`;
-  return <span className={`platform-badge-wrap platform-status-${status}`} onMouseEnter={reveal} onMouseLeave={() => { if (document.activeElement !== button.current) setOpen(false); }}>
-    <button ref={button} type="button" className="platform-badge" aria-label={label} aria-describedby={id} aria-expanded={open} onFocus={reveal} onClick={reveal} onBlur={() => setOpen(false)} onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); setOpen(false); } }}>
+  return <span className={`platform-badge-wrap platform-status-${status}`} onMouseEnter={reveal} onMouseLeave={() => { if (document.activeElement !== button.current) dismiss(); }}>
+    <button ref={button} type="button" className="platform-badge" aria-label={label} aria-describedby={id} aria-expanded={open} onFocus={reveal} onClick={reveal} onBlur={dismiss} onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); dismiss(); } }}>
       <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">{logos[system]}</svg>
       {arch && <span>{architectures[arch].label}</span>}<span aria-hidden="true">{supportStatuses[status].symbol}</span>
     </button>

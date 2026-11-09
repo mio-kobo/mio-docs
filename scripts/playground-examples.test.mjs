@@ -6,12 +6,17 @@ import { isDeepStrictEqual } from 'node:util';
 import test from 'node:test';
 import { collectDocsExamples } from './lib/docs-examples.mjs';
 import { PlaygroundWorkerClient } from './lib/playground-worker.mjs';
+import { bunkoCases, deniedModules } from '../fixtures/docs/playground-v2.1-bunko.mjs';
+import { hasSupportedImports, V21_BUNKO_PACKAGES } from '../lib/mio-example-policy.mjs';
 import { startWasmAssetServer } from './lib/wasm-asset-server.mjs';
 
 const root = process.cwd();
 const assetDir = join(root, 'public/wasm');
 const fixturePath = join(root, 'fixtures/docs/playground-expectations.json');
 const collection = collectDocsExamples(join(root, 'content/docs'));
+const v21Dir = join(assetDir, 'v2.1');
+const v21Manifest = JSON.parse(readFileSync(join(v21Dir, 'manifest.json'), 'utf8'));
+const v21Fixture = JSON.parse(readFileSync(join(root, 'fixtures/docs/playground-v2.1-expectations.json'), 'utf8'));
 const fixture = JSON.parse(readFileSync(fixturePath, 'utf8'));
 const sha256 = path => createHash('sha256').update(readFileSync(path)).digest('hex');
 
@@ -24,9 +29,10 @@ function observable(result) {
   };
 }
 
-async function withWorker(run, options = {}) {
-  const server = await startWasmAssetServer({ assetDir, failWasm: options.failWasm });
-  const client = new PlaygroundWorkerClient({ assetDir, origin: server.origin });
+async function withWorker(run, { version = 'legacy', failWasm } = {}) {
+  const assets = { assetDir: version === 'v2.1' ? v21Dir : assetDir, version };
+  const server = await startWasmAssetServer({ ...assets, failWasm });
+  const client = new PlaygroundWorkerClient({ ...assets, origin: server.origin });
   try {
     return await run({ server, client });
   } finally {
@@ -41,6 +47,11 @@ test('wraps the same production Worker and assets used by the site', () => {
   assert.equal(sha256(join(assetDir, 'wasm_exec.js')), fixture.runtime.wasmExecSha256,
     'wasm_exec.js changed. Run npm run update:playground and review the output diff.');
 });
+
+function expectation(example) {
+  return (example.version === 'v2.1' ? v21Fixture.examples[example.key] : undefined)
+    ?? fixture.examples[example.key];
+}
 
 test('collects every executable Mio example and validates its assertions', async () => {
   console.log('Mio blocks:', collection.counts);
@@ -61,7 +72,7 @@ test('collects every executable Mio example and validates its assertions', async
   const duplicateStaticOutputs = [];
   for (const output of collection.staticOutputs) {
     for (const example of executableByFile.get(output.file) ?? []) {
-      const expected = fixture.examples[example.key]?.run;
+      const expected = expectation(example)?.run;
       if (expected?.status === 'ok' && output.content.trimEnd() === expected.stdout.trimEnd()) {
         duplicateStaticOutputs.push(`${output.file}:${output.line} duplicates the Playground output at ${example.file}:${example.line}`);
       }
@@ -71,30 +82,32 @@ test('collects every executable Mio example and validates its assertions', async
 
   const missing = [];
   const mismatches = [];
-  await withWorker(async ({ client }) => {
-    await client.start();
-    for (const example of collection.examples.filter(item => item.kind === 'executable')) {
-      const expected = fixture.examples[example.key];
-      const where = `${example.file}:${example.line}`;
-      if (!expected) {
-        missing.push(`${where} (${JSON.stringify(example.preview)}): no expectation; run npm run update:playground and review`);
-        continue;
+  for (const version of ['legacy', 'v2.1']) {
+    const blocks = collection.examples.filter(item => item.kind === 'executable' && item.version === version);
+    assert.ok(blocks.length > 0, version);
+    await withWorker(async ({ client }) => {
+      await client.start();
+      for (const example of blocks) {
+        const expected = expectation(example);
+        const where = `${example.file}:${example.line} (${version})`;
+        if (!expected) {
+          missing.push(`${where} (${JSON.stringify(example.preview)}): no expectation; update and review the ${version} fixture`);
+          continue;
+        }
+        for (const operation of ['check', 'run']) {
+          const actual = observable(await client.execute(operation, example.source));
+          if (!isDeepStrictEqual(actual, expected[operation])) {
+            mismatches.push(`${where} ${operation}\n  expected ${JSON.stringify(expected[operation])}\n  actual   ${JSON.stringify(actual)}\n  source   ${example.preview}`);
+          }
+        }
       }
-      const checked = await client.execute('check', example.source);
-      if (!isDeepStrictEqual(observable(checked), expected.check)) {
-        mismatches.push(`${where} check\n  expected ${JSON.stringify(expected.check)}\n  actual   ${JSON.stringify(observable(checked))}\n  source   ${example.preview}`);
-      }
-      const ran = await client.execute('run', example.source);
-      if (!isDeepStrictEqual(observable(ran), expected.run)) {
-        mismatches.push(`${where} run\n  expected ${JSON.stringify(expected.run)}\n  actual   ${JSON.stringify(observable(ran))}\n  source   ${example.preview}`);
-      }
-    }
-  });
+    }, { version });
+    console.log(`Validated ${blocks.length} ${version} executable blocks (${new Set(blocks.map(item => item.key)).size} unique sources).`);
+  }
 
   if (missing.length || mismatches.length) {
     assert.fail([...missing, ...mismatches].join('\n'));
   }
-  console.log(`Validated ${collection.counts.executable} executable blocks (${Object.keys(fixture.examples).length} unique sources).`);
 });
 
 test('runs multiple examples sequentially and recovers after a diagnostic', async () => {
@@ -156,4 +169,92 @@ test('reports a real WASM load failure and then runs after recovery', async () =
     assert.equal(result.status, 'ok');
     assert.equal(result.stdout, 'after load failure\n');
   });
+});
+
+test('V2.1 runtime hashes match the release build manifest', () => {
+  assert.equal(v21Manifest.version, 'v2.1.0');
+  assert.equal(v21Manifest.source, '74e461b2985886160a285c7104d2a41090d0f548');
+  for (const file of ['mio.wasm', 'wasm_exec.js', 'mio-worker.js']) {
+    assert.equal(sha256(join(v21Dir, file)), v21Manifest.files[file], file);
+  }
+  assert.notEqual(v21Manifest.files['mio.wasm'], fixture.runtime.wasmSha256);
+});
+
+test('V2.1 Bunko browser allowlist matches the verified runtime', async t => {
+  assert.deepEqual([...V21_BUNKO_PACKAGES].sort(), Object.keys(bunkoCases).sort());
+  await withWorker(async ({ client }) => {
+    await client.start();
+    for (const [pkg, probe] of Object.entries(bunkoCases)) {
+      await t.test(pkg, async () => {
+        const prefix = `yobu "${pkg}";\n${probe.imports ?? ''}\n`;
+        assert.equal((await client.execute('check', prefix + probe.source)).status, 'checked');
+        assert.deepEqual(observable(await client.execute('run', prefix + probe.source)), {
+          status: 'ok', stdout: probe.stdout, diagnostics: [],
+        });
+        if (probe.invalid) {
+          const result = await client.execute('run', prefix + probe.invalid);
+          assert.equal(result.status, 'error');
+          assert.match(result.error, probe.error);
+        }
+      });
+    }
+    for (const pkg of deniedModules) {
+      await t.test(`denies ${pkg}`, async () => {
+        const source = `chant("must not run"); yobu "${pkg}";`;
+        assert.equal(hasSupportedImports(source, 'v2.1'), false);
+        const result = await client.execute('run', `yobu "${pkg}";\nchant("must not run");`);
+        assert.equal(result.status, 'diagnostic');
+        assert.equal(result.stdout, '');
+        assert.match(result.diagnostics[0], /bunko|package|包/i);
+      });
+    }
+  }, { version: 'v2.1' });
+});
+
+test('V2.1 bridge preserves diagnostics, partial output, limits and recovery', async () => {
+  await withWorker(async ({ client }) => {
+    await client.start();
+    const badType = await client.execute('check', 'kaku value: int64 = "Mio";');
+    assert.equal(badType.status, 'diagnostic');
+    assert.match(badType.diagnostics[0], /E0301/);
+    const divide = await client.execute('run', 'waza div(a:int64,b:int64)->int64 { kaesu a/b; } chant("before"); chant(div(1,0));');
+    assert.equal(divide.status, 'error');
+    assert.equal(divide.stdout, 'before\n');
+    assert.match(divide.diagnostics[0], /E0501/);
+    const budget = await client.execute('run', 'kaku x = 0; aida (hai) { x = x + 1; }');
+    assert.equal(budget.status, 'error');
+    assert.match(budget.error, /instruction limit/i);
+    const output = await client.execute('run', 'kaku i=0; aida (i<4000) { chant("' + 'x'.repeat(300) + '"); i=i+1; }');
+    assert.equal(output.status, 'error');
+    assert.match(output.error, /output limit/i);
+    assert.ok(output.stdout.endsWith('…（已截断）'));
+    assert.ok(output.stdout.length <= 64 * 1024);
+    assert.equal((await client.execute('run', 'chant("after errors");')).stdout, 'after errors\n');
+    await assert.rejects(client.execute('check', '界'.repeat(22_000)), /64 KiB/);
+  }, { version: 'v2.1' });
+});
+
+test('V2.1 load failure does not fall back to the legacy runtime', async () => {
+  await withWorker(async ({ client }) => {
+    await assert.rejects(client.start(), /HTTP 503/);
+  }, { version: 'v2.1', failWasm: true });
+});
+
+test('V2.1 timeout and termination allow a fresh Worker', async () => {
+  const loop = 'kaku x = 0; aida (hai) { x = x + 1; }';
+  const version = 'v2.1';
+  await withWorker(async ({ client }) => {
+    await client.start();
+    await assert.rejects(client.execute('run', loop, { timeoutMs: 20 }), { code: 'MIO_TIMEOUT' });
+  }, { version });
+  await withWorker(async ({ client }) => {
+    await client.start();
+    const cancelled = assert.rejects(client.execute('run', loop), { code: 'MIO_TERMINATED' });
+    await client.terminate();
+    await cancelled;
+  }, { version });
+  await withWorker(async ({ client }) => {
+    await client.start();
+    assert.equal((await client.execute('run', 'chant("fresh");')).stdout, 'fresh\n');
+  }, { version });
 });

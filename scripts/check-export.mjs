@@ -19,7 +19,7 @@ for (const slug of ['', ...pages]) {
     assert.ok(existsSync(html(`docs/${slug.slice(defaultVersion.length+1)}`)), `Missing legacy alias: ${slug}`);
   }
 }
-for (const asset of ['mio.wasm','mio-worker.js','wasm_exec.js']) {
+for (const asset of ['mio.wasm','mio-worker.js','wasm_exec.js','v2.1/mio.wasm','v2.1/mio-worker.js','v2.1/wasm_exec.js','v2.1/manifest.json']) {
   const digest = file => createHash('sha256').update(readFileSync(file)).digest('hex');
   assert.equal(digest(`out/wasm/${asset}`), digest(`public/wasm/${asset}`), `WASM asset altered: ${asset}`);
 }

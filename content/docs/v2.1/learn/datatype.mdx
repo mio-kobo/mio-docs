@@ -398,6 +398,8 @@ Mio 使用 `sentaku` 关键字声明枚举类型，并通过不同的变体表�
 
 例如：
 
+此示例可在 Web Playground 中运行。v2.1.0 Native CLI 无法从这个构造调用推断泛型枚举的全部类型参数（`E0306`）。
+
 ```mio title="DataType.mio"
 sentaku Result<T, E> {
     Ok(T);
