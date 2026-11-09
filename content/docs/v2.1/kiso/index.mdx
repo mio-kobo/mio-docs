@@ -7,7 +7,7 @@ description: Mio V2.1 的基础标准库、新增模块、AOT 工具包与 API �
 
 Bunko 是 Mio 的标准库集合。公开的基础模块使用 `kiso/` 作为导入路径。源码中的 `bunko/` 是物理目录名称，使用时不需要把它写入 `yobu`。
 
-V2.1 继续提供 V2.0 的数学、字符串、集合、文件系统和测试模块，并增加 JSON、正则表达式、SHA-256 与 OS 服务。新增模块按 `Mio-2.1` 已提交源码中的公开声明整理。
+V2.1 继续提供 V2.0 的数学、字符串、集合、文件系统和测试模块，并增加 JSON、正则表达式、SHA-256、OS 服务和阻塞 IPv4 TCP。TCP 接口以 v2.1.0 正式标签为准。
 
 ### 基础标准库
 
@@ -32,6 +32,7 @@ V2.1 继续提供 V2.0 的数学、字符串、集合、文件系统和测试模
 | [`kiso/regexp`](/docs/v2.1/kiso/regexp) <FeatureBadge status="new" since="2.1" /> | `compile`、`matches` | 正则表达式布尔匹配 |
 | [`kiso/crypto/sha256`](/docs/v2.1/kiso/crypto-sha256) <FeatureBadge status="new" since="2.1" /> | `context`、`sum`、`sum_range` | SHA-256 摘要 |
 | [`kiso/os`](/docs/v2.1/kiso/os) <FeatureBadge status="new" since="2.1" /> | 参数、环境、路径、进程和标准输入接口 | 需要宿主运行时 |
+| [`kiso/net/tcp`](/docs/v2.1/kiso/net-tcp) <FeatureBadge status="new" since="2.1" /> | `connect`、`listen`、`accept`、`read`、`write_all` | 原生阻塞 IPv4 TCP |
 
 这些包已进入开发分支，但各自的原生执行、宿主平台和整体发布验收仍应分别核对。尤其是 `kiso/os`，底层服务及限制需按 Darwin、Linux 与 Windows 目标分别确认。
 
@@ -51,7 +52,11 @@ V2.1 继续提供 V2.0 的数学、字符串、集合、文件系统和测试模
 - [`kiso/aot/macho`](/docs/v2.1/kiso/aot-macho)：Mach-O 镜像生成。
 - [`kiso/aot/sign`](/docs/v2.1/kiso/aot-sign) <FeatureBadge status="new" since="2.1" />：Darwin ARM64 本地 ad-hoc 签名。
 
-当前分支另有未完成整体验收的 `kiso/net/tcp` <FeatureBadge status="experimental" since="2.1" /> 阻塞 IPv4 TCP 实现。目前不将它列为已发布的标准库接口，也不据此推断已有 UDP、DNS、IPv6 或 TLS。相关状态见 [开发进度](/docs/v2.1/development)。
+### 阻塞 IPv4 TCP <FeatureBadge status="new" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
+
+`yobu "kiso/net/tcp";` 可使用 `tcp.listen`、`tcp.accept` 和 `tcp.connect`，并通过 `tcp.read` 或 `tcp.write_all` 传输字节。正式版三平台均通过回环 TCP 测试，Windows 额外验证了原生 echo 和通配地址绑定。一次读取可能只收到部分字节；需要固定长度时可使用 `io.read_full`。无 UDP、DNS、IPv6 或 TLS 接口，网页 Playground 也不提供套接字。
+
+见 [TCP 网络参考与 Echo 教程](/docs/v2.1/kiso/net-tcp)，示例使用 `127.0.0.1:18080`。
 
 ### 示例在网页上的行为
 

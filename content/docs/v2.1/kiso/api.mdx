@@ -23,6 +23,19 @@ description: Mio V2.1 的基础标准库函数索引，包含与 V2.0 共通的�
 
 原生工具链还有扩展的类型布局、lowering 和 Mach-O 接口，属于内部编译器 API，详见 [已有库的变化](/docs/v2.1/kiso/changes)。
 
+### kiso/net/tcp
+
+[TCP 网络参考与 Echo 教程](/docs/v2.1/kiso/net-tcp)
+
+| 用途 | 公开函数 |
+| --- | --- |
+| 构造地址 | `ipv4` |
+| 连接、监听和接入 | `connect`、`listen`、`listen_with_backlog`、`accept` |
+| 读写和 I/O 适配 | `read`、`write`、`write_all`、`reader`、`writer` |
+| 释放资源 | `close`、`close_listener` |
+
+公开类型：`TcpError`、`IPv4Address`、`Connection`、`Listener`、`ConnectionResult`、`ListenerResult`、`ReadResult`、`WriteResult`、`UnitResult`。
+
 ## V2.0 已有的基础 API
 
 ### kiso/math
