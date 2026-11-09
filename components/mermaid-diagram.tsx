@@ -122,6 +122,6 @@ export function MermaidDiagram({ chart, title }: MermaidDiagramProps) {
           ? <p className="mermaid-diagram-status is-error">流程图渲染失败。请刷新页面；如果问题持续，请报告文档问题。</p>
           : <p className="mermaid-diagram-status">正在渲染流程图…</p>}
     </div>
-    {title && <figcaption id={captionId}>{title}<span className="mermaid-diagram-scroll-hint"> · 可横向滚动</span></figcaption>}
+    {title && <figcaption id={captionId}>{title}<span className="mermaid-diagram-scroll-hint" aria-hidden="true"> · 可横向滚动</span></figcaption>}
   </figure>;
 }
