@@ -4,7 +4,7 @@
   "files": {
     "getting-started.mdx": "c8024dfe19122bb4995bee22ec6295f35ceda1b61918da9944045b4e744cd816",
     "index.mdx": "0a2c2c24fddcc582f0bb7d6e150d46290e482899b9151e4a6baea84e9aa4214e",
-    "learn.mdx": "62c88db65746ef29947b57d518631dc484970ef8340cd0786d66fb82c43b187a",
+    "learn/index.mdx": "62c88db65746ef29947b57d518631dc484970ef8340cd0786d66fb82c43b187a",
     "migration.mdx": "4bf795a8c218613c3631f2668cb26051d984215ada11b06a7bf1308cacd60308"
   }
 }
