@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { findProjection } from 'fumadocs-core/page-tree';
-import { compareVersions, numericVersion, registry, validateRegistry, latestStable, resolveVersionSwitch, docsUrl, parseDocsPath } from '../lib/versions.mjs';
+import { compareVersions, numericVersion, registry, validateRegistry, latestStable, versionLabel, versionPickerId, resolveVersionSwitch, docsUrl, parseDocsPath } from '../lib/versions.mjs';
 
 test('numeric ordering supports minor 10, optional patch and future majors', () => {
   const input = ['3.1.2','2.3','2.10','1.1','2.1','2.2','3.0','1.0','2.0'];
@@ -10,6 +10,12 @@ test('numeric ordering supports minor 10, optional patch and future majors', () 
   assert.equal(compareVersions('3.1','3.1.0'),0);
   assert.throws(() => numericVersion('../2.1'));
   assert.throws(() => numericVersion('2.01'));
+});
+test('the V2.1 picker groups patches without changing the stable default', () => {
+  assert.equal(versionLabel(registry.versions.find(v => v.id === 'v2.1')), 'v2.1.0 正式版文档');
+  for (const id of ['v2.1', 'v2.1.0', 'v2.1.1', 'v2.1.2']) assert.equal(versionPickerId(id), 'v2.1');
+  for (const id of ['v1.0', 'v2.0', 'v2.10.1']) assert.equal(versionPickerId(id), id);
+  assert.equal(registry.defaultVersion, 'v2.1.2');
 });
 test('default never follows an unreleased higher development version', () => {
   assert.equal(latestStable(registry).id, 'v2.1.2');
@@ -76,7 +82,7 @@ test('static production routes, redirects, untranslated 404 and version-isolated
   assert.ok(redirectHtml.includes('继续阅读文档'));
   for (const path of ['/docs/v1.0/','/docs/v2.0/','/docs/v2.1/','/docs/v2.1.2/','/docs/v2.1.2/learn/','/docs/v2.1/kiso/encoding-json/','/docs/v1.0/learn/variables/','/docs/v2.0/learn/grammer/','/docs/v2.0/development/']) {
     const r = await fetch(new URL(path,base)); assert.equal(r.status,200,path);
-    const html = await r.text(); assert.ok(html.includes(path.includes('v1.0') ? 'EOL' : path.startsWith('/docs/v2.1/') ? 'Development' : 'Stable'));
+    const html = await r.text(); assert.ok(html.includes(path.includes('v1.0') ? 'EOL' : path.startsWith('/docs/v2.1/') ? 'v2.1.0 正式版文档' : 'Stable'));
   }
   for (const [path, target] of [['/docs/learn/grammer/', '/docs/v2.0/learn/grammer/'], ['/zh-CN/docs/v2.1.2/learn/', '/docs/v2.1.2/learn/']]) {
     const r = await fetch(new URL(path, base));
@@ -94,7 +100,7 @@ test('static production routes, redirects, untranslated 404 and version-isolated
       assert.ok(results.length > 0, `${version.id}: ${query}`);
       for (const result of results) {
         assert.equal(parseDocsPath(result.url).version,version.id);
-        assert.ok(result.breadcrumbs[0].includes(`V${version.version}`));
+        assert.ok(result.breadcrumbs[0] === versionLabel(version));
         assert.equal((await fetch(new URL(result.url,base))).status,200,result.url);
       }
     }
