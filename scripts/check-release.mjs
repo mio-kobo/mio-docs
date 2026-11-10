@@ -30,14 +30,15 @@ if (plan.mode === 'live') {
   if (site.protocol !== 'https:' || ['localhost','127.0.0.1'].includes(site.hostname)) throw new Error('Set the real HTTPS MIO_DOCS_SITE_URL for a live release');
 }
 if (plan.mode === 'live' || process.argv.includes('--online')) {
+  const apiOptions = process.env.GH_TOKEN ? { headers: { Authorization: `Bearer ${process.env.GH_TOKEN}` } } : undefined;
   for (const release of downloads.releases) {
-    const response = await fetch(`https://api.github.com/repos/mio-kobo/mio/releases/tags/${release.tag}`);
+    const response = await fetch(`https://api.github.com/repos/mio-kobo/mio/releases/tags/${release.tag}`, apiOptions);
     if (!response.ok) throw new Error(`Release API unavailable: ${response.status}`);
     const record = await response.json();
     if (record.draft || record.html_url !== release.releaseUrl) throw new Error('Official release mismatch');
     const version = registry.versions.find(v => v.id === release.docsVersion);
     if (record.prerelease !== (version.status === 'Release Candidate') || record.published_at !== version.release.publishedAt) throw new Error('Release status/date mismatch');
-    const commitResponse = await fetch(`https://api.github.com/repos/mio-kobo/mio/commits/${release.tag}`);
+    const commitResponse = await fetch(`https://api.github.com/repos/mio-kobo/mio/commits/${release.tag}`, apiOptions);
     if (!commitResponse.ok || (await commitResponse.json()).sha !== version.source.commit) throw new Error('Release source commit mismatch');
     for (const asset of release.assets) {
       const remote = record.assets.find(a => a.name === asset.name);
