@@ -18,7 +18,12 @@ export const releaseNotesLink: LinkItemType = {
 };
 export const layoutOptions: BaseLayoutProps = {
   nav: { title: <span className="brand"><Image className="brand-mark" src={logo} alt="" width={32} height={32} /> Mio <span className="brand-subtitle">Docs</span></span>, url: '/' },
-  links: [{text:'Docs',url:'/docs',active:'nested-url'}, {text:'Download',url:'/download',active:'nested-url'}, releaseNotesLink],
+  links: [
+    { text: 'Docs', url: '/docs', active: 'nested-url' },
+    { text: 'Download', url: '/download', active: 'nested-url' },
+    { ...releaseNotesLink, on: 'nav', children: <li>{releaseNotesLink.children}</li> },
+    { ...releaseNotesLink, on: 'menu' },
+  ],
   // Section links are supplied by DocsShell within the active version.
   githubUrl: 'https://github.com/mio-kobo/mio',
   themeSwitch: { mode: 'light-dark-system' },
