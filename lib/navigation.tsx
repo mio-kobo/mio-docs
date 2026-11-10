@@ -1,4 +1,4 @@
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import type { BaseLayoutProps, LinkItemType } from 'fumadocs-ui/layouts/shared';
 import Image from 'next/image';
 import logo from '@/app/icon.png';
 import { defaultVersion } from '@/lib/versions.mjs';
@@ -11,9 +11,14 @@ export const sections = [
   { title: 'Tooling', label: '开发工具', url: '/docs/tooling', description: '查找 CLI、编辑器和语言服务资料。' },
   { title: 'Internals', label: '内部实现', url: '/docs/internals', description: '了解 Mochi VM、GC 与 Native AOT 边界。' },
 ];
+// Next.js treats the last dotted segment as a file, so these directory URLs use native navigation.
+export const releaseNotesLink: LinkItemType = {
+  type: 'custom',
+  children: <a className="inline-flex items-center p-2 text-sm text-fd-muted-foreground hover:text-fd-accent-foreground" href={`/releases/${releasePlan.version}/`}>Release Notes</a>,
+};
 export const layoutOptions: BaseLayoutProps = {
   nav: { title: <span className="brand"><Image className="brand-mark" src={logo} alt="" width={32} height={32} /> Mio <span className="brand-subtitle">Docs</span></span>, url: '/' },
-  links: [{text:'Docs',url:'/docs',active:'nested-url'}, {text:'Download',url:'/download',active:'nested-url'}, {text:'Release Notes',url:`/releases/${releasePlan.version}`,active:'nested-url'}],
+  links: [{text:'Docs',url:'/docs',active:'nested-url'}, {text:'Download',url:'/download',active:'nested-url'}, releaseNotesLink],
   // Section links are supplied by DocsShell within the active version.
   githubUrl: 'https://github.com/mio-kobo/mio',
   themeSwitch: { mode: 'light-dark-system' },

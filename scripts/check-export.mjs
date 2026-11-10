@@ -31,6 +31,12 @@ assert.ok(readFileSync('out/robots.txt','utf8').includes('/sitemap.xml'));
 const sitemap = readFileSync('out/sitemap.xml','utf8');
 assert.ok(sitemap.includes('https://mio.kaelexvp.cc/'));
 assert.ok(readFileSync(html('docs'),'utf8').includes(`/docs/${defaultVersion}/`));
+const home = readFileSync(html(''),'utf8');
+for (const path of [`download/${releasePlan.version}`, `releases/${releasePlan.version}`]) {
+  assert.ok(home.includes(`href="/${path}/"`), `Missing directory URL: ${path}`);
+  assert.ok(!home.includes(`href="/${path}"`), `Versioned link would request a missing file: ${path}`);
+  assert.ok(existsSync(join('out', path, 'index.txt')), `Missing navigation payload: ${path}`);
+}
 for (const slug of pages.filter(slug => slug === defaultVersion || slug.startsWith(defaultVersion + '/'))) {
   const path = `docs/${slug}`;
   const page = readFileSync(html(path),'utf8');

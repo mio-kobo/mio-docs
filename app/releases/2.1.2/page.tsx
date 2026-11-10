@@ -17,8 +17,8 @@ export default function Page() {
     </section>
     <section>
       <h2>发行包与文档</h2>
-      <p><Link href="/download/2.1.2">下载与 SHA-256 校验</Link> · <Link href="/docs/v2.1.2">稳定版文档</Link> · <Link href="/releases/2.1.2/migration">迁移指南</Link></p>
-      <p><Link href="/releases/2.0.0">历史发行说明 · v2.0.0</Link></p>
+      <p><a href="/download/2.1.2/">下载与 SHA-256 校验</a> · <a href="/docs/v2.1.2/">稳定版文档</a> · <Link href="/releases/2.1.2/migration">迁移指南</Link></p>
+      <p><a href="/releases/2.0.0/">历史发行说明 · v2.0.0</a></p>
     </section>
   </ReleaseShell>;
 }

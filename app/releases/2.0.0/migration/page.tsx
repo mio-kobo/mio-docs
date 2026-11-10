@@ -12,6 +12,6 @@ export default function Page() {
     <li><h3>按需尝试 Native AOT</h3><p>先确认程序在 Native 子集内。<code>mochi-aot</code> 生成未签名 Mach-O，需要 codesign；纯 Mio <code>native-aot</code> 使用两个无末尾换行的 config 文件，失败分支可能返回退出码 0，必须检查成功标记和新产物。</p><Link href="/docs/v2.0/internals/native-aot">Native AOT 流程与限制 →</Link></li>
     <li><h3>保留回退路径</h3><p>出现不支持的 lowering、Native 运行差异或平台限制时，恢复 V1 工具链或继续使用 v2.0.0 的 Mochi VM。不要通过关闭 GC、修改编译器或删除断言来强行迁移。</p><Link href="/docs/v2.0/tooling/troubleshooting">故障排查 →</Link></li>
   </ol></section>
-  <section><h2>版本与平台边界</h2><p>v2.0.0 的正式平台为 macOS Apple Silicon / ARM64；Intel Mac、Linux、Windows 没有正式支持认证。源码前端、VM、LSP 仍为 Go；M18 完成的是 Mochi → Native 的纯 Mio 自编译。分代 GC 与三档 GC 未实现，Native 支持集合小于 VM。</p><p>CLI 版本应为 <code>Mio 2.0.0</code>；V1 标签源码的默认字符串可能是 <code>Mio 1.0.0-beta.2</code>。插件版本与核心版本独立，不能互相推断。</p><Link href="/releases/2.0.0">返回 v2.0.0 发行说明 →</Link></section>
+  <section><h2>版本与平台边界</h2><p>v2.0.0 的正式平台为 macOS Apple Silicon / ARM64；Intel Mac、Linux、Windows 没有正式支持认证。源码前端、VM、LSP 仍为 Go；M18 完成的是 Mochi → Native 的纯 Mio 自编译。分代 GC 与三档 GC 未实现，Native 支持集合小于 VM。</p><p>CLI 版本应为 <code>Mio 2.0.0</code>；V1 标签源码的默认字符串可能是 <code>Mio 1.0.0-beta.2</code>。插件版本与核心版本独立，不能互相推断。</p><a href="/releases/2.0.0/">返回 v2.0.0 发行说明 →</a></section>
  </ReleaseShell>;
 }

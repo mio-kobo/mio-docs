@@ -22,6 +22,12 @@ import { i18n } from './i18n';
 const mdxComponents = {
   ...defaultMdxComponents,
   ...platformHeadings,
+  a: ({ href, ...props }: React.ComponentProps<typeof defaultMdxComponents.a>) => {
+    const versionRoot = href?.match(/^(\/(?:docs\/v|(?:download|releases)\/)\d+\.\d+(?:\.\d+)?)\/?([?#].*)?$/u);
+    if (versionRoot) return <a {...props} href={`${versionRoot[1]}/${versionRoot[2] ?? ''}`} />;
+    const Anchor = defaultMdxComponents.a;
+    return <Anchor {...props} href={href} />;
+  },
   FeatureBadge,
   PlatformBadge,
   PlatformSupport,
