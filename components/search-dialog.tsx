@@ -4,7 +4,7 @@ import { SearchDialog, SearchDialogOverlay, SearchDialogContent, SearchDialogHea
 import { useDocsSearch } from 'fumadocs-core/search/client';
 import { versionSearchClient } from '@/lib/static-search';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { defaultVersion, getVersion, parseDocsPath, versions, versionLabel } from '@/lib/versions.mjs';
 export function VersionSearchDialog(props: DefaultSearchDialogProps) {
   const current = parseDocsPath(usePathname());
@@ -14,10 +14,22 @@ export function VersionSearchDialog(props: DefaultSearchDialogProps) {
 }
 function ScopedSearch({version,locale,open,onOpenChange}:{version:string;locale:string}&DefaultSearchDialogProps) {
   const [tag,setTag] = useState(version);
+  const opener = useRef<HTMLElement | null>(null);
   const search = useDocsSearch({client:versionSearchClient(tag,locale),delayMs:100});
   return <SearchDialog {...search} open={open} onOpenChange={onOpenChange}>
     <SearchDialogOverlay />
-    <SearchDialogContent>
+    <SearchDialogContent
+      onOpenAutoFocus={() => {
+        opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      }}
+      onCloseAutoFocus={event => {
+        // Fumadocs opens search from a separate button or keyboard shortcut.
+        if (opener.current?.isConnected) {
+          event.preventDefault();
+          opener.current.focus();
+        }
+      }}
+    >
       <SearchDialogHeader><SearchDialogIcon /><SearchDialogInput /><SearchDialogClose /></SearchDialogHeader>
       <SearchDialogList />
       <SearchDialogFooter>

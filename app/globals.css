@@ -104,7 +104,7 @@ button { cursor: pointer; }
 .status-note { padding: 1.25rem 1.5rem; background: var(--hikari-code); border: 1px solid var(--color-fd-border); border-radius: var(--hikari-radius); font-size: .85rem; }
 .status-note strong { font-weight: 600; color: var(--hikari-lilac-ink); }
 .status-note p { color: var(--color-fd-muted-foreground); margin: .5rem 0 .65rem; line-height: 1.9; }
-.status-note a { color: var(--color-fd-primary); display: inline-flex; gap: .5rem; align-items: center; min-height: 32px; }
+.status-note a { color: var(--color-fd-primary); display: inline-flex; gap: .5rem; align-items: center; min-height: 32px; text-decoration: underline; text-underline-offset: .2em; }
 .home-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-top: 3rem; padding: 1.8rem 0; border-top: 1px solid var(--color-fd-border); color: var(--color-fd-muted-foreground); font-size: .75rem; }
 .home-footer a { display: inline-flex; align-items: center; gap: .3rem; }
 
