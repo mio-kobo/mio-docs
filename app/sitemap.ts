@@ -5,7 +5,8 @@ import { releasePlan } from '@/lib/releases.mjs';
 import { canonicalPath, siteUrl } from '@/lib/seo';
 export default function sitemap(): MetadataRoute.Sitemap {
   if (!siteUrl) return [];
-  const paths = ['/', '/download', '/docs/versions', ...(releasePlan.mode !== 'prepared' ? ['/releases/2.0.0','/releases/2.0.0/migration','/download/2.0.0'] : [])];
+  const paths = ['/', '/download', '/docs/versions', '/releases/2.0.0', '/releases/2.0.0/migration', '/download/2.0.0'];
+  if (releasePlan.mode !== 'prepared') paths.push(`/releases/${releasePlan.version}`, `/releases/${releasePlan.version}/migration`, `/download/${releasePlan.version}`);
   for (const page of source.getPages()) {
     const version = getVersion(page.slugs[0]);
     if (version && ['Stable','Legacy'].includes(version.status)) paths.push(page.url);

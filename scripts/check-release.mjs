@@ -4,14 +4,18 @@ import { validateReleasePlan } from '../lib/releases.mjs';
 import { registry } from '../lib/versions.mjs';
 const plan = JSON.parse(readFileSync('content/release-plan.json','utf8'));
 const downloads = JSON.parse(readFileSync('content/downloads.json','utf8'));
-validateReleasePlan(plan,registry,downloads);
+validateReleasePlan(plan, registry, downloads, { production: process.argv.includes('--production') });
 if (plan.mode === 'published') {
   const evidencePath = resolve(plan.publicationEvidence);
   if (!evidencePath.startsWith(resolve('.') + '/')) throw new Error('Publication evidence must be in this repository');
   const evidence = JSON.parse(readFileSync(evidencePath,'utf8'));
   const release = downloads.releases.find(r => r.docsVersion === plan.docsVersion);
-  const asset = release?.assets.find(a => a.name === evidence.artifact?.name);
-  if (evidence.sourceCommit !== plan.sourceCommit || evidence.releaseUrl !== plan.releaseUrl || evidence.publishedAt !== plan.publishedAt || evidence.prerelease !== false || !asset || asset.size !== evidence.artifact.size || asset.sha256 !== evidence.artifact.sha256) throw new Error('Publication verification does not match release metadata and artifacts');
+  const verified = new Map((evidence.artifacts ?? [evidence.artifact]).map(asset => [asset?.name, asset]));
+  const matchingArtifacts = verified.size === release.assets.length && release.assets.every(asset => {
+    const proof = verified.get(asset.name);
+    return proof?.size === asset.size && proof.sha256 === asset.sha256;
+  });
+  if (evidence.sourceCommit !== plan.sourceCommit || evidence.releaseUrl !== plan.releaseUrl || evidence.publishedAt !== plan.publishedAt || evidence.prerelease !== false || !matchingArtifacts) throw new Error('Publication verification does not match release metadata and artifacts');
   const decisionPath = resolve(evidence.decision);
   if (!decisionPath.startsWith(resolve('.') + '/')) throw new Error('Lifecycle decision must be in this repository');
   const decision = JSON.parse(readFileSync(decisionPath,'utf8'));

@@ -23,7 +23,7 @@ BASE_URL=http://127.0.0.1:3210 npm run check:links
 CHECK_EXTERNAL=1 npm run check:links
 ```
 
-**Mio v2.0.0 已于 2026-10-21 正式发布**：Tag `v2.0.0`，源码提交 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`，CLI `Mio 2.0.0`，首发平台 macOS Apple Silicon / ARM64。`/docs` 当前仍进入站点默认稳定版 `/docs/v1.0`；`/docs/v2.0` 的正文已按 v2.0.0 正式版核对，但站点注册表仍将该目录标记为 Development。V2.0.0 冻结快照与默认入口切换必须在站点验收完成后另行激活，不能把语言发布状态和站点版本状态混为一谈。
+**当前稳定版是 Mio v2.1.2。** `/docs` 进入冻结的 `/docs/v2.1.2`，历史 V2.0 和 V1.0 仍可查阅。发行证据与网站生产验收独立记录。
 
 注册表 `content/versions.json` 支持 `2.1`、`2.10`、`3.1.2` 等数字版本，不为示例版本生成公开空页。旧 URL 和 B 的未版本化资料保留；它们不自动归属稳定版本，也不混入版本搜索。
 
@@ -118,9 +118,13 @@ python3 scripts/check-content-quality.py --core /absolute/path/to/mio --go-tests
 - 平台：macOS Apple Silicon / ARM64
 - 签名：ad-hoc；无 Developer ID；无 notarization
 
-`/releases/2.0.0`、`/releases/2.0.0/migration` 与 `/download/2.0.0` 已按正式发布更新。首页 banner 通过 `content/release-plan.json` 的 `released`、`releaseUrl`、`publishedAt` 显示正式状态。`/download/2.0.0` 直接链接官方 Release 并展示已核验的大小与 SHA256；`content/downloads.json` 仍只登记 V1.0.0 的五个包，V2.0.0 没有写入该门禁清单，因此不会伪造 `Downloads` 组件的已核验记录。
+历史发行页面保留在 `/releases/2.0.0`、`/releases/2.0.0/migration` 和 `/download/2.0.0`。
 
-**站点默认入口仍是 `/docs/v1.0`，`/docs/v2.0` 仍标记为 Development。** 原因不是语言未发布，而是站点版本激活尚需完成冻结快照、审阅证据与浏览器验收。不要把当前状态写成“V2.0.0 尚未发布”。
+### v2.1.2 版本入口
+
+`/docs` 默认进入 `/docs/v2.1.2`，`/download` 展示 v2.1.2 已核验的发行包，`/releases/2.1.2` 提供发行说明与迁移入口。冻结快照覆盖发布、安装、首个程序与迁移；`/docs/v2.1` 继续作为可搜索的次版本预览，设置 `noindex`。既有未版本化章节链接保留 V2.0 目标。
+
+发布与内容核验见 [v2.1.2 验证记录](verification/v2.1.2-release/README.md)。
 
 可用 `MIO_DOCS_DIST_DIR=.next-release` 进行隔离构建，避免覆盖正在使用的 `.next`。预览：
 
@@ -133,16 +137,11 @@ BASE_URL=http://127.0.0.1:3211 npm run check:links
 npm run check:release -- --online
 ```
 
-SEO 使用 `MIO_DOCS_SITE_URL` 的真实 HTTPS 站点源；未配置时 canonical 只以本地预览源生成，sitemap 为空，不能直接作为生产配置。sitemap 只收录 Stable/Legacy 文档及已开放的正式页面，Development 与 RC 继续 noindex。
+SEO 使用 `MIO_DOCS_SITE_URL`，默认使用 `https://mio.kaelexvp.cc`。sitemap 收录 Stable/Legacy 文档及正式发行页面。Development、RC 和 EOL 文档保留 `noindex`。
 
-### 仍待执行的站点激活
+### 生产验收
 
-1. 在 `.docs-drafts/v2.0.0` 完成最终正文审阅，填写 `version.json` 的 Stable、release、frozen 与 `review.evidence`。RC4 目录不是正式发布证据，不能直接当作 v2.0.0 最终快照。
-2. 在隔离副本运行完整网站验收，将 `build/types/routes/versions/search/desktop/mobile/accessibility/artifacts/releaseNotes/migration` 的真实结果写入证据 JSON；`reviewedBy` 必须由维护者确认，禁止自动填 `passed`。
-3. 激活新的 `v2.0.0` 版本根，更新 `content/versions.json` 的 `defaultVersion`；旧 `/docs/v2.0` 保持原 URL，不重命名、不偷偷提升。
-4. 把已实际下载核验的 V2.0.0 资产写入 `content/downloads.json`，再设置 `content/release-plan.json` 的 `mode=live` 和 acceptance。
-5. 设置真实 `MIO_DOCS_SITE_URL`，运行 types:check、test:versions、test:release、check:versions、check:release -- --online、check:links 和 build，并复核桌面、手机、主题与键盘操作。
-6. 本轮不提交、不推送、不部署。回滚需同时恢复 release-plan、versions 默认值与 downloads；不要删除旧 URL 或修改历史正文锁。
+v2.1.2 在 `published` 模式可构建和预览。完整技术文档需在相关修正完成后逐页复核。生产部署前，由维护者核对 `build/types/routes/versions/search/desktop/mobile/accessibility/artifacts/releaseNotes/migration`，为精确源码提交填写验收记录并切换到 `mode=live`。使用正式 HTTPS `MIO_DOCS_SITE_URL` 运行 `npm run check:release -- --production`；该门禁同时检查正式发行包。
 
 新增补丁与次版本同样使用 `2.0.1`、`2.1.0` 等完整版本号；测试 fixture 不产生公共空页面。发布状态支持 Development、Release Candidate、Stable、Legacy，兼容原 EOL；RC 必须有实际 prerelease，不接管稳定入口。
 

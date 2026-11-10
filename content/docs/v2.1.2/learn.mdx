@@ -1,0 +1,13 @@
+---
+title: 运行第一个 Mio 程序
+description: 用 kaku 声明变量，在浏览器中检查并运行 Mio 函数调用。
+---
+
+`kaku` 声明变量，`chant` 函数将变量的值输出到终端。这个程序输出 `42`。
+
+```mio
+kaku value = 42;
+chant(value);
+```
+
+在本地，将示例保存为 `hello.mio`，用[已安装的 v2.1.2 CLI](/docs/v2.1.2/getting-started)运行 `mio check hello.mio` 和 `mio run hello.mio`。浏览器中的运行和检查由 V2.1.0 WebAssembly Playground 提供。
