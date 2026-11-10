@@ -1,0 +1,31 @@
+{
+  "title": "Bunko · V2.1",
+  "pages": [
+    "index",
+    "api",
+    "math",
+    "array",
+    "string",
+    "bytes",
+    "utf8",
+    "convert",
+    "path",
+    "io",
+    "fs",
+    "encoding-binary",
+    "testing",
+    "encoding-json",
+    "regexp",
+    "crypto-sha256",
+    "os",
+    "net-tcp",
+    "aot-sign",
+    "changes",
+    "aot-lower",
+    "aot-lower-nativefs",
+    "aot-lower-types",
+    "aot-macho",
+    "encoding-mochi",
+    "aot-arm64"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "title": "开发工具 · V2.1",
+  "pages": [
+    "index",
+    "cli",
+    "editors",
+    "lsp",
+    "troubleshooting",
+    "verification",
+    "native-cli",
+    "distribution",
+    "bunko-review",
+    "docker",
+    "selfhost"
+  ]
+}

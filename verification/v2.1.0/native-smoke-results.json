@@ -1,0 +1,727 @@
+[
+  {
+    "name": "version",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "version"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": "v2\\.1\\.0 \\(release; commit 74e461b",
+    "status": "PASS",
+    "code": 0,
+    "stdout": "mio v2.1.0 (release; commit 74e461b2985886160a285c7104d2a41090d0f548; pure Mio Native AOT)\n",
+    "stderr": ""
+  },
+  {
+    "name": "help",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "help"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": "--target=darwin-arm64",
+    "status": "PASS",
+    "code": 0,
+    "stdout": "mio v2 native development candidate\nmio version | help [command]\nmio run <source> [-- program arguments...]\nmio exec <file.mochi> [-- program arguments...]\nmio disasm <file.mochi>\nmio test <directory[/...]> [--run=regexp] [--format=human|short|json] [--lang=locale] [--verbose]\nmio lsp [--stdio] [--bunko-root <directory>]\nmio check <source> [--bunko-root <directory>]\nsource diagnostics: --color=auto|always|never --format=human|short|json --verbose\nmio build <source> [-o <output>] [--emit=mochi] [--target=darwin-arm64|linux-amd64|windows-amd64] [--gc-stress] [--observe] [--emit-symbols <file>] [--bunko-root <directory>]\n",
+    "stderr": ""
+  },
+  {
+    "name": "check",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "check",
+      "hello.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": "",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "build default native",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "build",
+      "hello.mio",
+      "-o",
+      "custom-native"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "native Mach-O ARM64 format",
+    "command": [
+      "file",
+      "custom-native"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": "Mach-O 64-bit executable arm64",
+    "status": "PASS",
+    "code": 0,
+    "stdout": "custom-native: Mach-O 64-bit executable arm64\n",
+    "stderr": ""
+  },
+  {
+    "name": "execute native",
+    "command": [
+      "./custom-native"
+    ],
+    "expected": 0,
+    "expected_stdout": "Hello, Mio!\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "Hello, Mio!\n",
+    "stderr": ""
+  },
+  {
+    "name": "run",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "hello.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": "Hello, Mio!\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "Hello, Mio!\n",
+    "stderr": ""
+  },
+  {
+    "name": "Mochi build",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "build",
+      "hello.mio",
+      "--emit=mochi",
+      "-o",
+      "hello.mochi"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "disasm",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "disasm",
+      "hello.mochi"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": "chant|Op",
+    "status": "PASS",
+    "code": 0,
+    "stdout": "Globals: 0\nConstants (1):\n  [0] string \"Hello, Mio!\"\nInstructions:\n0000 OpConstant 0\n0003 OpChant\nFunctions (14):\n  Function 0 $mma::mio/fs/runtime::close::513a084e5a0291e2893cce23d944461f99797716df1ab69f0acf49b3f195be93 params=2 locals=2 returns=value:\n  Function 1 $mma::mio/fs/runtime::dir_close::513a084e5a0291e2893cce23d944461f99797716df1ab69f0acf49b3f195be93 params=2 locals=2 returns=value:\n  Function 2 $mma::mio/fs/runtime::dir_is_dir::c9ff387755a05bfa435b60b204111ffc83a5f199b21f569f6673482e3a103ca6 params=1 locals=1 returns=value:\n  Function 3 $mma::mio/fs/runtime::dir_is_file::c9ff387755a05bfa435b60b204111ffc83a5f199b21f569f6673482e3a103ca6 params=1 locals=1 returns=value:\n  Function 4 $mma::mio/fs/runtime::dir_name::ca5c10cb23a1dc4f8d7120a05626b664f700151ff09870e6a2a9204b890efa7c params=1 locals=1 returns=value:\n  Function 5 $mma::mio/fs/runtime::dir_next::c9ff387755a05bfa435b60b204111ffc83a5f199b21f569f6673482e3a103ca6 params=1 locals=1 returns=value:\n  Function 6 $mma::mio/fs/runtime::dir_status::513a084e5a0291e2893cce23d944461f99797716df1ab69f0acf49b3f195be93 params=2 locals=2 returns=value:\n  Function 7 $mma::mio/fs/runtime::file_status::513a084e5a0291e2893cce23d944461f99797716df1ab69f0acf49b3f195be93 params=2 locals=2 returns=value:\n  Function 8 $mma::mio/fs/runtime::mkdir::6f2c95561ed64afe3034886f256d86934e0ad43ef1d605224b7f6d40167a9946 params=2 locals=2 returns=value:\n  Function 9 $mma::mio/fs/runtime::open::1192df94a5bdf48f4df10a0aa4b61147cfc2e6f2c2f8ea1248826e517f716633 params=2 locals=2 returns=value:\n  Function 10 $mma::mio/fs/runtime::open_dir::7128dadd824bee38c385b052b0d86ff37b801ae61b35c36db664b2d310b6dbdf params=1 locals=1 returns=value:\n  Function 11 $mma::mio/fs/runtime::read::e8706d18fa932e83ff56c940a8552084a64d75a1d0629364439b5e079ca29430 params=5 locals=5 returns=value:\n  Function 12 $mma::mio/fs/runtime::stat::6f2c95561ed64afe3034886f256d86934e0ad43ef1d605224b7f6d40167a9946 params=2 locals=2 returns=value:\n  Function 13 $mma::mio/fs/runtime::write::e8706d18fa932e83ff56c940a8552084a64d75a1d0629364439b5e079ca29430 params=5 locals=5 returns=value:\n",
+    "stderr": ""
+  },
+  {
+    "name": "exec",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "exec",
+      "hello.mochi"
+    ],
+    "expected": 0,
+    "expected_stdout": "Hello, Mio!\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "Hello, Mio!\n",
+    "stderr": ""
+  },
+  {
+    "name": "automatic Bunko",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "math.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": "6\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "6\n",
+    "stderr": ""
+  },
+  {
+    "name": "explicit Bunko wins",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "check",
+      "math.mio",
+      "--bunko-root",
+      "/opt/homebrew/Cellar/mio/2.1.0/libexec/bunko"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "MIO_BUNKO valid",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "check",
+      "math.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "MIO_BUNKO invalid",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "check",
+      "math.mio"
+    ],
+    "expected": 2,
+    "expected_stdout": null,
+    "pattern": "E_BUNKO_ROOT",
+    "status": "PASS",
+    "code": 2,
+    "stdout": "",
+    "stderr": "E_BUNKO_ROOT expected a Bunko directory containing kiso/: <scratch>/absent\n"
+  },
+  {
+    "name": "invalid --bunko-root",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "build",
+      "math.mio",
+      "--bunko-root",
+      "absent",
+      "-o",
+      "not-written"
+    ],
+    "expected": 2,
+    "expected_stdout": null,
+    "pattern": "E_BUNKO_ROOT",
+    "status": "PASS",
+    "code": 2,
+    "stdout": "",
+    "stderr": "E_BUNKO_ROOT expected a Bunko directory containing kiso/: absent\n"
+  },
+  {
+    "name": "diagnostics JSON",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "check",
+      "bad.mio",
+      "--format=json",
+      "--color=never",
+      "--verbose"
+    ],
+    "expected": 1,
+    "expected_stdout": null,
+    "pattern": "E[0-9]+",
+    "status": "PASS",
+    "code": 1,
+    "stdout": "",
+    "stderr": "{\"code\":\"E0301\",\"severity\":\"error\",\"message\":\"x\\nexpected/actual: int64 / string\",\"path\":\"<scratch>/bad.mio\",\"location\":{\"offset\":16,\"line\":1,\"column\":17},\"labels\":[{\"span\":{\"start\":{\"offset\":16,\"line\":1,\"column\":17},\"end\":{\"offset\":30,\"line\":1,\"column\":31}},\"primary\":true}]}\n"
+  },
+  {
+    "name": "runtime error",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "runtime.mio"
+    ],
+    "expected": 1,
+    "expected_stdout": null,
+    "pattern": "zero|divis",
+    "status": "PARTIAL",
+    "code": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "native bounds",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "bounds.mio"
+    ],
+    "expected": 1,
+    "expected_stdout": null,
+    "pattern": "bounds|index",
+    "status": "PARTIAL",
+    "code": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "target darwin-arm64",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "build",
+      "hello.mio",
+      "--target=darwin-arm64",
+      "-o",
+      "custom-native2"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "format darwin-arm64",
+    "command": [
+      "file",
+      "custom-native2"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": "Mach-O.*arm64",
+    "status": "PASS",
+    "code": 0,
+    "stdout": "custom-native2: Mach-O 64-bit executable arm64\n",
+    "stderr": ""
+  },
+  {
+    "name": "target linux-amd64",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "build",
+      "hello.mio",
+      "--target=linux-amd64",
+      "-o",
+      "cross-elf"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "format linux-amd64",
+    "command": [
+      "file",
+      "cross-elf"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": "ELF.*x86-64",
+    "status": "PASS",
+    "code": 0,
+    "stdout": "cross-elf: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, stripped\n",
+    "stderr": ""
+  },
+  {
+    "name": "target windows-amd64",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "build",
+      "hello.mio",
+      "--target=windows-amd64",
+      "-o",
+      "cross.exe"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "format windows-amd64",
+    "command": [
+      "file",
+      "cross.exe"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": "PE32\\+.*x86-64",
+    "status": "PASS",
+    "code": 0,
+    "stdout": "cross.exe: PE32+ executable (console) x86-64, for MS Windows\n",
+    "stderr": ""
+  },
+  {
+    "name": "Mach-O code signature",
+    "command": [
+      "codesign",
+      "--verify",
+      "--strict",
+      "--verbose=2",
+      "custom-native"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": "valid on disk",
+    "status": "PASS",
+    "code": 0,
+    "stdout": "",
+    "stderr": "custom-native: valid on disk\ncustom-native: satisfies its Designated Requirement\n"
+  },
+  {
+    "name": "sign API",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "sign.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": "hai\nhai\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "hai\nhai\n",
+    "stderr": ""
+  },
+  {
+    "name": "generic function",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "<v2.1.0-source>/examples/generics.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": "Mio\nMochi\n42\nhai\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "Mio\nMochi\n42\nhai\n",
+    "stderr": ""
+  },
+  {
+    "name": "nullable",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "<v2.1.0-source>/examples/nullable.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "42\nhai\n",
+    "stderr": ""
+  },
+  {
+    "name": "closures",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "<v2.1.0-source>/examples/closures.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "1\n2\n1\n",
+    "stderr": ""
+  },
+  {
+    "name": "arrays",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "<v2.1.0-source>/examples/arrays.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "4\n99\n99\n1\n2\n",
+    "stderr": ""
+  },
+  {
+    "name": "maps",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "<v2.1.0-source>/examples/maps.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "43\nhai\n",
+    "stderr": ""
+  },
+  {
+    "name": "structs/enums/match",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "<v2.1.0-source>/examples/structs_and_enums.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "7\n75\n24\n0\n",
+    "stderr": ""
+  },
+  {
+    "name": "strings and UTF8",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "<v2.1.0-source>/examples/strings_and_utf8.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "9\n5\nhai\nHello, 澪\n",
+    "stderr": ""
+  },
+  {
+    "name": "OS arguments",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "<v2.1.0-source>/examples/os_arguments.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "1\n",
+    "stderr": ""
+  },
+  {
+    "name": "JSON",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "<v2.1.0-source>/examples/json.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "Mio\n{\"name\":\"Mio\",\"version\":21}\n",
+    "stderr": ""
+  },
+  {
+    "name": "regexp",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "<v2.1.0-source>/examples/regexp.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "hai\niie\n",
+    "stderr": ""
+  },
+  {
+    "name": "SHA-256",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "<v2.1.0-source>/examples/sha256.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "32\n186\n",
+    "stderr": ""
+  },
+  {
+    "name": "generic struct",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "probe.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": "42\nMio\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "42\nMio\n",
+    "stderr": ""
+  },
+  {
+    "name": "cross-package generic",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "probe.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": "Mio\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "Mio\n",
+    "stderr": ""
+  },
+  {
+    "name": "type inference and cast",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "probe.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": "7\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "7\n",
+    "stderr": ""
+  },
+  {
+    "name": "native layout",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "run",
+      "probe.mio"
+    ],
+    "expected": 0,
+    "expected_stdout": "42\nMio\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "42\nMio\n",
+    "stderr": ""
+  },
+  {
+    "name": "build GC normal",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "build",
+      "gc.mio",
+      "-o",
+      "gc-normal"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "execute GC normal",
+    "command": [
+      "./gc-normal"
+    ],
+    "expected": 0,
+    "expected_stdout": "3\n499500\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "3\n499500\n",
+    "stderr": ""
+  },
+  {
+    "name": "build GC stress",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "build",
+      "gc.mio",
+      "-o",
+      "gc-stress",
+      "--gc-stress"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "execute GC stress",
+    "command": [
+      "./gc-stress"
+    ],
+    "expected": 0,
+    "expected_stdout": "3\n499500\n",
+    "pattern": null,
+    "status": "PASS",
+    "code": 0,
+    "stdout": "3\n499500\n",
+    "stderr": ""
+  },
+  {
+    "name": "mio test JSON",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "test",
+      "tests",
+      "--format=json",
+      "--run=test"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": "\"failed\":0",
+    "status": "PASS",
+    "code": 0,
+    "stdout": "{\"schema_version\":1,\"packages\":[{\"path\":\"tests\",\"status\":\"passed\",\"tests\":[{\"name\":\"test_arithmetic\",\"path\":\"<scratch>/tests/basic_test.mio\",\"status\":\"passed\",\"duration_ms\":245},{\"name\":\"test_nullable\",\"path\":\"<scratch>/tests/basic_test.mio\",\"status\":\"passed\",\"duration_ms\":5}]}],\"summary\":{\"status\":\"passed\",\"passed\":2,\"failed\":0,\"duration_ms\":332}}\n",
+    "stderr": ""
+  },
+  {
+    "name": "LSP stdio",
+    "command": [
+      "/opt/homebrew/bin/mio",
+      "lsp",
+      "--stdio"
+    ],
+    "expected": 0,
+    "expected_stdout": null,
+    "pattern": "hoverProvider",
+    "status": "PASS",
+    "code": 0,
+    "stdout": "Content-Length: 448\n\n{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"positionEncoding\":\"utf-16\",\"textDocumentSync\":{\"openClose\":true,\"change\":2,\"save\":{\"includeText\":false}},\"hoverProvider\":true,\"definitionProvider\":true,\"referencesProvider\":true,\"documentSymbolProvider\":true,\"completionProvider\":{\"triggerCharacters\":[\".\"]},\"signatureHelpProvider\":{\"triggerCharacters\":[\"(\",\",\"],\"retriggerCharacters\":[\",\"]}},\"serverInfo\":{\"name\":\"MioCore\",\"version\":\"2.0.0-dev\"}}}Content-Length: 109\n\n{\"jsonrpc\":\"2.0\",\"method\":\"window/logMessage\",\"params\":{\"type\":3,\"message\":\"MioCore language server ready.\"}}Content-Length: 191\n\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"contents\":{\"kind\":\"markdown\",\"value\":\"```mio\\nwaza inc(a: int64) -> int64\\n```\"},\"range\":{\"start\":{\"line\":1,\"character\":6},\"end\":{\"line\":1,\"character\":9}}}}Content-Length: 207\n\n{\"jsonrpc\":\"2.0\",\"id\":3,\"result\":[{\"uri\":\"file://<scratch>/lsp.mio\",\"range\":{\"start\":{\"line\":0,\"character\":5},\"end\":{\"line\":0,\"character\":8}}}]}Content-Length: 184\n\n{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/publishDiagnostics\",\"params\":{\"uri\":\"file://<scratch>/lsp.mio\",\"diagnostics\":[]}}Content-Length: 38\n\n{\"jsonrpc\":\"2.0\",\"id\":4,\"result\":null}",
+    "stderr": ""
+  }
+]

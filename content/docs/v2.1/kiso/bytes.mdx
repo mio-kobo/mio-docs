@@ -1,0 +1,114 @@
+---
+title: 字节
+description: Mio V2.0 字节标准库 kiso/bytes
+---
+
+> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+
+
+## 字节
+
+字节标准库（Bytes）面向 `[]uint8` 数据，提供内容比较、查找、复制、填充以及可扩容的字节缓冲区 `ByteBuffer`。
+
+这些操作处理的是字节，不会把输入自动解释为 UTF-8 字符或文本。
+
+本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
+
+### 导入包
+
+> **网页运行说明：** 本页的 Playground 代码块都是独立程序，已分别加入所需的 `yobu` 导入语句。点击「运行」时不会继承页面中其他代码块的状态。
+
+通过 `yobu "kiso/bytes";` 导入本包，随后使用 `bytes.函数名(...)` 调用。
+
+```mio title="Stdlib.mio"
+yobu "kiso/bytes";
+```
+
+### 比较与查找
+
+`equal` 比较长度与内容；`compare` 返回 `-1`、`0` 或 `1` 表示无符号字节字典序。`index`、`contains` 用于寻找单个字节。
+
+```mio title="Bytes.mio"
+yobu "kiso/bytes";
+
+kaku data: []uint8 = [65, 66, 67];
+chant(bytes.contains(data, uint8(66)));
+chant(bytes.index(data, uint8(67)));
+```
+
+### 复制和修改
+
+`copy` 将来源字节复制到目标数组已经存在的位置，不会自动扩容。`fill` 填充整个现有数组；`clone` 则得到独立存储。
+
+```mio title="Bytes.mio"
+yobu "kiso/bytes";
+
+kaku destination: []uint8 = [0, 0, 0];
+bytes.copy(destination, [65, 66]);
+bytes.fill(destination, uint8(42));
+```
+
+### ByteBuffer
+
+`ByteBuffer` 是保存 `data: []uint8` 的结构体，`write`、`write_byte` 可追加字节。复制缓冲区变量会共享其数组；独立复制请使用 `buffer_clone` 或 `buffer_bytes`。
+
+```mio title="Bytes.mio"
+yobu "kiso/bytes";
+
+kaku buffer = bytes.new_buffer();
+bytes.write_byte(buffer, uint8(65));
+bytes.write(buffer, [uint8(66), uint8(67)]);
+chant(bytes.buffer_len(buffer));
+```
+
+### 公开类型
+
+- `ByteBuffer { data: []uint8; }`：可变字节缓冲区；值赋值共享内部数组。
+
+### 公开函数（18 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `equal` | `equal(left: []uint8, right: []uint8) -> bool` | 比较字节数组内容及长度。 |
+| `compare` | `compare(left: []uint8, right: []uint8) -> int64` | 按无符号字节字典序比较，返回 -1、0、1。 |
+| `index` | `index(values: []uint8, target: uint8) -> int64` | 查找单字节，缺失为 -1。 |
+| `contains` | `contains(values: []uint8, target: uint8) -> bool` | 判断是否包含单字节。 |
+| `has_prefix` | `has_prefix(values: []uint8, prefix: []uint8) -> bool` | 判断字节前缀，空前缀为真。 |
+| `has_suffix` | `has_suffix(values: []uint8, suffix: []uint8) -> bool` | 判断字节后缀，空后缀为真。 |
+| `copy` | `copy(destination: []uint8, source: []uint8) -> int64` | 复制到目标现有位置，返回复制字节数，不扩容。 |
+| `fill` | `fill(values: []uint8, value: uint8) -> unit` | 用指定字节覆盖现有全部元素。 |
+| `clone` | `clone(values: []uint8) -> []uint8` | 复制并返回独立字节数组。 |
+| `new_buffer` | `new_buffer() -> ByteBuffer` | 创建空字节缓冲区。 |
+| `buffer_with_capacity` | `buffer_with_capacity(capacity: int64) -> ByteBuffer` | 创建长度为零且预留容量的缓冲区。 |
+| `write_byte` | `write_byte(buffer: ByteBuffer, value: uint8) -> unit` | 追加单个字节。 |
+| `write` | `write(buffer: ByteBuffer, source: []uint8) -> int64` | 追加全部来源字节，返回原来源长度。 |
+| `buffer_len` | `buffer_len(buffer: ByteBuffer) -> int64` | 获取缓冲区已写入字节数。 |
+| `buffer_capacity` | `buffer_capacity(buffer: ByteBuffer) -> int64` | 获取预留容量。 |
+| `reset` | `reset(buffer: ByteBuffer) -> unit` | 将共享缓冲区长度归零并保留容量。 |
+| `buffer_clone` | `buffer_clone(buffer: ByteBuffer) -> ByteBuffer` | 创建独立后备存储的缓冲区副本。 |
+| `buffer_bytes` | `buffer_bytes(buffer: ByteBuffer) -> []uint8` | 将缓冲区内容复制为独立字节数组。 |
+
+### 完整示例
+
+```mio title="Bytes.mio"
+yobu "kiso/bytes";
+
+kaku buffer = bytes.new_buffer();
+bytes.write_byte(buffer, uint8(65));
+kaku source: []uint8 = [66, 67];
+chant(bytes.write(buffer, source));
+chant(bytes.buffer_len(buffer));
+kaku copied = bytes.buffer_bytes(buffer);
+copied[0] = 90;
+chant(buffer.data[0]);
+bytes.reset(buffer);
+chant(bytes.buffer_len(buffer));
+```
+
+### 使用限制
+
+`ByteBuffer` 公开 `data` 字段，但调用者仍应保持缓冲区的长度与共享语义。使用 `buffer_bytes` 和 `buffer_clone` 时会分配独立存储；极大容量或资源不足可能触发运行时错误。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/bytes/bytes.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/bytes/bytes.mio)。

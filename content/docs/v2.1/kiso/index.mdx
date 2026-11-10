@@ -1,0 +1,65 @@
+---
+title: Bunko 标准库
+description: Mio V2.1 的基础标准库、新增模块、AOT 工具包与 API 索引。
+---
+
+## Bunko 标准库
+
+Bunko 是 Mio 的标准库集合。公开的基础模块使用 `kiso/` 作为导入路径。源码中的 `bunko/` 是物理目录名称，使用时不需要把它写入 `yobu`。
+
+V2.1 继续提供 V2.0 的数学、字符串、集合、文件系统和测试模块，并增加 JSON、正则表达式、SHA-256、OS 服务和阻塞 IPv4 TCP。TCP 接口以 v2.1.0 正式标签为准。
+
+### 基础标准库
+
+- [`kiso/math`](/docs/v2.1/kiso/math)：数值比较、平方根和取整。
+- [`kiso/array`](/docs/v2.1/kiso/array)：动态数组、追加和容量管理。
+- [`kiso/string`](/docs/v2.1/kiso/string)：UTF-8 文本、查找和 Builder。
+- [`kiso/bytes`](/docs/v2.1/kiso/bytes)：字节序列与 Buffer。
+- [`kiso/utf8`](/docs/v2.1/kiso/utf8)：Unicode 标量值和 UTF-8 编解码。
+- [`kiso/convert`](/docs/v2.1/kiso/convert)：数字、布尔值与字符串转换。
+- [`kiso/path`](/docs/v2.1/kiso/path)：路径规范化与拆分。
+- [`kiso/io`](/docs/v2.1/kiso/io)：同步读写和字节流接口。
+- [`kiso/fs`](/docs/v2.1/kiso/fs)：文件、目录和文件状态。
+- [`kiso/encoding/binary`](/docs/v2.1/kiso/encoding-binary)：二进制整数及读写器。
+
+以上模块沿用 V2.0 的基本用途。V2.1 对个别模块增加了函数，见 [既有标准库的变化](/docs/v2.1/kiso/changes)。
+
+### V2.1 新增模块
+
+| 导入路径 | 主要接口 | 说明 |
+| --- | --- | --- |
+| [`kiso/encoding/json`](/docs/v2.1/kiso/encoding-json) <FeatureBadge status="experimental" since="2.1" /> | `parse`、`member`、`text`、`integer`、`quote`、`render` | JSON 语法树式文档表示 |
+| [`kiso/regexp`](/docs/v2.1/kiso/regexp) <FeatureBadge status="new" since="2.1" /> | `compile`、`matches` | 正则表达式布尔匹配 |
+| [`kiso/crypto/sha256`](/docs/v2.1/kiso/crypto-sha256) <FeatureBadge status="new" since="2.1" /> | `context`、`sum`、`sum_range` | SHA-256 摘要 |
+| [`kiso/os`](/docs/v2.1/kiso/os) <FeatureBadge status="new" since="2.1" /> | 参数、环境、路径、进程和标准输入接口 | 需要宿主运行时 |
+| [`kiso/net/tcp`](/docs/v2.1/kiso/net-tcp) <FeatureBadge status="new" since="2.1" /> | `connect`、`listen`、`accept`、`read`、`write_all` | 原生阻塞 IPv4 TCP |
+
+这些模块包含在 v2.1.0 Full 中。对依赖宿主的接口，请参考各模块的系统图标及测试范围。
+
+### 测试与格式库
+
+- [`kiso/testing`](/docs/v2.1/kiso/testing)：在 `mio test` 中使用的断言辅助。
+- [`kiso/encoding/mochi`](/docs/v2.1/kiso/encoding-mochi)：Mochi 文件解码与验证，支持 v16 格式。
+
+### AOT 编译工具链
+
+以下模块为编译器维护者提供指令编码、类型分析、Native 桥接和原生镜像生成接口，并不代表稳定的应用层 ABI。
+
+- [`kiso/aot/arm64`](/docs/v2.1/kiso/aot-arm64)：ARM64 指令编码。
+- [`kiso/aot/lower`](/docs/v2.1/kiso/aot-lower)：Mochi lowering 与运行时接入。
+- [`kiso/aot/lower/nativefs`](/docs/v2.1/kiso/aot-lower-nativefs)：文件系统 Native 桥接。
+- [`kiso/aot/lower/types`](/docs/v2.1/kiso/aot-lower-types)：原生类型表示和布局分析。
+- [`kiso/aot/macho`](/docs/v2.1/kiso/aot-macho)：Mach-O 镜像生成。
+- [`kiso/aot/sign`](/docs/v2.1/kiso/aot-sign) <FeatureBadge status="new" since="2.1" />：Darwin ARM64 本地 ad-hoc 签名。
+
+### 阻塞 IPv4 TCP <FeatureBadge status="new" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
+
+`yobu "kiso/net/tcp";` 可使用 `tcp.listen`、`tcp.accept` 和 `tcp.connect`，并通过 `tcp.read` 或 `tcp.write_all` 传输字节。正式版三平台均通过回环 TCP 测试，Windows 额外验证了原生 echo 和通配地址绑定。一次读取可能只收到部分字节；需要固定长度时可使用 `io.read_full`。无 UDP、DNS、IPv6 或 TLS 接口，网页 Playground 也不提供套接字。
+
+见 [TCP 网络参考与 Echo 教程](/docs/v2.1/kiso/net-tcp)，示例使用 `127.0.0.1:18080`。
+
+### 示例在网页上的行为
+
+V2.1 网页使用 v2.1.0 WebAssembly Playground，支持部分 Bunko 模块；具体范围见 [Playground 验证](/docs/v2.1/tooling/verification#网页-playground-验证)。TCP 等依赖宿主的示例使用 `no-run` 静态展示，请用匹配的本地 CLI 与 Bunko 运行。
+
+按名称查询已公开接口，可阅读 [Bunko API 索引](/docs/v2.1/kiso/api)。需要对照正式版本，则查看 [V2.0 Bunko 参考](/docs/v2.0/kiso)。

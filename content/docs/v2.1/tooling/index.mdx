@@ -1,0 +1,52 @@
+---
+title: 开发工具
+description: Mio V2.1 的命令行、编译、测试、语言服务器及编辑器支持。
+---
+
+## 开发工具
+
+开发工具（Tooling）是用于编写、检查、编译、运行和维护 Mio 程序的一组工具。Mio 的源文件使用 `.mio` 扩展名，Mochi 字节码文件使用 `.mochi`。
+
+V2.1 提供原生编译流程，并完善 CLI、语言服务器和测试工具。V2.0 与 V2.1 的部分命令行为不同；如果需要继续使用 Mochi VM，请先确认正在运行哪一个版本。
+
+### 命令行工具
+
+| 命令 | V2.0 正式 CLI | V2.1 正式 CLI |
+| --- | --- | --- |
+| `mio check` | 源码静态检查 | 检查源码，不生成程序 |
+| `mio build` | 默认生成 `.mochi` | 默认生成原生程序；可用 `--emit=mochi` |
+| `mio run` | 编译源码并通过 VM 执行 | 编译临时原生程序并启动 |
+| `mio exec` | 在 VM 中执行 Mochi | 将 Mochi 编译为原生程序后启动 |
+| `mio disasm` | 查看 Mochi 字节码 | 查看 Mochi 字节码 |
+| `mio test` | 运行测试 | 发现测试文件并在隔离进程中运行 |
+| `mio lsp` | 启动 MioCore LSP | 启动 stdio LSP |
+
+V2.1 的选项、输出与退出码仍可能调整。详细用法见 [Native CLI](/docs/v2.1/tooling/native-cli)。
+
+### 从源码到原生程序 <FeatureBadge status="updated" since="2.1" />
+
+V2.1 的原生编译流程将源码转换为对应平台的可执行文件。macOS ARM64、Linux AMD64 与 Windows AMD64 已有 CI 验证；发行与验收范围见 [发行包说明](/docs/v2.1/tooling/distribution)。
+
+不同版本的工具对 Mochi 格式的支持范围可能不同，详见 [Mochi 格式](/docs/v2.1/internals/mochi)。
+
+### 编辑器与语言服务 <FeatureBadge status="updated" since="2.1" />
+
+Mio 提供 VS Code 和 JetBrains 插件。V2.1 LSP 支持编辑器中未保存的内容、UTF-16 位置、文档缓存和诊断；重命名、格式化及语义 Token 等功能尚不能视为已完成。
+
+插件安装方法见 [编辑器支持](/docs/v2.1/tooling/editors)，语言服务详情见 [LSP](/docs/v2.1/tooling/lsp)。如果想了解编译器与工具的内部实现，可继续阅读 [自托管工具链](/docs/v2.1/tooling/selfhost)。
+
+### 阅读顺序
+
+| 页面 | 内容 |
+| --- | --- |
+| [Core、Full 与发行包](/docs/v2.1/tooling/distribution) | V2.1 发行包内容边界、Bunko 外置方案与发布验收 |
+| [Bunko 审核与发布流程](/docs/v2.1/tooling/bunko-review) | 软件包索引 PR 的元数据、来源、测试、审核标签与合并边界 |
+| [Docker 离线开发](/docs/v2.1/tooling/docker) | 复用 Linux Full 发行包的离线容器开发流程 |
+| [Native CLI](/docs/v2.1/tooling/native-cli) | V2.1 原生命令、选项与 V2.0 的区别 |
+| [自托管编译器与语言服务](/docs/v2.1/tooling/selfhost) | 前端、Native Pipeline、LSP、测试与字节码工具 |
+| [Go 参考 CLI](/docs/v2.1/tooling/cli) | 沿用的 V2.0 Go CLI 命令与 Mochi VM 路径 |
+| [编辑器支持](/docs/v2.1/tooling/editors) | VS Code、JetBrains 配置与语言工具选择 |
+| [故障排查](/docs/v2.1/tooling/troubleshooting) | 导入、运行、签名与环境相关问题 |
+| [验证与来源](/docs/v2.1/tooling/verification) | 不同版本与运行记录的证据边界 |
+
+V2.1 的发行适配与部分工具仍在验证中。需要了解自举、构建证据和版本边界，请参阅 [验证与来源](/docs/v2.1/tooling/verification)。

@@ -3,6 +3,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
+import { getVersion } from '../../lib/versions.mjs';
+import { playgroundVersion } from '../../lib/mio-playground-version.mjs';
 import { classifyMioSource } from '../../lib/mio-example-policy.mjs';
 
 /** Normalize only line endings and trailing whitespace; keep Mio source inside blocks untouched. */
@@ -36,6 +38,7 @@ export function collectDocsExamples(root = 'content/docs') {
   const duplicateOutputs = [];
   for (const file of markdownFiles(root)) {
     const absolute = join(root, file);
+    const version = playgroundVersion(getVersion(file.split(/[\\/]/u)[0])?.id);
     const tree = unified().use(remarkParse).parse(readFileSync(absolute, 'utf8'));
 
     const walk = (node, parent = null) => {
@@ -53,13 +56,14 @@ export function collectDocsExamples(root = 'content/docs') {
           if (child.type === 'code' && child.lang?.toLowerCase() === 'mio') {
             const source = child.value;
             const meta = child.meta ?? '';
-            const kind = classifyMioSource(source, meta);
+            const kind = classifyMioSource(source, meta, version);
             const item = {
               file,
               line: child.position?.start.line ?? 0,
               source,
               meta,
               kind,
+              version,
               key: exampleKey(source),
               preview: source.trim().split(/\r?\n/u)[0]?.slice(0, 160) ?? '',
             };

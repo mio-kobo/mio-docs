@@ -1,15 +1,16 @@
 import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { playgroundAssetPath } from '../../lib/mio-playground-version.mjs';
 
 /**
  * Serve the real public/wasm assets over loopback for the Worker fetch path.
  * A failing server is used to exercise the real load-error branch.
  */
-export async function startWasmAssetServer({ assetDir, failWasm = false }) {
+export async function startWasmAssetServer({ assetDir, version = 'legacy', failWasm = false }) {
   const server = createServer((request, response) => {
     const path = new URL(request.url ?? '/', 'http://127.0.0.1').pathname;
-    if (path !== '/wasm/mio.wasm') {
+    if (path !== `${playgroundAssetPath(version)}/mio.wasm`) {
       response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
       response.end('not found');
       return;

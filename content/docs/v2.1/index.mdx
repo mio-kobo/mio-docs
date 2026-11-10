@@ -1,0 +1,117 @@
+---
+title: Mio V2.1 · 开始了解 Mio
+description: 认识 Mio 的语言特性，以及 V2.1 的原生工具链、内存管理和 Bunko 扩展。
+---
+
+Mio 是一门使用**日语罗马字关键字**的静态强类型编程语言。它以小巧的语言核心、明确的类型与数值语义，以及按需导入的标准库为设计方向。编写程序时，类型转换需要明确表达；文件、网络等能力则由 Bunko 提供。
+
+V2.1 延续 V2.0 的语言语法，重点完善**从 Mio 源码到原生程序的工具链**，并扩展原生编译、内存管理和标准库。对于已经使用 V2.0 的读者，可以直接阅读 [版本变化](/docs/v2.1/migration)；第一次接触 Mio，则可以从本页开始。
+
+本目录的功能说明以 [Mio v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0)（`74e461b2985886160a285c7104d2a41090d0f548`）为验证基线。现有版本登记保留原开发快照 `59002db2c9dc0c6dd11ff0f4341de42f79677df2`；正式包与验收范围见 [版本状态](/docs/v2.1/development)。
+
+## Mio 特性
+
+### 熟悉而独特的语法
+
+Mio 使用 `kaku` 声明变量、`waza` 定义函数、`moshi` 表示条件判断、`kaesu` 返回结果。文件中允许直接执行顶层语句，因此简单程序不需要额外编写 `main` 函数。
+
+V2.1 没有引入新的关键字或一套新的语法体系。数组、Map、结构体、枚举、模式匹配和模块导入的基本写法继续沿用 V2.0。完整规则见 [语法与表达式](/docs/v2.1/reference/syntax)。
+
+### 静态强类型与泛型 <FeatureBadge status="updated" since="2.1" />
+
+Mio 支持显式类型标注与类型推断，也提供固定宽度整数、`float32`、`float64`、`bool`、`string`、`rune` 和 `T?` 可空类型。不同宽度数值之间不会随意隐式转换。
+
+泛型函数、泛型结构体和闭包在 V2.0 已经存在。V2.1 主要完善它们的**原生编译**：保留具体泛型实例和跨包类型信息，处理数组布局、Map 及函数值调用，并修正部分 Nullable 与泛型类型检查。这些属于正确性和代码生成改进，不是新增泛型语法。
+
+详见 [类型系统](/docs/v2.1/reference/types)、[泛型与模块](/docs/v2.1/reference/modules)。
+
+### Mochi 与原生编译 <FeatureBadge status="updated" since="2.1" />
+
+Mochi 是 Mio 的中间字节码格式。V2.1 完善了源码检查、字节码生成与原生编译之间的流程，让命令行工具可以直接构建原生可执行文件。
+
+V2.1 CLI 默认生成原生程序，也可以使用 `--emit=mochi` 输出 Mochi 文件。与 V2.0 CLI 的命令差异见 [Native CLI](/docs/v2.1/tooling/native-cli)。
+
+正式归档及原生 CI 覆盖 **macOS ARM64、Linux AMD64 和 Windows AMD64**。见 [Native AOT](/docs/v2.1/internals/native-aot) 和 [发行包说明](/docs/v2.1/tooling/distribution)。
+
+### 内存管理 <FeatureBadge status="experimental" since="2.1" />
+
+V2.0 的原生运行时已经实现精确、非移动式 Mark-Sweep GC。V2.1 在此基础上增加 Young / Old 分代、Minor / Major 回收、原地晋升、Remembered Set、大对象空间（LOS）与托管内存预算。
+
+这些能力仍在逐步完成验收，部分实验性功能并非默认启用。需要了解具体实现与当前限制，可以查看下面的运行时文档。
+
+详见 [运行时与 GC](/docs/v2.1/internals/gc) 和 [内存预算与压力](/docs/v2.1/internals/memory-policy)。
+
+## V2.1 新增内容概览
+
+| 方向 | 主要变化 | 阅读入口 |
+| --- | --- | --- |
+| Bunko 标准库 | JSON、正则表达式、SHA-256、OS 接口与 Mach-O ad-hoc 签名 | [新增模块](/docs/v2.1/kiso) |
+| 数值与系统基础库 | `string.trim_space`、`fs.is_character_device`、`math.fail` 等公开扩展 | [标准库变更](/docs/v2.1/kiso/changes) |
+| 原生内存管理 | 分代 GC、Minor / Major、LOS 和内存预算策略 | [GC 设计](/docs/v2.1/internals/gc) |
+| 原生工具链 | Native CLI、测试运行器与 LSP | [工具链进展](/docs/v2.1/tooling) |
+| Mochi | 增加 v15 / v16 元数据；v2.1.0 Web 参考 VM 支持读取带类型元数据的格式 | [Mochi 格式变化](/docs/v2.1/kiso/encoding-mochi) |
+
+## 使用 Mio
+
+### 安装与准备
+
+从 [快速开始](/docs/v2.1/getting-started) 试用 Playground，或按 [发行包说明](/docs/v2.1/tooling/distribution) 选择 Core 或 Full。需要容器时，可查看 [Docker 离线开发](/docs/v2.1/tooling/docker)。
+
+### 继续学习
+
+建议从 [Learn 学习教程](/docs/v2.1/learn) 开始，依次学习变量、条件、循环、函数、集合、泛型和包。由于 V2.1 没有更换基础语法，这些教程大部分沿用 V2.0 的学习方式。
+
+Mio 还提供 [VS Code 与 JetBrains 编辑器支持](/docs/v2.1/tooling/editors)。CLI、语言服务器与测试工具的使用方法见 [开发工具](/docs/v2.1/tooling)。
+
+### 第一个程序
+
+Mio 使用 `yobu` 导入标准库。以下程序可以保存为 `Hello.mio`：
+
+```mio title="Hello.mio" no-run
+yobu "kiso/string";
+
+kaku greeting = string.concat("Hello, ", "Mio!");
+chant(greeting);
+```
+
+## 语言 API
+
+语言内置能力不需要导入；常用模块通过 Bunko 加载。查询语法、类型、函数与集合的具体规则，可从 [语言参考](/docs/v2.1/reference) 开始。
+
+- [语法与表达式](/docs/v2.1/reference/syntax)：关键字、控制流和运算符。
+- [类型与 Nullable](/docs/v2.1/reference/types)：数值语义、显式转换和可空值。
+- [函数与闭包](/docs/v2.1/reference/functions)：函数、作用域、返回与捕获。
+- [数组、结构体、枚举与 Map](/docs/v2.1/reference/collections)：复合数据类型。
+- [泛型、常量与模块](/docs/v2.1/reference/modules)：类型参数、约束和导入。
+
+## 标准库
+
+Mio 的标准库称为 **Bunko**。公开基础模块使用 `kiso/` 作为导入路径；`bunko/` 是源码中的物理目录，不需要写在 `yobu` 中。
+
+### 常用模块
+
+| 模块 | 用途 |
+| --- | --- |
+| [`kiso/math`](/docs/v2.1/kiso/math) | 数值计算 |
+| [`kiso/array`](/docs/v2.1/kiso/array) | 动态数组 |
+| [`kiso/string`](/docs/v2.1/kiso/string) | UTF-8 文本与 Builder |
+| [`kiso/bytes`](/docs/v2.1/kiso/bytes) | 字节序列 |
+| [`kiso/convert`](/docs/v2.1/kiso/convert) | 文本与数字转换 |
+| [`kiso/io`](/docs/v2.1/kiso/io) | 同步读写 |
+| [`kiso/fs`](/docs/v2.1/kiso/fs) | 文件与目录 |
+| [`kiso/path`](/docs/v2.1/kiso/path) | 路径处理 |
+| [`kiso/testing`](/docs/v2.1/kiso/testing) | 测试辅助 |
+
+V2.1 新增 [JSON](/docs/v2.1/kiso/encoding-json)、[正则表达式](/docs/v2.1/kiso/regexp)、[SHA-256](/docs/v2.1/kiso/crypto-sha256) 和 [OS 服务](/docs/v2.1/kiso/os)。已有模块也有少量 API 扩展，完整清单见 [Bunko 标准库](/docs/v2.1/kiso) 和 [Bunko API 索引](/docs/v2.1/kiso/api)。
+
+v2.1.0 还提供 [阻塞 IPv4 TCP](/docs/v2.1/kiso/net-tcp)。
+
+## 阅读顺序
+
+先读 [当前开发状态](/docs/v2.1/development)，再看 [与 V2.0.0 的变化](/docs/v2.1/migration)。使用新标准库时查阅 [Bunko](/docs/v2.1/kiso)；研究原生后端时阅读 [Internals](/docs/v2.1/internals) 和 [Tooling](/docs/v2.1/tooling)。
+
+V2.1 Playground 支持 JSON、正则表达式、SHA-256 以及其他纯 Mio 模块。涉及宿主文件、进程、网络和原生编译的示例请在本地运行。
+
+## 文档来源
+
+对照标签为 [v2.0.0](https://github.com/mio-kobo/mio/releases/tag/v2.0.0) 与 [v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0)。历史开发记录仅用于说明当时的设计和测试范围。

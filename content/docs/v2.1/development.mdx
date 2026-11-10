@@ -1,0 +1,40 @@
+---
+title: V2.1 版本与验证状态
+description: Mio-2.1 的源码基线、发布边界、M19 状态及已知限制。
+---
+
+## 正式版与文档状态
+
+[Mio v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0) 已发布，源码提交为 `74e461b2985886160a285c7104d2a41090d0f548`。本站的 V2.1 文档以此为验收基线；文档站的默认版本及生命周期登记由独立发布流程管理。
+
+| 功能 | v2.1.0 验证范围 |
+| --- | --- |
+| 原生工具链 | macOS ARM64、Linux AMD64 和 Windows AMD64 的原生固定点、CLI、Runtime ABI |
+| Core / Full | 三平台的归档校验、执行、Bunko 查找 |
+| Docker | Linux AMD64 Full 的断网运行和 save/load |
+| TCP | 三平台 Bunko 测试，Windows 另有原生回环 echo |
+| 网页 Playground | v2.1.0 Web 参考 VM，支持 12 个纯 Mio 模块 |
+
+上述范围来自 [正式版 CI](https://github.com/mio-kobo/mio/actions/runs/42384976176) 和 [发布页](https://github.com/mio-kobo/mio/releases/tag/v2.1.0) 的验证报告。逐功能说明见 [验证与来源](/docs/v2.1/tooling/verification)。
+
+### M19 的阶段证据 <FeatureBadge status="experimental" since="2.1" />
+
+`benchmarks/native-gc/m19c-acceptance.json` 是 2026-10-26 的历史记录：M19c 独立功能为 `PASS`，当时的 M19 总门禁为 `BLOCKED`，M19b 历史整体验收为 `NOT_ACCEPTED`。这些字段只描述该次验收，不能直接作为当前总门禁结论。
+
+v2.1.0 包含分代 GC、LOS、预算、并发 Old Mark、SATB 与 Concurrent Sweep 相关源码及 E6 测试。三平台发布 CI 不覆盖全部长期并发 GC 接纳；本轮没有取得可证明 M19 整体已接纳的新报告，仍按实验性能力介绍。
+
+`Normal / Elevated / High / Critical` 是内部内存压力等级。`High / Balanced / Low` 三档 GC 模式仍属后续工作，不能作为已发布用户选项。
+
+详见 [M19 分代 GC](/docs/v2.1/internals/gc) 和 [内存预算与压力](/docs/v2.1/internals/memory-policy)。
+
+### 工具链和 Playground
+
+本地 `mio` 正式发行包使用原生 CLI；V2.1 网页 Playground 使用同一正式标签构建的 Go Web 参考 VM。两种环境的执行路径和宿主能力不同。涉及文件、进程、TCP、原生测试和原生编译的示例需要在本机使用。
+
+TCP 的公开接口为阻塞 IPv4，不提供 UDP、DNS、IPv6 或 TLS。并发 GC 内部入口也不等于普通 CLI 默认启用。
+
+### 版本依据
+
+- [固定源码提交](https://github.com/mio-kobo/mio/tree/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f)
+- [M19c 验收记录](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/benchmarks/native-gc/m19c-acceptance.json)
+- [M19c 设计与限制](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/benchmarks/native-gc/M19c.md)

@@ -1,0 +1,80 @@
+---
+title: 从 V2.0 到 V2.1
+description: V2.1 分支中的新增模块、现有 API 变化与兼容性注意事项。
+---
+
+## 从 V2.0.0 看 V2.1 的变化
+
+本文对照 [v2.0.0](https://github.com/mio-kobo/mio/releases/tag/v2.0.0) 和 [v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0) 两个正式标签。
+
+**语言语法没有整体变更。** `kaku`、`waza`、`moshi`、`yobu`、泛型、闭包和 Nullable 都不是 V2.1 新增语法。V2.1 主要改进这些既有能力在原生编译与类型检查中的表现。
+
+| 范围 | V2.0.0 | V2.1.0 |
+| --- | --- | --- |
+| `kiso/encoding/json` | 不存在 | 有 `parse`、`member`、`text`、`integer`、`quote`、`render` |
+| `kiso/regexp` | 不存在 | Thompson NFA 布尔匹配，支持部分 Unicode 属性与简单折叠 |
+| `kiso/crypto/sha256` | 不存在 | `context`、`sum`、`sum_range` |
+| `kiso/os` | 不存在 | 进程参数、环境、路径与宿主进程操作 |
+| `kiso/aot/sign` | 不存在 | `adhoc`，面向 Darwin ARM64 Mach-O |
+| `kiso/string` | 17 个公开函数 | 新增 `trim_space` |
+| `kiso/fs` | 无 `is_character_device` | 新增 `is_character_device` |
+| `kiso/math` | 无 `fail` | 新增 `fail`，用于运行时失败路径 |
+| Mochi 解码器 | `VERSION = 14` | `VERSION = 16`；格式兼容应按具体文件和解码器验证 |
+| 原生 GC | 精确非移动式 Mark-Sweep | 已提交分代回收、LOS 与预算策略；整体接纳仍需独立确认 |
+| 原生 CLI | V2.0 正式入口仍以 Go CLI 为主 | V2.1 Native CLI；命令语义并非逐项相同 |
+| Native 泛型和类型布局 | 泛型语法已有，Native 表示有局限 | 保留具体类型实例、跨包信息和数组布局 |
+| 开发工具 | Go LSP 和测试运行器 | 新版语言服务、共享分析与隔离测试 |
+
+### 编译器与类型检查
+
+V2.1 保留原有类型写法，重点改进了以下几处：
+
+- 泛型函数按实际类型生成原生实例，跨包调用也传递所需的具体类型和布局信息；
+- Map、数组的 raw/boxed 存储、空数组布局以及函数值的原生调用得到完善；
+- 非法泛型容器、嵌套 Nullable 等原先可能漏检的组合会更早被拒绝；
+- 闭包不再沿用不恰当的 Nullable 非空推断，局部变量、导入别名和跨包同名类型的解析也更严格。
+
+这些变化主要影响编译结果和诊断。旧代码如果依赖编译器此前错误接受的类型表达式，迁移后可能需要修改，但不需要重写为另一套泛型语法。
+
+### Native CLI 与 Mochi 兼容性
+
+| 操作 | V2.0 正式 CLI | V2.1 正式 CLI |
+| --- | --- | --- |
+| `mio build Hello.mio` | 默认写入 Mochi 字节码 | 默认生成当前宿主的原生程序 |
+| `mio build --emit=mochi` | 非该版本的新增选择方式 | 显式保留 Mochi 输出 |
+| `mio run Hello.mio` | 编译并在 Mochi VM 执行 | 构建临时原生程序并执行 |
+| `mio exec Hello.mochi` | 在 Mochi VM 执行 | 将 Mochi 转成原生程序再执行 |
+
+**迁移建议：** 依赖旧默认 `.mochi` 产物的脚本，需要在V2.1 CLI 中显式指定 `--emit=mochi` 和输出文件。Go 工具链仍留在仓库中，因此命令行为取决于实际调用的可执行文件，不能只看 `mio` 这个名字。
+
+Mochi v15 新增字段类型约束元数据，v16 新增带返回形状的间接调用。v2.1.0 的 Native 工具和 Web 参考解码器可以读取相应元数据。v2.0.0 的 Go 解码器最高读取 v14；不要假定 V2.1 产生的文件能交给 V2.0 运行。
+
+### 向现有项目引入新模块
+
+新增包仍使用 `yobu "kiso/...";` 的导入格式。例如：
+
+```mio title="JSON.mio" no-run
+yobu "kiso/encoding/json";
+yobu "kiso/string";
+
+kaku document = json.parse(string.to_bytes("{\"answer\":42}"));
+moshi (document.error == "") {
+    kaku answer = json.member(document, document.root, "answer");
+    kaku number = json.integer(document, answer);
+    moshi (number != mu) { chant(number); }
+}
+```
+
+可以在 [快速开始](/docs/v2.1/getting-started#v21-新增的-bunko-模块) 运行类似的 JSON 示例。
+
+### 兼容性边界
+
+V2.1 的 Native CLI 将 `run` 与 `build` 设计为原生路径，同时保留 `--emit=mochi` 选项。**不要把V2.1 CLI 的命令行为直接覆盖 V2.0.0 文档中的 `mio run` / `mio build`。**
+
+对于 `kiso/os`、`kiso/fs` 或原生 AOT 代码，仍需考虑目标平台的支持情况。较早的开发版 CLI 可能内嵌 Bunko；V2.1 的 Core / Full 发行包已改为**独立 Bunko 目录**，并支持通过 `--bunko-root` 或 `MIO_BUNKO` 指定库位置。详见 [发行包说明](/docs/v2.1/tooling/distribution)。
+
+对于 GC，M19c 局部 `PASS` 不代表整个 M19 总发布门禁通过。对于新 Mochi 版本，单纯把解码常量改为 `16` 也不足以证明所有旧工具能消费新版输出。
+
+### 平台与验收边界
+
+`kiso/net/tcp` 提供阻塞 IPv4 TCP。Native CLI、Runtime ABI 和三平台发行包的验收见 [验证与来源](/docs/v2.1/tooling/verification)。长期并发 GC 的接纳范围请以独立证据为准。

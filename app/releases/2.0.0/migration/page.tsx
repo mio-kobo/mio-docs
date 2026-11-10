@@ -1,11 +1,10 @@
 import Link from 'next/link';
 import { ReleaseShell } from '@/components/release-shell';
 import { pageMetadata } from '@/lib/seo';
-import { releasePlan } from '@/lib/releases.mjs';
-export const metadata = pageMetadata('迁移到 Mio v2.0.0', '从 V1.0 迁移到 v2.0.0：安装、VM 验证、Native AOT 与兼容边界。', '/releases/2.0.0/migration', releasePlan.mode === 'prepared');
+export const metadata = pageMetadata('迁移到 Mio v2.0.0', '从 V1.0 迁移到 v2.0.0：安装、VM 验证、Native AOT 与兼容边界。', '/releases/2.0.0/migration');
 export default function Page() {
- return <ReleaseShell title="迁移到 Mio v2.0.0" description={releasePlan.released ? '面向 V1.0 用户的正式迁移指南。先保留 V1 工具链，再在独立目录安装 v2.0.0。' : '迁移准备。'}>
-  <aside className="release-callout"><strong>{releasePlan.released ? 'Stable · 正式迁移指南' : 'Development'}</strong><p>保留可用的 V1 工具链与 Bunko，使用独立的 <code>MIO_BUNKO</code>。不要混用两个版本的标准库。</p></aside>
+ return <ReleaseShell title="迁移到 Mio v2.0.0" description="面向 V1.0 用户的正式迁移指南。先保留 V1 工具链，再在独立目录安装 v2.0.0。">
+  <aside className="release-callout"><strong>Stable · 正式迁移指南</strong><p>保留可用的 V1 工具链与 Bunko，使用独立的 <code>MIO_BUNKO</code>。不要混用两个版本的标准库。</p></aside>
   <section><h2>迁移步骤</h2><ol className="migration-steps">
     <li><h3>固定当前 V1 环境</h3><p>记录 V1 CLI 字符串、Bunko 路径和项目测试结果，保留原工具链作为回退环境。</p><Link href="/docs/v1.0/getting-started">V1.0 安装与运行 →</Link></li>
     <li><h3>安装 v2.0.0 发行包</h3><p>从官方 Release 下载 <code>mio-2.0.0-darwin-arm64.tar.gz</code> 与 <code>SHA256SUMS</code>，校验后解压到独立目录，设置 PATH 与 <code>MIO_BUNKO</code>。</p><Link href="/docs/v2.0/getting-started">v2.0.0 安装与校验 →</Link></li>

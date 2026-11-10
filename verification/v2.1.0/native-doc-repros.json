@@ -1,0 +1,222 @@
+[
+  {
+    "file": "v2.1/learn/closures-function-values.mdx",
+    "line": 213,
+    "key": "6895b01e69f42db11081288512fe47cd5803937cf328dd189185371ef8a7e670",
+    "preview": "waza make_factorial() -> (int64) -> int64 {",
+    "check": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0305]: factorial\nexpected/actual: invalid / invalid\n  --> example.mio:6:23\n   6 |         kaesu value * factorial(value - 1);\n     |                       ^^^^^^^^^\n"
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0305]: factorial\nexpected/actual: invalid / invalid\n  --> example.mio:6:23\n   6 |         kaesu value * factorial(value - 1);\n     |                       ^^^^^^^^^\n"
+    },
+    "web_stdout": "120\n",
+    "source": "waza make_factorial() -> (int64) -> int64 {\n    kaku factorial: (int64) -> int64 = waza (value: int64) -> int64 {\n        moshi (value <= 1) {\n            kaesu 1;\n        }\n        kaesu value * factorial(value - 1);\n    };\n\n    kaesu factorial;\n}\n\nkaku factorial = make_factorial();\nchant(factorial(5));"
+  },
+  {
+    "file": "v2.1/learn/datatype.mdx",
+    "line": 401,
+    "key": "6732f2696610724ba3d3182f340750d03b7cc6b3552c3fc8ac4dd05efc590ec9",
+    "preview": "sentaku Result<T, E> {",
+    "check": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0306]: cannot infer enum type arguments\nexpected/actual: invalid / invalid\n  --> example.mio:18:38\n   18 | kaku result: Result<int64, string> = Result.Ok(42);\n      |                                      ^^^^^^^^^^^^^\n"
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0306]: cannot infer enum type arguments\nexpected/actual: invalid / invalid\n  --> example.mio:18:38\n   18 | kaku result: Result<int64, string> = Result.Ok(42);\n      |                                      ^^^^^^^^^^^^^\n"
+    },
+    "web_stdout": "42\n",
+    "source": "sentaku Result<T, E> {\n    Ok(T);\n    Err(E);\n}\n\nwaza get_value(result: Result<int64, string>) -> int64 {\n    awase (result) {\n        baai Ok(value) {\n            kaesu value;\n        }\n        baai Err(message) {\n            chant(message);\n            kaesu 0;\n        }\n    }\n}\n\nkaku result: Result<int64, string> = Result.Ok(42);\n\nchant(get_value(result));"
+  },
+  {
+    "file": "v2.1/learn/enums-pattern-matching.mdx",
+    "line": 17,
+    "key": "d78b8c6309f34125d03a8a0e80a9a098c853a8ba35889dd9a68e1a0d3686f65c",
+    "preview": "sentaku Status {",
+    "check": {
+      "code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0401]: E_LOWER 8 / 38\n"
+    },
+    "web_stdout": "准备完成\n",
+    "source": "sentaku Status {\n    Ready;\n    Failed(string);\n}\n\nkaku status: Status = Status.Ready();\n\nawase (status) {\n    baai Ready {\n        chant(\"准备完成\");\n    }\n    baai Failed(message) {\n        chant(message);\n    }\n}"
+  },
+  {
+    "file": "v2.1/learn/enums-pattern-matching.mdx",
+    "line": 128,
+    "key": "063e1f0e167f3c3fcf1e15fb58c2f444bed89ef9504562631a441f07f77b1eca",
+    "preview": "sentaku Message {",
+    "check": {
+      "code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0401]: E_LOWER 8 / 338\n"
+    },
+    "web_stdout": "Hello, Mio!\n",
+    "source": "sentaku Message {\n    Text(string);\n    Number(int64);\n}\n\nkaku message: Message = Message.Text(\"Hello, Mio!\");\n\nawase (message) {\n    baai Text(value) {\n        chant(value);\n    }\n    baai Number(value) {\n        chant(value);\n    }\n}"
+  },
+  {
+    "file": "v2.1/learn/enums-pattern-matching.mdx",
+    "line": 197,
+    "key": "4311d2b1bb6dc7916083d6d9e932104222826e96d37fcc484c6fde43f52d8d54",
+    "preview": "sentaku Result<T, E> {",
+    "check": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0306]: cannot infer enum type arguments\nexpected/actual: invalid / invalid\n  --> example.mio:18:38\n   18 | kaku result: Result<int64, string> = Result.Ok(42);\n      |                                      ^^^^^^^^^^^^^\n"
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0306]: cannot infer enum type arguments\nexpected/actual: invalid / invalid\n  --> example.mio:18:38\n   18 | kaku result: Result<int64, string> = Result.Ok(42);\n      |                                      ^^^^^^^^^^^^^\n"
+    },
+    "web_stdout": "42\n",
+    "source": "sentaku Result<T, E> {\n    Ok(T);\n    Err(E);\n}\n\nwaza get_value(result: Result<int64, string>) -> int64 {\n    awase (result) {\n        baai Ok(value) {\n            kaesu value;\n        }\n        baai Err(message) {\n            chant(message);\n            kaesu 0;\n        }\n    }\n}\n\nkaku result: Result<int64, string> = Result.Ok(42);\nchant(get_value(result));"
+  },
+  {
+    "file": "v2.1/learn/generics.mdx",
+    "line": 42,
+    "key": "03ca7b4f781cb50a98b5c0463d8488e39f7c692766e8ed70600890d5661f5327",
+    "preview": "waza first<T>(values: []T) -> T? {",
+    "check": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0301]: array element type mismatch\nexpected/actual: T / int64\n  --> example.mio:9:22\n   9 | kaku number = first([10, 20, 30]);\n     |                      ^^\n"
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0301]: array element type mismatch\nexpected/actual: T / int64\n  --> example.mio:9:22\n   9 | kaku number = first([10, 20, 30]);\n     |                      ^^\n"
+    },
+    "web_stdout": "10\n",
+    "source": "waza first<T>(values: []T) -> T? {\n    moshi (len(values) == 0) {\n        kaesu mu;\n    }\n\n    kaesu values[0];\n}\n\nkaku number = first([10, 20, 30]);\n\nmoshi (number != mu) {\n    chant(number);\n}",
+    "verifiedWorkaround": "waza first<T>(values: []T) -> T? {\n    moshi (len(values) == 0) {\n        kaesu mu;\n    }\n\n    kaesu values[0];\n}\n\nkaku number = first[int64]([10, 20, 30]);\n\nmoshi (number != mu) {\n    chant(number);\n}"
+  },
+  {
+    "file": "v2.1/learn/generics.mdx",
+    "line": 160,
+    "key": "9c14dba06091ceeeaf6d4cc10d30574fb4dfb8b02d5ab70ace944d9296bb6436",
+    "preview": "sentaku Result<T, E> {",
+    "check": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0306]: cannot infer enum type arguments\nexpected/actual: invalid / invalid\n  --> example.mio:6:38\n   6 | kaku result: Result<int64, string> = Result.Ok(42);\n     |                                      ^^^^^^^^^^^^^\n"
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0306]: cannot infer enum type arguments\nexpected/actual: invalid / invalid\n  --> example.mio:6:38\n   6 | kaku result: Result<int64, string> = Result.Ok(42);\n     |                                      ^^^^^^^^^^^^^\n"
+    },
+    "web_stdout": "42\n",
+    "source": "sentaku Result<T, E> {\n    Ok(T);\n    Err(E);\n}\n\nkaku result: Result<int64, string> = Result.Ok(42);\n\nawase (result) {\n    baai Ok(value) {\n        chant(value);\n    }\n    baai Err(message) {\n        chant(message);\n    }\n}"
+  },
+  {
+    "file": "v2.1/learn/generics.mdx",
+    "line": 186,
+    "key": "d84f2b881d37eac5dab2110e7f683406c37c0de8495fd7d1b6937b0226a96ce4",
+    "preview": "waza count<T>(values: []T) -> int64 {",
+    "check": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0301]: array element type mismatch\nexpected/actual: T / int64\n  --> example.mio:5:14\n   5 | chant(count([1, 2, 3]));\n     |              ^\n"
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0301]: array element type mismatch\nexpected/actual: T / int64\n  --> example.mio:5:14\n   5 | chant(count([1, 2, 3]));\n     |              ^\n"
+    },
+    "web_stdout": "3\n2\n",
+    "source": "waza count<T>(values: []T) -> int64 {\n    kaesu len(values);\n}\n\nchant(count([1, 2, 3]));\nchant(count([\"A\", \"B\"]));",
+    "verifiedWorkaround": "waza count<T>(values: []T) -> int64 {\n    kaesu len(values);\n}\n\nchant(count[int64]([1, 2, 3]));\nchant(count[string]([\"A\", \"B\"]));"
+  },
+  {
+    "file": "v2.1/learn/map.mdx",
+    "line": 76,
+    "key": "1bab97fd0b9a5d2351e4299027fdc60dd3fc30f1c9c9b6dffa299f9ed693fb75",
+    "preview": "kaku ages: Map<string, int64> = Map();",
+    "check": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0303]: Map constructor requires two type arguments and no values\nexpected/actual: invalid / invalid\n  --> example.mio:1:33\n   1 | kaku ages: Map<string, int64> = Map();\n     |                                 ^^^^^\n"
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0303]: Map constructor requires two type arguments and no values\nexpected/actual: invalid / invalid\n  --> example.mio:1:33\n   1 | kaku ages: Map<string, int64> = Map();\n     |                                 ^^^^^\n"
+    },
+    "web_stdout": "",
+    "source": "kaku ages: Map<string, int64> = Map();",
+    "verifiedWorkaround": "kaku ages: Map<string, int64> = Map[string, int64]();"
+  },
+  {
+    "file": "v2.1/learn/scope.mdx",
+    "line": 235,
+    "key": "0406cb770af127c862edca2209e358ae6a90729fe7831a396a22eab64b82fd5f",
+    "preview": "sentaku Result {",
+    "check": {
+      "code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0401]: E_LOWER 8 / 338\n"
+    },
+    "web_stdout": "42\n",
+    "source": "sentaku Result {\n    Ok(int64);\n    Err(string);\n}\n\nkaku result: Result = Result.Ok(42);\n\nawase (result) {\n    baai Ok(value) {\n        chant(value);\n    }\n    baai Err(message) {\n        chant(message);\n    }\n}"
+  },
+  {
+    "file": "v2.1/reference/builtins.mdx",
+    "line": 61,
+    "key": "1bb57319b5c7e57df3a02967d36a60e77838f72fa3080aa6c363d01d0a8b88df",
+    "preview": "kaku scores: Map<string, int64> = Map();",
+    "check": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0303]: Map constructor requires two type arguments and no values\nexpected/actual: invalid / invalid\n  --> example.mio:1:35\n   1 | kaku scores: Map<string, int64> = Map();\n     |                                   ^^^^^\n"
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0303]: Map constructor requires two type arguments and no values\nexpected/actual: invalid / invalid\n  --> example.mio:1:35\n   1 | kaku scores: Map<string, int64> = Map();\n     |                                   ^^^^^\n"
+    },
+    "web_stdout": "100\n",
+    "source": "kaku scores: Map<string, int64> = Map();\nscores[\"Mio\"] = 100;\n\nkaku score = scores[\"Mio\"];\nmoshi (score != mu) {\n    chant(score);\n}",
+    "verifiedWorkaround": "kaku scores: Map<string, int64> = Map[string, int64]();\nscores[\"Mio\"] = 100;\n\nkaku score = scores[\"Mio\"];\nmoshi (score != mu) {\n    chant(score);\n}"
+  },
+  {
+    "file": "v2.1/reference/collections.mdx",
+    "line": 133,
+    "key": "bf4c058077dd5ab20c032be429247a171928c513179003087bb8b008b8414820",
+    "preview": "sentaku Result<T, E> {",
+    "check": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0306]: cannot infer enum type arguments\nexpected/actual: invalid / invalid\n  --> example.mio:18:38\n   18 | kaku result: Result<int64, string> = Result.Ok(42);\n      |                                      ^^^^^^^^^^^^^\n"
+    },
+    "run": {
+      "code": 1,
+      "stdout": "",
+      "stderr": "error[E0306]: cannot infer enum type arguments\nexpected/actual: invalid / invalid\n  --> example.mio:18:38\n   18 | kaku result: Result<int64, string> = Result.Ok(42);\n      |                                      ^^^^^^^^^^^^^\n"
+    },
+    "web_stdout": "42\n",
+    "source": "sentaku Result<T, E> {\n    Ok(T);\n    Err(E);\n}\n\nwaza get_or_zero(result: Result<int64, string>) -> int64 {\n    awase (result) {\n        baai Ok(value) {\n            kaesu value;\n        }\n        baai Err(message) {\n            chant(message);\n            kaesu 0;\n        }\n    }\n}\n\nkaku result: Result<int64, string> = Result.Ok(42);\nchant(get_or_zero(result));"
+  }
+]

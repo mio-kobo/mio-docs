@@ -1,0 +1,47 @@
+{
+  "chromium": {
+    "engine": "chromium",
+    "version": "157.0.8103.38",
+    "workerURLs": [
+      "/wasm/v2.1/mio-worker.js",
+      "/wasm/mio-worker.js"
+    ],
+    "errors": [],
+    "passed": true
+  },
+  "firefox": {
+    "engine": "firefox",
+    "version": "159.0",
+    "workerURLs": [
+      "/wasm/v2.1/mio-worker.js",
+      "/wasm/mio-worker.js"
+    ],
+    "errors": [],
+    "passed": true
+  },
+  "webkit": {
+    "engine": "webkit",
+    "version": "27.2",
+    "workerURLs": [
+      "/wasm/v2.1/mio-worker.js",
+      "/wasm/mio-worker.js"
+    ],
+    "errors": [],
+    "passed": true
+  },
+  "chromiumFaultInjection": {
+    "engine": "157.0.8103.38",
+    "modules": 12,
+    "denied": 9,
+    "load503": true,
+    "timeout": true,
+    "workerException": true,
+    "activeStop": true,
+    "recovery": true,
+    "requests": [
+      "/wasm/v2.1/mio-worker.js",
+      "/wasm/v2.1/wasm_exec.js",
+      "/wasm/v2.1/mio.wasm"
+    ]
+  }
+}

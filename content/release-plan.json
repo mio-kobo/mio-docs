@@ -1,12 +1,18 @@
 {
-  "version": "2.0.0",
-  "mode": "published",
-  "docsVersion": "v2.0",
-  "previousStable": "v1.0",
+  "version": "2.1.2",
+  "mode": "live",
+  "docsVersion": "v2.1.2",
+  "previousStable": "v2.0",
   "released": true,
-  "releaseUrl": "https://github.com/mio-kobo/mio/releases/tag/v2.0.0",
-  "publishedAt": "2026-10-21T08:31:25Z",
-  "sourceCommit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
-  "acceptance": null,
-  "publicationEvidence": "verification/v2.0.0-release/promotion.json"
+  "releaseUrl": "https://github.com/mio-kobo/mio/releases/tag/v2.1.2",
+  "publishedAt": "2026-11-10T08:11:15Z",
+  "sourceCommit": "7903f6d18a37b3e4a84fb381f019d1683d3fb81a",
+  "acceptance": {
+    "status": "passed",
+    "sourceCommit": "7903f6d18a37b3e4a84fb381f019d1683d3fb81a",
+    "reviewer": "Codex (acceptance testing at the maintainer’s request)",
+    "reviewedAt": "2026-11-10T14:25:04Z",
+    "evidence": "verification/v2.1.2-release/production-acceptance.json"
+  },
+  "publicationEvidence": "verification/v2.1.2-release/promotion.json"
 }

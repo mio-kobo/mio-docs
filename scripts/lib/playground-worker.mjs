@@ -1,6 +1,7 @@
 import { Worker } from 'node:worker_threads';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
+import { playgroundAssetPath } from '../../lib/mio-playground-version.mjs';
 
 const HOST_ENTRY = fileURLToPath(new URL('./mio-worker-host.mjs', import.meta.url));
 
@@ -17,9 +18,10 @@ class WorkerFailure extends Error {
  * host loads the same mio-worker.js, wasm_exec.js and mio.wasm used by the site.
  */
 export class PlaygroundWorkerClient {
-  constructor({ assetDir, origin, initTimeoutMs = 20_000, executionTimeoutMs = 20_000 }) {
+  constructor({ assetDir, origin, version = 'legacy', initTimeoutMs = 20_000, executionTimeoutMs = 20_000 }) {
     this.assetDir = assetDir;
     this.origin = origin;
+    this.version = version;
     this.initTimeoutMs = initTimeoutMs;
     this.executionTimeoutMs = executionTimeoutMs;
     this.worker = null;
@@ -38,7 +40,7 @@ export class PlaygroundWorkerClient {
       workerData: {
         assetDir: this.assetDir,
         workerPath: join(this.assetDir, 'mio-worker.js'),
-        workerUrl: `${this.origin}/wasm/mio-worker.js`,
+        workerUrl: `${this.origin}${playgroundAssetPath(this.version)}/mio-worker.js`,
       },
     });
     this.worker.on('message', message => this.onMessage(message));

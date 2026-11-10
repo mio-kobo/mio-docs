@@ -1,0 +1,60 @@
+---
+featureBadge: new
+title: SHA-256 摘要
+description: V2.1 的 kiso/crypto/sha256：字节摘要与范围计算。
+---
+
+## SHA-256 <FeatureBadge status="new" since="2.1" />
+
+SHA-256 用于生成固定的 256 位（32 字节）哈希摘要。`kiso/crypto/sha256` 提供一次性计算和分段计算接口。
+
+### 导入
+
+```mio title="SHA256.mio"
+yobu "kiso/crypto/sha256";
+yobu "kiso/string";
+
+kaku digest = sha256.sum(string.to_bytes("abc"));
+chant(len(digest));
+chant(digest[0]);
+```
+
+摘要是 `[]uint8`，因此不能直接用 `chant(digest)` 输出整个数组。若要显示十六进制字符串，需要将每个字节格式化为两个十六进制数字。
+
+### 公开类型与函数
+
+```mio title="SHA256Types.mio" no-run
+// 以下是Context 类型布局（Tables 为包内公开查找表类型）；此代码不是独立程序。
+koukai kata Context {
+    xor_nibbles: []int64;
+    powers: []int64;
+    constants: []int64;
+    byte_tables: []Tables;
+}
+```
+
+| 函数 | 公开签名 | 说明 |
+| --- | --- | --- |
+| `context` | `context() -> Context` | 构建查找表和常量表，供范围摘要复用 |
+| `sum_range` | `sum_range(ctx: Context, data: []uint8, start: int64, length: int64) -> []uint8` | 计算指定字节区间摘要 |
+| `sum` | `sum(data: []uint8) -> []uint8` | 计算整段字节数组摘要 |
+
+### 只计算一部分内容
+
+```mio title="SHA256Range.mio"
+yobu "kiso/crypto/sha256";
+yobu "kiso/string";
+
+kaku ctx = sha256.context();
+kaku source = string.to_bytes("prefixabcpostfix");
+kaku digest = sha256.sum_range(ctx, source, 6, 3);
+chant(len(digest));
+```
+
+`sum_range` 不需要先复制 `data` 的目标子数组。`start` 和 `length` 的单位都是字节，超出数组界限或负数区间时返回空数组。**返回 32 字节表示有效摘要；返回空数组表示本次范围参数非法**。
+
+### 适用范围
+
+源码测试包括空消息、`abc`、跨两个块的标准消息、百万个 `a`，以及上下文复用。这里的 SHA-256 是**无密钥摘要函数**，不是 HMAC、数字签名或加密算法。`Context` 中的公开数组用于计算内部常量，调用者不应随意修改。
+
+来源：[`sha256.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/crypto/sha256/sha256.mio)、[`sha256_test.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/crypto/sha256/sha256_test.mio)。

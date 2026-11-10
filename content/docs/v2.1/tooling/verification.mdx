@@ -1,0 +1,193 @@
+---
+title: 验证与来源
+description: Mio V2.1 正式版的源码、平台验收与 V2.0 历史验证边界。
+---
+
+## 验证与来源
+
+Mio 的功能与工具链会随着版本变化，因此编写官方文档时，应以明确的源码版本作为依据。
+
+### V2.1 的验证范围
+
+正式基线：[v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0)，提交 `74e461b2985886160a285c7104d2a41090d0f548`。平台图标指明功能已验证的系统、CPU 和范围。
+
+| 能力 | 证据及范围 |
+| --- | --- |
+| Native AOT、Runtime、Bunko | 三平台原生固定点、Runtime ABI、原生差分与模块测试；见发布页中的 `darwin-arm64-native-report.json`、`linux-amd64-native-report.json`、`windows-amd64-native-report.json` |
+| Core / Full、CLI、测试、LSP | [发行工作流](https://github.com/mio-kobo/mio/actions/runs/42384976176) 及三份对应的 `*-verification.json`，验证归档、构建运行、Bunko 路径、测试与 LSP 握手 |
+| Linux AMD64 Full Docker | 同一工作流的 `docker-full-offline` 与 `docker-verification.json`，验证断网运行、归档保存与重新导入 |
+| Web 参考 VM | [v2.1.0 Web CI](https://github.com/mio-kobo/mio/actions/runs/42384113383) 覆盖 Chromium、原生 Mochi 生产端与参考 VM 差分 |
+| Mach-O 签名 | macOS ARM64 用正式 CLI 构建后执行 `codesign --verify --strict`；签名 API 另检查合法和无效输入 |
+| 并发 GC | ABI、有限分配和已有差分用例不能代替长期并发回收的接纳 |
+
+#### 未验证的架构 <PlatformSupport showArch={false} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
+
+三平台均有通过验证的正式目标，但不能把一个架构的结果推广到整个系统。只显示系统汇总时，缺少对应架构的证据会显示为「未验证」；具体架构见 [发行包说明](/docs/v2.1/tooling/distribution)。
+
+下文标明历史验证的部分使用 V2.0.0 Go CLI 语义。V2.1 的本机命令见 [Native CLI](/docs/v2.1/tooling/native-cli)。
+
+### V2.0 历史基线
+
+V2.0 的 CLI、Mochi、Bunko 和 MioCore LSP 均以当时的核心源码为基础。编辑器插件属于独立项目，应另行确认插件版本与运行环境。
+
+### 版本基线
+
+| 项目 | 版本或来源 |
+| --- | --- |
+| Mio 语言版本 | `v2.0.0` |
+| 发布标签 | [`v2.0.0`](https://github.com/mio-kobo/mio/releases/tag/v2.0.0) |
+| 发布 Tag 在此次审计中的指向 | `5d4c1dbdc75aba87e2213bec2b0031c4ff21f379` |
+| 旧版文档沿用的源码参考 | `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a` |
+| CLI 版本字符串 | `Mio 2.0.0` |
+| 字节码系统 | Mochi v14 |
+| 官方预编译发行平台 | macOS Apple Silicon ARM64 |
+| 标准库来源 | `bunko/kiso/` |
+| 语言服务器来源 | `internal/lsp/` |
+
+这里的版本信息用于说明文档的适用范围，不表示其他版本的 CLI、插件或 Native AOT 一定具有相同功能。
+
+### 核心功能验证
+
+对于一个完整的 Mio 程序，可以按照以下顺序检查源码与字节码执行流程。
+
+首先创建 `Hello.mio`：
+
+```mio title="Hello.mio"
+chant("Hello, Mio!");
+```
+
+随后使用终端执行：
+
+```sh
+mio version
+mio check Hello.mio
+mio run Hello.mio
+mio build -o Hello.mochi Hello.mio
+mio exec Hello.mochi
+mio disasm Hello.mochi
+```
+
+`check` 用于确认静态检查能够通过，`run` 用于确认源码运行，`build` 用于生成字节码，`exec` 则用来验证编译产物能够执行。
+
+`disasm` 可用于检查字节码中的常量、指令和函数信息，但其文本格式不应直接视作 Mio 源码的可逆表示。
+
+### 标准库验证
+
+使用 Bunko 时，应确认 CLI 能正确定位标准库目录，并在每个独立的示例文件中添加需要的 `yobu` 导入语句。
+
+例如：
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+kaku value: float64 = 144.0;
+chant(math.sqrt(value));
+```
+
+可以使用：
+
+```sh
+mio check Math.mio
+mio run Math.mio
+```
+
+如果 Bunko 未安装到项目目录中，可以通过 `MIO_BUNKO` 指定标准库物理根。
+
+### 自动化检查
+
+Mio 文档仓库包含示例检查脚本，可以使用指定的 CLI 和 Bunko 运行可验证的程序样例。
+
+在 `mio-docs` 仓库根目录下，可以根据已配置的文档版本执行：
+
+```sh
+DOCS_VERSION=v2.0 \
+MIO_CLI="$MIO_HOME/mio" \
+MIO_BUNKO="$MIO_HOME/bunko" \
+node scripts/check-examples.mjs
+```
+
+这个脚本用于检查仓库中它所覆盖的文档示例，并不意味着它会自动发现所有新建的 Markdown 代码块。
+
+新增文档仍应逐个检查示例是否完整、是否依赖外部文件、是否需要只在 `mio test` 下使用的测试环境，以及是否需要不可用的宿主功能。
+
+### 网页 Playground 验证
+
+V2.1 页使用 v2.1.0 Go Web 参考 VM。V1.0 和 V2.0 页继续使用原来的浏览器资源。V2.1 加载失败时会显示错误，不会改用旧版 VM。网页只提供运行和静态检查；Native AOT、文件、网络、进程、测试运行器与字节码文件操作请使用本机工具。
+
+| 已验证的浏览器模块 | 检查内容 |
+| --- | --- |
+| `kiso/array`、`kiso/bytes` | 追加、空数组、负长度诊断、空字节序列查找 |
+| `kiso/convert`、`kiso/math` | 整数解析与溢出、最大公约数、负数平方根 |
+| `kiso/encoding/binary`、`kiso/encoding/json` | 大端读取与短输入、JSON 解析与渲染、无效 JSON |
+| `kiso/regexp`、`kiso/regexp/unicode_data` | Unicode 属性匹配、非法模式、规范化表键及未知键 |
+| `kiso/crypto/sha256` | `abc` 的完整摘要、无效范围 |
+| `kiso/path`、`kiso/string`、`kiso/utf8` | 斜杠路径、非 ASCII 字符、无效 UTF-8 |
+
+`kiso/fs`、`kiso/io`、`kiso/os`、`kiso/net/tcp`、`kiso/testing` 等依赖宿主的模块没有嵌入。文档中相应代码以静态代码块展示。
+
+每个可运行的 `mio` 代码块应为完整程序，在同一代码块写出依赖的 `yobu`。上下文片段、故意出错的示例和只能在本机运行的测试可标注 `no-run`。站点用 `npm run check:playground` 校验每个可运行代码块。
+
+### 测试命令验证
+
+对于测试文件，应使用 `mio test` 而不是 `mio run`。
+
+例如：
+
+```mio title="number_test.mio" mode=test no-run
+yobu "kiso/testing";
+
+waza test_number() -> unit {
+    testing.expect(6 * 7 == 42, "数值计算应当正确");
+}
+```
+
+在项目中执行：
+
+```sh
+mio test .
+mio test ./... --format=json
+```
+
+除确认退出码以外，还应检查实际运行的测试数量和失败数量。因为没有匹配到任何测试时也可能返回成功退出码。
+
+### 发行平台与运行边界
+
+Mio V2.0.0 的正式预编译发布主要面向 macOS Apple Silicon ARM64。
+
+`mio` 可以完成源码前端和 Mochi VM 工作；`mochi-aot` 与 `native-aot` 负责原生 ARM64 Mach-O 生成。需要区分字节码构建通过、VM 运行通过和 Native AOT 运行通过这三个不同的结论。
+
+编译器与 Native AOT 的支持范围并不完全相同。例如，Native 当前不承诺完整支持 VM 的 Map、任意宿主桥接及全部函数值组合。
+
+官方 V2.0.0 发布包采用 ad-hoc 签名，并未建立 Developer ID 公证和全部 macOS 版本的兼容性承诺。因此，安装成功、字节码执行成功和原生程序首次启动成功应分别验证。
+
+### 编辑器验证边界
+
+VS Code 与 JetBrains 插件的版本独立于核心语言版本。
+
+| 项目 | 需要验证的内容 |
+| --- | --- |
+| VS Code | 插件能否找到 CLI、启动 MioCore、获得诊断与补全 |
+| JetBrains | Mio SDK、Bunko 路径、CLI 诊断与运行配置 |
+| LSP | `initialize`、文档同步、诊断、正常 `shutdown` / `exit` |
+| 扩展发布 | 插件包版本、目标 IDE 版本和市场发布状态 |
+
+现有核心仓库具有 MioCore LSP 的协议测试，文档仓库也记录了 V2.0.0 的语言服务握手验证。这些记录不能自动证明每个编辑器版本都已通过完整端到端测试。
+
+### 项目中的验证记录
+
+Mio 核心仓库包含与 V2.0.0 发布相关的文档和验证数据：
+
+| 来源路径 | 用途 |
+| --- | --- |
+| `cmd/mio/main.go` | CLI 命令解析与选项 |
+| `cmd/mio/test_command.go` | 测试发现与报告 |
+| `internal/lsp/` | MioCore 语言服务器实现 |
+| `internal/bunko/` | Bunko 加载和包组织 |
+| `docs/releases/v2.0.0-platforms.md` | 官方平台支持与限制 |
+| `docs/NATIVE_AOT_M18.md` | 原生自编译链与验收结论 |
+| `verification/v2.0.0-release/results.json` | 正式发行验证记录 |
+| `bunko/kiso/` | 标准库实际公开声明 |
+
+`verification/v2.0.0/` 中的部分早期证据属于候选阶段，不能直接当作正式发布的重新验证结果。
+
+本套新编写的 Tooling 页面依据已发布源码和现有文档整理，但没有在本次生成过程中重新执行 macOS 发行包、IDE 插件或全部示例的端到端验收；只有完成实际执行的项目才可以在后续版本中标注为本轮已验证。

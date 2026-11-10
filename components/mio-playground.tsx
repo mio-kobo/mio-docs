@@ -13,10 +13,12 @@ import {
   Terminal,
 } from 'lucide-react';
 import { checkMio, runMio, type MioOperation, type MioResult } from '@/lib/mio-runtime';
+import type { MioPlaygroundVersion } from '@/lib/mio-playground-version.mjs';
 import { MioResultPanel } from './mio-result-panel';
 
 export interface MioPlaygroundProps {
   source: string;
+  version: MioPlaygroundVersion;
   title?: string;
   icon?: string;
   highlighted?: ReactNode;
@@ -30,7 +32,7 @@ const EMPTY_RESULT: Omit<MioResult, 'status'> = {
   runMs: 0,
 };
 
-export function MioPlayground({ source, title, icon, highlighted, className }: MioPlaygroundProps) {
+export function MioPlayground({ source, version, title, icon, highlighted, className }: MioPlaygroundProps) {
   const [code, setCode] = useState(source);
   const [editing, setEditing] = useState(false);
   const [pending, setPending] = useState<MioOperation | null>(null);
@@ -56,7 +58,7 @@ export function MioPlayground({ source, title, icon, highlighted, className }: M
     setEditing(false);
     setPending(null);
     setResult(null);
-  }, [source]);
+  }, [source, version]);
 
   useEffect(() => {
     if (editing) editorRef.current?.focus();
@@ -83,8 +85,8 @@ export function MioPlayground({ source, title, icon, highlighted, className }: M
 
     try {
       const nextResult = operation === 'run'
-        ? await runMio(code, { signal: controller.signal })
-        : await checkMio(code, { signal: controller.signal });
+        ? await runMio(code, { signal: controller.signal }, version)
+        : await checkMio(code, { signal: controller.signal }, version);
 
       if (!mountedRef.current || token !== requestTokenRef.current) return;
       setResult(nextResult);
@@ -157,7 +159,7 @@ export function MioPlayground({ source, title, icon, highlighted, className }: M
     setEditing(value => !value);
   }
 
-  return <div className={`mio-playground${className ? ` ${className}` : ''}`} data-mio-playground="">
+  return <div className={`mio-playground${className ? ` ${className}` : ''}`} data-mio-playground="" data-mio-runtime={version}>
     <CodeBlock
       title={<span className="mio-playground-title">{displayTitle}<span className="mio-playground-badge">Playground</span></span>}
       icon={icon}

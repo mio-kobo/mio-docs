@@ -1,0 +1,69 @@
+---
+featureBadge: new
+title: 正则表达式
+description: V2.1 的 kiso/regexp：Thompson NFA、Unicode 属性和布尔匹配。
+---
+
+## 正则表达式 <FeatureBadge status="new" since="2.1" />
+
+`kiso/regexp` 提供基于 **Thompson NFA** 的正则表达式匹配，支持编译模式和判断文本是否匹配。它不是完整的 PCRE 兼容实现，支持范围请以本页 API 说明为准。
+
+### 导入与类型
+
+```mio title="Regexp.mio"
+yobu "kiso/regexp";
+
+kaku pattern = regexp.compile("^Mio[0-9]+$");
+moshi (pattern.error == "") {
+    chant(regexp.matches(pattern, "Mio21"));
+}
+```
+
+公开结构：
+
+| 类型 | 源码声明 | 含义 |
+| --- | --- | --- |
+| `State` | `State { op: int64; out: int64; other: int64; ranges: []int64; }` | NFA 状态，属于内部表示 |
+| `Program` | `Program { states: []State; start: int64; error: string; }` | 编译结果；`error == ""` 表示无语法错误 |
+
+### 公开函数
+
+| 函数 | 签名 | 说明 |
+| --- | --- | --- |
+| `compile` | `compile(pattern: string) -> Program` | 编译为状态机，错误保存在 `Program.error` |
+| `matches` | `matches(program: Program, text: string) -> bool` | 判断是否存在匹配；模式编译失败时返回 `iie` |
+
+### 基本匹配、重复与分支
+
+```mio title="RegexpBasics.mio"
+yobu "kiso/regexp";
+
+kaku pattern = regexp.compile("^(?:ab|a){2,4}c+$");
+moshi (pattern.error == "") {
+    chant(regexp.matches(pattern, "aabcc"));
+    chant(regexp.matches(pattern, "xabc"));
+}
+```
+
+测试源码包含分支 `|`、锚点、重复数量、模式标志、字符集合等用法。`matches` 的结果只有 `bool`，**没有公开返回捕获组、分组索引或替换字符串的 API**。
+
+### Unicode 与模式标志
+
+```mio title="RegexpUnicode.mio"
+yobu "kiso/regexp";
+
+kaku han = regexp.compile("^\\p{Han}+$");
+kaku fold = regexp.compile("(?i)^Σ$");
+moshi (han.error == "" && fold.error == "") {
+    chant(regexp.matches(han, "漢字"));
+    chant(regexp.matches(fold, "ς"));
+}
+```
+
+源码与测试覆盖 Unicode 15 属性数据和简单大小写折叠。`(?i)` 不区分大小写、`(?m)` 多行锚点、`(?s)` dotall 已有对应测试；`\b` 的单词边界按**ASCII** 单词字符规则实现，不应误解为完整 Unicode 词法分词。
+
+### 错误与兼容性
+
+无效字符集合、非法转义、未支持的反向引用（例如 `\1`）等通过 `Program.error` 报告。不要认为它支持 PCRE 的回溯、反向引用、任意环视或替换接口。模式和语法树受源码中的资源与深度上限约束。
+
+来源：[`regexp.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/regexp/regexp.mio)、[`regexp_test.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/regexp/regexp_test.mio)。

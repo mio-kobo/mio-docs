@@ -1,0 +1,68 @@
+---
+featureBadge: new
+title: 操作系统接口
+description: V2.1 的 kiso/os：参数、环境、进程与文件操作。
+---
+
+## 操作系统接口 <FeatureBadge status="new" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "partial" } }} />
+
+`kiso/os` 通过 `mio/os/runtime` 宿主入口访问系统环境，面向**支持这些 Native OS 运行时入口的开发环境**。它不是无宿主依赖的纯算法包，也不能据导入成功推断可在浏览器 WASM、所有 Go VM 或任意平台运行。
+
+### 读取环境与参数
+
+```mio title="OS.mio" no-run
+yobu "kiso/os";
+
+kaku args = os.arguments();
+chant(len(args));
+kaku home = os.environment("HOME");
+moshi (home != mu) { chant(home); }
+```
+
+`arguments()` 包含 `argv[0]`。`argument(index)` 在参数无效时返回 `mu`。`environment(name)` 在环境项缺失、值非法或非 UTF-8 时返回 `mu`，存在但为空的变量返回空字符串；`getenv()` 会把缺失值折叠为空字符串。
+
+### 公开函数
+
+| 函数 | 公开签名 | 用途及边界 |
+| --- | --- | --- |
+| `argument` | `argument(index: int64) -> string?` | 读取单个参数；无效返回 `mu` |
+| `arguments` | `arguments() -> []string` | 读取 argv，包括首项 |
+| `chmod` | `chmod(path: string, mode: int64) -> int64` | 设置文件模式；返回宿主状态 |
+| `exit` | `exit(status: int64) -> unit` | 退出当前进程 |
+| `spawn` | `spawn(path: string, arguments: []string) -> int64` | 启动进程并返回状态代码 |
+| `exec` | `exec(path: string, arguments: []string) -> int64` | 通过宿主 OS 执行入口，行为需按目标平台验证 |
+| `pid` | `pid() -> int64` | 获取进程 ID |
+| `remove` | `remove(path: string) -> int64` | 删除文件 |
+| `remove_dir` | `remove_dir(path: string) -> int64` | 删除目录 |
+| `spawn_test` | `spawn_test(path: string, arguments: []string, stdout: string, stderr: string, records: string, cpu_seconds: int64) -> int64` | 测试运行器使用的子进程隔离入口 |
+| `monotonic_ms` | `monotonic_ms() -> int64` | 读取单调计时值（毫秒，不是墙钟时间） |
+| `environment` | `environment(name: string) -> string?` | 获取可空环境变量 |
+| `getenv` | `getenv(name: string) -> string` | 获取环境变量，缺失时返回空字符串 |
+| `stdin_ready` | `stdin_ready() -> int64` | 非阻塞的标准输入就绪状态 |
+| `stdin_wait` | `stdin_wait(timeout_ms: int64) -> int64` | 等待标准输入；`-1` 表示不设期限 |
+| `executable_path` | `executable_path() -> string?` | 获取当前可执行文件的实际路径；失败返回 `mu` |
+| `canonical_path` | `canonical_path(path: string) -> string?` | 获取已存在路径的物理绝对身份；失败返回 `mu` |
+
+正式版三平台均通过进程协议测试。Windows 的 `exec` 启动子进程、等待并以其状态退出，不会像 POSIX 那样替换当前进程；测试超时按墙钟计算，标准输入就绪状态按管道、文件或控制台分别判断。见 [Windows 进程实现](https://github.com/mio-kobo/mio/blob/v2.1.0/bunko/kiso/aot/lowerwinrt/winprocess.mio)。
+
+### 文件与进程的返回值
+
+多个 OS 函数返回 `int64` 状态，而不是可空 Result。对于 `spawn` 等入口，源码注释约定负值表示系统错误号，子进程退出和信号用与 shell 兼容的值表示。调用者应检查返回值，不能假定操作成功，也不能把它理解为通用跨平台 POSIX 兼容保证。
+
+`spawn_test` 是为工具链测试提供的子进程隔离接口，不应作为普通用户程序的通用任务调度器。进程 API 受到宿主权限和沙箱策略限制，不能在 Web Playground 中运行。
+
+### 路径与标准输入
+
+```mio title="OSPath.mio" no-run
+yobu "kiso/os";
+
+kaku current = os.canonical_path(".");
+moshi (current != mu) { chant(current); }
+
+kaku ready = os.stdin_ready();
+chant(ready);
+```
+
+`canonical_path` 针对真实存在的路径；不可解析、非 UTF-8 或超出当前缓冲限制时返回 `mu`。`stdin_wait` 接受毫秒超时；源码拒绝小于 `-1` 或超出有符号 32 位上限的参数。
+
+来源：[`os.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/os/os.mio)。

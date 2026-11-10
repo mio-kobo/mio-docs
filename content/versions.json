@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "verifiedOn": "2026-11-03",
-  "defaultVersion": "v2.0",
+  "verifiedOn": "2026-11-10",
+  "defaultVersion": "v2.1.2",
   "versions": [
     {
       "id": "v1.0",
@@ -43,6 +43,43 @@
         "commit": "0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a",
         "ref": "v2.0.0",
         "cliVersion": "Mio 2.0.0"
+      },
+      "frozen": true
+    },
+    {
+      "id": "v2.1",
+      "version": "2.1",
+      "status": "Development",
+      "maintenance": "preview",
+      "locales": [
+        "zh-CN"
+      ],
+      "release": null,
+      "source": {
+        "commit": "59002db2c9dc0c6dd11ff0f4341de42f79677df2",
+        "ref": "Mio-2.1",
+        "cliVersion": "mio v2.0.0-dev (pure Mio Native AOT; GF3 candidate)"
+      },
+      "frozen": false
+    },
+    {
+      "id": "v2.1.2",
+      "version": "2.1.2",
+      "status": "Stable",
+      "maintenance": "unspecified",
+      "locales": [
+        "zh-CN"
+      ],
+      "release": {
+        "tag": "v2.1.2",
+        "url": "https://github.com/mio-kobo/mio/releases/tag/v2.1.2",
+        "publishedAt": "2026-11-10T08:11:15Z",
+        "prerelease": false
+      },
+      "source": {
+        "commit": "7903f6d18a37b3e4a84fb381f019d1683d3fb81a",
+        "ref": "v2.1.2",
+        "cliVersion": "mio v2.1.2 (release; commit 7903f6d18a37b3e4a84fb381f019d1683d3fb81a; pure Mio Native AOT)"
       },
       "frozen": true
     }

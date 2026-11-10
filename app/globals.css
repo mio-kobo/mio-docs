@@ -104,7 +104,7 @@ button { cursor: pointer; }
 .status-note { padding: 1.25rem 1.5rem; background: var(--hikari-code); border: 1px solid var(--color-fd-border); border-radius: var(--hikari-radius); font-size: .85rem; }
 .status-note strong { font-weight: 600; color: var(--hikari-lilac-ink); }
 .status-note p { color: var(--color-fd-muted-foreground); margin: .5rem 0 .65rem; line-height: 1.9; }
-.status-note a { color: var(--color-fd-primary); display: inline-flex; gap: .5rem; align-items: center; min-height: 32px; }
+.status-note a { color: var(--color-fd-primary); display: inline-flex; gap: .5rem; align-items: center; min-height: 32px; text-decoration: underline; text-underline-offset: .2em; }
 .home-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-top: 3rem; padding: 1.8rem 0; border-top: 1px solid var(--color-fd-border); color: var(--color-fd-muted-foreground); font-size: .75rem; }
 .home-footer a { display: inline-flex; align-items: center; gap: .3rem; }
 
@@ -489,4 +489,99 @@ button:has(.version-label) > div > p:last-child:not(:first-child) { display: non
   .mio-exercise .mio-exercise-instructions { padding-inline: .85rem; }
   .mio-exercise-toolbar .mio-playground-actions, .mio-exercise-toolbar .mio-playground-tools { flex: 1 1 100%; }
   .tutorial-nav { grid-template-columns: 1fr; }
+}
+
+/* Feature status uses the same compact pill treatment as version labels. */
+.feature-badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  border-radius: 999px;
+  padding: .18rem .5rem;
+  font-size: .65rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: .025em;
+  white-space: nowrap;
+  color: var(--feature-ink);
+  background: color-mix(in srgb, var(--feature-ink) 10%, var(--color-fd-background));
+}
+.feature-badge-new { --feature-ink: #20633b; }
+.feature-badge-updated { --feature-ink: #285ba0; }
+.feature-badge-experimental { --feature-ink: #8b470a; }
+.feature-badge-deprecated { --feature-ink: #aa3040; }
+.dark .feature-badge-new { --feature-ink: #8bd7a5; }
+.dark .feature-badge-updated { --feature-ink: #9dc5ff; }
+.dark .feature-badge-experimental { --feature-ink: #f5bc7d; }
+.dark .feature-badge-deprecated { --feature-ink: #ffa5b0; }
+.feature-doc-title { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .65rem; }
+.feature-doc-title > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.feature-nav-label { display: flex; flex: 1; min-width: 0; align-items: center; flex-wrap: wrap; gap: .2rem .4rem; }
+.feature-nav-text { flex: 1 1 4rem; min-width: 0; overflow-wrap: anywhere; }
+.feature-badge-compact { margin-inline-start: auto; padding: .1rem .35rem; font-size: .55rem; }
+.feature-badge-since { margin-inline-start: .35em; opacity: .8; }
+.prose .feature-badge { vertical-align: middle; }
+.prose :is(h1, h2, h3, h4, h5, h6) .feature-badge { margin-inline-start: .5em; vertical-align: .15em; }
+
+/* Independent platform pills share the feature badge rhythm. */
+.platform-support { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .35rem; max-width: 100%; vertical-align: middle; }
+.platform-badge-wrap { display: inline-flex; position: relative; max-width: 100%; vertical-align: middle; font-size: .7rem; font-weight: 600; line-height: 1.4; letter-spacing: normal; }
+.platform-status-full { --platform-ink: #20633b; }
+.platform-status-partial { --platform-ink: #795600; }
+.platform-status-unsupported { --platform-ink: #aa3040; }
+.platform-status-unknown { --platform-ink: #586171; }
+.dark .platform-status-full { --platform-ink: #8bd7a5; }
+.dark .platform-status-partial { --platform-ink: #eed080; }
+.dark .platform-status-unsupported { --platform-ink: #ffa5b0; }
+.dark .platform-status-unknown { --platform-ink: #bdc6d5; }
+.platform-badge { display: inline-flex; align-items: center; justify-content: center; gap: .3rem; border: 0; border-radius: 999px; padding: .18rem .5rem; min-height: 24px; color: var(--platform-ink); background: color-mix(in srgb, var(--platform-ink) 10%, var(--color-fd-background)); font: inherit; cursor: pointer; }
+.platform-badge svg { flex-shrink: 0; }
+.platform-badge:focus-visible { outline: 2px solid var(--platform-ink); outline-offset: 3px; }
+.platform-badge-detail { position: fixed; z-index: 50; width: min(18rem, calc(100vw - 2rem)); max-height: min(18rem, 50vh); overflow-y: auto; padding: .5rem .65rem; border: 1px solid var(--platform-ink); border-radius: .5rem; color: var(--color-fd-foreground); background: var(--color-fd-background); box-shadow: 0 4px 16px #0002; white-space: normal; overflow-wrap: anywhere; text-align: start; font-size: .75rem; font-weight: 400; }
+.platform-badge-detail[hidden] { display: none; }
+.prose :is(h1, h2, h3, h4, h5, h6) :is(.platform-support, .platform-badge-wrap) { vertical-align: middle; }
+.prose :is(h1, h2, h3, h4, h5, h6) > :is(.platform-support, .platform-badge-wrap) { margin-inline-start: .5em; }
+.prose .platform-heading { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .5rem; margin-block: 1.5em .75em; min-width: 0; }
+.prose .platform-heading > :is(h1, h2, h3, h4, h5, h6) { margin-block: 0; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+
+/* Mermaid diagrams keep Fumadocs' card rhythm and scroll instead of shrinking
+   below a readable size on narrow screens. */
+.mermaid-diagram {
+  margin: 1.5rem 0;
+  border: 1px solid var(--color-fd-border);
+  border-radius: var(--hikari-radius);
+  background: color-mix(in srgb, var(--color-fd-card) 72%, var(--color-fd-background));
+  overflow: hidden;
+}
+.mermaid-diagram-canvas {
+  overflow-x: auto;
+  padding: 1rem;
+  overscroll-behavior-x: contain;
+}
+.mermaid-diagram-svg { display: block; }
+.mermaid-diagram-svg svg { display: block; width: auto; max-width: none; height: auto; margin-inline: auto; }
+.mermaid-diagram-status {
+  min-height: 12rem;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 1rem;
+  color: var(--color-fd-muted-foreground);
+  font-size: .8rem;
+  text-align: center;
+}
+.mermaid-diagram-status.is-error { color: var(--color-fd-foreground); }
+.mermaid-diagram figcaption {
+  border-top: 1px solid var(--color-fd-border);
+  padding: .55rem 1rem;
+  color: var(--color-fd-muted-foreground);
+  font-size: .75rem;
+  line-height: 1.7;
+  text-align: center;
+}
+.mermaid-diagram-canvas:focus-visible { outline: 2px solid var(--color-fd-primary); outline-offset: -2px; }
+.mermaid-diagram-scroll-hint { display: none; }
+@media (max-width: 640px) {
+  .mermaid-diagram-canvas { padding: .75rem; }
+  .mermaid-diagram-scroll-hint { display: inline; }
 }

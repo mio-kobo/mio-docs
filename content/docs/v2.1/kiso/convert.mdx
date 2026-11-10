@@ -1,0 +1,97 @@
+---
+title: 类型转换
+description: Mio V2.0 文本类型转换标准库 kiso/convert
+---
+
+> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+
+
+## 类型转换
+
+类型转换标准库（Convert）用于将字符串解析为整数、浮点数和布尔值，也可以将这些值格式化为文本。
+
+这里介绍的是 **文本转换**，不同于语言中的 `int64(value)` 等显式数值类型转换。
+
+本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
+
+### 导入包
+
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+
+通过 `yobu "kiso/convert";` 导入本包，随后使用 `convert.函数名(...)` 调用。
+
+```mio title="Stdlib.mio" no-run
+yobu "kiso/convert";
+```
+
+### 整数解析与格式化
+
+`parse_int` 接受 ASCII 十进制有符号 `int64` 文本，`parse_uint` 接受无符号 `uint32` 文本。非法字符、溢出和额外空白不会被自动清理，解析失败返回 `mu`。
+
+```mio title="Convert.mio" no-run
+yobu "kiso/convert";
+
+kaku value = convert.parse_int("-42");
+moshi (value != mu) { chant(value); }
+chant(convert.format_uint(uint32(42)));
+```
+
+### 布尔值转换
+
+Mio 使用 `hai` 和 `iie` 表示真与假。`parse_bool` 只接受这两种文本，不会把 `"true"` 或 `"false"` 当作有效值。
+
+```mio title="Convert.mio" no-run
+yobu "kiso/convert";
+
+kaku enabled = convert.parse_bool("hai");
+chant(enabled != mu);
+chant(convert.format_bool(iie));
+```
+
+### 浮点文本
+
+`parse_float32` 和 `parse_float64` 接受受支持的十进制、小数、指数及特殊浮点文本；失败时返回 `mu`。格式化函数产生可往返解析的最短文本形式。
+
+```mio title="Convert.mio" no-run
+yobu "kiso/convert";
+
+kaku value = convert.parse_float64("1.25");
+moshi (value != mu) { chant(convert.format_float64(value)); }
+```
+
+### 公开函数（10 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `parse_int` | `parse_int(value: string) -> int64?` | 解析 ASCII 有符号十进制整数；非法或越界返回 `mu`。 |
+| `parse_uint` | `parse_uint(value: string) -> uint32?` | 解析 ASCII 无符号十进制整数；非法或越界返回 `mu`。 |
+| `format_int` | `format_int(value: int64) -> string` | 转成十进制字符串。 |
+| `format_uint` | `format_uint(value: uint32) -> string` | 转成无符号十进制字符串。 |
+| `parse_bool` | `parse_bool(value: string) -> bool?` | 仅接受 `hai` 和 `iie`。 |
+| `format_bool` | `format_bool(value: bool) -> string` | 返回 `"hai"` 或 `"iie"`。 |
+| `parse_float64` | `parse_float64(value: string) -> float64?` | 解析并舍入到 binary64；非法、上溢或输入过长返回 `mu`。 |
+| `parse_float32` | `parse_float32(value: string) -> float32?` | 解析并直接舍入到 binary32；非法、上溢或输入过长返回 `mu`。 |
+| `format_float64` | `format_float64(value: float64) -> string` | 生成可往返解析的精简十进制文本。 |
+| `format_float32` | `format_float32(value: float32) -> string` | 生成可往返解析的精简十进制文本。 |
+
+### 完整示例
+
+```mio title="Convert.mio" no-run
+yobu "kiso/convert";
+
+kaku number = convert.parse_int("-42");
+moshi (number != mu) { chant(number); }
+chant(convert.parse_uint("-1") == mu);
+chant(convert.parse_bool("true") == mu);
+chant(convert.format_bool(hai));
+kaku value = convert.parse_float32("1.25");
+moshi (value != mu) { chant(convert.format_float32(value)); }
+```
+
+### 使用限制
+
+浮点解析严格处理 ASCII 文本，也支持 `NaN`、`Infinity`、`+Infinity` 和 `-Infinity` 等特殊字面形式。字符串解析不会隐式修剪空白；浮点解析单次输入字节长度存在上限。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/convert`](https://github.com/mio-kobo/mio/tree/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/convert)。

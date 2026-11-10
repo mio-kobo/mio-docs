@@ -7,14 +7,20 @@
  */
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { isDeepStrictEqual } from 'node:util';
+import { playgroundAssetPath } from '../lib/mio-playground-version.mjs';
 import { dirname, join } from 'node:path';
 import { collectDocsExamples } from './lib/docs-examples.mjs';
 import { PlaygroundWorkerClient } from './lib/playground-worker.mjs';
 import { startWasmAssetServer } from './lib/wasm-asset-server.mjs';
 
 const root = process.cwd();
-const assetDir = join(root, 'public/wasm');
-const output = join(root, 'fixtures/docs/playground-expectations.json');
+const version = process.argv[2] ?? 'legacy';
+if (!['legacy', 'v2.1'].includes(version)) throw new Error('Use npm run update:playground -- legacy|v2.1');
+const assetDir = join(root, 'public', playgroundAssetPath(version));
+const legacyFixture = join(root, 'fixtures/docs/playground-expectations.json');
+const output = version === 'legacy' ? legacyFixture : join(root, 'fixtures/docs/playground-v2.1-expectations.json');
+const baseline = version === 'v2.1' ? JSON.parse(readFileSync(legacyFixture, 'utf8')).examples : {};
 const sha256 = path => createHash('sha256').update(readFileSync(path)).digest('hex');
 
 function observable(result) {
@@ -28,30 +34,31 @@ function observable(result) {
 
 const collection = collectDocsExamples(join(root, 'content/docs'));
 const unique = new Map();
-for (const example of collection.examples.filter(item => item.kind === 'executable')) {
+for (const example of collection.examples.filter(item => item.kind === 'executable' && item.version === version)) {
   if (!unique.has(example.key)) unique.set(example.key, example);
 }
 
-const server = await startWasmAssetServer({ assetDir });
-const client = new PlaygroundWorkerClient({ assetDir, origin: server.origin });
+const server = await startWasmAssetServer({ assetDir, version });
+const client = new PlaygroundWorkerClient({ assetDir, version, origin: server.origin });
 const examples = {};
 try {
   await client.start();
   for (const example of unique.values()) {
     const checked = await client.execute('check', example.source);
     const ran = await client.execute('run', example.source);
-    examples[example.key] = {
+    const actual = {
       preview: example.preview,
       check: observable(checked),
       run: observable(ran),
     };
+    if (!isDeepStrictEqual(actual, baseline[example.key])) examples[example.key] = actual;
   }
 } finally {
   await client.terminate().catch(() => {});
   await server.close();
 }
 
-const fixture = {
+const fixture = version === 'v2.1' ? { schemaVersion: 1, examples: Object.fromEntries(Object.entries(examples).sort(([a], [b]) => a.localeCompare(b))) } : {
   schemaVersion: 1,
   runtime: {
     wasmSha256: sha256(join(assetDir, 'mio.wasm')),
@@ -62,4 +69,4 @@ const fixture = {
 };
 mkdirSync(dirname(output), { recursive: true });
 writeFileSync(output, `${JSON.stringify(fixture, null, 2)}\n`);
-console.log(`Wrote ${output}: ${fixture.exampleCount} unique executable examples, ${collection.examples.length} blocks total.`);
+console.log(`Wrote ${output}: ${Object.keys(examples).length} stored expectations for ${unique.size} unique ${version} sources. Review the diff before accepting it.`);

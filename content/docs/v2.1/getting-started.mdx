@@ -1,0 +1,282 @@
+---
+title: Getting Started · Mio V2.1
+description: 从 Playground 开始体验 Mio，了解命令行工具的安装、编译与 Bunko 标准库。
+---
+
+## 开始使用 Mio
+
+Mio 是一门使用日语罗马字关键字的静态强类型编程语言。你可以先在文档站的 Playground 中运行简单程序，再根据需要安装本地命令行工具（CLI）。
+
+V2.1 延续了 V2.0 的语言基础，主要改进原生工具链、运行时和 Bunko。可以先用网页 Playground，也可以安装 [Mio v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0)。预编译包和网页运行都不需要 Go。
+
+正式归档面向 macOS ARM64、Linux AMD64 和 Windows AMD64。各平台的安装、架构与验收范围见 [发行包说明](/docs/v2.1/tooling/distribution)。
+
+## 在浏览器中运行第一个程序
+
+如果你正在 Mio 文档站阅读本页，可以直接运行下面的代码：
+
+```mio title="Hello.mio"
+chant("Hello, Mio!");
+```
+
+对于支持交互的代码块，点击 **运行** 即可执行程序，也可以点击 **检查** 只进行语法和类型检查。**编辑** 用于修改当前示例，**重置** 可以恢复原始代码。
+
+在上述示例中，`chant()` 用于输出内容，语句以分号 `;` 结尾。简单的 Mio 程序可以直接编写顶层语句，不需要额外定义 `main` 函数。
+
+每个 Playground 示例都是独立编译的程序。如果示例需要使用标准库，必须在同一个代码块内写出相应的 `yobu` 导入语句。例如：
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+kaku value: float64 = 144.0;
+chant(math.sqrt(value));
+```
+
+V2.1 文档中的 Playground 使用由 v2.1.0 源码构建的 Web 参考 VM。它可以运行 JSON、正则表达式和 SHA-256 等示例，也可以通过 **停止** 中断程序。支持的模块见 [网页 Playground 验证](/docs/v2.1/tooling/verification#网页-playground-验证)。
+
+网页运行环境不提供宿主文件、网络、进程、原生编译或字节码文件导入。需要这些功能时，请使用本地 CLI。
+
+## 安装 V2.1.0
+
+1. 打开 [v2.1.0 发布页](https://github.com/mio-kobo/mio/releases/tag/v2.1.0)，选择对应系统和 CPU 架构的 Full 归档。首次使用推荐 Full，它包含 Bunko；Core 适用于不导入标准库或另行配置 Bunko 的场景。
+2. 下载 `SHA256SUMS`，按 [发行包说明](/docs/v2.1/tooling/distribution#如何安装与校验) 核对归档摘要，再解压。
+3. 将归档内的 `bin` 目录加入 `PATH`。Full 请保留 `bin` 与 `bunko` 的相对位置。
+4. 执行 `mio version`；正式版输出包含 `v2.1.0 (release; commit 74e461b2985886160a285c7104d2a41090d0f548; pure Mio Native AOT)`。
+
+## 在本地运行 Mio 程序
+
+创建一个名为 `hello.mio` 的 UTF-8 文本文件：
+
+```mio title="hello.mio"
+chant("Hello, Mio!");
+```
+
+进入该文件所在的目录，在终端中执行：
+
+```sh
+mio check hello.mio
+mio run hello.mio
+```
+
+`mio check` 会加载源码和依赖、折叠编译期常量并完成名称与类型检查，但不会执行程序。正式 CLI 检查通过时退出码为 0，可以没有输出。
+
+V2.1 的 `mio run` 会构建临时原生程序并执行。
+
+### 编译与执行 Mochi 字节码
+
+需要保存中间文件时，使用 `--emit=mochi`：
+
+```sh
+mio build hello.mio --emit=mochi -o hello.mochi
+mio disasm hello.mochi
+mio exec hello.mochi
+```
+
+`mio disasm` 查看字节码结构；V2.1 Native CLI 的 `mio exec` 把受支持的 Mochi 文件编译为临时原生程序再执行。
+
+### V2.1 的原生编译
+
+V2.1 CLI 默认将源码编译为原生可执行文件。如果需要保存 Mochi 字节码，可以显式指定 `--emit=mochi`。这与 V2.0 CLI 默认生成字节码的行为不同。
+
+安装正式版 CLI 后，可以使用下面的命令（Windows 请用 `-o hello.exe` 并运行 `./hello.exe`）：
+
+```sh
+mio check hello.mio
+mio build -o hello hello.mio
+./hello
+
+mio build --emit=mochi -o hello.mochi hello.mio
+```
+
+与 V2.0 正式 CLI 相比，V2.1 CLI 的主要行为变化如下：
+
+| 命令 | V2.0 正式 CLI | V2.1 正式 CLI |
+| --- | --- | --- |
+| `build` | 默认生成 `.mochi` 字节码 | 默认生成原生可执行文件，默认名称为 `a.out` |
+| `run` | 通过 Mochi VM 执行 | 构建临时原生程序后执行 |
+| `exec` | 执行 Mochi 字节码 | 将受支持的 Mochi 输入编译为原生程序后执行 |
+| `build --emit=mochi` | 不是该 CLI 的新增选择方式 | 显式生成 Mochi 中间文件 |
+
+上面的原生构建命令**不能直接交给 V2.0 发行包中的 `mio` 执行**。仅克隆 V2.1 源码也不会自动生成开发版 CLI；构建方法见 [工具链说明](/docs/v2.1/tooling/selfhost)。
+
+V2.1 编译器支持较新的 Mochi 格式，而 V2.0 工具可能无法读取新版本字节码。macOS 的 ad-hoc 签名也不等于 Apple Developer ID 签名或 Apple 公证。具体兼容性见 [Mochi 格式](/docs/v2.1/internals/mochi)。
+
+## 使用 Bunko 标准库
+
+Bunko 是 Mio 的标准库，它通过 `yobu` 关键字按需导入。基础标准库使用 `kiso/` 作为公开导入路径。
+
+例如，使用数学标准库计算平方根和最大公约数：
+
+```mio title="Math.mio"
+yobu "kiso/math";
+
+kaku value: float64 = 144.0;
+chant(math.sqrt(value));
+chant(math.gcd(84, 30));
+```
+
+`yobu "kiso/math";` 用于导入数学包，默认限定名为导入路径最后一段 `math`，因此可以通过 `math.sqrt()` 和 `math.gcd()` 调用公开函数。
+
+同样，动态数组的追加操作需要导入 `kiso/array`：
+
+```mio title="Array.mio"
+yobu "kiso/array";
+
+kaku numbers = [10, 20];
+array.push(numbers, 30);
+
+chant(len(numbers));
+chant(numbers[2]);
+```
+
+这些代码块都包含各自需要的导入语句，因此既可以在支持对应标准库的网页 Playground 中独立运行，也可以保存为 `.mio` 文件后通过 CLI 执行。
+
+更多模块的用法见 [Bunko 标准库](/docs/v2.1/kiso)。文件系统和输入输出等模块未全部嵌入网页环境，建议使用本地 CLI 运行相关示例。
+
+### V2.1 新增的 Bunko 模块
+
+除了上面这些 V2.0 已经存在的模块，V2.1 还增加了：
+
+| 导入路径 | 用途 | 使用范围 |
+| --- | --- | --- |
+| `kiso/encoding/json` | 解析、查询与生成 JSON | 保留数字原始文本，转换前应检查类型与结果 |
+| `kiso/regexp` | 正则表达式编译与布尔匹配 | 支持部分 Unicode 特性，不提供完整捕获结果与替换 API |
+| `kiso/crypto/sha256` | SHA-256 摘要计算 | 返回字节数组，正常摘要长度为 32 |
+| `kiso/os` | 程序参数、环境、进程与部分系统服务 | 支持范围随目标平台而异，Windows 的进程和标准输入语义与 POSIX 存在差异 |
+
+例如，使用 JSON 模块读取对象中的 `name` 字段：
+
+```mio title="Json.mio"
+yobu "kiso/encoding/json";
+yobu "kiso/string";
+
+kaku document = json.parse(string.to_bytes("{\"name\":\"Mio\"}"));
+moshi (document.error == "") {
+    kaku name = json.member(document, document.root, "name");
+    chant(json.text(document, name));
+}
+```
+
+`json.parse()` 返回解析结果。读取字段之前应先检查 `error`，不要假设输入一定是合法 JSON。
+
+正则模块可以判断字符串是否符合指定模式：
+
+```mio title="Regexp.mio"
+yobu "kiso/regexp";
+
+kaku pattern = regexp.compile("^Mio[0-9]+$");
+moshi (pattern.error == "") {
+    chant(regexp.matches(pattern, "Mio21"));
+}
+```
+
+计算 SHA-256 摘要时，先将字符串转换为字节数组：
+
+```mio title="SHA256.mio"
+yobu "kiso/crypto/sha256";
+yobu "kiso/string";
+
+kaku digest = sha256.sum(string.to_bytes("abc"));
+chant(len(digest));
+```
+
+以上三个示例可在 V2.1 Playground 中直接运行。
+
+## 函数与基本程序结构
+
+Mio 使用 `waza` 定义函数，使用 `kaesu` 返回结果：
+
+```mio title="Function.mio"
+waza add(a: int64, b: int64) -> int64 {
+    kaesu a + b;
+}
+
+kaku result = add(20, 22);
+chant(result);
+```
+
+函数参数需要明确的类型标注，返回值类型使用 `->` 指定。对于不返回普通值的函数，可以使用 `unit` 返回类型。
+
+基础语法的完整说明可以从 [学习 Mio](/docs/v2.1/learn) 开始阅读；V2.1 没有新增一套需要重新学习的基础语法。
+
+## 编写和运行测试
+
+Mio 通过 `mio test` 运行测试文件。测试源码以 `_test.mio` 结尾，测试函数以 `test_` 开头，且应无参数、非泛型，并返回 `unit`。
+
+创建 `example_test.mio`：
+
+```mio title="example_test.mio" mode=test no-run
+yobu "kiso/testing";
+
+waza test_add() -> unit {
+    testing.expect(1 + 1 == 2, "addition should work");
+}
+```
+
+在包含该文件的目录中执行：
+
+```sh
+mio test .
+```
+
+`kiso/testing` 的断言能力只在 `mio test` 环境中注册，不能把测试文件当作普通 `mio run` 程序直接运行。`expect()` 在断言不成立时记录失败，测试结果由 CLI 汇总报告。
+
+V2.1 的测试运行器延续相同的测试源码约定，并改为在隔离的原生进程中运行测试。使用时应确认当前 CLI 版本。
+
+完整的测试命令、筛选和报告参数见 [开发工具](/docs/v2.1/tooling/cli)，断言 API 见 [kiso/testing](/docs/v2.1/kiso/testing)。
+
+## 从源码构建 Mio
+
+如果希望参与 V2.1 工具链开发，可以检出正式标签 `v2.1.0`。这样后续分支更新不会影响当前阅读的源码内容。
+
+```sh
+git clone --branch v2.1.0 https://github.com/mio-kobo/mio.git mio-source
+cd mio-source
+git checkout --detach v2.1.0
+
+go build -o mio-ref ./cmd/mio
+./mio-ref version
+```
+
+需要在本地准备与该仓库兼容的 Go 环境。上面的 `go build` 命令构建的是**参考 CLI**，并非 V2.1 原生发行二进制。当前开发分支的版本文件也不能代替正式发行版本的确认。
+
+V2.1 原生 CLI 的源码位于 `selfhost/cli/`，其构建流程需要匹配的引导程序及验证步骤。具体过程由 [自举与工具链文档](/docs/v2.1/tooling/selfhost)说明；本页不提供未经验证的下载地址。
+
+在源码仓库内，`bunko/` 就是标准库物理根。如果要在其他目录运行自己编译的 CLI，请根据实际源码仓库位置设置 `MIO_BUNKO`，例如在源码仓库根目录执行：
+
+```sh
+export MIO_BUNKO="$PWD/bunko"
+```
+
+较早的开发版 CLI 可能内嵌 Bunko。V2.1 的 Core / Full 发行包已将标准库作为独立目录提供，并允许通过 `--bunko-root` 或 `MIO_BUNKO` 指定位置。详情见 [发行包说明](/docs/v2.1/tooling/distribution)。
+
+## 版本与支持范围
+
+当前功能说明按 v2.1.0 核对。文档站的版本登记仍保留早期开发快照 `59002db2c9dc0c6dd11ff0f4341de42f79677df2`。各功能与目标平台的测试证据见 [版本状态](/docs/v2.1/development) 和 [验证与来源](/docs/v2.1/tooling/verification)。
+
+## 常见问题
+
+| 情况 | 检查方法 |
+| --- | --- |
+| 终端提示 `mio: command not found` | 确认已安装适合当前架构的归档，且其 `bin` 在 `PATH` 中 |
+| 导入 `kiso/math` 失败 | 确认 `MIO_BUNKO` 指向包含 `kiso/` 的 `bunko/` 根目录 |
+| 网页提示 `undefined identifier "math"` | 确认当前代码块中包含 `yobu "kiso/math";` |
+| 网页代码不显示运行按钮 | 检查是否为测试示例、代码片段，或导入了浏览器未嵌入的模块 |
+| `mio check` 通过但没有程序输出 | `check` 不会执行程序；请使用 `mio run` 或 Playground 的“运行” |
+| `mio build` 输出格式与预期不同 | 确认使用的是 V2.0 还是 V2.1 CLI；两者默认输出不同 |
+| 直接打开 `.mochi` 无法执行 | 字节码不能当作原生程序；还需注意新 Mochi v16 与旧 Go decoder 的版本差异 |
+| 网页无法导入 V2.1 新 Bunko 模块 | 确认正在阅读 V2.1 文档；依赖宿主能力的模块需在本地运行 |
+| 找不到 `kiso/net/tcp` | 确认 CLI 与 Bunko 来自同一个 v2.1.0 Full 归档；V2.0 不含此模块 |
+| 运行测试失败 | 检查 `_test.mio` 文件名、`test_` 函数签名，并使用 `mio test` |
+| macOS 拒绝打开可执行文件 | 检查架构、发布来源、哈希以及系统的 Gatekeeper 提示 |
+
+更详细的错误类型与排查方法见 [故障排查](/docs/v2.1/tooling/troubleshooting)。
+
+## 下一步
+
+- [学习 Mio](/docs/v2.1/learn)：从基本语法逐步学习数组、结构体、泛型和可空类型。
+- [Bunko 标准库](/docs/v2.1/kiso)：查询真实公开的模块、函数签名及使用示例。
+- [开发工具](/docs/v2.1/tooling)：了解 CLI、编辑器、LSP 和测试流程。
+- [语言参考](/docs/v2.1/reference)：查询类型规则、运算符与模块语义。
+- [V2.1 变更概览](/docs/v2.1/migration)：查看原生工具链、类型检查及 Bunko 的实际更新。
+- [M19 GC 状态](/docs/v2.1/internals/gc)：了解分代内存管理与并发 GC 的验收边界。

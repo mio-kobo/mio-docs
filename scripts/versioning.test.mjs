@@ -12,9 +12,12 @@ test('numeric ordering supports minor 10, optional patch and future majors', () 
   assert.throws(() => numericVersion('2.01'));
 });
 test('default never follows an unreleased higher development version', () => {
-  assert.equal(latestStable(registry).id, 'v2.0');
-  assert.equal(registry.defaultVersion, 'v2.0');
-  const changed = structuredClone(registry); changed.defaultVersion = 'v3.0';
+  assert.equal(latestStable(registry).id, 'v2.1.2');
+  assert.equal(registry.defaultVersion, 'v2.1.2');
+  const changed = structuredClone(registry);
+  changed.versions.push({ ...changed.versions.find(v => v.id === 'v2.1'), id: 'v3.0', version: '3.0' });
+  assert.doesNotThrow(() => validateRegistry(changed));
+  changed.defaultVersion = 'v3.0';
   assert.throws(() => validateRegistry(changed), /latest formally released/);
 });
 test('release evidence, duplicate URL identities, maintenance and EOL are validated', () => {
@@ -55,7 +58,8 @@ test('official Fumadocs projection supplies native same-page navigation and fall
 test('every published root uses native version metadata and independent owned content', () => {
   for (const version of registry.versions) {
     const meta = JSON.parse(readFileSync(`content/docs/${version.id}/meta.json`));
-    assert.equal(meta.root,'version'); assert.ok(meta.pages.includes('learn'));
+    assert.equal(meta.root,'version'); assert.ok(meta.pages.includes('index'));
+    assert.ok(meta.pages.includes('learn'));
     assert.ok(readFileSync(`content/docs/${version.id}/index.mdx`,'utf8').includes(version.source.commit));
     assert.ok(readFileSync(`content/docs/${version.id}/getting-started.mdx`,'utf8').includes(version.source.commit));
   }
@@ -70,10 +74,17 @@ test('static production routes, redirects, untranslated 404 and version-isolated
   const redirectHtml = await response.text();
   assert.ok(redirectHtml.includes(`/docs/${registry.defaultVersion}/`));
   assert.ok(redirectHtml.includes('继续阅读文档'));
-  for (const path of ['/docs/v1.0/','/docs/v2.0/','/docs/v1.0/learn/variables/','/docs/v2.0/learn/grammer/','/docs/v2.0/development/']) {
+  for (const path of ['/docs/v1.0/','/docs/v2.0/','/docs/v2.1/','/docs/v2.1.2/','/docs/v2.1.2/learn/','/docs/v2.1/kiso/encoding-json/','/docs/v1.0/learn/variables/','/docs/v2.0/learn/grammer/','/docs/v2.0/development/']) {
     const r = await fetch(new URL(path,base)); assert.equal(r.status,200,path);
-    const html = await r.text(); assert.ok(html.includes(path.includes('v1.0') ? 'EOL' : 'Stable'));
+    const html = await r.text(); assert.ok(html.includes(path.includes('v1.0') ? 'EOL' : path.startsWith('/docs/v2.1/') ? 'Development' : 'Stable'));
   }
+  for (const [path, target] of [['/docs/learn/grammer/', '/docs/v2.0/learn/grammer/'], ['/zh-CN/docs/v2.1.2/learn/', '/docs/v2.1.2/learn/']]) {
+    const r = await fetch(new URL(path, base));
+    assert.equal(r.status, 200, path);
+    assert.ok((await r.text()).includes(`href="${target}"`), path);
+  }
+  const sample = await (await fetch(new URL('/docs/v2.1.2/learn/', base))).text();
+  assert.match(sample, /data-mio-runtime="v2\.1"/u);
   for (const path of ['/docs/v3.1.2/','/docs/v1.0/development/','/en/docs/v1.0/learn/variables/','/ja/docs/v2.0/learn/grammer/']) assert.equal((await fetch(new URL(path,base))).status,404,path);
   const { versionSearchClient } = await import('../lib/static-search.ts');
   for (const version of registry.versions) {
@@ -145,6 +156,9 @@ test('frozen historical content rejects changed semantics and deletion', async (
     }
     assert.equal(checkVersions(root),registry.versions.length);
     writeFileSync(join(root,'content/docs/v1.0/index.mdx'),'Changed API signature');assert.throws(()=>checkVersions(root),/frozen semantics changed/);
-    rmSync(join(root,'content/docs/v1.0/index.mdx'));assert.throws(()=>checkVersions(root),/missing version home/);
+    writeFileSync(join(root,'content/docs/v1.0/index.mdx'),'Original signature');
+    writeFileSync(join(root,'content/docs/v2.1.2/index.mdx'),'Changed patch snapshot');
+    assert.throws(()=>checkVersions(root),/v2\.1\.2\/index\.mdx: frozen semantics changed/);
+    rmSync(join(root,'content/docs/v2.1.2/index.mdx'));assert.throws(()=>checkVersions(root),/missing version home/);
   } finally {rmSync(root,{recursive:true,force:true});}
 });

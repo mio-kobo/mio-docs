@@ -1,0 +1,45 @@
+---
+title: Mochi v16 格式
+description: V2.1 分支的 Mochi 解码器版本常量及兼容性边界。
+---
+
+## Mochi 格式版本变化 <FeatureBadge status="updated" since="2.1" />
+
+V2.0.0 的 Mochi 解码器声明 `VERSION = 14`；固定 `Mio-2.1` 源码中的 `bunko/kiso/encoding/mochi/decode.mio` 已将该公开常量设为：
+
+```mio title="MochiVersion.mio" no-run
+yobu "kiso/encoding/mochi";
+
+chant(mochi.VERSION);
+```
+
+`VERSION` 的实际值为 **16**。这一变化反映了v2.1.0 的 Decoder 上限，**不构成所有工具链、旧版 VM 或现有 Playground 都能读取 v16 的保证**。
+
+### 新增的格式信息
+
+| 版本 | 操作码 | 含义 |
+| --- | --- | --- |
+| v15 | `OP_TYPE_CONSTRAINT = 66` | 记录字段结果的类型表示约束，不执行运行时类型转换 |
+| v16 | `OP_CALL_TYPED = 67` | 间接调用附带是否返回值的信息 |
+
+V2.1 的 Native 与 Web 参考解码器支持读取 v16；V2.0 的 Go Mochi Decoder 以 v14 为上限。另有旧的 `encode_layout` API 保留 v14 输出，不能仅凭库内常量 `VERSION = 16` 推断任意编码入口一定会生成 v16 文件。
+
+### 保留的公开 API
+
+| 名称 | 公开签名 | 用途 |
+| --- | --- | --- |
+| `decode` | `decode(data: []uint8) -> DecodeResult` | 从内存数据解码并验证 |
+| `decode_file` | `decode_file(path: string) -> DecodeResult` | 文件分块读取及验证 |
+| `canonical_bytes` | `canonical_bytes(value: File) -> []uint8` | 对有效解码结果规范化重编码 |
+| `summarize` | `summarize(value: File) -> Summary` | 版本、槽位及长度摘要 |
+| `error_code` | `error_code(error: DecodeError) -> int64` | 稳定错误分类编号 |
+
+公开类型还包括 `File`、`Function`、`Constant`、`Capture`、`DecodeError` 与 `DecodeResult`。其中 `DecodeResult` 使用 `value: File?` 和 `error: DecodeError?` 表示成功或失败。
+
+### 使用限制
+
+对未知或损坏的输入，应先检查 `DecodeResult.error`，只有成功时才使用 `value`。本包保留文件大小、UTF-8、指令宽度、操作码版本门槛、跳转范围和索引的验证规则。Mochi v16 具体新增操作需要与原生编译流程及相关解码器分别做兼容性测试。
+
+分支中的 `bunko/kiso/encoding/mochi/README.md` 仍描述了较早的版本范围；本页引用**源码常量 16**，并将 README 与实现不一致作为文档维护提醒，而不武断宣称全工具链 v16 验收通过。
+
+来源：[`decode.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/encoding/mochi/decode.mio)。

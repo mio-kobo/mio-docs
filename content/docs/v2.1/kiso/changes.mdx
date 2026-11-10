@@ -1,0 +1,50 @@
+---
+title: 既有标准库的变化
+description: Mio v2.1.0 新增的公开函数与原有模块行为边界。
+---
+
+## 已有标准库的增量变化
+
+本页对照 `v2.0.0` 与 `v2.1.0` 的公开接口；字符设备判断和运行时失败依赖本机执行环境。其余 API 不在本页重复抄写。
+
+### kiso/string：`trim_space` <FeatureBadge status="new" since="2.1" />
+
+```mio title="TrimSpace.mio"
+yobu "kiso/string";
+
+kaku text = string.trim_space("  Mio  ");
+chant(text);
+```
+
+签名：`trim_space(value: string) -> string`。
+
+它从 UTF-8 文本两端移除源码列出的 Unicode 空白字符。实现包括 ASCII 空格、制表符、换行，以及部分 Unicode 空白码点；**不是任意 Unicode 规范化、大小写折叠或字素簇处理函数**。
+
+### kiso/fs：`is_character_device` <FeatureBadge status="new" since="2.1" />
+
+```mio title="CharDevice.mio" no-run
+yobu "kiso/fs";
+
+chant(fs.is_character_device("/dev/null"));
+```
+
+签名：`is_character_device(path: string) -> bool`。
+
+本函数通过扩展的 NativeFS stat 状态判断字符设备。它依赖实际宿主文件系统与对应的桥接实现；布尔返回值不携带详细错误，不能由 `iie` 区分“不是字符设备”和所有可能的查询失败。
+
+### kiso/math：`fail` <FeatureBadge status="new" since="2.1" />
+
+签名：`fail(message: string) -> unit`。
+
+此函数封装现有运行时失败通道，供工具在输出结构化 stderr 诊断后使用统一的失败入口。**它会触发运行时失败，不是返回可检查的 `Error?`**；不要将其放在普通示例的成功路径中。
+
+### AOT 表示分析的扩展 <FeatureBadge status="updated" since="2.1" />
+
+`kiso/aot/lower/types` 新增了 `type_map_ref` 常量，以及 `integer_descriptor`、`type_array_element`、`map_field`、`forwarded_parameter` 等公开函数，还有测试报告识别辅助函数。它们服务于工具链内部表示分析，**不是**用户级动态反射 API。
+
+具体源码见：
+
+- [string.mio](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/string/string.mio)
+- [fs.mio](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/fs/fs.mio)
+- [math/fail.mio](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/math/fail.mio)
+- [aot/lower/types.mio](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/aot/lower/types/types.mio)

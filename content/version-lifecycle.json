@@ -1,8 +1,8 @@
 {
-  "decidedOn": "2026-11-03",
+  "decidedOn": "2026-11-10",
   "authority": "maintainer instruction in Codex chat",
-  "instruction": "把V2.0设为主发布版本，1.0为过时版本不再更新",
-  "defaultVersion": "v2.0",
+  "instruction": "将 v2.1.2 设为默认稳定文档，保留 /docs/v2.1 与 V1.0、V2.0 历史入口；不将 V2.0 标记为 EOL。",
+  "defaultVersion": "v2.1.2",
   "versions": {
     "v1.0": {
       "status": "EOL",
@@ -13,6 +13,23 @@
       "status": "Stable",
       "maintenance": "maintained",
       "release": "v2.0.0"
+    },
+    "v2.1": {
+      "status": "Development",
+      "maintenance": "preview",
+      "note": "次版本预览入口保持可访问，修订在独立 PR 中审核，页面 noindex 且不列入 sitemap。"
+    },
+    "v2.1.2": {
+      "status": "Stable",
+      "maintenance": "unspecified",
+      "release": "v2.1.2",
+      "note": "本次冻结范围仅涵盖已核对的发布、入门与迁移页面。"
     }
+  },
+  "previousDefaultDecision": {
+    "decidedOn": "2026-11-03",
+    "authority": "maintainer instruction in Codex chat",
+    "instruction": "把V2.0设为主发布版本，1.0为过时版本不再更新",
+    "defaultVersion": "v2.0"
   }
 }

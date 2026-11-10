@@ -65,6 +65,96 @@
           "url": "https://github.com/mio-kobo/mio/releases/download/v2.0.0/mio-2.0.0-darwin-arm64.tar.gz"
         }
       ]
+    },
+    {
+      "version": "2.1.2",
+      "docsVersion": "v2.1.2",
+      "tag": "v2.1.2",
+      "releaseUrl": "https://github.com/mio-kobo/mio/releases/tag/v2.1.2",
+      "verifiedOn": "2026-11-10",
+      "assets": [
+        {
+          "name": "mio-2.1.2-darwin-arm64-core.tar.gz",
+          "platform": "macOS",
+          "architecture": "arm64",
+          "edition": "Core",
+          "size": 980337,
+          "sha256": "8fecf123504f03bbc095427201bcf2f3badaea9bafbcdf4a25ea5c1b454552c7",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-darwin-arm64-core.tar.gz"
+        },
+        {
+          "name": "mio-2.1.2-darwin-arm64-full.tar.gz",
+          "platform": "macOS",
+          "architecture": "arm64",
+          "edition": "Full",
+          "size": 1314778,
+          "sha256": "5bd450ab96e6da945e5baa97d9ddd31162a289e183ffe3eff6635d3006344c8d",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-darwin-arm64-full.tar.gz"
+        },
+        {
+          "name": "mio-2.1.2-linux-amd64-core.tar.gz",
+          "platform": "Linux",
+          "architecture": "x86_64",
+          "edition": "Core",
+          "size": 638509,
+          "sha256": "1fdee15adf06cb1b633162d26dcc4f92269fac36df04d11840f8adf97a154844",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-linux-amd64-core.tar.gz"
+        },
+        {
+          "name": "mio-2.1.2-linux-amd64-full.docker.tar",
+          "platform": "Linux",
+          "architecture": "x86_64",
+          "edition": "Full",
+          "size": 15582720,
+          "sha256": "e8f11d8468a49c4dedbbf03e727ddfaa4fdf2e504d037d8395bdf2eefe38591c",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-linux-amd64-full.docker.tar"
+        },
+        {
+          "name": "mio-2.1.2-linux-amd64-full.tar.gz",
+          "platform": "Linux",
+          "architecture": "x86_64",
+          "edition": "Full",
+          "size": 959133,
+          "sha256": "3937fc0c52e79eea6bf60f7721c5ea4a86e5ef6e0c9578020ce4cdedac94611e",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-linux-amd64-full.tar.gz"
+        },
+        {
+          "name": "mio-2.1.2-windows-amd64-core-setup.exe",
+          "platform": "Windows",
+          "architecture": "x86_64",
+          "edition": "Core",
+          "size": 2622035,
+          "sha256": "bbb49d86035838760c5f800de3c4a594a539dd357c90f5a076d337a0e86ddd8c",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-windows-amd64-core-setup.exe"
+        },
+        {
+          "name": "mio-2.1.2-windows-amd64-core.zip",
+          "platform": "Windows",
+          "architecture": "x86_64",
+          "edition": "Core",
+          "size": 694732,
+          "sha256": "8fbecc6d42316d08204c7887dc5b5973dc912a23af6a6abcf7be8170a7961402",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-windows-amd64-core.zip"
+        },
+        {
+          "name": "mio-2.1.2-windows-amd64-full-setup.exe",
+          "platform": "Windows",
+          "architecture": "x86_64",
+          "edition": "Full",
+          "size": 2819564,
+          "sha256": "ae2656c5f1364ec2acb2165149bc3c6c16a29827f9bc67756fbb79f29dff158f",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-windows-amd64-full-setup.exe"
+        },
+        {
+          "name": "mio-2.1.2-windows-amd64-full.zip",
+          "platform": "Windows",
+          "architecture": "x86_64",
+          "edition": "Full",
+          "size": 1019267,
+          "sha256": "6970dad8809f6338e6c4a5c411da1a37885dcd58ec8db1ba829859ce9f389937",
+          "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-windows-amd64-full.zip"
+        }
+      ]
     }
   ]
 }

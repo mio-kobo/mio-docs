@@ -1,0 +1,84 @@
+---
+title: Mach-O 文件生成
+description: Mio V2.0 Darwin Mach-O 生成库 kiso/aot/macho
+---
+
+> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+
+
+## Mach-O 文件生成
+
+Mach-O 生成模块用于规划并产生 Darwin ARM64 平台的 Mach-O 可执行文件字节，主要由 Mio AOT 工具链调用。
+
+它不提供跨平台链接器，也不负责自动完成系统级代码签名和安装。
+
+本模块属于 **AOT 编译工具链接口**，其公开声明不等于稳定的应用层 API；以下内容对应 `v2.0.0` 发布标签。
+
+### 导入包
+
+> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+
+通过 `yobu "kiso/aot/macho";` 导入本包，随后使用 `macho.函数名(...)` 调用。
+
+```mio title="Stdlib.mio" no-run
+yobu "kiso/aot/macho";
+```
+
+### 地址目标
+
+`text_target`、`const_target` 和 `data_target` 创建不同段的地址目标，用于描述后续的地址修补规则。
+
+```mio title="Macho.mio" no-run
+yobu "kiso/aot/macho";
+
+chant(macho.text_target().kind);
+chant(macho.const_target().kind);
+```
+
+### 布局规划
+
+`plan` 根据机器码字节数、常量区字节数以及全局变量槽位数量规划 `Layout`；规划结果并不意味着输入镜像已经可执行。
+
+### 生成镜像
+
+`executable` 接受 `ImageSpec`，产生 `ImageResult`。成功时 `bytes` 是未签名的 Mach-O 数据；失败时应检查 `error`。
+
+### 公开类型
+
+- `MachOError`：包含空代码、过大镜像、非法修补与编码失败等变体。
+- `AddressTarget { kind: int64; }`：地址目标类别。
+- `AddressPatch`：地址修补位置及其目标。
+- `Section`：区段名称、偏移和对齐信息。
+- `Symbol`：符号名称与位置。
+- `Relocation`：重定位记录。
+- `Layout`：镜像与各区段规划结果。
+- `ImageSpec { words: []uint32; constants: []uint8; globals: int64; patches: []AddressPatch; }`：可执行镜像输入。
+- `ImageResult { bytes: []uint8; layout: Layout; error: MachOError?; }`：文件字节及构造状态。
+
+### 公开函数（5 个）
+
+以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+
+| 函数 | 公开签名 | 功能与返回规则 |
+| --- | --- | --- |
+| `text_target` | `text_target() -> AddressTarget` | 构造指向 `__text` 的地址修补目标。 |
+| `const_target` | `const_target() -> AddressTarget` | 构造指向常量区的地址修补目标。 |
+| `data_target` | `data_target() -> AddressTarget` | 构造指向数据区的地址修补目标。 |
+| `plan` | `plan(code_size: int64, const_size: int64, globals: int64) -> Layout` | 计算代码、常量和全局槽位对应的镜像布局。 |
+| `executable` | `executable(spec: ImageSpec) -> ImageResult` | 按镜像规格生成 Mach-O 字节并报告错误。 |
+
+### 完整示例
+
+```mio title="Macho.mio" no-run
+yobu "kiso/aot/macho";
+
+chant(macho.text_target().kind);
+chant(macho.const_target().kind);
+chant(macho.data_target().kind);
+```
+
+### 使用限制
+
+`code_size` 与 `const_size` 是字节数，而 `globals` 是全局变量槽数。生成前必须遵守布局容量和补丁约束，生成后仍可能需要由系统完成签名与授权。公开的结构体字段不意味着可以无条件传入任意人工构造内容。
+
+源码依据：[Mio v2.0.0 · `bunko/kiso/aot/macho/macho.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/aot/macho/macho.mio)。

@@ -1,0 +1,60 @@
+---
+featureBadge: new
+title: Native CLI
+description: Mio v2.1.0 原生 CLI 的命令、目标平台与选项。
+---
+
+## 原生 CLI <FeatureBadge status="new" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
+
+本页适用于 [Mio v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0) 正式发行包。运行 `mio version` 核对版本号；部分帮助文本仍带有历史上的 candidate 字样。三平台的发行归档均已验证基础 CLI 行为，见 [验证与来源](/docs/v2.1/tooling/verification)。
+
+### 命令及用途
+
+| 命令 | 正式 CLI 的行为 |
+| --- | --- |
+| `version`、`help` | 版本与帮助信息 |
+| `check` | 检查源码并输出诊断 |
+| `build` | 默认走原生构建；`--emit=mochi` 可生成 Mochi 字节码 |
+| `run` | 从源码构建当前宿主的原生镜像，写入私有临时目录并启动子进程 |
+| `exec` | 读取 Mochi 字节码，再编译/启动原生程序 |
+| `disasm` | 查看字节码结构 |
+| `test` | 交由 `selfhost/testrunner` |
+| `lsp` | 交由 `selfhost/lsp/rpc` 的 stdio 服务器 |
+
+注意：V2.0.0 正式 Go CLI 的 `mio run` 与 `mio exec` 使用 Mochi VM；V2.1 CLI则采用**原生编译与进程启动**流程，不能混为一谈。
+
+### 已有命令选项
+
+| 选项 | 使用方式 |
+| --- | --- |
+| `-o <path>` | 指定 build 输出文件；`run` 与 `exec` 自行管理原生临时路径 |
+| `--emit=mochi` | 在 `build` 中选择 Mochi 输出 |
+| `--bunko-root <directory>` | 显式指定 Bunko 路径 |
+| `--target=darwin-arm64\|linux-amd64\|windows-amd64` | 选择原生目标；也接受 `--target <value>`，默认为当前宿主目标 |
+| `--gc-stress` | 源码原生构建的 GC 压力测试选项 |
+| `--observe`、`--emit-symbols <file>` | 仅用于 Darwin ARM64 源码原生 `build`，不能与 `--emit=mochi` 合用 |
+| `--format=human\|short\|json` | 选择源码诊断形式 |
+| `--color=auto\|always\|never` | 控制诊断颜色形式 |
+| `--verbose` | 开启详细诊断 |
+| `--` | 对 `run` / `exec` 分隔后续用户程序参数 |
+
+`test` 与 `lsp` 使用独立的子命令解析逻辑。例如，无效的 Bunko 根目录返回 `E_BUNKO_ROOT` 和退出码 2；源码类型错误返回退出码 1。
+
+### 原生运行与测试 <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
+
+```sh
+mio version
+mio check Hello.mio
+mio build Hello.mio -o Hello-native
+mio build Hello.mio -o Hello.mochi --emit=mochi
+mio run Hello.mio -- one two
+mio test ./tests --format=json
+```
+
+`mio build` 默认使用当前宿主目标。使用 `--target=linux-amd64` 或 `--target=windows-amd64` 可以输出其他目标的可执行文件，应在对应系统运行。Windows 可将输出名设为 `Hello.exe`。三平台正式归档均已通过 `run`、`exec` 和 `test` 烟测；编译出来的原生程序若因除零或数组越界退出，本机 macOS ARM64 测试中得到退出码 1，未收到错误文本。
+
+### 开发边界
+
+CLI 由编译前端、原生构建流程、字节码工具、测试运行器和语言服务器等组件组成。有关实现结构、完整自举与版本验证的技术细节，请阅读 [自托管工具链](/docs/v2.1/tooling/selfhost) 和 [验证与来源](/docs/v2.1/tooling/verification)。
+
+来源：[`selfhost/cli/main.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/selfhost/cli/main.mio)。

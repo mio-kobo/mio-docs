@@ -1,0 +1,81 @@
+---
+featureBadge: experimental
+title: M19 原生分代 GC（开发中）
+description: 非移动式精确分代回收、LOS、SATB 并发开发和 M19 验收边界。
+---
+
+## M19：原生分代垃圾回收 <FeatureBadge status="experimental" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "partial" }, linux: { x86_64: "partial" }, windows: { x86_64: "partial" } }} />
+
+v2.1.0 三平台已通过 Runtime ABI 和所覆盖的原生差分测试。macOS ARM64 的有界分配样例在默认和 `--gc-stress` 两种模式下结果一致；这些证据不覆盖长期并发回收的接纳。
+
+V2.1 分支新增了分代回收和大对象内存预算相关实现。其目的是在保留**精确对象扫描、引用分类与非移动对象地址**的基础上，减少某些场景下扫描旧对象的工作，并对大对象、堆增长和内存预算分别进行管理。
+
+**历史状态说明（2026-10-26）：** `M19c` 的独立功能验收记录为 `PASS`，同一记录的 `m19_release_gate` 仍为 `BLOCKED`；M19b 历史 race 检查超时，整体为 `NOT_ACCEPTED`。下面属于**开发中的原生 Runtime 行为**，不是正式发布或所有负载的性能保证。
+
+### Young 与 Old
+
+新对象被登记到 Young 链。经过存活判断与晋升策略后，部分对象成为 Old。分代策略分开记录 Young、Old 占用和回收计数。
+
+- **Minor GC** 重点回收 Young，对指向年轻对象的旧对象引用使用 Remembered Set 协助追踪。
+- **Major GC** 用于更广泛地处理 Old 对象与可达性。当前纯 Mio emitter 源码包含“有 Old 对象时约每八次 Minor 触发一次 Major”的策略，以及分配失败重试路径。
+- **晋升** 将存活对象从年轻代纳入旧代管理；这里的“晋升”是对象的代际状态变化，不应简单理解为对象必然搬迁或复制到新地址。
+
+实际收集条件受堆预算、对象状态和 GC stress 等影响。不能仅依据“八次”这一个细节预测任意程序的 GC 次序。
+
+### 写屏障和 Remembered Set
+
+当旧对象中的引用可能指向新对象时，必须保留这一跨代关系。原生后端为相关写入生成写屏障，将需要扫描的旧对象加入 Remembered Set。
+
+这属于编译器和 Runtime 共同维护的不变式。若自行改写对象布局或绕过写屏障，会破坏精确可达性保证。**普通 Mio 应用不需要也不应手工维护 Remembered Set。**
+
+### Large Object Space（LOS）
+
+开发分支添加了 LOS，大对象使用独立映射。源码记录的默认阈值是对象跨度（含头及对齐）达到 **128 KiB**，而非只比较用户有效载荷字节数。
+
+- LOS 对象有独立映射和链表管理。
+- LOS 与普通对象共享分代、晋升和 Remembered Set 规则。
+- Minor / Major 可分别发现不可达的年轻或旧大对象。
+- 已死亡映射进行有界同步释放；每次普通 GC 最多尝试一批，失败时仍保留计费与后续重试。
+- 对象保持非移动；分类器只对准确的合法 Payload 起点读取对象头，不依赖“字节看上去像指针”的猜测。
+
+LOS 不是任意大对象都能无限分配的承诺，仍受预算、平台和原生内存上限约束。
+
+### 与 V2.0 的 Mark-Sweep 关系
+
+V2.0 的精确 Mark-Sweep 是已经发布的基础。V2.1 的分代实现继承了精确根、对象分类和扫描约束，但加入了新策略和额外状态。
+
+源码同时保留 GC stress 与原生差分测试入口，不应把“新增分代 GC”写成“删除 Mark-Sweep”或“GC 改成移动式复制回收”。
+
+### 并发 Old GC：已有内部实现，尚未接纳 <FeatureBadge status="experimental" since="2.1" />
+
+当前 V2.1 分支已进一步加入 Darwin ARM64 Native Thread、TLS、互斥与条件等待适配，并通过 Epoch、安全点、线程根快照和 SATB 记录并发标记期间发生的引用变更。旧对象清扫也有单独的并发阶段。
+
+并发集成代码已提交；下表保留早期审计的阶段记录，不作为当前总门禁结论：
+
+| 阶段 | 本次只读审计可确认的范围 |
+| --- | --- |
+| E2 | Native 线程、TLS 和同步适配已有阶段验证 |
+| E3 | Epoch、安全点、线程根快照有历史范围记录，集成要求复验 |
+| E4 | Concurrent Old Mark 与 SATB 有历史阶段运行记录，集成要求复验 |
+| E5 | Concurrent Sweep 有历史范围 `PASS`，不能代替 M19e 总门禁 |
+| E6 | Socket、内存快照与整体回归继续集成；总门禁尚未完成 |
+
+历史 M19e 整体状态为 **`NOT_ACCEPTED`**；当前分支已有 E6 测试，但本轮未确认更新的整体接纳报告。其实现入口属于内部 Native Runtime bridge，普通 CLI 并未默认改成并发 GC，也没有因此提供稳定的应用级线程标准库。
+
+### 仍未完成的总发布门禁
+
+M19c 资料原先将以下任务放在后续阶段；当前分支已包含 M19e 集成源码，但本轮未确认其整体验收：
+
+- M19d：进一步的接纳控制；
+- M19e：并发 Old GC 的完整集成、复验与接纳；
+- M19f：三档自动调优以及压力预测校准；
+- 多线程状态快照的所有权保护与最终验收。
+
+这也意味着 **High / Balanced / Low 三档 GC 不能作为已实现用户选项写入 V2.1 文档**。`Normal / Elevated / High / Critical` 属于另一套内部内存压力状态，详见 [内存预算](/docs/v2.1/internals/memory-policy)。
+
+### 源码与证据
+
+- [M19c 开发记录](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/benchmarks/native-gc/M19c.md)
+- [M19c 功能验收记录](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/benchmarks/native-gc/m19c-acceptance.json)
+- [纯 Mio 分代运行时 emitter](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/aot/lower/generational.mio)
+- [Go 后端对应实现](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/internal/aot/darwinarm64/m19b_generational.go)
