@@ -8,6 +8,7 @@ import { collectDocsExamples } from './lib/docs-examples.mjs';
 import { PlaygroundWorkerClient } from './lib/playground-worker.mjs';
 import { bunkoCases, deniedModules } from '../fixtures/docs/playground-v2.1-bunko.mjs';
 import { hasSupportedImports, V21_BUNKO_PACKAGES } from '../lib/mio-example-policy.mjs';
+import { playgroundAssetPath, playgroundVersion } from '../lib/mio-playground-version.mjs';
 import { startWasmAssetServer } from './lib/wasm-asset-server.mjs';
 
 const root = process.cwd();
@@ -169,6 +170,24 @@ test('reports a real WASM load failure and then runs after recovery', async () =
     assert.equal(result.status, 'ok');
     assert.equal(result.stdout, 'after load failure\n');
   });
+});
+
+test('V2.1.2 uses the V2.1.0 Worker for checks, runs and diagnostics', async () => {
+  const version = playgroundVersion('v2.1.2');
+  assert.equal(version, playgroundVersion('v2.1'));
+  assert.equal(playgroundAssetPath(version), '/wasm/v2.1');
+  for (const docVersion of ['v1.0', 'v2.0', undefined]) {
+    assert.equal(playgroundAssetPath(playgroundVersion(docVersion)), '/wasm');
+  }
+  await withWorker(async ({ client }) => {
+    await client.start();
+    const source = 'kaku value = 42; chant(value);';
+    assert.equal((await client.execute('check', source)).status, 'checked');
+    assert.equal((await client.execute('run', source)).stdout, '42\n');
+    const bad = await client.execute('check', 'kaku value: int64 = "Mio";');
+    assert.equal(bad.status, 'diagnostic');
+    assert.match(bad.diagnostics[0], /E0301/);
+  }, { version });
 });
 
 test('V2.1 runtime hashes match the release build manifest', () => {

@@ -92,6 +92,19 @@
         "diagnostics": []
       }
     },
+    "531a37172ed2f2d69dad71dc09586637bc99d75b27062ac1457f7caffdf7a85d": {
+      "preview": "kaku value = 42;",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "42\n",
+        "diagnostics": []
+      }
+    },
     "57f0dc0246d730d6bd4c12c6d28392afe55b142c3b1b456c4042030d31644122": {
       "preview": "yobu \"kiso/encoding/json\";",
       "check": {

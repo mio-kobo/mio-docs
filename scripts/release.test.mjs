@@ -7,30 +7,31 @@ test('exact patch versions coexist with the stable minor URL and sort numericall
  for(const version of ['2.0.0','2.0.1','2.1.0']) r.versions.push({...r.versions[1],id:`v${version}`,version,status:'Development',maintenance:'preview',release:null,frozen:false});
  assert.doesNotThrow(()=>validateRegistry(r));
  assert.deepEqual(['2.1.0','2.0.1','2.0.0'].sort(compareVersions),['2.0.0','2.0.1','2.1.0']);
- assert.equal(r.defaultVersion,'v2.0');
+ assert.equal(r.defaultVersion,'v2.1.2');
 });
-test('published minor URL requires a frozen stable default, matching release identity and artifacts', () => {
- assert.doesNotThrow(()=>validateReleasePlan());
+test('published release requires a frozen stable default, matching release identity and artifacts', () => {
+ const published={...releasePlan,mode:'published',acceptance:null};
+ assert.doesNotThrow(()=>validateReleasePlan(published));
  for (const change of [
   p => { p.released=false; },
   p => { p.sourceCommit='a'.repeat(40); },
   p => { p.publishedAt='2026-01-01T00:00:00Z'; },
   p => { p.publicationEvidence=null; },
  ]) {
-  const p=structuredClone(releasePlan);change(p);
+  const p=structuredClone(published);change(p);
   assert.throws(()=>validateReleasePlan(p));
  }
  for (const change of [
   r => { r.defaultVersion='v1.0'; },
-  r => { r.versions.find(v=>v.id==='v2.0').frozen=false; },
-  r => { r.versions.find(v=>v.id==='v2.0').status='Legacy'; },
+  r => { r.versions.find(v=>v.id===releasePlan.docsVersion).frozen=false; },
+  r => { r.versions.find(v=>v.id===releasePlan.docsVersion).status='Legacy'; },
  ]) {
   const r=structuredClone(registry);change(r);
-  assert.throws(()=>validateReleasePlan(releasePlan,r,downloadManifest));
+  assert.throws(()=>validateReleasePlan(published,r,downloadManifest));
  }
  const artifacts=structuredClone(downloadManifest);
- artifacts.releases=artifacts.releases.filter(r=>r.docsVersion!=='v2.0');
- assert.throws(()=>validateReleasePlan(releasePlan,registry,artifacts),/downloads/);
+ artifacts.releases=artifacts.releases.filter(r=>r.docsVersion!==releasePlan.docsVersion);
+ assert.throws(()=>validateReleasePlan(published,registry,artifacts),/downloads/);
 });
 test('RC requires prerelease evidence and never becomes the stable default', () => {
  const r=structuredClone(registry), rc={...r.versions[1],id:'v2.0.0',version:'2.0.0',status:'Release Candidate',frozen:true,release:{tag:'v2.0.0-rc.1',url:'https://github.com/mio-kobo/mio/releases/tag/v2.0.0-rc.1',publishedAt:'2026-10-21T00:00:00Z',prerelease:true}};
@@ -39,17 +40,40 @@ test('RC requires prerelease evidence and never becomes the stable default', () 
  r.defaultVersion=registry.defaultVersion;rc.release.prerelease=false;assert.throws(()=>validateRegistry(r));
 });
 test('promotion fails closed without final acceptance, exact Stable docs and verified artifacts', () => {
- assert.equal(releasePlan.mode,'published');
- assert.throws(()=>validateReleasePlan({...releasePlan,mode:'live'}));
- const r=structuredClone(registry), p={...releasePlan,mode:'live',docsVersion:'v2.0.0'};
- const v={...r.versions[1],id:'v2.0.0',version:'2.0.0',status:'Stable',frozen:true,release:{tag:'v2.0.0',url:'https://github.com/mio-kobo/mio/releases/tag/v2.0.0',publishedAt:'2026-10-21T00:00:00Z',prerelease:false}};
- r.versions.push(v);r.defaultVersion=v.id;
- assert.throws(()=>validateReleasePlan(p,r,downloadManifest));
- p.acceptance={status:'passed',sourceCommit:v.source.commit,reviewer:'fixture',reviewedAt:'2026-10-21T00:00:00Z',evidence:'fixture.json'};
- assert.throws(()=>validateReleasePlan(p,r,downloadManifest),/downloads/);
- assert.throws(()=>validateReleasePlan({...releasePlan,mode:'prepared'},r,downloadManifest),/stable entry/);
- const artifacts=structuredClone(downloadManifest);artifacts.releases[0].assets[0].sha256='fake';
- assert.throws(()=>validateReleasePlan(releasePlan,registry,artifacts),/asset/);
+ const p={...releasePlan,mode:'live',acceptance:null};
+ assert.throws(()=>validateReleasePlan(p),/Final acceptance/);
+ assert.throws(()=>validateReleasePlan({...p,docsVersion:'v2.0'}),/exact Stable snapshot/);
+ p.acceptance={status:'passed',sourceCommit:releasePlan.sourceCommit,reviewer:'fixture',reviewedAt:'2026-11-10T08:11:15Z',evidence:'fixture.json'};
+ const artifacts=structuredClone(downloadManifest);
+ artifacts.releases=artifacts.releases.filter(r=>r.docsVersion!==p.docsVersion);
+ assert.throws(()=>validateReleasePlan(p,registry,artifacts),/downloads/);
+ assert.throws(()=>validateReleasePlan({...releasePlan,mode:'prepared'}),/stable entry/);
+ const malformed=structuredClone(downloadManifest);
+ malformed.releases[0].assets[0].sha256='fake';
+ assert.throws(()=>validateReleasePlan(releasePlan,registry,malformed),/asset/);
+ const published={...releasePlan,mode:'published',acceptance:null};
+ assert.throws(()=>validateReleasePlan(published,registry,downloadManifest,{production:true}),/Production deployment requires live mode and final acceptance/);
+});
+
+test('v2.1.2 is a frozen Stable patch with verified Core and Full downloads', () => {
+ const version=registry.versions.find(v=>v.id==='v2.1.2');
+ assert.equal(version.status,'Stable');
+ assert.equal(version.frozen,true);
+ assert.equal(version.release.tag,'v2.1.2');
+ assert.equal(version.release.prerelease,false);
+ assert.equal(version.source.commit,releasePlan.sourceCommit);
+ assert.equal(registry.versions.find(v=>v.id==='v2.0').maintenance,'maintained');
+ const manifest=structuredClone(downloadManifest);
+ const patch=manifest.releases.find(r=>r.docsVersion===version.id);
+ assert.equal(patch.assets.length,9);
+ assert.deepEqual([...new Set(patch.assets.map(a=>a.platform))].sort(),['Linux','Windows','macOS']);
+ const core=patch.assets.find(a=>a.edition==='Core');
+ const full=patch.assets.find(a=>a.edition==='Full');
+ full.sha256=core.sha256;
+ assert.throws(()=>validateReleasePlan(releasePlan,registry,manifest),/distinct checksums/);
+ full.sha256='f'.repeat(64);
+ full.platform='Windows';
+ assert.throws(()=>validateReleasePlan(releasePlan,registry,manifest),/edition mismatch/);
 });
 
 test('Stable activation cannot change the default with content-only review evidence', async () => {
@@ -70,13 +94,26 @@ test('Stable activation cannot change the default with content-only review evide
 });
 
 const base=process.env.BASE_URL;
-test('published routes, canonical, downloads and SEO promote V2 and exclude development and EOL', {skip:!base},async()=>{
- for(const path of ['/','/download','/download/2.0.0','/releases/2.0.0','/releases/2.0.0/migration']) {
+test('published routes, canonical, downloads and SEO promote the patch and exclude development and EOL', {skip:!base},async()=>{
+ for(const path of ['/','/download','/download/2.0.0','/releases/2.0.0','/releases/2.0.0/migration','/download/2.1.2','/releases/2.1.2','/releases/2.1.2/migration']) {
   const r=await fetch(new URL(path,base));assert.equal(r.status,200,path);const html=await r.text();
-  assert.match(html,/rel="canonical"/);assert.equal((html.match(/<h1[ >]/g)??[]).length,1,path);
+  assert.ok(html.includes(`rel="canonical" href="https://mio.kaelexvp.cc${path === '/' ? '/' : path+'/'}"`),path);assert.equal((html.match(/<h1[ >]/g)??[]).length,1,path);
   assert.ok(!/<meta name="robots" content="noindex/.test(html));
-  if(path==='/download') assert.ok(html.includes('/releases/download/v2.0.0/'));
+  if(path==='/download' || path==='/download/2.1.2') {
+   for(const asset of downloadManifest.releases.find(r=>r.version==='2.1.2').assets) {
+    assert.ok(html.includes(asset.url) && html.includes(asset.sha256),asset.name);
+   }
+  }
+  if(path==='/') for(const entry of ['/download/2.1.2','/releases/2.1.2','/docs/v2.1.2/learn']) assert.ok(html.includes(`href="${entry}`),entry);
+  if(path==='/download/2.0.0' || path==='/releases/2.0.0') assert.ok(html.includes('github.com/mio-kobo/mio/releases/tag/v2.0.0'));
+  if(path==='/releases/2.0.0') assert.ok(html.includes(registry.versions.find(v=>v.id==='v2.0').source.commit));
  }
- const map=await (await fetch(new URL('/sitemap.xml',base))).text();assert.ok(map.includes('/docs/v2.0'));assert.ok(map.includes('/releases/2.0.0'));assert.ok(!map.includes('/docs/v2.1'));assert.ok(!map.includes('/docs/v1.0'));
+ const map=await (await fetch(new URL('/sitemap.xml',base))).text();
+ for (const path of ['/docs/v2.0/','/docs/v2.1.2/','/docs/v2.1.2/learn/','/releases/2.0.0/','/releases/2.1.2/','/releases/2.1.2/migration/','/download/2.1.2/']) assert.ok(map.includes(`${path}</loc>`),path);
+ for (const path of ['/docs/v2.1/','/docs/v1.0/']) {
+  assert.ok(!map.includes(path),path);
+  const preview=await (await fetch(new URL(path,base))).text();
+  assert.match(preview,/<meta name="robots" content="noindex/u);
+ }
  for(const query of ['tag=v1.0&tag=v2.0','tag=v2.0.0','tag=v1.0&locale=en']) assert.equal((await fetch(new URL(`/api/search?query=kaku&${query}`,base))).status,404);
 });

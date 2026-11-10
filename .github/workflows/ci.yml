@@ -17,3 +17,14 @@ jobs:
       - run: npm run check:playground
       - run: npm run check:tutorial
       - run: npm run build
+      - name: Test the static preview
+        env:
+          BASE_URL: http://127.0.0.1:3210
+        run: |
+          npm run start -- --port 3210 > /tmp/mio-static-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          curl --fail --silent --retry 30 --retry-connrefused --retry-delay 1 "$BASE_URL/" > /dev/null
+          npm run test:versions
+          npm run test:release
+          npm run check:links

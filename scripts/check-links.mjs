@@ -1,16 +1,17 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
-import { defaultVersion } from '../lib/versions.mjs';
+import { legacyChapterVersion } from '../lib/versions.mjs';
+import { releasePlan } from '../lib/releases.mjs';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 const root = 'content/docs';
 function walk(dir) { return readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]); }
 const files = walk(root);
 function route(file) { const slug = relative(root, file).replace(/\.mdx?$/u, '').replace(/(?:^|\/)index$/u, ''); return '/docs' + (slug ? '/' + slug.replace(/\/$/u, '') : ''); }
-const routes = new Set(['/', '/docs', '/download', '/download/2.0.0', '/releases/2.0.0', '/releases/2.0.0/migration', ...files.filter(f => /\.mdx?$/u.test(f)).map(route)]);
+const routes = new Set(['/', '/docs', '/download', '/download/2.0.0', '/releases/2.0.0', '/releases/2.0.0/migration', `/download/${releasePlan.version}`, `/releases/${releasePlan.version}`, `/releases/${releasePlan.version}/migration`, ...files.filter(f => /\.mdx?$/u.test(f)).map(route)]);
 for (const path of [...routes]) {
-  const alias = path.replace('/docs/' + defaultVersion, '/docs');
-  if (path !== alias && /^\/docs\/(getting-started|learn|reference|kiso|tooling|internals)(?:\/|$)/u.test(alias)) routes.add(alias);
+  const [, root, version, ...slug] = path.split('/');
+  if (root === 'docs' && version && version === legacyChapterVersion(slug)) routes.add(`/docs/${slug.join('/')}`);
 }
 let count = 0;
 const external = new Set();

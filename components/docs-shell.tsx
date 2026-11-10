@@ -5,13 +5,14 @@ import { findPath, findProjection, type Folder, type Root } from 'fumadocs-core/
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { layoutOptions, sections } from '@/lib/navigation';
+import { releasePlan } from '@/lib/releases.mjs';
 import { docsUrl, getVersion, parseDocsPath, versionLabel } from '@/lib/versions.mjs';
 export const versionNoticeKey = 'mio-docs-version-fallback';
 export function DocsShell({ tree, sidebarTree, children }: { tree: Root; sidebarTree: Root; children: ReactNode }) {
   const pathname = usePathname();
   const current = parseDocsPath(pathname);
   const links = sections.map(({ title, url }) => ({ text: title, url: current && getVersion(current.version) ? docsUrl([current.version!, ...url.split('/').slice(2)], current.locale) : url, active: 'nested-url' as const, on:'nav' as const })).filter(link => !getVersion(current?.version) || findPath(tree.children, node => node.type === 'page' && node.url === link.url));
-  return <FeatureSidebarProvider tree={sidebarTree}><DocsLayout slots={{ sidebar: featureSidebarSlots }} {...layoutOptions} links={links} tree={tree} tabs={{ transform(option, folder) {
+  return <FeatureSidebarProvider tree={sidebarTree}><DocsLayout slots={{ sidebar: featureSidebarSlots }} {...layoutOptions} links={[...links, { text: 'Release Notes', url: `/releases/${releasePlan.version}`, on: 'nav' }]} tree={tree} tabs={{ transform(option, folder) {
     if (folder.root !== 'version') return option;
     const version = getVersion(folder.$ref?.folder);
     if (!version) return null;
