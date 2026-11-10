@@ -11,13 +11,13 @@ export const metadata = pageMetadata('Mio · 澪光文档', `认识 Mio 编程�
 export default function Home() {
   return <HomeLayout {...layoutOptions}>
     <main className="hikari-home" id="main-content" tabIndex={-1}>
-      <section className="release-banner home-release" aria-labelledby="release-title"><div className="release-banner-copy"><div className="release-heading"><h2 id="release-title">Mio <span>V{releasePlan.version}</span></h2><span className={`version-badge ${releasePlan.released ? 'is-stable' : 'is-development'}`}>{releasePlan.released ? '语言正式版' : '开发中'}</span></div><p>{releasePlan.released ? '查看正式发行包、版本文档与迁移指南。' : '下一程，正在准备。浏览开发文档与已验证的变化；正式发布与安装包仍待最终验收。'}</p><Link className="release-summary" href={`/releases/${releasePlan.version}`}>{releasePlan.released ? '查看更新' : `了解 V${releasePlan.version} 发布准备`} <ArrowRight size={16} aria-hidden="true" /></Link></div><div className="release-banner-nav"><ReleaseLinks /></div></section>
+      <section className="release-banner home-release" aria-labelledby="release-title"><div className="release-banner-copy"><div className="release-heading"><h2 id="release-title">Mio <span>V{releasePlan.version}</span></h2><span className={`version-badge ${releasePlan.released ? 'is-stable' : 'is-development'}`}>{releasePlan.released ? '语言正式版' : '开发中'}</span></div><p>{releasePlan.released ? '查看正式发行包、版本文档与迁移指南。' : '下一程，正在准备。浏览开发文档与已验证的变化；正式发布与安装包仍待最终验收。'}</p><a className="release-summary" href={`/releases/${releasePlan.version}/`}>{releasePlan.released ? '查看更新' : `了解 V${releasePlan.version} 发布准备`} <ArrowRight size={16} aria-hidden="true" /></a></div><div className="release-banner-nav"><ReleaseLinks /></div></section>
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-copy">
           <h1 id="hero-title"><span className="hero-name">Mio</span>小巧的核心，<br /><span>清晰地表达。</span></h1>
           <p className="hero-intro">认识 Mio，一门采用日语罗马音关键字的静态强类型编程语言。以精简的语言核心，组合按需导入的 Bunko 标准库。</p>
           <Link className="home-version" href="/docs"><span className="release-dot" aria-hidden="true" />默认文档：{versionLabel(getVersion(defaultVersion)!)}<ArrowUpRight size={14} aria-hidden="true" /></Link>
-          <div className="hero-actions"><Link className="primary-action" href={`/download/${releasePlan.version}`}>下载 Mio v{releasePlan.version} <ArrowRight size={18} aria-hidden="true" /></Link><Link className="secondary-action" href={`/docs/${defaultVersion}/learn`}>开始学习 <ArrowRight size={18} aria-hidden="true" /></Link></div>
+          <div className="hero-actions"><a className="primary-action" href={`/download/${releasePlan.version}/`}>下载 Mio v{releasePlan.version} <ArrowRight size={18} aria-hidden="true" /></a><Link className="secondary-action" href={`/docs/${defaultVersion}/learn`}>开始学习 <ArrowRight size={18} aria-hidden="true" /></Link></div>
           <p className="hero-note">当前执行路径：Mio 源码 → Mochi 字节码 → Mochi VM</p>
         </div>
         <HomeCode />
