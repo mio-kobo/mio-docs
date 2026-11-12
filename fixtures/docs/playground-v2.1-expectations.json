@@ -1,6 +1,45 @@
 {
   "schemaVersion": 1,
   "examples": {
+    "0184e8360f69a0978c8db86a4b8ed36be85ecd2c816252ea17f2493007845543": {
+      "preview": "yobu \"kiso/utf8\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\n3\niie\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "01c7c047059af7764e1f171cde6b610a77ea70e4bee230ae934427b266aaa2db": {
+      "preview": "yobu \"kiso/path\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "/etc/hosts\n../a\nbunko/kiso/path\npath.mio\n.mio\n\nC:\\temp\\a.txt\n",
+        "diagnostics": []
+      }
+    },
+    "075499a9122541210cb9e1766b5f89428af5f9cb88641866373bad6debb8f0a1": {
+      "preview": "yobu \"kiso/encoding/json\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "{\"ok\":true,\"items\":[1,null,7]}\n\"Hello\\n\\\"Mio\\\"\"\n",
+        "diagnostics": []
+      }
+    },
     "0be3db94aa72d1d8b6e405a3110ce6c23549fe846e47d4e1ab3b03e7ba1dbced": {
       "preview": "yobu \"kiso/encoding/json\";",
       "check": {
@@ -11,6 +50,58 @@
       "run": {
         "status": "ok",
         "stdout": "Mio\n",
+        "diagnostics": []
+      }
+    },
+    "0e50ae8fbe10da280024d167bd21f284c1568c806976369f58bcc55c60b3eb40": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "11\nMio 澪😀\n0\n32\n",
+        "diagnostics": []
+      }
+    },
+    "172eb0cd398a8112b31a1103a5553767103b743a258e8cda0bff3a3716647001": {
+      "preview": "yobu \"kiso/math\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "12\n-2\n2\n4\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "18010e4ce2de804b15ac481342cda345ec24c2ddf542e8143ecdef12bc6fd5d8": {
+      "preview": "yobu \"kiso/convert\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "-42\nhai\nhai\nhai\n-12345\n4294967295\n",
+        "diagnostics": []
+      }
+    },
+    "1b5c289e6c203da3dfb570e366a50e7b452affa7ba120742913e9c9ea1ff9adc": {
+      "preview": "yobu \"kiso/path\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\niie\nb.txt\n/a\n.txt\n\ndocs\nmanual.mio\n",
         "diagnostics": []
       }
     },
@@ -27,19 +118,6 @@
         "diagnostics": []
       }
     },
-    "2067e59cb8578f39618b1a845231d28d47daf51346410321fc7441071e2ce859": {
-      "preview": "yobu \"kiso/crypto/sha256\";",
-      "check": {
-        "status": "checked",
-        "stdout": "",
-        "diagnostics": []
-      },
-      "run": {
-        "status": "ok",
-        "stdout": "32\n",
-        "diagnostics": []
-      }
-    },
     "2122d0ea8cb5f553ccf1b8284199e48258ea7002fcaedfaf076cefaf895ad5ab": {
       "preview": "yobu \"kiso/crypto/sha256\";",
       "check": {
@@ -53,7 +131,20 @@
         "diagnostics": []
       }
     },
-    "2190196995081117d37bc45f5e127a68fe6aa36e46adf8a7935fd75321df6439": {
+    "21370a574e908d3ac5b42e78a5e163b146708b238a7ca0786dccaef881ebe953": {
+      "preview": "yobu \"kiso/convert\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "-42\nhai\nhai\nhai\nhai\n0.1\n",
+        "diagnostics": []
+      }
+    },
+    "2235ab245a7ef0ff3ad3d27491a24f17661bca26bbbaf0c29c36e36000838a69": {
       "preview": "yobu \"kiso/bytes\";",
       "check": {
         "status": "checked",
@@ -62,12 +153,12 @@
       },
       "run": {
         "status": "ok",
-        "stdout": "2\n",
+        "stdout": "hai\n-1\n1\n1\niie\nhai\nhai\n",
         "diagnostics": []
       }
     },
-    "2c07306daecc42d45b737971d1c86fa089c3ff58c193e3e7f96a49086f00e94f": {
-      "preview": "yobu \"kiso/string\";",
+    "280669e0764cdec33d154bfc74111d500c4c154620e883501e2d6e8d28a6a249": {
+      "preview": "yobu \"kiso/array\";",
       "check": {
         "status": "checked",
         "stdout": "",
@@ -75,12 +166,12 @@
       },
       "run": {
         "status": "ok",
-        "stdout": "Mio\n",
+        "stdout": "9\n3\n9\n6\n9\n2\n",
         "diagnostics": []
       }
     },
-    "3d5aa893dd7c60f3f5ecbbc93656f83bc569faee748fae3e81a0f385871135c6": {
-      "preview": "yobu \"kiso/regexp\";",
+    "35bae869f381f9babbe84af8afbd7ff29e30828f02493a96c5a41c36c1475d64": {
+      "preview": "yobu \"kiso/crypto/sha256\";",
       "check": {
         "status": "checked",
         "stdout": "",
@@ -88,7 +179,33 @@
       },
       "run": {
         "status": "ok",
-        "stdout": "hai\nhai\n",
+        "stdout": "32\n32\n0\n",
+        "diagnostics": []
+      }
+    },
+    "4309355125804b2dead88966cb947e5805ffb7960f328044eeae50c9ef74b4bc": {
+      "preview": "yobu \"kiso/encoding/json\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "9223372036854775807\nMio\nv2\naot\n",
+        "diagnostics": []
+      }
+    },
+    "467cb484449340ffb7accd85ef3eb2d32034b25124b524257383826f2b36ccad": {
+      "preview": "yobu \"kiso/utf8\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\n1\nhai\n3\niie\n1\n0\n",
         "diagnostics": []
       }
     },
@@ -105,8 +222,8 @@
         "diagnostics": []
       }
     },
-    "57f0dc0246d730d6bd4c12c6d28392afe55b142c3b1b456c4042030d31644122": {
-      "preview": "yobu \"kiso/encoding/json\";",
+    "58957c4188ecb563237832fe5fc28992983db9756638c666e7a0d69955543aaa": {
+      "preview": "yobu \"kiso/encoding/binary\";",
       "check": {
         "status": "checked",
         "stdout": "",
@@ -114,12 +231,12 @@
       },
       "run": {
         "status": "ok",
-        "stdout": "42\nMio\n",
+        "stdout": "1\n8\n999\nhai\nmu\n",
         "diagnostics": []
       }
     },
-    "60257eab8204d4701556dfede6420634ba9ed83c9f185fa69249ef6d9a3e8da5": {
-      "preview": "yobu \"kiso/encoding/json\";",
+    "5b55eb16cf5b0e347b0ab76a20c8e2e0f39b3352da8ca99f84639ffe79c762b0": {
+      "preview": "yobu \"kiso/string\";",
       "check": {
         "status": "checked",
         "stdout": "",
@@ -127,7 +244,46 @@
       },
       "run": {
         "status": "ok",
-        "stdout": "{\"a\":[true,null,7]}\n\"Hello\\nMio\"\n",
+        "stdout": "Mio V2.1\n",
+        "diagnostics": []
+      }
+    },
+    "5b85465f5cb90c65ab4367b69788c920b08b2895d4959d05ed46ba1906c9f42e": {
+      "preview": "yobu \"kiso/bytes\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\n9\n9\n",
+        "diagnostics": []
+      }
+    },
+    "6d151de24bb9255ba5de25dec1c10c3291dd4f5a690619c9d2d413c7569a0b4d": {
+      "preview": "yobu \"kiso/bytes\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\n3\n65\n0\n3\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "71b56948b4f9b88cd61b4b38c0b69f5125abf83d2ce580a17e5063cc5bcdb662": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "10\n5\n",
         "diagnostics": []
       }
     },
@@ -144,6 +300,45 @@
         "diagnostics": []
       }
     },
+    "7c7b9e33c2422398ccb6e4f63809e8604e6deb0a1f478f35adba13df0f9ba390": {
+      "preview": "yobu \"kiso/math\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3.141592653589793\n6.2831855\n3\n10\n",
+        "diagnostics": []
+      }
+    },
+    "7d4030e9ee3b670511c85ea61820842ea79e39aabd3f450320c07a9f821ad93e": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "5\n50\n16\n",
+        "diagnostics": []
+      }
+    },
+    "872093aeefb9a37eda6a9dbc5c3e200c80874ed1c1309b1d1668e2d9d4447f3e": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\nb\nhai\n",
+        "diagnostics": []
+      }
+    },
     "8a17646a1c71ebd70924467f4b1c64c5c8559e205b76c368b037dd16a47feba1": {
       "preview": "waza first<T>(values: []T) -> T? {",
       "check": {
@@ -157,8 +352,8 @@
         "diagnostics": []
       }
     },
-    "9508c05f05f57fb7cb99c33cde2e949d57b471a11f471f8e898995af7beff39a": {
-      "preview": "yobu \"kiso/crypto/sha256\";",
+    "8d57043c386b159b09f00844382cc1bbe031c90412fed37de5bd209aafc35430": {
+      "preview": "yobu \"kiso/string\";",
       "check": {
         "status": "checked",
         "stdout": "",
@@ -166,7 +361,46 @@
       },
       "run": {
         "status": "ok",
-        "stdout": "32\n186\n",
+        "stdout": "4\n日\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "9a98e28822818483bf45a328e63c59e2949febdbd002ec08ce99b25ad7f5cdb2": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "4660\n-42\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "9c3250692a823adc47c27c6f5b79a4c85f915cb10f47aac3f63f9cfb0983dabf": {
+      "preview": "yobu \"kiso/utf8\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\n3\n4\n4\n",
+        "diagnostics": []
+      }
+    },
+    "9dad911115dfd0d82748707e3b9dde9d2ad7e98ee06a882f63f01e9abfebb0af": {
+      "preview": "yobu \"kiso/regexp\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\nhai\nhai\nhai\nhai\n",
         "diagnostics": []
       }
     },
@@ -183,6 +417,45 @@
         "diagnostics": []
       }
     },
+    "a0a6f6b2fc1aad59db24f3e500f3371a99e060c16d9d3d7efa308ab1ca722813": {
+      "preview": "yobu \"kiso/array\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "3\n7\n0\n16\n",
+        "diagnostics": []
+      }
+    },
+    "a392304f6ebbcfe262a4ca40112b67783b230f0ca01f7a1ced8eb893038147ba": {
+      "preview": "yobu \"kiso/bytes\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "2\n3\n64\n0\n3\n",
+        "diagnostics": []
+      }
+    },
+    "b2ca9d7fb8e97c7367c97676af98551994832ade128453e2afe73bd13bc8f656": {
+      "preview": "yobu \"kiso/path\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": ".\n/a/c\n../../b\ndocs/v2.1/guide.mio\na/c\nsrc/path\n",
+        "diagnostics": []
+      }
+    },
     "b2da379ed5b70c9e5b3e6315fe51fd038ffdeb0fe5f8be7d3408fe0c52de172a": {
       "preview": "waza echo(message: string) -> int64 {",
       "check": {
@@ -196,8 +469,8 @@
         "diagnostics": []
       }
     },
-    "c0857e74a19b66c57c362ab182b082cf45146014352c67bd09178767d296319c": {
-      "preview": "yobu \"kiso/bytes\";",
+    "c19450f9f5df435342ace348c6f200c9aa5a11979ef3d17943120c4e50530de6": {
+      "preview": "yobu \"kiso/array\";",
       "check": {
         "status": "checked",
         "stdout": "",
@@ -205,11 +478,76 @@
       },
       "run": {
         "status": "ok",
-        "stdout": "3\n2\n",
+        "stdout": "99\n99\n42\n88\n",
         "diagnostics": []
       }
     },
-    "c4cafcf75d25c111993fb3bb48c6795d43a04c05e5e94922915568ef7533d736": {
+    "c533be05903ec2b726d59a2cf22e38787a35fb9a330e361899fd760a92c3a337": {
+      "preview": "yobu \"kiso/convert\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\nhai\niie\n",
+        "diagnostics": []
+      }
+    },
+    "c5e063afacea343ec327cdd38ef6404a835b421557b81f453b53845e86163bba": {
+      "preview": "yobu \"kiso/regexp\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\niie\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "cae1714133b33ad2b32badea1330a8190a2f02985d8a444ac1d54313af4fc335": {
+      "preview": "yobu \"kiso/convert\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "8080\n-1250\n2\n",
+        "diagnostics": []
+      }
+    },
+    "cc094890fb13bccbcca924af9e55d4cc5959cbf5d76a5524643f4404602de4c8": {
+      "preview": "yobu \"kiso/math\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\n42\n",
+        "diagnostics": []
+      }
+    },
+    "cedbf56e64a6f733d9e62abfdc5fb86d89ceea640b12390a2ba64b02b181baad": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "hai\nhai\nhai\n10\n-1\n",
+        "diagnostics": []
+      }
+    },
+    "d047c58c06684102821d6efba2a9401770befe75df2589505287d74f2c803665": {
       "preview": "yobu \"kiso/regexp\";",
       "check": {
         "status": "checked",
@@ -222,8 +560,8 @@
         "diagnostics": []
       }
     },
-    "e04b337b8458abc2eecf471f0613aabb17d1054625c0f5c72c748c6852f0f5d4": {
-      "preview": "yobu \"kiso/string\";",
+    "d369e2f484d48dcae7722dacad6629a44d88c1d1bf29e4272f105b8328e8f793": {
+      "preview": "yobu \"kiso/array\";",
       "check": {
         "status": "checked",
         "stdout": "",
@@ -231,7 +569,20 @@
       },
       "run": {
         "status": "ok",
-        "stdout": "Mio\n",
+        "stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\n",
+        "diagnostics": []
+      }
+    },
+    "da2baa5a5741f7ed8c19f6aca9938722332fe79a87cb2b2e974ca4bb4eadc57e": {
+      "preview": "yobu \"kiso/convert\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "0.0025\n0.30000000000000004\n1e+21\n-0\nNaN\n",
         "diagnostics": []
       }
     },
@@ -245,6 +596,45 @@
       "run": {
         "status": "ok",
         "stdout": "100\n",
+        "diagnostics": []
+      }
+    },
+    "e877670caf3d06794c63f34a6eefadf332233c4437eea2ae79df4b999874c1d5": {
+      "preview": "yobu \"kiso/encoding/binary\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "300\n2\n-123456\n3\nhai\n",
+        "diagnostics": []
+      }
+    },
+    "f1466a0c9e2ce5930ed08c0688b01ea1bb5045b12bcf32b5255242a46024c846": {
+      "preview": "yobu \"kiso/crypto/sha256\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "32\n186\n",
+        "diagnostics": []
+      }
+    },
+    "f41b9043770b5b290c50536197e9c41db9cc562a180e016ca6fe0dc444c033e9": {
+      "preview": "yobu \"kiso/string\";",
+      "check": {
+        "status": "checked",
+        "stdout": "",
+        "diagnostics": []
+      },
+      "run": {
+        "status": "ok",
+        "stdout": "Hello, Mio!\nHello, Mio! v2.1\n",
         "diagnostics": []
       }
     }
