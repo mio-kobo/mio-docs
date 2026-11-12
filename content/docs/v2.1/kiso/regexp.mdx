@@ -1,69 +1,135 @@
 ---
 featureBadge: new
 title: 正则表达式
-description: V2.1 的 kiso/regexp：Thompson NFA、Unicode 属性和布尔匹配。
+description: Mio V2.1 基于 Thompson NFA 的线性时间正则表达式编译与 Unicode 15 属性布尔匹配 kiso/regexp
 ---
+
+> **版本说明：** 本页对应 Mio V2.1 新增的 `kiso/regexp` 模块。全部 2 个公开函数（`compile` 与 `matches`）、公开状态机结构以及内置的 Unicode 15.0.0 属性与简单大小写折叠表（`kiso/regexp/unicode_data`）均基于纯 Mio 源码实现，可在 Mochi VM、Web Playground 与原生 AOT 后端运行。
 
 ## 正则表达式 <FeatureBadge status="new" since="2.1" />
 
-`kiso/regexp` 提供基于 **Thompson NFA** 的正则表达式匹配，支持编译模式和判断文本是否匹配。它不是完整的 PCRE 兼容实现，支持范围请以本页 API 说明为准。
+`kiso/regexp` 提供基于 **Thompson NFA（非确定性有限自动机）** 的正则表达式编译与布尔搜索匹配引擎。
 
-### 导入与类型
+与基于回溯（Backtracking）的正则引擎不同，Thompson NFA 按输入 Unicode 标量值（`rune`）逐步推进状态集合，不会因为嵌套量词（如 `(a+)+`）触发指数级回溯灾难，保证线性时间匹配复杂度。当前版本专注于**存在性布尔匹配**（`matches` 返回 `bool`）。
 
-```mio title="Regexp.mio"
+### 导入包
+
+> **网页运行说明：** 本页的 Playground 代码块均为独立可运行程序，已各自包含所需的 `yobu` 导入语句，运行时互不继承状态。
+
+通过 `yobu "kiso/regexp";` 导入本包，并使用 `regexp.函数名(...)` 调用：
+
+```mio title="RegexpImport.mio"
 yobu "kiso/regexp";
-
-kaku pattern = regexp.compile("^Mio[0-9]+$");
-moshi (pattern.error == "") {
-    chant(regexp.matches(pattern, "Mio21"));
-}
 ```
 
-公开结构：
+### 编译模式与布尔匹配
 
-| 类型 | 源码声明 | 含义 |
-| --- | --- | --- |
-| `State` | `State { op: int64; out: int64; other: int64; ranges: []int64; }` | NFA 状态，属于内部表示 |
-| `Program` | `Program { states: []State; start: int64; error: string; }` | 编译结果；`error == ""` 表示无语法错误 |
+使用 `regexp.compile(pattern)` 将正则字符串编译为 `Program`。编译前必须检查 `program.error == ""`；若表达式存在语法错误或超出安全上限，`program.error` 会记录错误说明，此时调用 `regexp.matches` 将安全返回 `iie`。
 
-### 公开函数
-
-| 函数 | 签名 | 说明 |
-| --- | --- | --- |
-| `compile` | `compile(pattern: string) -> Program` | 编译为状态机，错误保存在 `Program.error` |
-| `matches` | `matches(program: Program, text: string) -> bool` | 判断是否存在匹配；模式编译失败时返回 `iie` |
-
-### 基本匹配、重复与分支
-
-```mio title="RegexpBasics.mio"
+```mio title="RegexpBasic.mio"
 yobu "kiso/regexp";
 
 kaku pattern = regexp.compile("^(?:ab|a){2,4}c+$");
 moshi (pattern.error == "") {
-    chant(regexp.matches(pattern, "aabcc"));
-    chant(regexp.matches(pattern, "xabc"));
+    chant(regexp.matches(pattern, "aabcc")); // hai
+    chant(regexp.matches(pattern, "xabc"));  // iie
+} sore {
+    chant(pattern.error);
 }
 ```
 
-测试源码包含分支 `|`、锚点、重复数量、模式标志、字符集合等用法。`matches` 的结果只有 `bool`，**没有公开返回捕获组、分组索引或替换字符串的 API**。
+在上述示例中，由于未使用 `^` 与 `$` 锚点时 `matches` 默认执行子串搜索（任意位置匹配即返回 `hai`），若需匹配整串文本，应在表达式首尾显式添加 `^` 与 `$`（或 `\A` 与 `\z`）。
 
-### Unicode 与模式标志
+### 字符类、转义与字面量引用
+
+`kiso/regexp` 支持方括号字符集 `[a-z]`、取反字符集 `[^0-9]`、POSIX 命名字符类（如 `[[:alpha:]]`、`[[:xdigit:]]`）、常用简写转义（`\d`、`\D`、`\w`、`\W`、`\s`、`\S`）、十六进制码点转义（`\xHH` 与 `\x{HHHH}`）以及通过 `\Q...\E` 包围的字面量转义区间。
+
+```mio title="RegexpEscapes.mio"
+yobu "kiso/regexp";
+
+// ASCII 单词边界 \b 与非边界 \B
+kaku word_re = regexp.compile("\\bfoo\\b");
+moshi (word_re.error == "") {
+    chant(regexp.matches(word_re, " foo ")); // hai
+    chant(regexp.matches(word_re, "food"));  // iie
+}
+
+// \Q...\E 内部的所有元字符均按字面量匹配
+kaku literal_re = regexp.compile("^\\Q.*+?\\E$");
+moshi (literal_re.error == "") {
+    chant(regexp.matches(literal_re, ".*+?")); // hai
+}
+```
+
+### 模式标志与 Unicode 15.0 属性支持
+
+引擎内嵌 Unicode 15.0.0 字符类别与文字系统（Script）区间表（支持 `\p{Name}` 与取反 `\P{Name}`，忽略名称中的大小写、空格、连字符与下划线），并在启用 `(?i)` 时执行完整简单大小写折叠闭包（例如希腊字母 `Σ` / `σ` / `ς` 三元折叠环）。
 
 ```mio title="RegexpUnicode.mio"
 yobu "kiso/regexp";
 
+// Unicode 文字系统与通用类别匹配
 kaku han = regexp.compile("^\\p{Han}+$");
-kaku fold = regexp.compile("(?i)^Σ$");
-moshi (han.error == "" && fold.error == "") {
-    chant(regexp.matches(han, "漢字"));
-    chant(regexp.matches(fold, "ς"));
+kaku lower_cat = regexp.compile("^\\p{lowercase_letter}$");
+
+// (?i) 不区分大小写简单折叠闭包，(?m) 多行锚点，(?s) 点号匹配换行
+kaku sigma = regexp.compile("(?i)^Σ$");
+kaku multi = regexp.compile("(?m)^abc$");
+kaku dotall = regexp.compile("(?s)a.b");
+
+moshi (han.error == "" && sigma.error == "" && multi.error == "" && dotall.error == "") {
+    chant(regexp.matches(han, "漢字"));       // hai
+    chant(regexp.matches(lower_cat, "é"));  // hai
+    chant(regexp.matches(sigma, "ς"));      // hai
+    chant(regexp.matches(multi, "x\nabc\ny")); // hai
+    chant(regexp.matches(dotall, "a\nb"));  // hai
 }
 ```
 
-源码与测试覆盖 Unicode 15 属性数据和简单大小写折叠。`(?i)` 不区分大小写、`(?m)` 多行锚点、`(?s)` dotall 已有对应测试；`\b` 的单词边界按**ASCII** 单词字符规则实现，不应误解为完整 Unicode 词法分词。
+### 支持的语法特性速查
 
-### 错误与兼容性
+| 语法分类             | 支持写法与行为说明                                                                                                                                                                                                          |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| **连接与分支**       | `ab`（连接）、`a                                                                                                                                                                                                            | b`（选择分支） |
+| **分组与局部标志**   | `(re)`、`(?:re)`（非捕获分组）、`(?P<name>re)` / `(?<name>re)`（命名分组语法接受，但不导出捕获索引）、`(?imsU)` / `(?-imsU)`（作用域内标志切换）                                                                            |
+| **量词与非贪婪修饰** | `*`、`+`、`?`、`{n}`、`{n,}`、`{n,m}`（支持 `*?`、`+?`、`??`、`{n,m}?` 修饰；畸形或前导零计数如 `{01}` 按字面量花括号处理）                                                                                                 |
+| **锚点与边界**       | `^` / `$`（受 `(?m)` 影响按 `\n` 换行切换行首/行尾）、`\A` / `\z`（文本绝对起止）、`\b` / `\B`（按 ASCII `[0-9A-Za-z_]` 判定的单词边界）                                                                                    |
+| **字符集与转义**     | `.`（默认匹配除 `\n` 外任意码点，`(?s)` 下匹配全部码点）、`[...]`、`[^...]`、`[[:alnum:]]` 等 14 种 POSIX 类别、`\d`/`\D`、`\w`/`\W`、`\s`/`\S`、`\a`/`\f`/`\n`/`\r`/`\t`/`\v`、`\0` 八进制、`\xHH` / `\x{H...}`、`\Q...\E` |
+| **Unicode 属性**     | `\p{Han}`、`\P{Lu}`、`\p{lowercase_letter}` 等 Unicode 15.0 通用类别（General Category）与文字系统（Script），支持 `Any`、`ASCII` 与 `Assigned`                                                                             |
 
-无效字符集合、非法转义、未支持的反向引用（例如 `\1`）等通过 `Program.error` 报告。不要认为它支持 PCRE 的回溯、反向引用、任意环视或替换接口。模式和语法树受源码中的资源与深度上限约束。
+### 公开类型与函数
 
-来源：[`regexp.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/regexp/regexp.mio)、[`regexp_test.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/regexp/regexp_test.mio)。
+#### `State` 与 `Program`
+
+```mio title="RegexpTypes.mio" no-run
+// Thompson NFA 状态机单个状态节点（内部表示）
+koukai kata State {
+    op: int64;        // 操作类型编号（0=接受, 1=码点区间, 2=非换行通配, 3=全通配, 4=空转移, 5..10=锚点边界, 11=分支）
+    out: int64;       // 主出边目标状态索引
+    other: int64;     // 次出边目标状态索引（仅分支状态使用）
+    ranges: []int64;  // 排序且合并后的闭区间对 [low, high, ...]
+}
+
+// 编译后的正则表达式自动机
+koukai kata Program {
+    states: []State;  // 状态节点表
+    start: int64;     // 起始状态索引（编译失败时为 -1）
+    error: string;    // 错误描述（空字符串 "" 表示编译成功）
+}
+```
+
+#### 公开函数（2 个）
+
+| 函数      | 公开签名                                          | 功能与返回规则                                                                                                    |
+| --------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `compile` | `compile(pattern: string) -> Program`             | 解析并编译正则表达式为 Thompson NFA；若语法非法或超出复杂度限制，返回 `error != ""` 的 `Program`。                |
+| `matches` | `matches(program: Program, text: string) -> bool` | 判断 `text` 中是否存在匹配 `program` 的子串；若 `program.error != ""` 或 `text` 包含非法 UTF-8 序列则返回 `iie`。 |
+
+### 使用限制与平台说明
+
+- **仅支持布尔匹配**：当前模块专注于高效存在的 `matches` 布尔判定，**不提供提取子串位置、返回捕获组（Capture Groups）切片或字符串正则替换（Replace）的公开函数**。
+- **不支持回溯扩展语法**：遵循线性时间 NFA 模型，明确拒绝反向引用（如 `\1`）、前后环视断言（Lookaround）以及嵌套量词（如 `a{1}{2}`）或缺少操作数的孤立量词（如 `{1}`、`*`）。
+- **资源与复杂度安全上限**：单次模式字符串最大长度上限为 `32 MiB`（`33,554,432` 字节），语法树与自动机状态上限为 `3,355,443` 个节点/状态，语法树嵌套深度上限为 `1,000` 层，单次或嵌套计数重复展开乘积上限为 `1,000` 次；超出任一上限均安全通过 `Program.error` 拒绝。
+- **内部数据模块**：`kiso/regexp/unicode_data` 为代码生成的只读 Unicode 15.0.0 区间数据表，供 `kiso/regexp` 内部查询使用。
+
+源码依据：[Mio V2.1 · `bunko/kiso/regexp`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/regexp)。

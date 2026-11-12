@@ -1,46 +1,150 @@
 ---
-title: AOT Lowering 新接口
-description: V2.1 新增的 GC 观测、自动预算和显式内存硬限制编译入口。
+title: AOT Lowering 字节码降级
+description: Mio V2.1 Mochi 字节码到 ARM64 机器码降级、Shadow Frame 根追踪与内存预算编译入口 kiso/aot/lower
 ---
 
-## Lowering 与内存预算
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/aot/lower` 模块。在保留 V2.0 基础编译入口的同时，V2.1 完整支持 Mochi v1~v16 字节码格式（含类型约束元数据与定型间接调用），新增分代回收（Generational GC）、大对象空间（LOS）、自适应内存预算与观测编译入口，并在 `LowerResult` 中公开了 `function_words` 与 `labels` 诊断字段。
 
-`kiso/aot/lower` 接收已解码的 `mochi.File`，生成 ARM64 机器指令字、常量区、地址补丁和全局槽位数量。调用者通过 `LowerResult.error` 判断失败，不能在出错时直接使用 `words`。
+## AOT Lowering 字节码降级
 
-### 公开编译入口
+`kiso/aot/lower` 是 Mio 原生 AOT 编译流水线的核心后端。它接收由 `kiso/encoding/mochi` 解码后的 `mochi.File` 字节码模块，经过静态类型流分析与泛型特化后，降级生成可直接交付给 `kiso/aot/macho` 封装的 ARM64 机器指令字（`[]uint32`）、静态字符串常量区镜像、地址重定位补丁以及全局槽位需求。
 
-| 函数 | 源码签名 | 作用 |
-| --- | --- | --- |
-| `compile` | `compile(file: mochi.File) -> LowerResult` | 默认 lowering |
-| `compile_gc_stress` | `compile_gc_stress(file: mochi.File) -> LowerResult` | 增加 GC 压力的验证入口 |
-| `compile_with_heap` | `compile_with_heap(file: mochi.File, capacity: int64, gc_stress: bool) -> LowerResult` | 显式有界对象容量 |
-| `compile_with_observation` | `compile_with_observation(file: mochi.File, capacity: int64, gc_stress: bool) -> LowerResult` | 生成带内存观测的运行时 |
-| `compile_with_adaptive_heap` | `compile_with_adaptive_heap(file: mochi.File, maximum: int64, gc_stress: bool, observation: bool) -> LowerResult` | 内部自适应对象预算 |
-| `compile_with_memory_budget` | `compile_with_memory_budget(file: mochi.File, hard_cap: int64, gc_stress: bool, observation: bool) -> LowerResult` | 以托管费用上限推导容量 |
+所有公开编译入口均返回 `LowerResult`。调用方必须先检查 `result.error == mu`，严禁在编译出错时直接使用 `words` 或 `constants`。
 
-同一个包还公开 `error_code(LowerError) -> int64` 与 `error_detail(LowerError) -> int64`，用于内部诊断分类。
+### 导入包
 
-### 错误类型
+> **运行环境：** 当前网页 Playground 的 WASM 环境不包含 AOT 工具链模块。以下代码需在本地通过 Mio V2.1 CLI 与完整 Bunko 标准库运行。
 
-```mio title="LowerTypes.mio" no-run
-// 结构布局摘录。具体 Mach-O AddressPatch 类型来自 kiso/aot/macho。
-koukai kata LowerResult {
-    words: []uint32;
-    constants: []uint8;
-    patches: []macho.AddressPatch;
-    globals: int64;
-    error: LowerError?;
+通过 `yobu "kiso/aot/lower";` 导入本包，并使用 `lower.函数名(...)` 调用：
+
+```mio title="LowerImport.mio" no-run
+yobu "kiso/aot/lower";
+```
+
+### 基础编译与错误检查
+
+标准编译流程将 `mochi.File` 传入 `lower.compile`，验证 `error` 字段后即可获取生成的机器指令字与常量区数据。
+
+```mio title="LowerBasic.mio" no-run
+yobu "kiso/aot/lower";
+yobu "kiso/encoding/mochi";
+
+// 构造一个最小合法的 Mochi v14 空模块
+kaku file = mochi.File {
+    version: 14,
+    constants: [],
+    global_count: 0,
+    instructions: [],
+    functions: []
+};
+
+kaku result = lower.compile(file);
+moshi (result.error == mu) {
+    chant(len(result.words));
+    chant(result.globals);
+} sore {
+    // 提取诊断错误码与定位详情
+    kaku err = result.error;
+    moshi (err != mu) {
+        chant(lower.error_code(err));
+        chant(lower.error_detail(err));
+    }
 }
 ```
 
-这里的代码是**签名资料**，不是建议用户自行构造任意 `LowerResult` 或手工伪造类型分析结果。需要先解码、验证 Mochi 输入，再检查各阶段错误。
+在上述示例中，即使输入字节码为空，`compile` 也会自动发射程序入口序言（Prologue）、标准退出系统调用（`normal_exit`）以及基础运行时辅助例程；若字节码包含非法指令或类型冲突，`result.error` 将返回对应的 `LowerError` 枚举值。
 
-### 版本行为差异
+---
 
-与 V2.0 不同，V2.1 的 lowering 已出现分代 GC、LOS、原生内存观测和 Map 表示分析所需的代码路径。`compile_with_adaptive_heap`、`compile_with_memory_budget` 是**源码层公开函数**，不等于已发布的 CLI 选项。
+### 核心架构与运行时约定
 
-特别注意：M19c 的记录将整体 M19 发布门禁标为 `BLOCKED`，因此这里不是对全部用户程序的原生兼容保证。
+`kiso/aot/lower` 生成的原生代码严格遵循以下 ABI 与内存管理协议（Fail-Closed 安全边界）：
 
-了解预算含义：[内存预算和压力等级](/docs/v2.1/internals/memory-policy)。
+- **调用帧与寄存器约定**：主入口与每个函数各自拥有上限为 `4,080` 字节的操作数区域（基址 `x19`，实时字节偏移 `x20`）；函数局部变量区基址为 `x21`（最多支持 `256` 个局部变量与 `256` 个参数），闭包环境指针固定使用 `x25`，运行时堆元数据基址固定使用 `x23`，精确影子栈链表头固定使用 `x24`。递归调用深度上限为 `1024` 层。
+- **精确 Shadow Frame 根追踪**：所有可能触发堆分配或跨函数调用的指令前均会压入精确影子帧（`{previous, count, roots...}`）。静态字符串常量使用最低位为 `1` 的 Tagged ID 表示，GC 标记阶段会自动跳过；可空基础标量（如 `int64?`）在装箱时分配独立的 Type-106 堆对象，确保与原始整数 `0` 严格区分。
+- **有界托管堆与释放策略**：默认托管堆容量为 `128 MiB`（合法配置范围为 `64` 字节至 `1 GiB`，且必须为 `16` 字节对齐）。普通堆采用 39 级空闲链表（`0..30` 为 16 字节步进精确分箱，`31` 覆盖 `496..1023` 字节，`32..38` 为自 `1 KiB` 起的 2 的幂次分级）配合大对象空间（LOS，默认阈值 `128 KiB`）管理。
 
-来源：[`lower.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/aot/lower/lower.mio)。
+---
+
+### 公开类型
+
+#### `LowerError`
+
+字节码验证、类型求解、栈帧布局与指令编码阶段可能报告的错误枚举：
+
+```mio title="LowerTypes.mio" no-run
+koukai sentaku LowerError {
+    UnsupportedConstant;    // 常量池标签超出 1 ~ 10 支持范围
+    UnsupportedOpcode(int64); // 遇到未实现或与模块版本号不兼容的操作码
+    UnsupportedClosure;     // 非法的闭包捕获结构或函数 ID 不连续
+    InvalidFunction;        // 函数索引越界、局部操作数出现在顶层或桥接签名不合法
+    InvalidOperand(int64);  // 全局/局部槽位越界、堆容量参数非法或字节码截断
+    FrameTooLarge;          // 操作数栈深度或局部/参数数量超出帧容量上限
+    EncodeFailure;          // 底层 ARM64 指令编码器返回内部失败
+    UnsafeType(int64);      // 静态类型求解失败、存在未解决的 unknown 布局或类型不匹配
+    UnsupportedNative(int64); // 未知的 NativeFS 宿主签名或不支持的原生内建函数
+    BranchOutOfRange(int64);  // 降级后的机器码跳转距离超出 ARM64 26-bit 寻址范围
+}
+```
+
+#### `LowerResult`
+
+降级编译的完整输出载体：
+
+```mio title="LowerTypes.mio" no-run
+koukai kata LowerResult {
+    words: []uint32;                // 生成的 ARM64 32 位小端序机器指令字序列
+    constants: []uint8;             // 静态 UTF-8 字符串表与字节数据镜像（供 __CONST 区使用）
+    patches: []macho.AddressPatch;  // 需由 Mach-O 封装器重定位的跨段地址补丁列表
+    globals: int64;                 // 需在 __DATA 段预留的 8 字节全局变量槽位总数
+    error: LowerError?;             // 编译错误；仅当为 mu 时其余字段有效
+    function_words: []int64;        // 各 Mochi 函数入口在 words 中的指令字索引（未发射为 -1）
+    labels: []arm64.Label;          // 汇编器生成的全部符号标签表（可用于性能分析映射）
+}
+```
+
+---
+
+### 公开函数（15 个）
+
+#### 1. 标准与内存预算编译入口（6 个）
+
+| 函数                         | 公开签名                                                                                                           | 功能与参数规则                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `compile`                    | `compile(file: mochi.File) -> LowerResult`                                                                         | 使用默认 `128 MiB` 有界托管堆执行标准 AOT 降级编译。                                 |
+| `compile_gc_stress`          | `compile_gc_stress(file: mochi.File) -> LowerResult`                                                               | 在每次堆分配入口强制触发垃圾回收的验证编译模式，用于检验根追踪完整性。               |
+| `compile_with_heap`          | `compile_with_heap(file: mochi.File, capacity: int64, gc_stress: bool) -> LowerResult`                             | 使用显式指定的托管堆容量（`64` 字节至 `1 GiB`，须 `16` 字节对齐）编译。              |
+| `compile_with_observation`   | `compile_with_observation(file: mochi.File, capacity: int64, gc_stress: bool) -> LowerResult`                      | 生成内嵌内存采样与统计输出（`observation_dump`）的原生运行时代码。                   |
+| `compile_with_adaptive_heap` | `compile_with_adaptive_heap(file: mochi.File, maximum: int64, gc_stress: bool, observation: bool) -> LowerResult`  | 启用运行时自动容量探测（`memory.autocap`）与动态内存压力策略，上限不超过 `maximum`。 |
+| `compile_with_memory_budget` | `compile_with_memory_budget(file: mochi.File, hard_cap: int64, gc_stress: bool, observation: bool) -> LowerResult` | 根据总托管内存费用硬上限 `hard_cap`（不得低于 `114,688` 字节）自动推导并对齐堆容量。 |
+
+#### 2. 诊断辅助函数（2 个）
+
+| 函数           | 公开签名                                   | 功能与返回规则                                                                                                                                                                                                              |
+| -------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `error_code`   | `error_code(value: LowerError) -> int64`   | 返回标准错误分类编号（`1` ~ `10`；其中 `InvalidOperand(detail)` 返回 `5000 + detail`）。                                                                                                                                    |
+| `error_detail` | `error_detail(value: LowerError) -> int64` | 提取附带的定位信息：对操作码或类型错误，按 `(functionID + 1) * 1_000_000 + byteOffset * 100 + opcode` 打包编码（顶层 `main` 的 `functionID` 为 `-1`，无高位函数前缀）；对 `BranchOutOfRange` 返回发生越界的机器指令字索引。 |
+
+#### 3. 运行时协同与线程/并发回收集成入口（7 个）
+
+> **内部集成接口：** 以下入口用于 runtime 线程根协同与并发老年代回收验证，需要配合特定的运行时符号表链接，并非面向普通用户源码的稳定应用层 API。
+
+| 函数                                        | 公开签名                                                                                                                                              | 功能与约束                                                                                            |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `compile_with_attached_roots`               | `compile_with_attached_roots(file: mochi.File, capacity: int64, gc_stress: bool) -> LowerResult`                                                      | 在安全点发射协作式线程根发布与轮询代码（需配合 `darwin.executable_appended` 链接线程符号）。          |
+| `compile_with_worker_bridge`                | `compile_with_worker_bridge(file: mochi.File, capacity: int64, gc_stress: bool, bindings: []int64) -> LowerResult`                                    | 绑定 4 个互异的无捕获函数 ID（依次对应 `start`、`join`、`wait`、`collect`）作为原生工作线程桥接入口。 |
+| `compile_with_old_mark_proto`               | `compile_with_old_mark_proto(file: mochi.File, capacity: int64, bindings: []int64) -> LowerResult`                                                    | 启用带类型化 SATB 写屏障的实验性老年代标记原型（默认工作队列 `32,768` 槽）。                          |
+| `compile_with_old_work_queue`               | `compile_with_old_work_queue(file: mochi.File, capacity: int64, queue_slots: int64, bindings: []int64) -> LowerResult`                                | 同上，允许显式配置 SATB 工作队列槽位数（`1 ~ 32,768`）。                                              |
+| `compile_with_old_work_queue_stress`        | `compile_with_old_work_queue_stress(file: mochi.File, capacity: int64, queue_slots: int64, gc_stress: bool, bindings: []int64) -> LowerResult`        | 在指定队列容量下同时开启 GC 分配压力测试。                                                            |
+| `compile_with_concurrent_old`               | `compile_with_concurrent_old(file: mochi.File, capacity: int64, queue_slots: int64, gc_stress: bool, bindings: []int64) -> LowerResult`               | 启用完整清扫（Full Sweep）模式的并发老年代回收运行时配置。                                            |
+| `compile_with_concurrent_old_release_fault` | `compile_with_concurrent_old_release_fault(file: mochi.File, capacity: int64, queue_slots: int64, gc_stress: bool, bindings: []int64) -> LowerResult` | 负向测试配置：向首次系统内存释放调用注入未对齐地址以验证故障容错路径。                                |
+
+---
+
+### 使用限制与平台说明
+
+- **字节码版本要求**：支持 `mochi.File` 版本 `1 ~ 16`（其中操作码 `66` 类型约束要求 `version >= 15`，操作码 `67` 定型间接调用要求 `version >= 16`），单模块全局变量槽位上限为 `2,048` 个。
+- **输出行为差异**：遵循原生运行时 ABI（RA-1），只有显式调用 `chant` 才会向标准输出写入内容；顶层表达式求值后被丢弃的值不会像 `mio run` 交互执行那样自动回显。
+- **发布门禁边界**：`compile_with_adaptive_heap` 与 `compile_with_memory_budget` 属于源码层公开函数，并非独立发布的 CLI 参数；并发老年代回收的整体接纳状态与跨平台支持范围请参考 [从 V2.0 到 V2.1](/docs/v2.1/migration) 与 [验证与来源](/docs/v2.1/tooling/verification)。
+
+源码依据：[Mio V2.1 · `bunko/kiso/aot/lower`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/aot/lower)。

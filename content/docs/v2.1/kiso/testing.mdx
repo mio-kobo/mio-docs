@@ -1,78 +1,87 @@
 ---
+featureBadge: updated
 title: 测试
-description: Mio V2.0 测试标准库 kiso/testing
+description: Mio V2.1 单元测试断言、无条件失败与测试跳过报告标准库 kiso/testing
 ---
 
-> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/testing` 模块。在保留 V2.0 的 `expect` 与 `fail` 断言接口的基础上，V2.1 新增了 `skip(reason: string) -> unit` 接口，支持在运行时按条件跳过不适用的测试用例并单独统计。
 
+## 测试 <FeatureBadge status="updated" since="2.1" />
 
-## 测试
+测试标准库（`kiso/testing`）用于在 `mio test` 测试运行器中报告断言结果与跳过状态。
 
-测试标准库（Testing）用于在 Mio 测试函数中报告断言失败。它只在 `mio test` 环境提供所需的宿主测试接口，不能将其当作普通 `mio run` 程序中的通用输出或异常处理库。
-
-测试源码以 `_test.mio` 结尾，测试函数名以 `test_` 开头、不能带参数、不能为泛型，并且返回 `unit`。
-
-本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
+该模块依赖测试运行器注入的宿主报告接口（`mio/testing/runtime`），**仅在 `mio test` 测试模式下可用**，不能在普通 `mio run` 程序或编译后的独立可执行文件中作为通用日志或异常处理库使用。
 
 ### 导入包
 
-> **运行环境：** 测试示例仅供 Mio CLI 的 `mio test` 使用。网页 Playground 不提供测试宿主接口，请将代码保存为 `answer_test.mio` 后执行 `mio test`。
+> **运行环境：** 测试示例仅供 Mio CLI 的 `mio test` 使用。网页 Playground 不提供测试宿主接口，请将代码保存为 `*_test.mio` 文件后在本地执行 `mio test`。
 
-通过 `yobu "kiso/testing";` 导入本包，随后使用 `testing.函数名(...)` 调用。
+通过 `yobu "kiso/testing";` 导入本包，并使用 `testing.函数名(...)` 调用：
 
-```mio title="Stdlib.mio" no-run
+```mio title="TestingImport.mio" no-run
 yobu "kiso/testing";
 ```
 
-### 编写测试函数
+### 测试文件与函数命名规范
 
-将测试逻辑放在顶层的 `test_` 函数里，再通过 `testing.expect` 检查条件。条件为 `iie` 时记录错误消息，但并不以异常方式立即停止整个函数。
+`mio test` 自动发现并执行符合以下约定的测试函数：
 
-```mio title="answer_test.mio" mode=test no-run
+- **测试文件命名**：测试源码文件必须以 `_test.mio` 结尾（例如 `math_test.mio`），与同目录下的被测源文件位于同一包命名空间中。
+- **测试函数签名**：顶层函数必须以 `test_` 开头，**不接受任何参数、不带泛型类型参数，且返回类型为 `unit`**。
+
+### 断言、失败与跳过（`expect` / `fail` / `skip`）
+
+`testing.expect(condition, message)` 在 `condition` 为 `iie` 时向测试运行器记录一条失败消息；通过的断言保持静默。注意 `expect` **不会像异常一样立即中断当前测试函数**，函数内的后续语句仍会继续执行。
+
+`testing.fail(message)` 无条件记录一次测试失败；V2.1 新增的 `testing.skip(reason)` 用于将当前测试标记为跳过（`SKIP`），既不计入通过也不计入失败。
+
+```mio title="calculator_test.mio" mode=test no-run
+yobu "kiso/os";
 yobu "kiso/testing";
 
-waza test_answer() -> unit {
-    testing.expect(6 * 7 == 42, "answer should be 42");
+waza test_arithmetic() -> unit {
+    testing.expect(6 * 7 == 42, "6 * 7 should equal 42");
+    testing.expect(10 / 2 == 5, "10 / 2 should equal 5");
 }
-```
 
-### 主动标记失败
+waza test_unreachable_branch() -> unit {
+    kaku mode = 1;
+    moshi (mode == 1) {
+        testing.expect(hai, "expected mode 1");
+    } sore {
+        testing.fail("unexpected mode branch");
+    }
+}
 
-`testing.fail(message)` 无条件记录一次失败，适合处理测试逻辑中不应该到达的分支。
-
-```mio title="answer_test.mio" mode=test no-run
-yobu "kiso/testing";
-
-waza test_unexpected() -> unit {
-    moshi (iie) { testing.fail("unexpected state"); }
+waza test_unix_only_feature() -> unit {
+    // 若当前环境不符合测试前提，必须在任何 expect 之前调用 skip
+    moshi (os.environment("HOME") == mu) {
+        testing.skip("requires POSIX HOME environment variable");
+        kaesu;
+    }
+    testing.expect(hai, "HOME is present");
 }
 ```
 
 ### 运行测试
 
-使用 `mio test` 执行测试，而不是直接调用 `mio run`。测试文件中的普通顶层代码和待测源文件的加载行为应遵守 `mio test` 的测试发现规则。
+在项目目录或指定文件路径下使用 `mio test` 运行测试套件，切勿直接用 `mio run` 执行 `_test.mio` 文件：
 
-### 公开函数（2 个）
-
-以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
-
-| 函数 | 公开签名 | 功能与返回规则 |
-| --- | --- | --- |
-| `expect` | `expect(condition: bool, message: string) -> unit` | 在条件为 `iie` 时记录失败及消息。 |
-| `fail` | `fail(message: string) -> unit` | 无条件记录一条测试失败。 |
-
-### 完整示例
-
-```mio title="answer_test.mio" mode=test no-run
-yobu "kiso/testing";
-
-waza test_answer() -> unit {
-    testing.expect(6 * 7 == 42, "answer");
-}
+```sh
+mio test bunko/kiso/math
 ```
 
-### 使用限制
+### 公开函数（3 个）
 
-完整示例应保存为 `answer_test.mio`，并在测试模式中执行。不要把 `_test.mio` 文件当作普通运行入口，也不要假设 `expect` 会停止当前函数的后续语句。
+| 函数     | 公开签名                                           | 功能与返回规则                                                                                                                                        |
+| -------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `expect` | `expect(condition: bool, message: string) -> unit` | 当 `condition` 为 `iie` 时向测试运行器报告断言失败与 `message`；为 `hai` 时静默通过，不中断后续代码执行。                                             |
+| `fail`   | `fail(message: string) -> unit`                    | 无条件向测试运行器报告一条测试失败及 `message`（不自动返回，通常需配合 `kaesu;` 提前退出当前函数）。                                                  |
+| `skip`   | `skip(reason: string) -> unit`                     | 将当前测试标记为跳过（`SKIP`）并记录原因 `reason`，由运行器单独统计；**必须在调用任何其他 `expect` 之前执行，且调用后应立即 `kaesu;`**（V2.1 新增）。 |
 
-源码依据：[Mio v2.0.0 · `bunko/kiso/testing/testing.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/testing/testing.mio)。
+### 使用限制与平台说明
+
+- **调用顺序约束（`skip`）**：`testing.skip` 底层向测试运行器发送跳过标记与原因两条记录；如果在调用 `skip` 之前已经记录了失败的 `expect`，该测试仍可能被判定为失败。因此应在测试函数入口处完成前提检查并立即调用 `skip` 后返回。
+- **测试隔离与独立构建**：`mio test` 通过隔离进程与数据包协议（`mio-test-protocol`）收集结果；在未注册 `mio/testing/runtime` 宿主的普通程序中调用本模块函数会导致编译或链接失败。
+
+源码依据：[Mio V2.1 · `bunko/kiso/testing`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/testing)。

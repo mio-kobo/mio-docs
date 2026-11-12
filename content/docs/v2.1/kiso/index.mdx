@@ -1,65 +1,111 @@
 ---
-title: Bunko 标准库
-description: Mio V2.1 的基础标准库、新增模块、AOT 工具包与 API 索引。
+title: 既有标准库的变化
+description: Mio V2.1 对 V2.0 既有 Bunko 标准库与原生 AOT 工具链模块的增量公开接口、版本演进与行为边界说明
 ---
 
-## Bunko 标准库
+> **版本说明：** 本页专门对照 Mio `v2.0.0` 与 `v2.1.2`（V2.1 系列）之间**既有模块**的增量公开符号与协议演进。V2.1 全新引入的 6 个独立模块（`kiso/encoding/json`、`kiso/regexp`、`kiso/crypto/sha256`、`kiso/os`、`kiso/net/tcp`、`kiso/aot/sign`）以及全量函数清单请参见 [Bunko API 索引](/docs/v2.1/kiso)。
 
-Bunko 是 Mio 的标准库集合。公开的基础模块使用 `kiso/` 作为导入路径。源码中的 `bunko/` 是物理目录名称，使用时不需要把它写入 `yobu`。
+## 既有标准库的增量变化
 
-V2.1 继续提供 V2.0 的数学、字符串、集合、文件系统和测试模块，并增加 JSON、正则表达式、SHA-256、OS 服务和阻塞 IPv4 TCP。TCP 接口以 v2.1.0 正式标签为准。
+在 Mio V2.1 中，所有 V2.0 既有公开函数均保持向后兼容。在此基础上，标准库与原生 AOT 工具链针对文本修剪、设备检测、运行时诊断、测试跳过、字节码格式升级以及分代 GC / 套接字lowering 补充了增量接口。
 
-### 基础标准库
+### 一、通用标准库增量接口
 
-- [`kiso/math`](/docs/v2.1/kiso/math)：数值比较、平方根和取整。
-- [`kiso/array`](/docs/v2.1/kiso/array)：动态数组、追加和容量管理。
-- [`kiso/string`](/docs/v2.1/kiso/string)：UTF-8 文本、查找和 Builder。
-- [`kiso/bytes`](/docs/v2.1/kiso/bytes)：字节序列与 Buffer。
-- [`kiso/utf8`](/docs/v2.1/kiso/utf8)：Unicode 标量值和 UTF-8 编解码。
-- [`kiso/convert`](/docs/v2.1/kiso/convert)：数字、布尔值与字符串转换。
-- [`kiso/path`](/docs/v2.1/kiso/path)：路径规范化与拆分。
-- [`kiso/io`](/docs/v2.1/kiso/io)：同步读写和字节流接口。
-- [`kiso/fs`](/docs/v2.1/kiso/fs)：文件、目录和文件状态。
-- [`kiso/encoding/binary`](/docs/v2.1/kiso/encoding-binary)：二进制整数及读写器。
+#### 1. `kiso/string`：`trim_space` <FeatureBadge status="new" since="2.1" />
 
-以上模块沿用 V2.0 的基本用途。V2.1 对个别模块增加了函数，见 [既有标准库的变化](/docs/v2.1/kiso/changes)。
+- **公开签名**：`trim_space(value: string) -> string`
+- **参考文档**：[字符串（`kiso/string`）](/docs/v2.1/kiso/string)
 
-### V2.1 新增模块
+从 UTF-8 字符串开头与结尾移除所有 Unicode 空白字符（包括 ASCII 控制空白 `\t`、`\n`、`\v`、`\f`、`\r`、空格 `U+0020`，以及 `U+0085`、`U+00A0`、`U+1680`、`U+2000 ~ U+200A`、`U+2028`、`U+2029`、`U+202F`、`U+205F`、全角空格 `U+3000`），返回修剪后的新字符串；若输入末尾存在非法 UTF-8 截断序列则原样回退返回 `value`。
 
-| 导入路径 | 主要接口 | 说明 |
-| --- | --- | --- |
-| [`kiso/encoding/json`](/docs/v2.1/kiso/encoding-json) <FeatureBadge status="updated" since="2.1" /> | `parse`、`member`、`text`、`integer`、`quote`、`render` | JSON 语法树式文档表示 |
-| [`kiso/regexp`](/docs/v2.1/kiso/regexp) <FeatureBadge status="new" since="2.1" /> | `compile`、`matches` | 正则表达式布尔匹配 |
-| [`kiso/crypto/sha256`](/docs/v2.1/kiso/crypto-sha256) <FeatureBadge status="new" since="2.1" /> | `context`、`sum`、`sum_range` | SHA-256 摘要 |
-| [`kiso/os`](/docs/v2.1/kiso/os) <FeatureBadge status="new" since="2.1" /> | 参数、环境、路径、进程和标准输入接口 | 需要宿主运行时 |
-| [`kiso/net/tcp`](/docs/v2.1/kiso/net-tcp) <FeatureBadge status="new" since="2.1" /> | `connect`、`listen`、`accept`、`read`、`write_all` | 原生阻塞 IPv4 TCP |
+```mio title="TrimSpace.mio"
+yobu "kiso/string";
 
-这些模块包含在 v2.1.0 Full 中。对依赖宿主的接口，请参考各模块的系统图标及测试范围。
+kaku raw = " \t　Mio V2.1　\n ";
+kaku clean = string.trim_space(raw);
+chant(clean); // Mio V2.1
+```
 
-### 测试与格式库
+> **边界提示**：`trim_space` 仅移除首尾空白标量值，**不执行** Unicode 规范化（NFC/NFD）、大小写折叠或字素簇切分。
 
-- [`kiso/testing`](/docs/v2.1/kiso/testing)：在 `mio test` 中使用的断言辅助。
-- [`kiso/encoding/mochi`](/docs/v2.1/kiso/encoding-mochi)：Mochi 文件解码与验证，支持 v16 格式。
+#### 2. `kiso/fs`：`is_character_device` <FeatureBadge status="new" since="2.1" />
 
-### AOT 编译工具链
+- **公开签名**：`is_character_device(path: string) -> bool`
+- **参考文档**：[文件系统（`kiso/fs`）](/docs/v2.1/kiso/fs)
 
-以下模块为编译器维护者提供指令编码、类型分析、Native 桥接和原生镜像生成接口，并不代表稳定的应用层 ABI。
+通过扩展的 `NativeFS` 3 字节状态协议查询目标路径是否为字符设备（例如 Unix/macOS 上的 `/dev/null` 或终端设备节点）。仅当路径存在且宿主文件系统明确将其标识为字符设备时返回 `hai`。
 
-- [`kiso/aot/arm64`](/docs/v2.1/kiso/aot-arm64)：ARM64 指令编码。
-- [`kiso/aot/lower`](/docs/v2.1/kiso/aot-lower)：Mochi lowering 与运行时接入。
-- [`kiso/aot/lower/nativefs`](/docs/v2.1/kiso/aot-lower-nativefs)：文件系统 Native 桥接。
-- [`kiso/aot/lower/types`](/docs/v2.1/kiso/aot-lower-types)：原生类型表示和布局分析。
-- [`kiso/aot/macho`](/docs/v2.1/kiso/aot-macho)：Mach-O 镜像生成。
-- [`kiso/aot/sign`](/docs/v2.1/kiso/aot-sign) <FeatureBadge status="new" since="2.1" />：Darwin ARM64 本地 ad-hoc 签名。
+```mio title="CharDevice.mio" no-run
+yobu "kiso/fs";
 
-### 阻塞 IPv4 TCP <FeatureBadge status="new" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
+// 仅在提供本地文件系统的原生 CLI 环境下运行
+chant(fs.is_character_device("/dev/null"));
+```
 
-`yobu "kiso/net/tcp";` 可使用 `tcp.listen`、`tcp.accept` 和 `tcp.connect`，并通过 `tcp.read` 或 `tcp.write_all` 传输字节。正式版三平台均通过回环 TCP 测试，Windows 额外验证了原生 echo 和通配地址绑定。一次读取可能只收到部分字节；需要固定长度时可使用 `io.read_full`。无 UDP、DNS、IPv6 或 TLS 接口，网页 Playground 也不提供套接字。
+> **边界提示**：`is_character_device` 依赖本地宿主文件系统运行时，不能在 Web Playground 中运行；其布尔返回值不包含详细错误码，无法通过 `iie` 区分“目标为普通文件/不存在”与“权限不足等底层查询失败”。
 
-见 [TCP 网络参考与 Echo 教程](/docs/v2.1/kiso/net-tcp)，示例使用 `127.0.0.1:18080`。
+#### 3. `kiso/math`：`fail` <FeatureBadge status="new" since="2.1" />
 
-### 示例在网页上的行为
+- **公开签名**：`fail(message: string) -> unit`
+- **参考文档**：[数学（`kiso/math`）](/docs/v2.1/kiso/math)
 
-V2.1 网页使用 v2.1.0 WebAssembly Playground，支持部分 Bunko 模块；具体范围见 [Playground 验证](/docs/v2.1/tooling/verification#网页-playground-验证)。TCP 等依赖宿主的示例使用 `no-run` 静态展示，请用匹配的本地 CLI 与 Bunko 运行。
+封装底层受检运行时失败原语（`__math_error`），供标准库与工具链在输出结构化诊断信息后立即触发不可恢复的运行时终止。
 
-按名称查询已公开接口，可阅读 [Bunko API 索引](/docs/v2.1/kiso/api)。需要对照正式版本，则查看 [V2.0 Bunko 参考](/docs/v2.0/kiso)。
+> **边界提示**：`math.fail` **不会返回可检查的 `Error?`**，调用后会直接中止当前执行流；切勿将其放入普通示例或正常业务成功路径中。
+
+#### 4. `kiso/testing`：`skip` <FeatureBadge status="new" since="2.1" />
+
+- **公开签名**：`skip(reason: string) -> unit`
+- **参考文档**：[测试（`kiso/testing`）](/docs/v2.1/kiso/testing)
+
+用于在 `mio test` 测试运行器中将当前测试用例标记为跳过（`SKIP`）并记录原因字符串，由运行器独立统计（既不计入通过也不计入失败）。
+
+```mio title="SkipTest.mio" mode=test no-run
+yobu "kiso/os";
+yobu "kiso/testing";
+
+waza test_posix_only() -> unit {
+    moshi (os.environment("HOME") == mu) {
+        testing.skip("requires POSIX HOME environment variable");
+        kaesu;
+    }
+    testing.expect(hai, "HOME is set");
+}
+```
+
+> **边界提示**：`testing.skip` 必须在当前测试函数调用任何其他 `expect` 断言之前调用，且调用后应立即 `kaesu;` 退出函数。
+
+---
+
+### 二、字节码格式与原生 AOT 工具链扩展
+
+#### 1. `kiso/encoding/mochi`：Mochi v15 / v16 解码与校验支持 <FeatureBadge status="updated" since="2.1" />
+
+- **常量变更**：`VERSION` 从 `14` 提升至 `16`
+- **参考文档**：[Mochi 字节码编解码器（`kiso/encoding/mochi`）](/docs/v2.1/kiso/encoding-mochi)
+
+| 新增格式版本 | 新增操作码           | 宽度     | 解码器验证规则                                                            |
+| ------------ | -------------------- | -------- | ------------------------------------------------------------------------- |
+| `v15`        | `66`（类型约束）     | `2` 字节 | 校验操作数为合法基础类型描述符（`1 ~ 17`）且不携带可空标志位（`< 128`）。 |
+| `v16`        | `67`（定型间接调用） | `4` 字节 | 校验参数个数（`uint16`）与返回值标志位（`0` 或 `1`，其他值拒绝）。        |
+
+#### 2. `kiso/aot/*`：分代有界堆、类型分析与套接字桥接扩展 <FeatureBadge status="updated" since="2.1" />
+
+| 工具链模块                | V2.1 新增公开符号                                                                                                                                                                                                                                                                                                                               | 工程用途                                                                                                   |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `kiso/aot/lower`          | `compile_with_observation`、`compile_with_adaptive_heap`、`compile_with_memory_budget`、`compile_with_attached_roots`、`compile_with_worker_bridge`、`compile_with_old_mark_proto`、`compile_with_old_work_queue`、`compile_with_old_work_queue_stress`、`compile_with_concurrent_old`、`compile_with_concurrent_old_release_fault`（共 10 个） | 支持自适应堆预算、跨线程根挂载、增量/并发老年代标记队列与确定性释放故障注入的 ARM64 AOT 编译入口。         |
+| `kiso/aot/lower/types`    | 常量：`type_map_ref`；函数：`integer_descriptor`、`type_array_element`、`map_field`、`forwarded_parameter`、`is_testing_report`、`is_testing_packet`                                                                                                                                                                                            | 静态类型等价类求解、哈希表字段描述符查询、逃逸参数分析与测试断言数据包识别（**非用户级运行时反射 API**）。 |
+| `kiso/aot/lower/nativefs` | `emit_socket_runtime`                                                                                                                                                                                                                                                                                                                           | 在 Darwin ARM64 汇编输出中发射 `mio/sys/socket` 原生系统调用桥接层，支撑 `kiso/net/tcp`。                  |
+| `kiso/aot/macho`          | `executable_with_runtime_data`                                                                                                                                                                                                                                                                                                                  | 支持在生成 Mach-O 可执行镜像时注入初始 `__DATA` 运行时配置数据段。                                         |
+
+### 三、兼容性与版本对照总览
+
+| 变更类别                 | V2.0.0 状态               | V2.1.2 状态                                        |
+| ------------------------ | ------------------------- | -------------------------------------------------- |
+| `string.trim_space`      | 未提供                    | 已实现（纯 Mio Unicode 空白修剪，支持 Playground） |
+| `fs.is_character_device` | 未提供                    | 已实现（依赖宿主 `NativeFS` 扩展 stat 状态）       |
+| `math.fail`              | 仅包内私有 `__math_error` | 公开为 `math.fail(message)` 诊断终止入口           |
+| `testing.skip`           | 仅 `expect` / `fail`      | 新增 `testing.skip(reason)` 独立跳过状态报告       |
+| `mochi.VERSION`          | `14`                      | `16`（支持 v15 操作码 `66` 与 v16 操作码 `67`）    |
+
+源码依据：[Mio V2.1 · `bunko/kiso`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso)。

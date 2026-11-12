@@ -1,98 +1,116 @@
 ---
-title: 路径
-description: Mio V2.0 路径处理标准库 kiso/path
+title: 路径处理
+description: Mio V2.1 词法逻辑路径规范化、拼接、扩展名提取与目录/文件名拆分 kiso/path
 ---
 
-> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/path` 模块。全部 8 个公开函数与 `SplitResult` 结构体均基于纯 Mio 源码与紧凑字节操作实现，可在 Mochi VM、Web Playground 与原生 AOT 后端运行，并已在 macOS ARM64、Linux x86_64 与 Windows x86_64 正式版通过全量测试。
 
+## 路径处理 <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
 
-## 路径 <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
+路径处理标准库（`kiso/path`）为 Mio 提供纯词法（Lexical）的逻辑路径规范化、拼接、根目录判定、扩展名提取以及目录与文件名分离功能。
 
-路径标准库（Path）提供路径清理、拼接、扩展名提取、目录与文件名分离等操作。
-
-本包处理以 `/` 为分隔符的**逻辑路径字符串**，不会实际访问文件系统，也不会解析符号链接。
-
-本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
+本模块仅处理以正斜杠 `/` 为分隔符的**逻辑路径字符串**，不会访问实际文件系统，也不会解析符号链接或探测磁盘目录结构。
 
 ### 导入包
 
-> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+> **网页运行说明：** 本页的 Playground 代码块均为独立可运行程序，已各自包含所需的 `yobu` 导入语句，运行时互不继承状态。
 
-通过 `yobu "kiso/path";` 导入本包，随后使用 `path.函数名(...)` 调用。
+通过 `yobu "kiso/path";` 导入本包，并使用 `path.函数名(...)` 调用：
 
-```mio title="Stdlib.mio" no-run
+```mio title="PathImport.mio"
 yobu "kiso/path";
 ```
 
-### 清理与拼接
+### 路径规范化与拼接
 
-`clean` 去除冗余分隔符和可抵消的 `.`、`..`。`join` 处理两个部分，`join_all` 按顺序连接字符串数组并清理结果。
+`path.clean` 消除多余的连续斜杠 `/`、当前目录标记 `.` 以及可抵消的父级目录 `..`；空路径 `""` 会被规范化为 `"."`，根路径的父级不会越过 `"/"`，而相对路径开头无法抵消的 `".."` 会被保留。
 
-```mio title="Path.mio" no-run
+`path.join` 与 `path.join_all` 使用 `/` 连接多个路径片段并对最终结果自动执行 `clean`。
+
+```mio title="PathCleanJoin.mio"
 yobu "kiso/path";
 
-chant(path.clean("/a//b/../c/"));
-chant(path.join("docs", "v2/guide.mio"));
+chant(path.clean(""));              // .
+chant(path.clean("/a//b/../c/.")); // /a/c
+chant(path.clean("../../a/../b"));  // ../../b
+
+chant(path.join("docs", "v2.1/guide.mio"));           // docs/v2.1/guide.mio
+chant(path.join("a/b", "../c"));                      // a/c
+chant(path.join_all(["src", "kiso", "..", "path"]));  // src/path
 ```
 
-### 判断与拆分
+在上述示例中，由于 `join` 仅按 `/` 拼接后规范化，`path.join("a", "/b")` 会得到 `"a/b"`（第二段开头的 `/` 不会像部分宿主路径库那样丢弃第一段）。
 
-`is_abs` 判断路径是否以 `/` 开头；`base`、`dir`、`ext` 分别取得基本名称、目录和扩展名。
+### 判断绝对路径与拆解路径组件
 
-```mio title="Path.mio" no-run
+`path.is_abs` 判断路径是否以 `/` 开头；`path.base`、`path.dir` 与 `path.ext` 均先对输入执行 `clean`，再分别提取末段名称、父目录路径和文件扩展名。`path.split` 则一次性返回包含 `dir` 与 `base` 的 `SplitResult` 结构体。
+
+```mio title="PathParts.mio"
 yobu "kiso/path";
 
-chant(path.base("docs/hello.mio"));
-chant(path.ext("docs/hello.mio"));
-```
+chant(path.is_abs("/usr/local")); // hai
+chant(path.is_abs("src/main"));   // iie
 
-### SplitResult
+chant(path.base("/a/b.txt/"));    // b.txt（忽略尾随斜杠）
+chant(path.dir("/a/b.txt"));      // /a
+chant(path.ext("/a/b.txt"));      // .txt
+chant(path.ext(".env"));          // ""（隐藏文件前导点不视为扩展名）
 
-`split` 返回结构体，其 `dir` 和 `base` 字段分别是清理后的目录部分与末段名称。
-
-```mio title="Path.mio" no-run
-yobu "kiso/path";
-
-kaku result = path.split("docs/main.mio");
-chant(result.dir);
-chant(result.base);
+kaku parts = path.split("docs/manual.mio");
+chant(parts.dir);                 // docs
+chant(parts.base);                // manual.mio
 ```
 
 ### 公开类型
 
-- `SplitResult { dir: string; base: string; }`：分离目录与末段名称的返回结果。
+#### `SplitResult`
+
+```mio title="PathTypes.mio" no-run
+koukai kata SplitResult {
+    dir: string;  // 规范化后的父目录部分（无父目录时为 "."，根目录为 "/"）
+    base: string; // 规范化后的末段基本名称
+}
+```
 
 ### 公开函数（8 个）
 
-以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
-
-| 函数 | 公开签名 | 功能与返回规则 |
-| --- | --- | --- |
-| `clean` | `clean(value: string) -> string` | 清理路径中的重复分隔符、`.` 和可抵消的 `..`。 |
-| `join` | `join(left: string, right: string) -> string` | 连接两个路径片段并清理。 |
-| `join_all` | `join_all(parts: []string) -> string` | 连接数组中的全部路径片段并清理。 |
-| `is_abs` | `is_abs(value: string) -> bool` | 判断路径是否以 `/` 开始。 |
-| `base` | `base(value: string) -> string` | 返回路径最后一段。 |
-| `dir` | `dir(value: string) -> string` | 返回清理后的目录部分。 |
-| `ext` | `ext(value: string) -> string` | 返回基本名称中的扩展名，`.env` 不视为有扩展名。 |
-| `split` | `split(value: string) -> SplitResult` | 返回包含 `dir` 和 `base` 的结果结构体。 |
+| 函数       | 公开签名                                      | 功能与返回规则                                                                                             |
+| ---------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `clean`    | `clean(value: string) -> string`              | 按词法规则清理重复分隔符、`.` 与可抵消的 `..`，并移除非根目录的尾随 `/`；空输入返回 `"."`。                |
+| `join`     | `join(left: string, right: string) -> string` | 使用 `/` 连接两个路径片段并调用 `clean` 返回规范化结果（空片段会被自动跳过）。                             |
+| `join_all` | `join_all(parts: []string) -> string`         | 按顺序使用 `/` 连接字符串数组中的全部片段并调用 `clean`；空数组返回 `"."`。                                |
+| `is_abs`   | `is_abs(value: string) -> bool`               | 判断路径字符串是否以 `/` 开头。                                                                            |
+| `base`     | `base(value: string) -> string`               | 返回规范化路径的最后一段名称；若输入为 `"/"`、`"."` 或 `".."` 则原样返回。                                 |
+| `dir`      | `dir(value: string) -> string`                | 返回规范化路径的父目录部分；若路径不含 `/` 则返回 `"."`，位于根目录下则返回 `"/"`。                        |
+| `ext`      | `ext(value: string) -> string`                | 返回 `base(value)` 中最后一个 `.` 及其后缀（包含 `.`）；若无后缀或仅首字符为 `.`（如 `.env`）则返回 `""`。 |
+| `split`    | `split(value: string) -> SplitResult`         | 对 `value` 执行 `clean` 后同时返回 `{ dir: dir(normalized), base: base(normalized) }`。                    |
 
 ### 完整示例
 
-```mio title="Path.mio" no-run
+下面的示例演示了在纯词法路径规范化下的边界行为（包括根路径保护、相对父级保留、隐藏文件名以及反斜杠处理）：
+
+```mio title="PathComplete.mio"
 yobu "kiso/path";
 
-chant(path.clean("/a//b/../c/"));
-chant(path.clean(""));
-chant(path.join("a", "/b"));
-chant(path.ext(".env"));
-kaku result = path.split("a/b.mio");
-chant(result.dir);
-chant(result.base);
+// 根路径与相对路径边界
+chant(path.clean("/../../etc/hosts")); // /etc/hosts
+chant(path.clean("../a/b/.."));        // ../a
+
+// 连接多段路径并拆分
+kaku full = path.join_all(["bunko", "kiso", "path", "path.mio"]);
+kaku info = path.split(full);
+chant(info.dir);                       // bunko/kiso/path
+chant(info.base);                      // path.mio
+chant(path.ext(full));                 // .mio
+
+// 隐藏文件与反斜杠行为
+chant(path.ext(".gitignore"));         // ""
+chant(path.clean("C:\\temp\\a.txt"));  // C:\temp\a.txt（反斜杠视为普通文件名字符）
 ```
 
-### 使用限制
+### 使用限制与平台说明
 
-正式版三平台的路径包测试均通过。本包只处理以 `/` 分隔的路径文本；算法不认识 Windows 盘符、UNC 路径或反斜杠，也不验证文件是否存在。特别注意 `join("a", "/b")` 的规则不同于某些语言的路径库：第二段以 `/` 开头不代表自动抛弃第一段。
+- **纯逻辑正斜杠语义**：本模块始终以 `/` 作为唯一路径分隔符，不识别 Windows 盘符（如 `C:`）、反斜杠 `\` 或 UNC 网络路径（反斜杠会被当作普通文件名字符保留）；若需获取宿主操作系统的真实物理绝对路径，请使用 `kiso/os` 中的 `os.canonical_path`。
+- **词法处理与安全边界**：`path.clean` 仅执行纯字符串词法折叠，不会解析磁盘上的符号链接（Symlink），也不能替代文件系统访问权限或沙箱路径逃逸校验。
 
-源码依据：[Mio v2.0.0 · `bunko/kiso/path/path.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/path/path.mio)。
+源码依据：[Mio V2.1 · `bunko/kiso/path`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/path)。

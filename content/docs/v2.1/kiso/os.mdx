@@ -1,68 +1,140 @@
 ---
 featureBadge: new
 title: 操作系统接口
-description: V2.1 的 kiso/os：参数、环境、进程与文件操作。
+description: Mio V2.1 命令行参数、环境变量、子进程执行、文件系统管理、单调时钟与规范化路径解析 kiso/os
 ---
+
+> **版本说明：** 本页对应 Mio V2.1 新增的 `kiso/os` 模块。该模块通过宿主运行时原语（`mio/os/runtime`）提供跨平台操作系统交互能力，已在 macOS ARM64、Linux x86_64 与 Windows x86_64 正式版上通过进程协议与路径解析测试。
 
 ## 操作系统接口 <FeatureBadge status="new" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "partial" } }} />
 
-`kiso/os` 通过 `mio/os/runtime` 宿主入口访问系统环境，面向**支持这些 Native OS 运行时入口的开发环境**。它不是无宿主依赖的纯算法包，也不能据导入成功推断可在浏览器 WASM、所有 Go VM 或任意平台运行。
+`kiso/os` 为 Mio 程序提供操作系统环境与进程生命周期接口，涵盖命令行参数读取（`argument` / `arguments`）、环境变量查询（`environment` / `getenv`）、子进程启动与替换（`spawn` / `exec` / `spawn_test`）、进程标识与退出（`pid` / `exit`）、单调时钟（`monotonic_ms`）、标准输入就绪轮询（`stdin_ready` / `stdin_wait`）、文件/目录删除与权限设置（`remove` / `remove_dir` / `chmod`）以及物理绝对路径解析（`canonical_path` / `executable_path`）。
 
-### 读取环境与参数
+与返回结构化错误枚举的 `kiso/fs` 不同，`kiso/os` 中的系统操作函数直接返回底层 `int64` 状态码（`0` 通常表示成功，负值表示系统错误号 `-errno`，子进程退出码遵循 Shell 兼容约定）。
 
-```mio title="OS.mio" no-run
+### 导入包
+
+> **运行环境：** 当前网页 Playground 的 WASM 环境不提供本地操作系统进程与环境变量接口。以下代码示例需在本地通过 Mio V2.1 CLI 与完整 Bunko 标准库运行。
+
+通过 `yobu "kiso/os";` 导入本包，并使用 `os.函数名(...)` 调用：
+
+```mio title="OsImport.mio" no-run
+yobu "kiso/os";
+```
+
+### 读取命令行参数与环境变量
+
+`os.arguments()` 返回包含程序名（`argv[0]`）在内的全部参数切片；`os.argument(index)` 按从 `0` 开始的下标读取单个参数，越界或非法编码时安全返回 `mu`。
+
+`os.environment(name)` 在变量不存在、格式非法或包含非 UTF-8 字节时返回 `mu`（若变量存在但值为空，则返回空字符串 `""`）；`os.getenv(name)` 则将缺失变量统一折叠为空字符串 `""`。
+
+```mio title="OsEnvArgs.mio" no-run
 yobu "kiso/os";
 
 kaku args = os.arguments();
 chant(len(args));
+chant(args[0]); // 程序自身调用路径
+
+// 越界参数安全返回 mu
+chant(os.argument(-1) == mu);
+
+// 区分“未设置”与“空值”
 kaku home = os.environment("HOME");
-moshi (home != mu) { chant(home); }
+moshi (home != mu) {
+    chant(home);
+}
+
+// 缺失时返回空字符串
+kaku custom = os.getenv("MIO_CUSTOM_FLAG");
+chant(custom);
 ```
 
-`arguments()` 包含 `argv[0]`。`argument(index)` 在参数无效时返回 `mu`。`environment(name)` 在环境项缺失、值非法或非 UTF-8 时返回 `mu`，存在但为空的变量返回空字符串；`getenv()` 会把缺失值折叠为空字符串。
+### 进程控制、单调时钟与标准输入轮询
 
-### 公开函数
+`os.spawn(path, arguments)` 启动子进程并等待其结束，返回子进程退出码（`0 ~ 255`）、信号终止码（`128 + signal`）或负系统错误号（目标程序无法启动时返回 `127`）。`os.monotonic_ms()` 读取基于硬件虚拟计数器的单调递增毫秒值，不受系统墙钟校时影响。
 
-| 函数 | 公开签名 | 用途及边界 |
-| --- | --- | --- |
-| `argument` | `argument(index: int64) -> string?` | 读取单个参数；无效返回 `mu` |
-| `arguments` | `arguments() -> []string` | 读取 argv，包括首项 |
-| `chmod` | `chmod(path: string, mode: int64) -> int64` | 设置文件模式；返回宿主状态 |
-| `exit` | `exit(status: int64) -> unit` | 退出当前进程 |
-| `spawn` | `spawn(path: string, arguments: []string) -> int64` | 启动进程并返回状态代码 |
-| `exec` | `exec(path: string, arguments: []string) -> int64` | 通过宿主 OS 执行入口，行为需按目标平台验证 |
-| `pid` | `pid() -> int64` | 获取进程 ID |
-| `remove` | `remove(path: string) -> int64` | 删除文件 |
-| `remove_dir` | `remove_dir(path: string) -> int64` | 删除目录 |
-| `spawn_test` | `spawn_test(path: string, arguments: []string, stdout: string, stderr: string, records: string, cpu_seconds: int64) -> int64` | 测试运行器使用的子进程隔离入口 |
-| `monotonic_ms` | `monotonic_ms() -> int64` | 读取单调计时值（毫秒，不是墙钟时间） |
-| `environment` | `environment(name: string) -> string?` | 获取可空环境变量 |
-| `getenv` | `getenv(name: string) -> string` | 获取环境变量，缺失时返回空字符串 |
-| `stdin_ready` | `stdin_ready() -> int64` | 非阻塞的标准输入就绪状态 |
-| `stdin_wait` | `stdin_wait(timeout_ms: int64) -> int64` | 等待标准输入；`-1` 表示不设期限 |
-| `executable_path` | `executable_path() -> string?` | 获取当前可执行文件的实际路径；失败返回 `mu` |
-| `canonical_path` | `canonical_path(path: string) -> string?` | 获取已存在路径的物理绝对身份；失败返回 `mu` |
-
-正式版三平台均通过进程协议测试。Windows 的 `exec` 启动子进程、等待并以其状态退出，不会像 POSIX 那样替换当前进程；测试超时按墙钟计算，标准输入就绪状态按管道、文件或控制台分别判断。见 [Windows 进程实现](https://github.com/mio-kobo/mio/blob/v2.1.0/bunko/kiso/aot/lowerwinrt/winprocess.mio)。
-
-### 文件与进程的返回值
-
-多个 OS 函数返回 `int64` 状态，而不是可空 Result。对于 `spawn` 等入口，源码注释约定负值表示系统错误号，子进程退出和信号用与 shell 兼容的值表示。调用者应检查返回值，不能假定操作成功，也不能把它理解为通用跨平台 POSIX 兼容保证。
-
-`spawn_test` 是为工具链测试提供的子进程隔离接口，不应作为普通用户程序的通用任务调度器。进程 API 受到宿主权限和沙箱策略限制，不能在 Web Playground 中运行。
-
-### 路径与标准输入
-
-```mio title="OSPath.mio" no-run
+```mio title="OsProcess.mio" no-run
 yobu "kiso/os";
 
-kaku current = os.canonical_path(".");
-moshi (current != mu) { chant(current); }
+chant(os.pid());
 
+kaku start = os.monotonic_ms();
+kaku code = os.spawn("/bin/echo", ["echo", "hello"]);
+kaku elapsed = os.monotonic_ms() - start;
+
+chant(code);    // 0
+chant(elapsed); // >= 0
+
+// 非阻塞检查标准输入（>0 表示有数据或 EOF，0 表示空闲，<0 为 -errno）
 kaku ready = os.stdin_ready();
 chant(ready);
 ```
 
-`canonical_path` 针对真实存在的路径；不可解析、非 UTF-8 或超出当前缓冲限制时返回 `mu`。`stdin_wait` 接受毫秒超时；源码拒绝小于 `-1` 或超出有符号 32 位上限的参数。
+### 路径规范化与文件删除
 
-来源：[`os.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/os/os.mio)。
+`os.canonical_path(path)` 解析已存在路径的物理绝对路径（统一使用 `/` 分隔符且不含反斜杠）；`os.executable_path()` 返回当前正在运行的原生可执行文件绝对路径。`os.remove` 与 `os.remove_dir` 分别用于删除单个文件与空目录。
+
+```mio title="OsPathFile.mio" no-run
+yobu "kiso/fs";
+yobu "kiso/os";
+yobu "kiso/string";
+
+kaku exe = os.executable_path();
+moshi (exe != mu) {
+    chant(exe);
+}
+
+kaku cwd = os.canonical_path(".");
+moshi (cwd != mu) {
+    chant(cwd);
+}
+
+// 创建临时文件、修改权限并清理
+fs.write_all("temp_os.txt", string.to_bytes("data"));
+chant(os.chmod("temp_os.txt", 420) == 0); // 0644 八进制 = 420 十进制
+chant(os.remove("temp_os.txt") == 0);
+```
+
+### 公开函数（17 个）
+
+#### 1. 参数与环境变量（4 个）
+
+| 函数          | 公开签名                               | 功能与返回规则                                                                                        |
+| ------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `argument`    | `argument(index: int64) -> string?`    | 读取第 `index` 个命令行参数（`0` 为程序名）；索引越界或编码非法返回 `mu`。                            |
+| `arguments`   | `arguments() -> []string`              | 读取全部命令行参数切片（含 `argv[0]`）；若参数包含非法 UTF-8 则触发运行时错误。                       |
+| `environment` | `environment(name: string) -> string?` | 查询指定环境变量；变量缺失或非 UTF-8 返回 `mu`，存在但为空时返回 `""`（Windows 上名称不区分大小写）。 |
+| `getenv`      | `getenv(name: string) -> string`       | 查询指定环境变量；变量缺失或非法时统一返回空字符串 `""`。                                             |
+
+#### 2. 进程控制、时钟与标准输入（8 个）
+
+| 函数           | 公开签名                                                                                                                      | 功能与返回规则                                                                                                                                                        |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pid`          | `pid() -> int64`                                                                                                              | 返回当前进程的操作系统进程 ID（正整数）。                                                                                                                             |
+| `exit`         | `exit(status: int64) -> unit`                                                                                                 | 立即以状态码 `status` 终止当前进程（不返回）。                                                                                                                        |
+| `spawn`        | `spawn(path: string, arguments: []string) -> int64`                                                                           | 创建子进程执行 `path`（`arguments` 首项应为 `argv[0]`）并阻塞等待结束；返回退出码（`0 ~ 255`）、信号退出码（`128 + sig`）、启动失败码 `127` 或负系统错误号 `-errno`。 |
+| `exec`         | `exec(path: string, arguments: []string) -> int64`                                                                            | 在 POSIX 平台用新程序替换当前进程映像（成功时不返回，失败返回 `-errno`）；在 Windows 平台启动子进程、等待并以其状态退出。                                             |
+| `spawn_test`   | `spawn_test(path: string, arguments: []string, stdout: string, stderr: string, records: string, cpu_seconds: int64) -> int64` | 测试运行器专用的隔离子进程执行入口，将标准输出、错误输出与断言数据包重定向至指定文件，并施加时间预算限制（`cpu_seconds` 须在 `1 ~ 3600` 秒内，否则返回 `126`）。      |
+| `monotonic_ms` | `monotonic_ms() -> int64`                                                                                                     | 读取单调递增计时器毫秒数（非系统墙钟时间，适用于耗时测量）。                                                                                                          |
+| `stdin_ready`  | `stdin_ready() -> int64`                                                                                                      | 非阻塞轮询标准输入状态（等价于 `stdin_wait(0)`）：大于 `0` 表示有可读数据或已达 EOF，`0` 表示当前无数据，负值表示 `-errno`。                                          |
+| `stdin_wait`   | `stdin_wait(timeout_ms: int64) -> int64`                                                                                      | 阻塞等待标准输入就绪，最多等待 `timeout_ms` 毫秒；传入 `-1` 表示无限期等待；传入小于 `-1` 或大于 `2147483647`（`INT32_MAX`）的参数直接返回 `-22`（`-EINVAL`）。       |
+
+#### 3. 文件删除、权限与规范化路径（5 个）
+
+| 函数              | 公开签名                                    | 功能与返回规则                                                                                                                  |
+| ----------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `remove`          | `remove(path: string) -> int64`             | 删除指定路径的文件；成功返回 `0`，失败返回负系统错误号 `-errno`。                                                               |
+| `remove_dir`      | `remove_dir(path: string) -> int64`         | 删除指定的**空目录**；成功返回 `0`，目录非空或不存在返回负系统错误号 `-errno`。                                                 |
+| `chmod`           | `chmod(path: string, mode: int64) -> int64` | 修改文件权限位（如 `420` 对应 `0644`）；成功返回 `0`，失败返回 `-errno`（Windows 上为无操作并返回 `0`）。                       |
+| `canonical_path`  | `canonical_path(path: string) -> string?`   | 解析已存在文件或目录的物理绝对路径（统一采用 `/` 分隔符）；空路径、不存在路径、非 UTF-8 或超过 `1024` 字节缓冲上限时返回 `mu`。 |
+| `executable_path` | `executable_path() -> string?`              | 获取当前正在运行的原生可执行文件物理绝对路径（缓冲区上限 `4096` 字节）；无法解析时返回 `mu`。                                   |
+
+### 使用限制与平台说明
+
+- **跨平台行为差异**：
+    - `exec` 在 macOS ARM64 与 Linux x86_64 上直接替换当前进程映像；在 Windows x86_64 上由于操作系统进程模型限制，通过派生子进程并等待退出实现。
+    - `chmod` 在 Windows 上保持兼容返回 `0` 但不执行 POSIX 权限位变更；`canonical_path` 在所有平台上均统一输出正斜杠 `/` 分隔符。
+- **错误码与诊断约定**：所有返回 `int64` 的系统调用封装均遵循 `0` 成功、负值 `-errno` 失败的约定；参数包含非法 `\0` 字节时，路径相关函数会安全拒绝并返回 `-22`（`-EINVAL`）或 `127`。
+- **内部运行时边界**：`mio/os/runtime` 属于底层宿主原语 ABI，不作为稳定应用层 API 暴露；普通文件读写与目录列举请优先使用提供结构化 `FsError` 的 `kiso/fs`。
+
+源码依据：[Mio V2.1 · `bunko/kiso/os`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/os)。

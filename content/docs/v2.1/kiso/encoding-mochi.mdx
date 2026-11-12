@@ -1,45 +1,203 @@
 ---
-title: Mochi v16 格式
-description: V2.1 分支的 Mochi 解码器版本常量及兼容性边界。
+title: Mochi 字节码编解码器
+description: Mio V2.1 Mochi v1~v16 字节码格式解码校验、结构摘要与规范化重编码 kiso/encoding/mochi
 ---
 
-## Mochi 格式版本变化 <FeatureBadge status="updated" since="2.1" />
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/encoding/mochi` 模块。相比 V2.0（`VERSION = 14`），V2.1 将解码器版本上限常量更新为 `VERSION = 16`，新增对 v15 类型约束指令（`OP_TYPE_CONSTRAINT = 66`）与 v16 定型间接调用指令（`OP_CALL_TYPED = 67`）的解码、边界校验及规范化重编码支持。
 
-V2.0.0 的 Mochi 解码器声明 `VERSION = 14`；固定 `Mio-2.1` 源码中的 `bunko/kiso/encoding/mochi/decode.mio` 已将该公开常量设为：
+## Mochi 字节码编解码器
 
-```mio title="MochiVersion.mio" no-run
+`kiso/encoding/mochi` 提供纯 Mio 实现的 Mochi 字节码（`.mochi`）解码器、静态结构验证器、摘要统计工具以及确定性规范化重编码器（`canonical_bytes`）。
+
+该模块严格校验魔数（`MOCHI`）、格式版本（`1 ~ 16`）、资源容量上限、UTF-8 编码、常量池标签、函数槽位与闭包捕获范围、全部已定义操作码及其版本门槛，以及所有跳转目标的指令边界。
+
+### 导入包
+
+> **网页运行说明：** 内存解码、摘要与规范化函数（`decode`、`canonical_bytes`、`summarize`、`error_code`）均可在网页 Playground 与原生 CLI 中运行；文件分块读取入口 `decode_file` 依赖文件系统模块 `kiso/fs`，需在本地 CLI 环境运行。
+
+通过 `yobu "kiso/encoding/mochi";` 导入本包，并使用 `mochi.函数名(...)` 调用：
+
+```mio title="MochiImport.mio"
 yobu "kiso/encoding/mochi";
-
-chant(mochi.VERSION);
 ```
 
-`VERSION` 的实际值为 **16**。这一变化反映了v2.1.0 的 Decoder 上限，**不构成所有工具链、旧版 VM 或现有 Playground 都能读取 v16 的保证**。
+### 解码、校验与规范化重编码
 
-### 新增的格式信息
+使用 `mochi.decode` 解码内存中的字节数组后，必须先检查 `result.error == mu`，确认解码成功后再访问 `result.value`。成功解码得到的 `mochi.File` 可通过 `mochi.summarize` 查看结构统计，或通过 `mochi.canonical_bytes` 序列化为规范字节流。
 
-| 版本 | 操作码 | 含义 |
-| --- | --- | --- |
-| v15 | `OP_TYPE_CONSTRAINT = 66` | 记录字段结果的类型表示约束，不执行运行时类型转换 |
-| v16 | `OP_CALL_TYPED = 67` | 间接调用附带是否返回值的信息 |
+```mio title="MochiDecode.mio"
+yobu "kiso/encoding/binary";
+yobu "kiso/encoding/mochi";
 
-V2.1 的 Native 与 Web 参考解码器支持读取 v16；V2.0 的 Go Mochi Decoder 以 v14 为上限。另有旧的 `encode_layout` API 保留 v14 输出，不能仅凭库内常量 `VERSION = 16` 推断任意编码入口一定会生成 v16 文件。
+// 构造一个包含 v16 定型间接调用操作码（67）的最小字节码文件
+kaku w = binary.writer(256);
+binary.writer_write_bytes(w, [77, 79, 67, 72, 73]); // 魔数 "MOCHI"
+binary.writer_write_u16_be(w, uint16(mochi.VERSION)); // 版本 16
+binary.writer_write_u32_be(w, uint32(0));            // 常量池数量: 0
+binary.writer_write_u32_be(w, uint32(0));            // 全局槽位数量: 0
+binary.writer_write_length_prefixed(w, [21, 67, 0, 0, 1, 3]); // 顶层指令
+binary.writer_write_u32_be(w, uint32(0));            // 函数表数量: 0
 
-### 保留的公开 API
+kaku raw = binary.writer_bytes(w);
+kaku decoded = mochi.decode(raw);
 
-| 名称 | 公开签名 | 用途 |
-| --- | --- | --- |
-| `decode` | `decode(data: []uint8) -> DecodeResult` | 从内存数据解码并验证 |
-| `decode_file` | `decode_file(path: string) -> DecodeResult` | 文件分块读取及验证 |
-| `canonical_bytes` | `canonical_bytes(value: File) -> []uint8` | 对有效解码结果规范化重编码 |
-| `summarize` | `summarize(value: File) -> Summary` | 版本、槽位及长度摘要 |
-| `error_code` | `error_code(error: DecodeError) -> int64` | 稳定错误分类编号 |
+moshi (decoded.error == mu) {
+    kaku file = decoded.value;
+    moshi (file != mu) {
+        kaku info = mochi.summarize(file);
+        chant(info.version);           // 16
+        chant(info.instruction_bytes); // 6
 
-公开类型还包括 `File`、`Function`、`Constant`、`Capture`、`DecodeError` 与 `DecodeResult`。其中 `DecodeResult` 使用 `value: File?` 和 `error: DecodeError?` 表示成功或失败。
+        // 确定性规范化重编码并与原始字节比对长度
+        kaku canonical = mochi.canonical_bytes(file);
+        chant(len(canonical) == len(raw)); // hai
+    }
+} sore {
+    kaku err = decoded.error;
+    moshi (err != mu) {
+        chant(mochi.error_code(err));
+    }
+}
+```
 
-### 使用限制
+在上述示例中，由于操作码 `67` 要求 `version >= 16`，若将版本号改为 `15`，`mochi.decode` 会返回 `InvalidInstruction`（错误码 `8`）并拒绝该文件。
 
-对未知或损坏的输入，应先检查 `DecodeResult.error`，只有成功时才使用 `value`。本包保留文件大小、UTF-8、指令宽度、操作码版本门槛、跳转范围和索引的验证规则。Mochi v16 具体新增操作需要与原生编译流程及相关解码器分别做兼容性测试。
+### 从文件分块解码
 
-分支中的 `bunko/kiso/encoding/mochi/README.md` 仍描述了较早的版本范围；本页引用**源码常量 16**，并将 README 与实现不一致作为文档维护提醒，而不武断宣称全工具链 v16 验收通过。
+`mochi.decode_file` 以 `32 KiB` 分块读取磁盘上的 `.mochi` 文件，在读取过程中实时强制执行 `MAX_FILE_SIZE`（`64 MiB`）上限保护，防止恶意超大文件触发无界内存分配。
 
-来源：[`decode.mio`](https://github.com/mio-kobo/mio/blob/f8410f48ee69eb2bcd228eafe423b92fc1dd7d2f/bunko/kiso/encoding/mochi/decode.mio)。
+```mio title="MochiFile.mio" no-run
+yobu "kiso/encoding/mochi";
+
+kaku res = mochi.decode_file("build/app.mochi");
+moshi (res.error == mu) {
+    kaku file = res.value;
+    moshi (file != mu) {
+        chant(mochi.summarize(file).functions);
+    }
+} sore {
+    kaku err = res.error;
+    moshi (err != mu) {
+        // 文件不存在或读取失败返回 IoFailure (错误码 12)
+        chant(mochi.error_code(err));
+    }
+}
+```
+
+### 公开常量（8 个）
+
+| 常量                    | 值         | 说明                                            |
+| ----------------------- | ---------- | ----------------------------------------------- |
+| `VERSION`               | `16`       | 当前解码器支持的最高 Mochi 字节码格式版本号     |
+| `MAX_FILE_SIZE`         | `67108864` | 单文件最大允许字节数（`64 MiB`）                |
+| `MAX_CONSTANTS`         | `65536`    | 单模块常量池最大条目数                          |
+| `MAX_GLOBALS`           | `65536`    | 单模块全局变量槽位最大数量                      |
+| `MAX_STRING_BYTES`      | `16777216` | 单个字符串常量的最大 UTF-8 字节长度（`16 MiB`） |
+| `MAX_INSTRUCTION_BYTES` | `16777216` | 顶层或单个函数体的最大指令字节长度（`16 MiB`）  |
+| `MAX_FUNCTIONS`         | `65536`    | 单模块函数表最大函数数量                        |
+| `MAX_FUNCTION_SLOTS`    | `65536`    | 单个函数的参数、局部变量及捕获槽位最大数量      |
+
+#### V2.1 新增格式特性（v15 ~ v16）
+
+| 格式版本 | 新增操作码     | 语义与校验规则                                                                                     |
+| -------- | -------------- | -------------------------------------------------------------------------------------------------- |
+| `v15`    | `66`（2 字节） | 记录栈顶值的声明类型描述符约束（`1 ~ 17`，不带可空标志位），不执行运行时类型转换。                 |
+| `v16`    | `67`（4 字节） | 定型间接调用，操作数包含参数个数与返回值标志位（`0` 表示无返回值，`1` 表示有返回值，其他值拒绝）。 |
+
+### 公开类型
+
+#### 错误类型与错误码映射
+
+```mio title="MochiErrors.mio" no-run
+koukai sentaku DecodeErrorKind {
+    Truncated;          // 1: 输入在预期字段或指令操作数结束前提前截断
+    InvalidMagic;       // 2: 缺少 5 字节 "MOCHI" 文件头魔数
+    UnsupportedVersion; // 3: 格式版本号小于 1 或大于 VERSION (16)
+    LimitExceeded;      // 4: 文件总大小、表项数量或指令长度超出公开上限常量
+    InvalidConstant;    // 5: 常量标签非法（非 1 ~ 10）或标签低于当前格式版本要求
+    InvalidUtf8;        // 6: 字符串常量或函数名称包含非法 UTF-8 字节序列
+    InvalidFunction;    // 7: 函数 ID 不连续、槽位计数矛盾、返回标志非法或顶层出现 return 指令
+    InvalidInstruction; // 8: 未知操作码、操作码超出当前版本允许范围或子操作数非法
+    InvalidIndex;       // 9: 常量、全局、局部、函数或捕获上值索引越界
+    InvalidJump;        // 10: 分支跳转目标越界或未落在合法指令起始边界上
+    TrailingData;       // 11: 解析完所有段后文件末尾仍有多余未消费字节
+    IoFailure;          // 12: decode_file 打开、分块读取或关闭文件失败
+}
+
+koukai kata DecodeError {
+    kind: DecodeErrorKind; // 错误分类枚举
+    offset: int64;         // 发生错误时的字节偏移量
+    detail: int64;         // 附加诊断详情（如非法操作码编号、越界索引或实际长度）
+}
+```
+
+#### 字节码结构与结果类型
+
+```mio title="MochiTypes.mio" no-run
+// 常量池条目（64 位整数与浮点保留完整 U64 高低字位模式）
+koukai kata Constant {
+    tag: uint8;        // 常量类型标签（1 ~ 10）
+    bits: binary.U64;  // 标量载荷的高低 32 位原始位模式
+    data: []uint8;     // UTF-8 字符串原始字节（仅 tag == 2 时非空）
+}
+
+// 闭包捕获来源描述
+koukai kata Capture {
+    local: bool;       // hai 表示捕获外层局部变量，iie 表示转发外层上值
+    index: int64;      // 外层局部槽位或上值索引
+}
+
+// 单个函数元数据与字节码体
+koukai kata Function {
+    id: int64;
+    name: string;
+    name_bytes: []uint8;
+    parameter_count: int64;
+    local_count: int64;
+    returns_value: bool;
+    captures: []Capture;
+    instructions: []uint8;
+}
+
+// 解码后的完整 Mochi 模块
+koukai kata File {
+    version: int64;
+    constants: []Constant;
+    global_count: int64;
+    instructions: []uint8;
+    functions: []Function;
+}
+
+// 解码结果载体
+koukai kata DecodeResult {
+    value: File?;
+    error: DecodeError?;
+}
+
+// 模块结构摘要信息
+koukai kata Summary {
+    version: int64;
+    constants: int64;
+    functions: int64;
+    globals: int64;
+    instruction_bytes: int64;
+    canonical_size: int64;
+}
+```
+
+### 公开函数（5 个）
+
+| 函数              | 公开签名                                    | 功能与返回规则                                                                         |
+| ----------------- | ------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `decode`          | `decode(data: []uint8) -> DecodeResult`     | 从内存字节数组完整解码并验证 Mochi 字节码；不会修改输入的 `data` 数组。                |
+| `decode_file`     | `decode_file(path: string) -> DecodeResult` | 分块读取指定路径的 `.mochi` 文件并执行完整解码验证，读取阶段即强制校验 `64 MiB` 上限。 |
+| `canonical_bytes` | `canonical_bytes(value: File) -> []uint8`   | 将已解码的 `File` 结构确定性地重新序列化为标准大端序字节流。                           |
+| `summarize`       | `summarize(value: File) -> Summary`         | 统计并返回模块版本号、常量/函数/全局槽位数量、总指令字节数及规范化编码大小。           |
+| `error_code`      | `error_code(error: DecodeError) -> int64`   | 将 `DecodeError` 映射为稳定的整型错误分类编号（`1 ~ 12`）。                            |
+
+### 使用限制与平台说明
+
+- **跨工具链版本兼容性**：`VERSION = 16` 反映 V2.1 解码器的支持上限。V2.0 的旧版参考解码器最高仅支持 `v14`，且历史布局编码接口默认仍输出 `v14` 格式；在跨版本分发 `.mochi` 文件时需确认目标运行时支持对应的操作码版本。
+- **输入不可变性与校验优先**：`decode` 不会修改传入的 `[]uint8` 缓冲区，所有标量常量按原始 `U64` 位模式保留（完整保留 `NaN` 载荷、`-0.0` 与 `MinInt64`）；`canonical_bytes` 面向合法的 `File` 结构，传入未经验证的伪造节点可能导致输出越界截断。
+
+源码依据：[Mio V2.1 · `bunko/kiso/encoding/mochi`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/encoding/mochi)。
