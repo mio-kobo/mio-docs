@@ -1,58 +1,99 @@
 ---
 featureBadge: new
-title: Mach-O ad-hoc 签名
-description: V2.1 新增的 Mach-O ad-hoc 代码签名辅助模块。
+title: Mach-O ad-hoc 代码签名
+description: Mio V2.1 Darwin ARM64 Mach-O 本地 ad-hoc 代码签名器 kiso/aot/sign
 ---
 
-## AOT Mach-O 签名 <FeatureBadge status="new" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "unknown" }, windows: { x86_64: "unknown" } }} />
+> **版本说明：** 本页对应 Mio V2.1 新增的 `kiso/aot/sign` 模块。该模块为未签名的 Darwin ARM64 Mach-O 镜像追加 `LC_CODE_SIGNATURE` 加载命令及基于 SHA-256 的 `CodeDirectory`（`v0x20400`），使原生编译产物无需外部 `codesign` 即可在 macOS ARM64 上通过内核代码签名校验。
 
-`kiso/aot/sign` 提供 **Darwin ARM64 Mach-O ad-hoc 签名**，将代码页哈希与必要的 Mach-O 签名命令组织为文件字节，供原生编译工具使用。
+## Mach-O ad-hoc 代码签名 <FeatureBadge status="new" since="2.1" /> <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "unknown" }, windows: { x86_64: "unknown" } }} />
 
-macOS ARM64 已核对模块生成镜像及非法输入，并用 `codesign --verify --strict` 验证正式 CLI 生成的原生产物。Linux 和 Windows 上运行此签名 API 尚未单独验证；签名针对 Mach-O 格式。
+`kiso/aot/sign` 为 Mio 原生 AOT 编译流水线提供纯 Mio 实现的 Darwin ARM64 Mach-O 本地 ad-hoc 签名器。
 
-它不提供 Apple Developer ID、CMS 身份签名、entitlements、notarization，也不构成第三方身份认证。
+在 Apple Silicon（macOS ARM64）平台上，系统内核要求所有可执行二进制文件具备有效的代码签名。该模块接收由 `kiso/aot/macho` 或其他原生链接器生成的未签名 ARM64 Mach-O 镜像字节数组，校验其头部与段布局合法性，计算每个 `4 KiB` 代码页的 SHA-256 摘要，并输出包含完整 `SuperBlob` 签名的可执行字节流。
 
-### 公开类型与函数
+### 导入包
 
-```mio title="SignTypes.mio" no-run
-// 公开结构的源码摘录，不是独立程序。
-koukai kata SignResult {
-    bytes: []uint8;
-    error: string;
-}
+> **运行环境：** 当前网页 Playground 的 WASM 环境不包含 AOT 工具链模块。以下代码需在本地通过 Mio V2.1 CLI 与完整 Bunko 标准库运行。
+
+通过 `yobu "kiso/aot/sign";` 导入本包，并使用 `sign.函数名(...)` 调用：
+
+```mio title="SignImport.mio" no-run
+yobu "kiso/aot/sign";
 ```
 
-| 函数 | 源码签名 | 说明 |
-| --- | --- | --- |
-| `adhoc_linked` | `adhoc_linked(image: []uint8) -> SignResult` | 接受符合签名器要求且已有预留签名 load command 的镜像 |
-| `adhoc` | `adhoc(image: []uint8) -> SignResult` | 将有效、尚未签名的受支持 Mach-O 生成本地 ad-hoc 签名镜像 |
+### 对 Mach-O 镜像执行 ad-hoc 签名
 
-`error == ""` 才表示返回的 `bytes` 可用。输入必须满足模块规定的 Mach-O 头、load commands、段布局和大小约束。已经签过名的镜像会被拒绝。
-
-### 与 Mach-O Writer 组合
+生成原生可执行文件的最后一步是将 `macho.executable` 产出的未签名字节传入 `sign.adhoc`，并检查返回的 `error == ""`：
 
 ```mio title="SignMachO.mio" no-run
 yobu "kiso/aot/arm64";
 yobu "kiso/aot/macho";
 yobu "kiso/aot/sign";
 
-kaku instruction = arm64.ret();
-moshi (instruction.error == mu) {
-    kaku image = macho.executable(macho.ImageSpec {
-        words: [instruction.word],
-        constants: [],
-        globals: 0,
-        patches: []
-    });
-    moshi (image.error == mu) {
-        kaku result = sign.adhoc(image.bytes);
-        chant(result.error == "");
+// 1. 编码最小退出指令序列
+kaku words: []uint32 = [
+    arm64.movz_x(0, 0, 0).word,
+    arm64.movz_x(16, 1, 0).word,
+    arm64.svc(128).word
+];
+
+// 2. 封装为未签名 Mach-O 镜像
+kaku image = macho.executable(macho.ImageSpec {
+    words: words,
+    constants: [],
+    globals: 0,
+    patches: []
+});
+
+moshi (image.error == mu) {
+    // 3. 追加本地 ad-hoc 签名
+    kaku signed = sign.adhoc(image.bytes);
+    moshi (signed.error == "") {
+        chant(len(signed.bytes));
+    } sore {
+        chant(signed.error);
     }
 }
 ```
 
-该示例只展示**内存中生成和检查镜像字节**的调用方式，并不代表单条 `ret` 就是一份可安全执行的用户程序。要启动可执行文件仍需有效的程序入口、运行时和宿主许可；发布前应使用 `codesign --verify --strict` 等工具独立验证真实产物。
+在上述示例中，`sign.adhoc` 会将镜像的 Load Commands 数量加 `1`、更新 `__LINKEDIT` 段的虚拟内存与文件大小，并在镜像末尾追加 16 字节对齐的签名数据块。输出字节写入文件并赋予可执行权限后，即可通过系统 `codesign --verify --strict` 校验并直接运行。
 
-签名器假设编译器已经处理完指令标签和镜像地址补丁，不负责把任意有重定位的 Mach-O 转换为可签名版本。输出字节的签名结构和平台要求，以固定源码和真实验证为准。
+---
 
-来源：[`sign.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/aot/sign/sign.mio)。
+### 签名结构与校验规则
+
+`kiso/aot/sign` 严格按照 Apple Code Signing 二进制格式生成确定性的本地签名：
+
+- **输入镜像前置校验**：输入字节数组长度必须为 `16` 字节对齐（范围 `768` 字节至 `64 MiB`），具备 64 位 ARM64 可执行文件头（魔数 `0xFEEDFACF`、`CPU_TYPE_ARM64`、`MH_EXECUTE`），包含 `1 ~ 32` 条 8 字节对齐的 Load Commands（总长度不超过 `720` 字节，确保新增 16 字节的 `LC_CODE_SIGNATURE` 后仍不越过 `0x300` 入口偏移），且尚未包含 `LC_CODE_SIGNATURE`（命令编号 `29`）。
+- **`__LINKEDIT` 布局要求**：镜像末尾必须存在 `__TEXT` 与 `__LINKEDIT` 段。对于纯静态无重定位镜像（`adhoc`），`__LINKEDIT` 的初始文件大小必须为 `0`；对于包含动态链接器绑定数据的镜像（`adhoc_linked`），`__LINKEDIT` 必须位于文件末尾（`offset + size == len(image)`）并保留原有绑定负载。
+- **签名数据组织**：签名块由 `SuperBlob`（20 字节，`0xFADE0CC0`）、`CodeDirectory`（`v0x20400`，固定标识符 `"mio\0"`，标志位 `0x00020002` 即 `CS_ADHOC | CS_LINKER_SIGNED`）以及按 **`4,096` 字节（`4 KiB`）** 页切分计算的 SHA-256 哈希槽数组组成，最终长度向上对齐至 `16` 字节边界。
+
+---
+
+### 公开类型与函数
+
+#### `SignResult`
+
+```mio title="SignTypes.mio" no-run
+koukai kata SignResult {
+    bytes: []uint8; // 追加签名并更新头部后的完整 Mach-O 文件字节（仅当 error == "" 时有效）
+    error: string;  // 错误描述；为空字符串 "" 时表示签名成功
+}
+```
+
+#### 公开函数（2 个）
+
+| 函数           | 公开签名                                     | 功能与校验差异                                                                                                       |
+| -------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `adhoc`        | `adhoc(image: []uint8) -> SignResult`        | 为无动态链接负载的纯静态 ARM64 Mach-O 镜像生成本地 ad-hoc 签名；要求输入镜像的 `__LINKEDIT` 段大小为 `0`。           |
+| `adhoc_linked` | `adhoc_linked(image: []uint8) -> SignResult` | 为包含现有 dyld 绑定负载的动态 ARM64 Mach-O 镜像生成本地 ad-hoc 签名；保留 `__LINKEDIT` 既有数据并在其后追加签名块。 |
+
+---
+
+### 使用限制与平台说明
+
+- **签名范围边界**：本模块仅生成本地内核校验所需的 ad-hoc 签名，不包含 Apple Developer ID 证书、CMS 签名块、Entitlements 权限配置或公证（Notarization）票据，也不负责解析重定位表。
+- **平台适用性**：本模块针对 Darwin ARM64 Mach-O 格式设计，已在 macOS ARM64 上完成镜像生成与 `codesign --verify --strict` 严格验证；Linux 与 Windows 平台不适用 Mach-O 代码签名，详见 [验证与来源](/docs/v2.1/tooling/verification)。
+
+源码依据：[Mio V2.1 · `bunko/kiso/aot/sign`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/aot/sign)。

@@ -1,84 +1,178 @@
 ---
-title: Mach-O 文件生成
-description: Mio V2.0 Darwin Mach-O 生成库 kiso/aot/macho
+title: Mach-O 可执行文件生成
+description: Mio V2.1 Darwin ARM64 Mach-O 段布局规划、跨段地址补丁修补与可执行镜像写入器 kiso/aot/macho
 ---
 
-> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/aot/macho` 模块。在保留 V2.0 基础布局规划与镜像生成接口的同时，V2.1 新增了 `executable_with_runtime_data` 入口，用于在保持源码全局变量信封完整的前提下为目标运行时追加独立数据槽位。
 
+## Mach-O 可执行文件生成
 
-## Mach-O 文件生成
+`kiso/aot/macho` 为 Mio 原生 AOT 编译器提供纯 Mio 实现的 Darwin ARM64 Mach-O 布局规划器与二进制镜像写入器。
 
-Mach-O 生成模块用于规划并产生 Darwin ARM64 平台的 Mach-O 可执行文件字节，主要由 Mio AOT 工具链调用。
-
-它不提供跨平台链接器，也不负责自动完成系统级代码签名和安装。
-
-本模块属于 **AOT 编译工具链接口**，其公开声明不等于稳定的应用层 API；以下内容对应 `v2.0.0` 发布标签。
+该模块接收机器指令字（`[]uint32`）、只读常量区字节（`[]uint8`）、全局变量槽位数量以及跨段地址补丁（`[]AddressPatch`），在确定最终 `16 KiB` 页对齐的段偏移后解析 `ADRP` + `ADD` 地址重定位，输出确定性的未签名 Mach-O 可执行文件字节数组。
 
 ### 导入包
 
-> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+> **运行环境：** 当前网页 Playground 的 WASM 环境不包含 AOT 工具链模块。以下代码需在本地通过 Mio V2.1 CLI 与完整 Bunko 标准库运行。
 
-通过 `yobu "kiso/aot/macho";` 导入本包，随后使用 `macho.函数名(...)` 调用。
+通过 `yobu "kiso/aot/macho";` 导入本包，并使用 `macho.函数名(...)` 调用：
 
-```mio title="Stdlib.mio" no-run
+```mio title="MachoImport.mio" no-run
 yobu "kiso/aot/macho";
 ```
 
-### 地址目标
+### 规划段布局与生成 Mach-O 镜像
 
-`text_target`、`const_target` 和 `data_target` 创建不同段的地址目标，用于描述后续的地址修补规则。
+构造可执行镜像时，通常直接将机器码、常量数据与重定位补丁封装为 `ImageSpec` 并调用 `macho.executable`（也可提前调用 `macho.plan` 预览各段的文件与虚拟内存偏移）。
 
-```mio title="Macho.mio" no-run
+```mio title="MachoExecutable.mio" no-run
+yobu "kiso/aot/arm64";
 yobu "kiso/aot/macho";
 
-chant(macho.text_target().kind);
-chant(macho.const_target().kind);
+// 构造最小退出序列：MOVZ X0, #0; MOVZ X16, #1; SVC #128
+kaku words: []uint32 = [
+    arm64.movz_x(0, 0, 0).word,
+    arm64.movz_x(16, 1, 0).word,
+    arm64.svc(128).word
+];
+kaku constants: []uint8 = [77, 105, 111, 0]; // "Mio\0"
+
+// 预演段布局
+kaku preview = macho.plan(len(words) * 4, len(constants), 1);
+chant(preview.data_offset);
+
+// 生成完整的未签名 Mach-O 字节流
+kaku image = macho.executable(macho.ImageSpec {
+    words: words,
+    constants: constants,
+    globals: 1,
+    patches: []
+});
+
+moshi (image.error == mu) {
+    chant(len(image.bytes));
+    chant(image.layout.const_offset);
+}
 ```
 
-### 布局规划
+在上述示例中，由于同时包含代码与全局变量，`executable` 会生成一个 `32,768` 字节（两个 `16 KiB` 页）的 Mach-O 镜像，其中入口机器码固定位于文件偏移 `0x300`（`768` 字节）处。在写入磁盘并执行前，仍需使用 `kiso/aot/sign` 或系统 `codesign` 完成 ad-hoc 代码签名。
 
-`plan` 根据机器码字节数、常量区字节数以及全局变量槽位数量规划 `Layout`；规划结果并不意味着输入镜像已经可执行。
+---
 
-### 生成镜像
+### 镜像段结构与修补规则
 
-`executable` 接受 `ImageSpec`，产生 `ImageResult`。成功时 `bytes` 是未签名的 Mach-O 数据；失败时应检查 `error`。
+`kiso/aot/macho` 生成的 64 位 ARM64 Mach-O（魔数 `0xFEEDFACF`，CPU 类型 `CPU_TYPE_ARM64`）采用以下固定段布局与重定位规则：
+
+- **固定入口偏移（`0x300` / `768` 字节）**：文件头（32 字节）与全部 Load Commands（含 `__PAGEZERO`、`__TEXT`、可选的 `__DATA`、`__LINKEDIT`、`LC_LOAD_DYLINKER`、`LC_BUILD_VERSION`（最低目标系统 macOS 11.0）、空 `LC_SYMTAB` / `LC_DYSYMTAB` 以及 `LC_MAIN`）写入头部后，零填充至偏移 `768` 字节处作为 `__TEXT,__text` 入口。
+- **段对齐与大小**：所有段边界均按 Darwin ARM64 页大小 **`16,384` 字节（`16 KiB`）** 对齐。`__TEXT` 包含 `__text`（4 字节对齐）与可选的 `__const`（8 字节对齐）；当 `globals > 0` 时发射 `__DATA,__data` 段（8 字节对齐）；末尾附带空的 `__LINKEDIT` 段以满足签名器结构要求。
+- **布局期 `ADRP` + `ADD` 补丁解析**：在确定 `const_offset` 与 `data_offset` 后，写入器会遍历 `ImageSpec.patches`，将 `at_word` 处的指令替换为指向目标页的 `arm64.adrp_offset`（按架构 4 KiB 页计算），并将 `add_at_word`（若 `>= 0`）替换为补充页内低 12 位偏移的 `arm64.add_imm_x`。因此输出文件不包含动态重定位表。
+
+---
 
 ### 公开类型
 
-- `MachOError`：包含空代码、过大镜像、非法修补与编码失败等变体。
-- `AddressTarget { kind: int64; }`：地址目标类别。
-- `AddressPatch`：地址修补位置及其目标。
-- `Section`：区段名称、偏移和对齐信息。
-- `Symbol`：符号名称与位置。
-- `Relocation`：重定位记录。
-- `Layout`：镜像与各区段规划结果。
-- `ImageSpec { words: []uint32; constants: []uint8; globals: int64; patches: []AddressPatch; }`：可执行镜像输入。
-- `ImageResult { bytes: []uint8; layout: Layout; error: MachOError?; }`：文件字节及构造状态。
+#### `MachOError`
 
-### 公开函数（5 个）
+布局校验、补丁边界检查与二进制写入阶段可能报告的错误枚举：
 
-以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
-
-| 函数 | 公开签名 | 功能与返回规则 |
-| --- | --- | --- |
-| `text_target` | `text_target() -> AddressTarget` | 构造指向 `__text` 的地址修补目标。 |
-| `const_target` | `const_target() -> AddressTarget` | 构造指向常量区的地址修补目标。 |
-| `data_target` | `data_target() -> AddressTarget` | 构造指向数据区的地址修补目标。 |
-| `plan` | `plan(code_size: int64, const_size: int64, globals: int64) -> Layout` | 计算代码、常量和全局槽位对应的镜像布局。 |
-| `executable` | `executable(spec: ImageSpec) -> ImageResult` | 按镜像规格生成 Mach-O 字节并报告错误。 |
-
-### 完整示例
-
-```mio title="Macho.mio" no-run
-yobu "kiso/aot/macho";
-
-chant(macho.text_target().kind);
-chant(macho.const_target().kind);
-chant(macho.data_target().kind);
+```mio title="MachOError.mio" no-run
+koukai sentaku MachOError {
+    EmptyText;             // ImageSpec.words 为空，缺少可执行代码
+    TooManyGlobals;        // globals 负数、超出上限（标准 2052 或扩展 10244）或 runtime_words 越界
+    ImageTooLarge;         // 代码、常量或最终文件总大小超出 64 MiB（67,108,864 字节）限制
+    LoadCommandsTooLarge;  // Load Commands 总长度超出 768 字节入口偏移预留区
+    InvalidPatch;          // AddressPatch 索引越界、目标类型非法或 target_offset 超出对应段大小
+    EncodeFailure;         // ADRP 或 ADD 补丁指令编码失败（如目标寄存器越界或页差超限）
+    WriteFailure;          // 底层 BinaryWriter 写入或字节序转换失败
+}
 ```
 
-### 使用限制
+#### 输入、布局与结构描述类型
 
-`code_size` 与 `const_size` 是字节数，而 `globals` 是全局变量槽数。生成前必须遵守布局容量和补丁约束，生成后仍可能需要由系统完成签名与授权。公开的结构体字段不意味着可以无条件传入任意人工构造内容。
+```mio title="MachOTypes.mio" no-run
+// 跨段地址修补目标（kind: 0=__text, 1=__const, 2=__data）
+koukai kata AddressTarget {
+    kind: int64;
+}
 
-源码依据：[Mio v2.0.0 · `bunko/kiso/aot/macho/macho.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/aot/macho/macho.mio)。
+// 单条跨段地址重定位补丁描述
+koukai kata AddressPatch {
+    at_word: int64;        // ADRP 指令在 words 中的索引
+    add_at_word: int64;    // 配对 ADD 指令在 words 中的索引（无需配对时设为 -1）
+    target: AddressTarget; // 目标段（通过 text_target / const_target / data_target 构造）
+    target_offset: int64;  // 目标相对于所属段起点的字节偏移量
+    register: int64;       // 接收计算地址的目标寄存器编号（0 ~ 31）
+}
+
+// 单个 Mach-O 区段描述
+koukai kata Section {
+    segment: string;
+    name: string;
+    file_offset: int64;
+    vm_offset: int64;
+    size: int64;
+    alignment: int64;
+}
+
+// 符号与重定位辅助结构（保留字段定义，当前写入器输出空符号表）
+koukai kata Symbol {
+    name: string;
+    section: int64;
+    value: int64;
+}
+
+koukai kata Relocation {
+    section: int64;
+    offset: int64;
+    symbol: int64;
+    pc_relative: bool;
+    width: int64;
+}
+
+// 段布局规划结果
+koukai kata Layout {
+    text_size: int64;      // __TEXT 段总大小（16 KiB 对齐）
+    const_offset: int64;   // __const 区在文件中的起始偏移（8 字节对齐）
+    data_offset: int64;    // __DATA 段在文件中的起始偏移（等于 text_size）
+    linkedit_offset: int64;// __LINKEDIT 段起始偏移（等于文件总字节数）
+    file_size: int64;      // 最终镜像字节总大小
+    sections: []Section;   // 包含的有效区段列表（1 ~ 3 个）
+}
+
+// 可执行镜像构造输入
+koukai kata ImageSpec {
+    words: []uint32;           // ARM64 机器指令字序列
+    constants: []uint8;        // 只读常量区原始字节流（可为空）
+    globals: int64;            // 全局变量 8 字节槽位总数（可为 0）
+    patches: []AddressPatch;   // 跨段地址补丁列表
+}
+
+// 可执行镜像构造结果
+koukai kata ImageResult {
+    bytes: []uint8;        // 完整的未签名 Mach-O 文件字节（仅当 error == mu 时有效）
+    layout: Layout;        // 实际使用的段布局信息
+    error: MachOError?;    // 构造错误；为 mu 时表示成功
+}
+```
+
+---
+
+### 公开函数（6 个）
+
+| 函数                           | 公开签名                                                                             | 功能与返回规则                                                                                                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `text_target`                  | `text_target() -> AddressTarget`                                                     | 返回指向 `__TEXT,__text` 代码段起点的地址补丁目标（`kind: 0`）。                                                                                                 |
+| `const_target`                 | `const_target() -> AddressTarget`                                                    | 返回指向 `__TEXT,__const` 常量区起点的地址补丁目标（`kind: 1`）。                                                                                                |
+| `data_target`                  | `data_target() -> AddressTarget`                                                     | 返回指向 `__DATA,__data` 数据段起点的地址补丁目标（`kind: 2`）。                                                                                                 |
+| `plan`                         | `plan(code_size: int64, const_size: int64, globals: int64) -> Layout`                | 根据机器码字节数、常量区字节数和全局变量槽数，计算 `16 KiB` 页对齐后的各段偏移与总文件大小。                                                                     |
+| `executable`                   | `executable(spec: ImageSpec) -> ImageResult`                                         | 按 `ImageSpec` 解析补丁并生成未签名 Darwin ARM64 Mach-O 镜像（`globals` 合法范围为 `0 ~ 2,052`）。                                                               |
+| `executable_with_runtime_data` | `executable_with_runtime_data(spec: ImageSpec, runtime_words: int64) -> ImageResult` | 在保持源码与私有 ABI 全局变量上限（`0 ~ 2,052`）的同时，在 `__DATA` 段末尾额外追加 `runtime_words`（`0 ~ 8,192`）个运行时专用 8 字节槽位（总上限 `10,244` 槽）。 |
+
+---
+
+### 使用限制与平台说明
+
+- **容量与槽位上限**：单镜像文件总大小上限为 **`64 MiB`（`67,108,864` 字节）**；标准 `executable` 最多支持 `2,052` 个全局槽位（对应降级器上限的 `2,048` 个用户全局变量与 `4` 个私有 ABI 状态槽位）。
+- **纯静态链接与签名要求**：输出镜像不包含动态符号重定位，也不内嵌代码签名命令。在 macOS ARM64 上运行生成的二进制文件前，必须通过 `kiso/aot/sign`（如 `sign.adhoc`）或系统 `codesign` 完成 ad-hoc 签名。
+
+源码依据：[Mio V2.1 · `bunko/kiso/aot/macho`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/aot/macho)。
