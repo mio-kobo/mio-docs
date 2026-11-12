@@ -1,93 +1,170 @@
 ---
 featureBadge: updated
 title: JSON 编解码
-description: V2.1 的 kiso/encoding/json 的节点表示、解析与渲染接口。
+description: Mio V2.1 严格 RFC 8259 JSON 节点索引树解析、大整数精度保留与紧凑渲染 kiso/encoding/json
 ---
 
-## JSON <FeatureBadge status="updated" since="2.1" />
+> **版本说明：** 本页对应 Mio V2.1 新增的 `kiso/encoding/json` 模块。全部 6 个公开函数与节点表示类型均基于纯 Mio 源码实现，可在 Mochi VM、Web Playground 与原生 AOT 后端运行。
 
-这是 v2.1.0 新增的模块，两个完整示例可在本页的 Playground 运行。
+## JSON 编解码 <FeatureBadge status="updated" since="2.1" />
 
-JSON 包以 `Document` 表示一个解析后的文档。它不把 JSON 对象直接转换为 Mio 的 `Map`，而是把每个节点存进 `Document.values` 数组，并用整数索引引用子节点。这允许数字保留原始 JSON 文本，不会因先转为浮点数而丢失大整数精度。
+JSON 编解码标准库（`kiso/encoding/json`）提供符合 RFC 8259 规范的 UTF-8 JSON 解析与渲染功能。
 
-### 导入
+该模块不将 JSON 对象直接转换为动态 `Map`，而是采用**扁平节点索引树（`Document`）**设计：解析后的每个 JSON 值存入 `Document.values` 数组，数组和对象通过整数索引（`children`）引用子节点，并将数字保存为原始 JSON 文本。这一设计避免了将 64 位大整数（如雪花 ID）提前转换为 `float64` 而导致的精度丢失。
 
-```mio title="JSON.mio" no-run
+### 导入包
+
+> **网页运行说明：** 本页的 Playground 代码块均为独立可运行程序，已各自包含所需的 `yobu` 导入语句，运行时互不继承状态。
+
+通过 `yobu "kiso/encoding/json";` 导入本包，并使用 `json.函数名(...)` 调用：
+
+```mio title="JsonImport.mio" no-run
 yobu "kiso/encoding/json";
-yobu "kiso/string";
 ```
 
-导入片段没有可执行语句；完整示例见下文。
+### 解析 JSON 与读取字段
+
+`json.parse` 接收 UTF-8 字节数组 `[]uint8`，返回 `Document`。使用前必须检查 `doc.error == ""`；若解析失败，`doc.error` 包含错误说明，`doc.offset` 记录出错时的字节位置，`doc.root` 为 `-1`。
+
+```mio title="ReadJson.mio"
+yobu "kiso/encoding/json";
+yobu "kiso/string";
+
+kaku payload = string.to_bytes("{\"id\":9223372036854775807,\"name\":\"Mio\",\"tags\":[\"v2\",\"aot\"]}");
+kaku doc = json.parse(payload);
+
+moshi (doc.error == "") {
+    // 1. 读取大整数并保留完整 int64 精度
+    kaku id_node = json.member(doc, doc.root, "id");
+    kaku id = json.integer(doc, id_node);
+    moshi (id != mu) {
+        chant(id); // 9223372036854775807
+    }
+
+    // 2. 读取字符串字段（已自动解码转义序列）
+    kaku name_node = json.member(doc, doc.root, "name");
+    chant(json.text(doc, name_node)); // Mio
+
+    // 3. 遍历 JSON 数组子节点
+    kaku tags_node = json.member(doc, doc.root, "tags");
+    moshi (tags_node >= 0) {
+        kaku tags = doc.values[tags_node];
+        kaku i = 0;
+        aida (i < len(tags.children)) {
+            chant(json.text(doc, tags.children[i]));
+            i = i + 1;
+        }
+    }
+}
+```
+
+在上述示例中，`json.member` 在对象节点中查找指定键名并返回对应子节点的整数索引，若键不存在或目标节点非对象则返回 `-1`（注意返回值为 `-1` 而非 `mu`）。当 JSON 对象包含重复键名时，`member` 从后向前查找并返回**最后一个同名成员**。
+
+### 转义引号与渲染节点
+
+`json.quote` 将普通字符串编码为带双引号的合法 JSON 字符串字面量（自动转义 `"`、`\`、控制字符 `\b`/`\f`/`\n`/`\r`/`\t` 以及其余 `< 0x20` 控制字节为 `\u00XX`）；`json.render` 则将指定节点及其子树渲染为无多余空白的紧凑 JSON 文本。
+
+```mio title="RenderJson.mio"
+yobu "kiso/encoding/json";
+yobu "kiso/string";
+
+kaku doc = json.parse(string.to_bytes("{ \"ok\": true, \"items\": [1, null, 7] }"));
+moshi (doc.error == "") {
+    // 输出紧凑 JSON：{"ok":true,"items":[1,null,7]}
+    chant(json.render(doc, doc.root));
+}
+
+// 单独转义包含换行与引号的字符串
+chant(json.quote("Hello\n\"Mio\"")); // "Hello\n\"Mio\""
+```
+
+---
 
 ### 公开类型
 
-```mio title="JSONTypes.mio" no-run
-// 以下为源码声明摘录，不是独立程序。
+#### `Value` 与 `Document`
+
+```mio title="JsonTypes.mio" no-run
+// 单个 JSON 值的扁平节点表示
 koukai kata Value {
-    kind: int64;
-    text: string;
-    children: []int64;
-    keys: []string;
+    kind: int64;       // 节点类型编号（0 ~ 5）
+    text: string;      // 原始文本或解码后的字符串内容
+    children: []int64; // 子节点在 Document.values 中的索引列表（array 与 object 使用）
+    keys: []string;    // 成员键名列表（仅 object 使用，与 children 一一对应）
 }
 
+// 解析后的 JSON 文档容器
 koukai kata Document {
-    values: []Value;
-    root: int64;
-    error: string;
-    offset: int64;
+    values: []Value;   // 文档内全部扁平节点池
+    root: int64;       // 根节点索引（失败时为 -1）
+    error: string;     // 错误描述（空字符串 "" 表示解析成功）
+    offset: int64;     // 解析结束或发生错误时的字节偏移量
 }
 ```
 
-`Value.kind` 的实际编码是：`0` 为 null、`1` 为 bool、`2` 为 number、`3` 为 string、`4` 为 array、`5` 为 object。`children` 存节点索引；对象的 `keys` 与 `children` 对齐。
+#### `Value.kind` 类型编码对照
 
-`Document.error` 为空字符串表示解析成功；失败时包含文本错误，`root` 不应被当作有效节点使用。某个查找函数返回 `-1` 表示节点不存在，与 `T?` 的 `mu` 不同。
+| `kind` 值 | JSON 类型 | `text` 字段内容                             | `children` / `keys` 内容                       |
+| --------- | --------- | ------------------------------------------- | ---------------------------------------------- |
+| `0`       | `null`    | `"null"`                                    | 均为空数组                                     |
+| `1`       | `bool`    | `"true"` 或 `"false"`                       | 均为空数组                                     |
+| `2`       | `number`  | 原始数字文本（如 `"-1.25e+3"`）             | 均为空数组                                     |
+| `3`       | `string`  | 已解码转义与 `\uXXXX` 代理对后的 UTF-8 文本 | 均为空数组                                     |
+| `4`       | `array`   | `""`                                        | `children` 按顺序保存元素节点索引；`keys` 为空 |
+| `5`       | `object`  | `""`                                        | `keys` 与 `children` 按出现顺序一一对应        |
 
-### 公开函数
+---
 
-| 函数 | 精确签名 | 说明 |
-| --- | --- | --- |
-| `parse` | `parse(data: []uint8) -> Document` | 解析 UTF-8 JSON 字节，返回文档和错误信息 |
-| `member` | `member(document: Document, object: int64, key: string) -> int64` | 查找对象字段；失败返回 `-1`；重名键从后向前查找 |
-| `text` | `text(document: Document, node: int64) -> string` | 获取节点文本，索引无效时返回空字符串 |
-| `integer` | `integer(document: Document, node: int64) -> int64?` | 仅对 number 节点尝试解析 `int64`，失败返回 `mu` |
-| `quote` | `quote(text: string) -> string` | 对字符串生成 JSON 引号及必要的转义 |
-| `render` | `render(document: Document, node: int64) -> string` | 将有效节点渲染为紧凑 JSON 文本 |
+### 公开函数（6 个）
 
-### 读取对象和数值
+| 函数      | 公开签名                                                          | 功能与返回规则                                                                                                                    |
+| --------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `parse`   | `parse(data: []uint8) -> Document`                                | 校验 UTF-8 并解析完整 JSON 文档；若输入非法、超出限制或末尾存在非空白多余数据，返回 `error != ""` 的 `Document`。                 |
+| `member`  | `member(document: Document, object: int64, key: string) -> int64` | 在索引为 `object` 的对象节点中从后向前查找 `key`，返回匹配子节点的索引；未找到或节点类型非对象返回 `-1`。                         |
+| `text`    | `text(document: Document, node: int64) -> string`                 | 返回索引为 `node` 的节点的 `text` 字段（字符串节点返回解码后文本，数字/布尔/null 返回原始文本，容器节点或越界索引返回 `""`）。    |
+| `integer` | `integer(document: Document, node: int64) -> int64?`              | 仅当 `node` 为数字节点（`kind == 2`）且文本可无损解析为有符号 `int64` 时返回对应整数；小数、指数、越界或非数字节点一律返回 `mu`。 |
+| `quote`   | `quote(text: string) -> string`                                   | 为 `text` 添加首尾双引号并转义必要字符，生成合法 JSON 字符串字面量。                                                              |
+| `render`  | `render(document: Document, node: int64) -> string`               | 将 `node` 及其子节点递归序列化为紧凑 JSON 文本；若 `node` 索引越界则返回 `"null"`。                                               |
 
-```mio title="ReadJSON.mio"
+---
+
+### 完整示例
+
+下面的示例演示了从解析嵌套 JSON、安全提取整数字段与浮点原始文本、修改后重新渲染的完整流程：
+
+```mio title="JsonWorkflow.mio"
+yobu "kiso/convert";
 yobu "kiso/encoding/json";
 yobu "kiso/string";
 
-kaku bytes = string.to_bytes("{\"id\":42,\"name\":\"Mio\"}");
-kaku doc = json.parse(bytes);
-moshi (doc.error == "") {
-    kaku id_node = json.member(doc, doc.root, "id");
-    kaku id = json.integer(doc, id_node);
-    moshi (id != mu) { chant(id); }
+kaku raw = "{\"service\":\"mio\",\"port\":8080,\"ratio\":-1.25e+3,\"dup\":1,\"dup\":2}";
+kaku doc = json.parse(string.to_bytes(raw));
 
-    kaku name_node = json.member(doc, doc.root, "name");
-    chant(json.text(doc, name_node));
+moshi (doc.error == "") {
+    // 提取整数端口
+    kaku port = json.integer(doc, json.member(doc, doc.root, "port"));
+    moshi (port != mu) {
+        chant(port); // 8080
+    }
+
+    // 科学计数法数字通过 text() 读取原始文本后再按需转为 float64
+    kaku ratio_text = json.text(doc, json.member(doc, doc.root, "ratio"));
+    kaku ratio = convert.parse_float64(ratio_text);
+    moshi (ratio != mu) {
+        chant(ratio); // -1250
+    }
+
+    // 重复键名返回最后一个匹配项
+    chant(json.text(doc, json.member(doc, doc.root, "dup"))); // 2
 }
 ```
 
-`integer` 不会自动解析带小数或指数的 JSON 数字；可以读取其原始文本，再由调用方按照需要转换。`member` 查找重复键时采用**最后一个同名成员**。
+---
 
-### 渲染已有文档
+### 使用限制与平台说明
 
-```mio title="RenderJSON.mio"
-yobu "kiso/encoding/json";
-yobu "kiso/string";
+- **资源与安全上限**：`json.parse` 在解析前会校验输入长度与 UTF-8 合法性，单次输入最大支持 **`67,108,864` 字节（64 MiB）**，嵌套结构深度上限为 **`256` 层**，单文档最多容纳 **`1,000,000` 个节点**，超出任意限制均安全返回错误。
+- **严格 RFC 8259 语法**：解析器拒绝前导零数字（如 `01`）、尾随逗号（如 `[1,]`）、未完整指数（如 `1e+`）以及字符串中未转义的控制字符（`< 0x20`）。`\uXXXX` 支持 UTF-16 代理对（Surrogate Pair）合并解码，孤立代理项会被替换为 Unicode 替换字符 `U+FFFD`。
+- **渲染与序列化边界**：`json.render` 面向由 `json.parse` 生成的合法无环节点图，不保证手工构造的循环引用节点图安全；当前模块未提供将任意 Mio `Map` 或自定义结构体直接自动序列化为 JSON 的反射接口。
 
-kaku doc = json.parse(string.to_bytes("{\"a\":[true,null,7]}"));
-moshi (doc.error == "") {
-    chant(json.render(doc, doc.root));
-    chant(json.quote("Hello\nMio"));
-}
-```
-
-### 输入范围和限制
-
-源码在解析前验证 UTF-8，拒绝大于 `67,108,864` 字节的输入；解析结构层数超过 `256` 或节点过多也会失败。JSON 数字原样保存以保持表示精度；`render` 面向有效的解析结果，**不会保证手工伪造的节点图都安全**。本包没有公开直接把任意 Mio `Map` 自动序列化的接口。
-
-源码：[`bunko/kiso/encoding/json/json.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/encoding/json/json.mio)，测试：[`json_test.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/encoding/json/json_test.mio)。
+源码依据：[Mio V2.1 · `bunko/kiso/encoding/json`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/encoding/json)。

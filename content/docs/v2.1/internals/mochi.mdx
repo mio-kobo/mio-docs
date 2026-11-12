@@ -1,161 +1,167 @@
 ---
 title: Mochi 格式与 VM（v14 / v16）
-description: V2.0 Go VM 的 Mochi v14 格式与 V2.1 纯 Mio v15、v16 扩展的兼容性边界。
+description: V2.0 Go VM 的 Mochi v14 格式与 V2.1 纯 Mio 及 Go 参考解码器 v15、v16 扩展的兼容性边界。
 ---
 
 ## V2.1 的 Mochi 格式变化 <FeatureBadge status="updated" since="2.1" />
 
-Mochi 是 Mio 的中间字节码格式。V2.1 的纯 Mio 编译器将它用于源码前端与原生代码生成之间的交接，并增加了两项元数据：
+Mochi 是 Mio 的中间字节码格式。在 `v2.1.0` 中，纯 Mio 编译器（以及 `v2.1.0` 的 Go 参考实现）将其用于源码前端与原生代码生成、参考 VM 之间的交接，并向既有 Opcode 空间尾部新增了两项元数据指令：
 
-| 版本 | 新增指令 | 作用 |
-| --- | --- | --- |
-| v15 | `OP_TYPE_CONSTRAINT = 66` | 携带字段结果的类型表示约束，不是运行时转换 |
-| v16 | `OP_CALL_TYPED = 67` | 为间接调用明确标注返回形状，辅助类型和栈分析 |
+| 版本 | 新增指令                                       | 机器编码（共字节数）                                   | 作用与关键限制                                                                                                 |
+| ---- | ---------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| v15  | `OpTypeConstraint` / `OP_TYPE_CONSTRAINT = 66` | 操作码 `u8` + 类型描述符 `u8`（2 字节）                | 为栈顶值补充类型表示约束，**不进行运行时数值转换**；描述符须为受支持的非零值且低于 `0x80`                      |
+| v16  | `OpCallTyped` / `OP_CALL_TYPED = 67`           | 操作码 `u8` + 实参数量 `u16` + 返回标记 `u8`（4 字节） | 类似 `OpCallValue` 的函数值调用，明确标注返回形状以辅助类型和栈分析；返回标记只能是 `0` 或 `1`，实参不能超上限 |
 
-v2.1.0 的 Native 与 Web 参考解码器支持 v16；v2.0.0 的 Go 解码器以 **v14** 为上限。生成新版 Mochi 后，不应将文件交给旧 Go VM、反汇编器或 AOT 工具并假设兼容。`Mochi v16` 是格式版本，和 `Mio V2.1` 的语言版本不是同一概念。
+**版本兼容性边界：**
 
-以下主体保留 **Mio v2.0.0 的 Mochi v14 格式与 Go VM 参考**（历史源码记录为 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`）。其数据格式、版本门槛和指令说明应按旧工具理解；Go AOT 与纯 Mio Native AOT 的边界见 [Native AOT](/docs/v2.1/internals/native-aot)。
+- **`v2.1.0` 源码实现：** 无论是纯 Mio 解码器（`bunko/kiso/encoding/mochi/decode.mio`）还是 `v2.1.0` 固定标签中的 Go 参考实现（`internal/mochi/mochi.go`）及浏览器 Web/WASM 参考执行路径，均支持至 **Mochi v16**（注意：旧文档 `bunko/kiso/encoding/mochi/README.md` 曾误写为 v1–v15，实际源码已更新至 v16）。
+- **`v2.0.0` 旧工具链：** 仅历史 **Mio v2.0.0** 的 Go 解码器与 VM 以 **v14** 为上限。生成包含 v15/v16 指令的 Mochi 文件后，不应交给旧 Go VM、旧反汇编器或已删除的旧 Go AOT 工具（`internal/aot`、`cmd/mochi-aot` 已在 `v2.1.0` 中移除）并假设兼容。
+- **最低版本按需编码：** 编码器采用“能表达当前程序所需的最低格式版本”策略。若程序未使用 Opcode 66 或 67，生成的 `.mochi` 文件版本号不必写为 16。`Mochi v16` 是字节码格式版本，和 `Mio v2.1.0` 的语言发布版本不是同一概念。
+
+以下主体保留 **Mio v2.0.0 的 Mochi v14 格式与 Go VM 参考**（历史源码记录为 `0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a`）。其基础二进制容器布局、v1–v14 指令表与验证门槛在 `v2.1.0` 中保持向后兼容；Go 参考前端与纯 Mio Native AOT 的边界见 [Native AOT](/docs/v2.1/internals/native-aot)。
 
 ## V2.0 的 v14 格式与 VM
 
-Mochi 是 Mio 的二进制字节码容器。所有多字节整数使用大端字节序，文件不包含填充、校验和或尾随数据。
+Mochi 是 Mio 的二进制字节码容器。所有多字节整数使用大端字节序，文件不包含填充、校验和或尾随数据（也不包含可以跳过验证直接执行的原生机器代码）。
 
-Mochi v14 增加受限数据复制转换指令。**旧 Go 解码器和 VM** 可以读取 Mochi v1 至 v14。`Version = 14` 是该实现支持上限；Go 编码器的 `encodedVersion` 按实际常量与指令选择输出版本，并非每次 build 都写 14。含 `OpDataConvert` 的程序写 v14。
+Mochi v14 增加受限数据复制转换指令。**v2.0.0 时代的 Go 解码器和 VM** 可以读取 Mochi v1 至 v14，`Version = 14` 是该旧实现的支持上限；Go 编码器的 `encodedVersion` 按实际常量与指令选择输出版本，并非每次 build 都写 14。含 `OpDataConvert` 的程序写 v14。
 
 ## 公共头部和主指令流
 
-| 字段 | 大小 | 说明 |
-| --- | ---: | --- |
-| 签名 | 5 字节 | ASCII `MOCHI` |
-| 版本 | `uint16` | `1` 至 `14` |
-| 常量数量 | `uint32` | 后续常量条目数 |
-| 常量表 | 可变 | 见下节 |
-| 全局槽位数量 | `uint32` | VM 启动时分配的槽位数 |
-| 主指令长度 | `uint32` | 指令字节数 |
-| 主指令 | 可变 | 编码后的 Opcode 与操作数 |
+| 字段         |     大小 | 说明                                                    |
+| ------------ | -------: | ------------------------------------------------------- |
+| 签名         |   5 字节 | ASCII `MOCHI`                                           |
+| 版本         | `uint16` | 格式版本号（v2.0.0 为 `1` 至 `14`；v2.1.0 扩展至 `16`） |
+| 常量数量     | `uint32` | 后续常量条目数                                          |
+| 常量表       |     可变 | 见下节                                                  |
+| 全局槽位数量 | `uint32` | VM 启动时分配的槽位数                                   |
+| 主指令长度   | `uint32` | 指令字节数                                              |
+| 主指令       |     可变 | 编码后的 Opcode 与操作数                                |
 
-Mochi v1 在主指令后结束。Mochi v2 至 v14 继续写入函数表。
+Mochi v1 在主指令后结束。Mochi v2 及后续版本继续写入函数表。
 
 ## 常量表
 
 每个常量以一个 `uint8` 类型标签开始：
 
-| 标签 | 数据 |
-| ---: | --- |
-| `1` | 一个按位保存的 `int64`，占 8 字节 |
-| `2` | `uint32` UTF-8 字节长度，随后是字符串数据 |
-| `3` | 一个 IEEE 754 binary64 位模式，占 8 字节，Mochi v3 及后续版本允许 |
-| `4` | 一个 IEEE 754 binary32 位模式，占 4 字节，Mochi v10 起允许 |
-| `5` / `8` | `int8` / `uint8` 位模式，占 1 字节，Mochi v11 起允许 |
-| `6` / `9` | `int16` / `uint16` 位模式，占 2 字节，Mochi v11 起允许 |
-| `7` / `10` | `int32` / `uint32` 位模式，占 4 字节，Mochi v11 起允许 |
+|       标签 | 数据                                                              |
+| ---------: | ----------------------------------------------------------------- |
+|        `1` | 一个按位保存的 `int64`，占 8 字节                                 |
+|        `2` | `uint32` UTF-8 字节长度，随后是字符串数据                         |
+|        `3` | 一个 IEEE 754 binary64 位模式，占 8 字节，Mochi v3 及后续版本允许 |
+|        `4` | 一个 IEEE 754 binary32 位模式，占 4 字节，Mochi v10 起允许        |
+|  `5` / `8` | `int8` / `uint8` 位模式，占 1 字节，Mochi v11 起允许              |
+|  `6` / `9` | `int16` / `uint16` 位模式，占 2 字节，Mochi v11 起允许            |
+| `7` / `10` | `int32` / `uint32` 位模式，占 4 字节，Mochi v11 起允许            |
 
 布尔值和 `mu` 不进入常量表，分别由 `OpTrue`、`OpFalse` 和 `OpNil` 产生。
 
-## Mochi v2 至 v14 函数表
+## Mochi v2 及后续版本函数表
 
 主指令后先写入 `uint32` 函数数量，每个函数依次包含：
 
-| 字段 | 大小 | 说明 |
-| --- | ---: | --- |
-| FunctionID | `uint16` | 从 0 开始，必须与函数表索引一致 |
-| 名称长度 | `uint16` | UTF-8 名称的字节数 |
-| 名称 | 可变 | 非空 UTF-8 文本 |
-| 参数数量 | `uint32` | 函数参数槽位数 |
-| 局部槽位数量 | `uint32` | 包含参数槽位，不能少于参数数量 |
-| 标志 | `uint8` | bit 0 表示函数返回值，其余位必须为 0 |
-| 捕获数量及捕获项 | 可变 | v9 起：`uint32` 数量，每项为 `uint8` 来源和 `uint32` 索引 |
-| 指令长度 | `uint32` | 函数指令字节数 |
-| 指令 | 可变 | 独立函数指令流 |
+| 字段             |     大小 | 说明                                                      |
+| ---------------- | -------: | --------------------------------------------------------- |
+| FunctionID       | `uint16` | 从 0 开始，必须与函数表索引一致                           |
+| 名称长度         | `uint16` | UTF-8 名称的字节数                                        |
+| 名称             |     可变 | 非空 UTF-8 文本                                           |
+| 参数数量         | `uint32` | 函数参数槽位数                                            |
+| 局部槽位数量     | `uint32` | 包含参数槽位，不能少于参数数量                            |
+| 标志             |  `uint8` | bit 0 表示函数返回值，其余位必须为 0                      |
+| 捕获数量及捕获项 |     可变 | v9 起：`uint32` 数量，每项为 `uint8` 来源和 `uint32` 索引 |
+| 指令长度         | `uint32` | 函数指令字节数                                            |
+| 指令             |     可变 | 独立函数指令流                                            |
 
 ## Opcode
 
 Opcode 占 1 字节。表中的 `u16` 操作数使用大端字节序，`u8` 操作数直接占一个字节。
 
-| 编号 | 名称 | 操作数 |
-| ---: | --- | --- |
-| 1 | `OpConstant` | 常量索引 `u16` |
-| 2 | `OpAdd` | 无 |
-| 3 | `OpPop` | 无 |
-| 4 | `OpSub` | 无 |
-| 5 | `OpMul` | 无 |
-| 6 | `OpDiv` | 无 |
-| 7 | `OpNeg` | 无 |
-| 8 | `OpTrue` | 无 |
-| 9 | `OpFalse` | 无 |
-| 10 | `OpNot` | 无 |
-| 11 | `OpEqual` | 无 |
-| 12 | `OpNotEqual` | 无 |
-| 13 | `OpLess` | 无 |
-| 14 | `OpLessEqual` | 无 |
-| 15 | `OpGreater` | 无 |
-| 16 | `OpGreaterEqual` | 无 |
-| 17 | `OpJump` | 目标字节偏移 `u16` |
-| 18 | `OpJumpIfFalse` | 目标字节偏移 `u16` |
-| 19 | `OpSetGlobal` | 全局槽位 `u16` |
-| 20 | `OpGetGlobal` | 全局槽位 `u16` |
-| 21 | `OpNil` | 无 |
-| 22 | `OpChant` | 无 |
-| 23 | `OpSetLocal` | 局部槽位 `u16` |
-| 24 | `OpGetLocal` | 局部槽位 `u16` |
-| 25 | `OpCall` | FunctionID `u16` |
-| 26 | `OpReturn` | 无 |
-| 27 | `OpReturnValue` | 无 |
-| 28 | `OpIntToFloat` | 无，Mochi v4 起允许 |
-| 29 | `OpFloatToInt` | 无，Mochi v4 起允许 |
-| 30 | `OpArray` | 元素数量 `u16`，Mochi v5 起允许 |
-| 31 | `OpIndex` | 无，Mochi v5 起允许 |
-| 32 | `OpLen` | 无，Mochi v6 起允许 |
-| 33 | `OpSetIndex` | 无，Mochi v6 起允许 |
-| 34 | `OpIsNil` | 无，Mochi v7 起允许 |
-| 35 | `OpSetNullableIndex` | 无，Mochi v7 起允许 |
-| 36 | `OpStruct` | 字段数量 `u16`，Mochi v8 起允许 |
-| 37 | `OpGetField` | 字段索引 `u16`，Mochi v8 起允许 |
-| 38 | `OpEnum` | 变体编号 `u16`、关联值数量 `u16`，Mochi v8 起允许 |
-| 39 | `OpEnumTag` | 无，Mochi v8 起允许 |
-| 40 | `OpGetEnumValue` | 关联值索引 `u16`，Mochi v8 起允许 |
-| 41 | `OpMap` | 无，Mochi v8 起允许 |
-| 42 | `OpMapGet` | 无，Mochi v8 起允许 |
-| 43 | `OpMapSet` | 无，Mochi v8 起允许 |
-| 44 | `OpFunction` | FunctionID `u16`，Mochi v8 起允许 |
-| 45 | `OpCallValue` | 实参数量 `u16`，Mochi v8 起允许 |
-| 46 | `OpClosure` | FunctionID `u16`，Mochi v9 起允许 |
-| 47 | `OpGetUpvalue` | Upvalue 索引 `u16`，Mochi v9 起允许 |
-| 48 | `OpSetUpvalue` | Upvalue 索引 `u16`，Mochi v9 起允许 |
-| 49 | `OpDefineLocal` | 局部槽位 `u16`，Mochi v9 起允许 |
-| 50 | `OpIntToFloat32` | 无，Mochi v10 起允许 |
-| 51 | `OpFloat32ToInt` | 无，Mochi v10 起允许 |
-| 52 | `OpFloat32ToFloat64` | 无，Mochi v10 起允许 |
-| 53 | `OpFloat64ToFloat32` | 无，Mochi v10 起允许 |
-| 54 | `OpMath` | 原语编号 `u8`、实参数量 `u8`，Mochi v10 起允许 |
-| 55 | `OpIntegerConvert` | 目标整数类型编号 `u8`，Mochi v11 起允许 |
-| 56 | `OpArrayTyped` | 元素数量 `u16`、元素描述符 `u8`，Mochi v12 起允许 |
-| 57 | `OpArrayMake` | 元素描述符 `u8`，Mochi v12 起允许 |
-| 58 | `OpArrayWithCapacity` | 元素描述符 `u8`，Mochi v12 起允许 |
-| 59 | `OpArrayPush` | 无，Mochi v12 起允许 |
-| 60 | `OpArrayCapacity` | 无，Mochi v12 起允许 |
-| 61 | `OpArrayReserve` | 无，Mochi v12 起允许 |
-| 62 | `OpArrayClone` | 无，Mochi v12 起允许 |
-| 63 | `OpArrayTruncate` | 无，Mochi v13 起允许 |
-| 64 | `OpArrayAppendAll` | 无，Mochi v13 起允许 |
-| 65 | `OpDataConvert` | 数据转换编号 `u8`，Mochi v14 起允许 |
+| 编号 | 名称                  | 操作数                                            |
+| ---: | --------------------- | ------------------------------------------------- |
+|    1 | `OpConstant`          | 常量索引 `u16`                                    |
+|    2 | `OpAdd`               | 无                                                |
+|    3 | `OpPop`               | 无                                                |
+|    4 | `OpSub`               | 无                                                |
+|    5 | `OpMul`               | 无                                                |
+|    6 | `OpDiv`               | 无                                                |
+|    7 | `OpNeg`               | 无                                                |
+|    8 | `OpTrue`              | 无                                                |
+|    9 | `OpFalse`             | 无                                                |
+|   10 | `OpNot`               | 无                                                |
+|   11 | `OpEqual`             | 无                                                |
+|   12 | `OpNotEqual`          | 无                                                |
+|   13 | `OpLess`              | 无                                                |
+|   14 | `OpLessEqual`         | 无                                                |
+|   15 | `OpGreater`           | 无                                                |
+|   16 | `OpGreaterEqual`      | 无                                                |
+|   17 | `OpJump`              | 目标字节偏移 `u16`                                |
+|   18 | `OpJumpIfFalse`       | 目标字节偏移 `u16`                                |
+|   19 | `OpSetGlobal`         | 全局槽位 `u16`                                    |
+|   20 | `OpGetGlobal`         | 全局槽位 `u16`                                    |
+|   21 | `OpNil`               | 无                                                |
+|   22 | `OpChant`             | 无                                                |
+|   23 | `OpSetLocal`          | 局部槽位 `u16`                                    |
+|   24 | `OpGetLocal`          | 局部槽位 `u16`                                    |
+|   25 | `OpCall`              | FunctionID `u16`                                  |
+|   26 | `OpReturn`            | 无                                                |
+|   27 | `OpReturnValue`       | 无                                                |
+|   28 | `OpIntToFloat`        | 无，Mochi v4 起允许                               |
+|   29 | `OpFloatToInt`        | 无，Mochi v4 起允许                               |
+|   30 | `OpArray`             | 元素数量 `u16`，Mochi v5 起允许                   |
+|   31 | `OpIndex`             | 无，Mochi v5 起允许                               |
+|   32 | `OpLen`               | 无，Mochi v6 起允许                               |
+|   33 | `OpSetIndex`          | 无，Mochi v6 起允许                               |
+|   34 | `OpIsNil`             | 无，Mochi v7 起允许                               |
+|   35 | `OpSetNullableIndex`  | 无，Mochi v7 起允许                               |
+|   36 | `OpStruct`            | 字段数量 `u16`，Mochi v8 起允许                   |
+|   37 | `OpGetField`          | 字段索引 `u16`，Mochi v8 起允许                   |
+|   38 | `OpEnum`              | 变体编号 `u16`、关联值数量 `u16`，Mochi v8 起允许 |
+|   39 | `OpEnumTag`           | 无，Mochi v8 起允许                               |
+|   40 | `OpGetEnumValue`      | 关联值索引 `u16`，Mochi v8 起允许                 |
+|   41 | `OpMap`               | 无，Mochi v8 起允许                               |
+|   42 | `OpMapGet`            | 无，Mochi v8 起允许                               |
+|   43 | `OpMapSet`            | 无，Mochi v8 起允许                               |
+|   44 | `OpFunction`          | FunctionID `u16`，Mochi v8 起允许                 |
+|   45 | `OpCallValue`         | 实参数量 `u16`，Mochi v8 起允许                   |
+|   46 | `OpClosure`           | FunctionID `u16`，Mochi v9 起允许                 |
+|   47 | `OpGetUpvalue`        | Upvalue 索引 `u16`，Mochi v9 起允许               |
+|   48 | `OpSetUpvalue`        | Upvalue 索引 `u16`，Mochi v9 起允许               |
+|   49 | `OpDefineLocal`       | 局部槽位 `u16`，Mochi v9 起允许                   |
+|   50 | `OpIntToFloat32`      | 无，Mochi v10 起允许                              |
+|   51 | `OpFloat32ToInt`      | 无，Mochi v10 起允许                              |
+|   52 | `OpFloat32ToFloat64`  | 无，Mochi v10 起允许                              |
+|   53 | `OpFloat64ToFloat32`  | 无，Mochi v10 起允许                              |
+|   54 | `OpMath`              | 原语编号 `u8`、实参数量 `u8`，Mochi v10 起允许    |
+|   55 | `OpIntegerConvert`    | 目标整数类型编号 `u8`，Mochi v11 起允许           |
+|   56 | `OpArrayTyped`        | 元素数量 `u16`、元素描述符 `u8`，Mochi v12 起允许 |
+|   57 | `OpArrayMake`         | 元素描述符 `u8`，Mochi v12 起允许                 |
+|   58 | `OpArrayWithCapacity` | 元素描述符 `u8`，Mochi v12 起允许                 |
+|   59 | `OpArrayPush`         | 无，Mochi v12 起允许                              |
+|   60 | `OpArrayCapacity`     | 无，Mochi v12 起允许                              |
+|   61 | `OpArrayReserve`      | 无，Mochi v12 起允许                              |
+|   62 | `OpArrayClone`        | 无，Mochi v12 起允许                              |
+|   63 | `OpArrayTruncate`     | 无，Mochi v13 起允许                              |
+|   64 | `OpArrayAppendAll`    | 无，Mochi v13 起允许                              |
+|   65 | `OpDataConvert`       | 数据转换编号 `u8`，Mochi v14 起允许               |
+|   66 | `OpTypeConstraint`    | 类型描述符 `u8`，Mochi v15 起允许                 |
+|   67 | `OpCallTyped`         | 实参数量 `u16`、返回标记 `u8`，Mochi v16 起允许   |
 
-Opcode 编号是 v1/v2 兼容面的一部分。未知 Opcode、截断操作数和跳入操作数字节的目标都会被拒绝。
+Opcode 编号是向后兼容面的一部分。未知 Opcode、非法类型描述符/返回标记、截断操作数和跳入操作数字节的目标都会被拒绝。
 
 ## 验证限制
 
-| 项目 | 上限 |
-| --- | ---: |
-| 文件 | 64 MiB |
-| 常量 | 65,536 |
-| 全局槽位 | 65,536 |
-| 单个字符串 | 16 MiB |
-| 主指令或单个函数指令 | 16 MiB |
-| 函数 | 65,536 |
-| 函数名称 | 65,535 字节 |
-| 单个函数的参数或局部槽位 | 65,536 |
+| 项目                     |        上限 |
+| ------------------------ | ----------: |
+| 文件                     |      64 MiB |
+| 常量                     |      65,536 |
+| 全局槽位                 |      65,536 |
+| 单个字符串               |      16 MiB |
+| 主指令或单个函数指令     |      16 MiB |
+| 函数                     |      65,536 |
+| 函数名称                 | 65,535 字节 |
+| 单个函数的参数或局部槽位 |      65,536 |
 
-解码器还会检查 UTF-8、索引范围、函数元数据、返回指令种类和跳转边界。文件末尾不允许额外数据。VM 会继续检查运行时类型、Value Stack、局部槽位初始化、调用深度和指令预算。
+解码器还会检查格式版本、UTF-8、索引范围、函数元数据、返回指令种类、v15/v16 操作数合法性和跳转边界。文件末尾不允许额外数据。VM 会继续检查运行时类型、Value Stack、局部槽位初始化、调用深度和指令预算。
 
 ## 兼容性
 
@@ -173,16 +179,15 @@ Opcode 编号是 v1/v2 兼容面的一部分。未知 Opcode、截断操作数�
 - v12 增加 Opcode 56 至 62，用于通用动态数组操作。
 - v13 增加 Opcode 63 和 64，用于数组截断与批量追加。
 - v14 增加 `OpDataConvert`。当前只允许 `string` 与紧凑 `[]uint8` 的复制转换。
-- 不使用新能力的既有程序保持原二进制语义；解码器继续接受合法 v1 至 v13。
-- 格式没有校验和或签名。加载不可信文件时必须经过 `mochi.Decode`，不能绕过验证直接执行原始字节。
+- v15 增加 `OpTypeConstraint`（Opcode 66），为栈顶值补充类型表示约束而不执行转换。v1 至 v14 解码器严格拒绝。
+- v16 增加 `OpCallTyped`（Opcode 67），为间接调用标注返回形状。v1 至 v15 解码器严格拒绝。
+- 不使用新能力的既有程序保持原二进制语义；解码器继续接受合法 v1 至 v15。
+- 格式没有校验和或签名。校验合法性不等于证明文件出自可信编译器，加载不可信文件时必须经过解码验证（如 `mochi.Decode`），不能绕过验证直接执行原始字节。
 
 后续格式若需要不兼容变更，应使用新的版本号，不能改变已有字段或 Opcode 编号。
 
-
 ## 执行系统与验证范围
 
-Go VM 对解码后的字节码运行共享 Value Stack 与调用帧；Mochi 容器不是 ARM64 可执行文件。`build → exec` 可验证序列化后执行行为，`disasm` 列出字节码结构。相关源码为 `internal/mochi/mochi.go`、`validate.go`、`internal/code/code.go` 与 `internal/vm/vm.go`。
-
-本页示例与字节码输出已使用官方 v2.0.0 发行包的 `build` / `exec` / `disasm` 路径验证；Hello 程序的实际 Mochi 输出与 `Constants` / `Instructions` 结构记录在 [CLI](/docs/v2.1/tooling/cli)。更早的完整 fixture 验证记录保留在 `verification/content-quality/`，不能自动改标为本轮对 v2.0.0 的重新执行。完整限制与来源见 [验证与来源](/docs/v2.1/tooling/verification)。
-
-Go VM 的对象生命周期由 Go 宿主管理；Native 精确 GC 是另一个 Runtime，不应混用资源上限或验收结论，见 [GC](/docs/v2.1/internals/gc)。
+- **参考 VM 与 Web 路径：** `v2.1.0` 的 Go 参考 VM 对解码后的字节码运行共享 Value Stack 与调用帧，用于语义对照和浏览器 Web/WASM Playground 执行（相关源码为 `internal/mochi/mochi.go`、`validate.go`、`internal/code/code.go` 与 `internal/vm/vm.go`）。Mochi 容器不是 ARM64 或 AMD64 可执行文件。
+- **原生 CLI 行为变化：** 在 `v2.1.0` 原生工具链中，正常的 `mio build` 默认输出原生可执行镜像（需显式指定 `--emit=mochi` 才输出字节码文件）；`mio run` 与 `mio exec` 会构建并启动本机原生程序，不再等同于 `v2.0.0` 时代的直接 Go VM 解释执行。`mio disasm` 用于检查 Mochi 指令与数据结构（不是可逆源码反编译器）。
+- **版本验证与内存模型边界：** 本页基础格式说明保留了 `v2.0.0` 的验证基线，更早的完整 fixture 验证记录保留在 `verification/content-quality/`，不能自动改标为对 `v2.1.0` 的全量重跑（完整限制与来源见 [验证与来源](/docs/v2.1/tooling/verification)）。Go 参考 VM 的对象生命周期由 Go 宿主管理；Native 精确 GC 是另一个 Runtime，不应混用资源上限或验收结论，见 [GC](/docs/v2.1/internals/gc)。

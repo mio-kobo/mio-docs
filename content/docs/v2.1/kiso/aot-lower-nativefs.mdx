@@ -1,76 +1,131 @@
 ---
-title: AOT NativeFS 桥接
-description: Mio V2.0 AOT NativeFS 桥接库 kiso/aot/lower/nativefs
+title: AOT 宿主原语与 NativeFS 桥接
+description: Mio V2.1 原生文件系统、进程环境与 IPv4 套接字系统调用运行时发射与精确根追踪桥接 kiso/aot/lower/nativefs
 ---
 
-> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/aot/lower/nativefs` 模块。相比 V2.0 的文件与目录基础桥接，V2.1 新增了操作系统进程与环境原语（操作编号 `15 ~ 31`）、阻塞 IPv4 套接字原语（操作编号 `32 ~ 40`）以及对应的 `emit_socket_runtime` 运行时代码发射入口，并更新了 `emit_runtime` 的参数签名以支持 `os_state` 槽位重定位。
 
+## AOT 宿主原语与 NativeFS 桥接
 
-## AOT NativeFS 桥接
+`kiso/aot/lower/nativefs` 为 Mio 原生 AOT 降级器（`kiso/aot/lower`）提供 Darwin ARM64 平台的宿主系统调用桥接。
 
-NativeFS 桥接模块面向 AOT 代码生成器，用于识别文件系统宿主调用、判断参数根位置以及发射 NativeFS 运行时代码。
+在编译期间，该模块通过完整的 `$mma::...::<sha256>` 签名指纹识别无函数体的宿主原语声明，向降级器报告参数个数、精确 GC 根位置及返回值引用属性，并将底层 Darwin 系统调用封装例程发射到目标 `arm64.Assembler` 缓冲区中。
 
-它不是应用层文件 API。普通文件的读写、状态查询和目录操作应使用 `kiso/fs`。
-
-本模块属于 **AOT 编译工具链接口**，其公开声明不等于稳定的应用层 API；以下内容对应 `v2.0.0` 发布标签。
+本模块属于 **AOT 编译工具链内部接口**；普通应用层的文件读写、进程控制与网络通信应使用 `kiso/fs`、`kiso/os` 与 `kiso/net/tcp`。
 
 ### 导入包
 
-> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+> **运行环境：** 当前网页 Playground 的 WASM 环境不包含 AOT 工具链模块。以下代码需在本地通过 Mio V2.1 CLI 与完整 Bunko 标准库运行。
 
-通过 `yobu "kiso/aot/lower/nativefs";` 导入本包，随后使用 `nativefs.函数名(...)` 调用。
+通过 `yobu "kiso/aot/lower/nativefs";` 导入本包，并使用 `nativefs.函数名(...)` 调用：
 
-```mio title="Stdlib.mio" no-run
+```mio title="NativefsImport.mio" no-run
 yobu "kiso/aot/lower/nativefs";
 ```
 
-### 操作编号
+### 识别宿主原语与查询根属性
 
-`operation(name)` 根据宿主接口完整签名识别操作；不能识别的名称返回 `op_none`。编号是模块内的工具链约定。
+降级器在扫描 `mochi.File` 中的无体函数时，调用 `nativefs.operation` 验证完整签名指纹，并依据 `parameter_count` 与 `parameter_is_root` 构造调用点的精确 Shadow Frame：
 
-```mio title="Nativefs.mio" no-run
+```mio title="NativefsInspect.mio" no-run
 yobu "kiso/aot/lower/nativefs";
 
-kaku op = nativefs.operation("not-a-native-signature");
-chant(op == nativefs.op_none);
+// 传入完整且带有签名哈希的宿主原语名称
+kaku sig = "$mma::mio/fs/runtime::read::e8706d18fa932e83ff56c940a8552084a64d75a1d0629364439b5e079ca29430";
+kaku op = nativefs.operation(sig);
+
+moshi (op != nativefs.op_none) {
+    chant(op == nativefs.op_read);                    // hai (12)
+    chant(nativefs.parameter_count(op));              // 5
+    chant(nativefs.parameter_is_root(op, 0));         // iie（资源句柄令牌，非托管指针）
+    chant(nativefs.parameter_is_root(op, 1));         // hai（目标字节缓冲区，须登记为 GC 根）
+    chant(nativefs.returns_reference(op));            // hai
+    chant(nativefs.entry_label(op));                  // "nativefs_read"
+}
+
+// 缺少完整模块路径或哈希指纹的名称一律拒绝
+chant(nativefs.operation("read") == nativefs.op_none); // hai
 ```
 
-### 参数和返回引用
+在上述示例中，`op_read` 接收 5 个参数，其中索引 `0` 为代际检查整数句柄（非堆对象），索引 `1` 与索引 `4` 为受管理的字节数组，因此 `parameter_is_root` 仅对托管引用参数返回 `hai`。
 
-`parameter_count` 返回操作需要的参数数目；`parameter_is_root` 和 `returns_reference` 提供编译器精确根追踪所需的信息，不应用于业务数据检查。
+### 发射宿主运行时例程
 
-### 运行时发射
+在生成完所有用户函数指令后，降级器会调用 `emit_runtime`（以及在检测到套接字操作时调用 `emit_socket_runtime`）向汇编器写入底层封装例程：
 
-`entry_label` 返回运行时代码入口标签，`emit_runtime` 向传入的 ARM64 Assembler 添加代码。应检查后续编码和汇编结果。
-
-### 公开常量
-
-`op_none`、`op_close`、`op_dir_close`、`op_dir_is_dir`、`op_dir_is_file`、`op_dir_name`、`op_dir_next`、`op_dir_status`、`op_file_status`、`op_mkdir`、`op_open`、`op_open_dir`、`op_read`、`op_stat`、`op_write`。以上 15 个公开整数常量从 0 到 14 依序编号。
-
-### 公开函数（6 个）
-
-以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
-
-| 函数 | 公开签名 | 功能与返回规则 |
-| --- | --- | --- |
-| `operation` | `operation(name: string) -> int64` | 根据完整宿主签名识别操作；未知返回 `op_none`。 |
-| `parameter_count` | `parameter_count(op: int64) -> int64` | 查询操作参数数量。 |
-| `parameter_is_root` | `parameter_is_root(op: int64, index: int64) -> bool` | 判断某参数是否应作为精确 GC 根。 |
-| `returns_reference` | `returns_reference(op: int64) -> bool` | 判断该操作是否返回受管理引用。 |
-| `entry_label` | `entry_label(op: int64) -> string` | 查询运行时代码入口标签。 |
-| `emit_runtime` | `emit_runtime(code: arm64.Assembler, empty_tagged: int64) -> unit` | 向汇编器写入 NativeFS 运行时代码。 |
-
-### 完整示例
-
-```mio title="Nativefs.mio" no-run
+```mio title="NativefsEmit.mio" no-run
+yobu "kiso/aot/arm64";
 yobu "kiso/aot/lower/nativefs";
+yobu "kiso/aot/macho";
 
-kaku op = nativefs.operation("not-a-native-signature");
-chant(op == nativefs.op_none);
+kaku code = arm64.assembler();
+kaku patches: []macho.AddressPatch = [];
+
+// 发射文件、目录与进程系统调用例程（os_state 为 -1 表示未使用 argc/argv/envp 状态槽）
+nativefs.emit_runtime(code, 1, patches, -1);
+
+// 若程序使用了 kiso/net/tcp，额外发射 IPv4 套接字例程
+nativefs.emit_socket_runtime(code, 1);
+
+// 写入程序退出清理标签供 normal_exit 调用
+arm64.assembler_bl(code, "nativefs_cleanup");
 ```
 
-### 使用限制
+---
 
-导出的 `op_*` 常量和函数是 AOT 实现细节，调用方不能将其当作可扩展或稳定的外部文件系统 ABI。不能凭操作名称猜测宿主可用的功能；仍应遵循 Runtime 的完整签名和参数表示约定。
+### 核心运行时机制
 
-源码依据：[Mio v2.0.0 · `bunko/kiso/aot/lower/nativefs/nativefs.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/aot/lower/nativefs/nativefs.mio)。
+`kiso/aot/lower/nativefs` 生成的原生运行时封装遵循以下隔离与资源安全协议：
+
+- **代际检查资源句柄表（32 槽）**：文件（`kind = 1`）、目录（`kind = 2`）与套接字（`kind = 3`）共享一张按需 `mmap` 分配的 `4,096` 字节句柄表（共 `32` 个 `128` 字节表项）。暴露给 Mio 代码的并非原始操作系统文件描述符，而是将槽位索引（低 8 位）与单调递增代际计数器（高位）组合而成的令牌；每次访问都会校验代际号与资源类型，防止悬垂句柄或跨类型误用。
+- **非托管临时内存隔离**：向内核传递路径字符串或 `exec`/`spawn` 参数数组时，运行时会通过匿名 `mmap` 分配临时缓冲区、复制数据并追加 `\0` 终止符，系统调用返回后立即 `munmap` 释放，绝不将原生 C 指针混入托管堆或 GC 根集合。
+- **退出自动清理（`nativefs_cleanup`）**：程序正常退出前调用 `nativefs_cleanup`，遍历并关闭所有尚未显式释放的文件与目录描述符，归还目录遍历缓冲区（`16 KiB`）与句柄表内存映射。
+
+---
+
+### 公开常量（15 个）
+
+模块为文件系统操作导出编号 `0 ~ 14` 的具名常量；进程/环境操作（`15 ~ 31`）与套接字操作（`32 ~ 40`）由 `operation` 直接返回对应整数编号：
+
+| 常量                | 值        | 对应原语与说明                                                                                                                                                                                      |
+| ------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `op_none`           | `0`       | 未识别或签名指纹不匹配                                                                                                                                                                              |
+| `op_close`          | `1`       | `mio/fs/runtime::close`（入口标签 `nativefs_close`）                                                                                                                                                |
+| `op_dir_close`      | `2`       | `mio/fs/runtime::dir_close`（入口标签 `nativefs_dir_close`）                                                                                                                                        |
+| `op_dir_is_dir`     | `3`       | `mio/fs/runtime::dir_is_dir`（入口标签 `nativefs_dir_is_dir`）                                                                                                                                      |
+| `op_dir_is_file`    | `4`       | `mio/fs/runtime::dir_is_file`（入口标签 `nativefs_dir_is_file`）                                                                                                                                    |
+| `op_dir_name`       | `5`       | `mio/fs/runtime::dir_name`（入口标签 `nativefs_dir_name`）                                                                                                                                          |
+| `op_dir_next`       | `6`       | `mio/fs/runtime::dir_next`（入口标签 `nativefs_dir_next`）                                                                                                                                          |
+| `op_dir_status`     | `7`       | `mio/fs/runtime::dir_status`（入口标签 `nativefs_dir_status`）                                                                                                                                      |
+| `op_file_status`    | `8`       | `mio/fs/runtime::file_status`（入口标签 `nativefs_file_status`）                                                                                                                                    |
+| `op_mkdir`          | `9`       | `mio/fs/runtime::mkdir`（入口标签 `nativefs_mkdir`）                                                                                                                                                |
+| `op_open`           | `10`      | `mio/fs/runtime::open`（入口标签 `nativefs_open`）                                                                                                                                                  |
+| `op_open_dir`       | `11`      | `mio/fs/runtime::open_dir`（入口标签 `nativefs_open_dir`）                                                                                                                                          |
+| `op_read`           | `12`      | `mio/fs/runtime::read`（入口标签 `nativefs_read`）                                                                                                                                                  |
+| `op_stat`           | `13`      | `mio/fs/runtime::stat`（入口标签 `nativefs_stat`）                                                                                                                                                  |
+| `op_write`          | `14`      | `mio/fs/runtime::write`（入口标签 `nativefs_write`）                                                                                                                                                |
+| _(进程与环境原语)_  | `15 ~ 31` | 依次对应 `argc`、`arg_size`、`arg_copy`、`chmod`、`exit`、`spawn`、`exec`、`pid`、`remove`、`rmdir`、`spawn_test`、`monotonic_ms`、`env_size`、`env_copy`、`stdin_ready`、`stdin_wait`、`real_path` |
+| _(IPv4 套接字原语)_ | `32 ~ 40` | 依次对应 `socket::open`、`status`、`bind_ipv4`、`connect_ipv4`、`listen`、`accept`、`read`、`write`、`close`                                                                                        |
+
+---
+
+### 公开函数（7 个）
+
+| 函数                  | 公开签名                                                                                                           | 功能与返回规则                                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `operation`           | `operation(name: string) -> int64`                                                                                 | 校验完整 `$mma::<模块>::<函数>::<sha256>` 签名，返回操作编号（`1 ~ 40`）；未匹配返回 `op_none`（`0`）。                                                             |
+| `parameter_count`     | `parameter_count(op: int64) -> int64`                                                                              | 返回指定操作编号期望的参数个数；若 `op == op_none` 则返回 `-1`。                                                                                                    |
+| `parameter_is_root`   | `parameter_is_root(op: int64, index: int64) -> bool`                                                               | 判断第 `index` 个参数（从 `0` 开始）是否为受管理的堆对象或字符串引用，需要纳入调用方 Shadow Frame 根追踪。                                                          |
+| `returns_reference`   | `returns_reference(op: int64) -> bool`                                                                             | 判断该宿主原语的返回值是否为受管理的引用类型（如 `dir_name` 返回的字符串或部分操作返回的空字符串标记）。                                                            |
+| `entry_label`         | `entry_label(op: int64) -> string`                                                                                 | 返回该操作对应的汇编运行时例程入口标签名称（如 `"nativefs_open"`、`"nativeos_spawn"`、`"native_socket_open"`）。                                                    |
+| `emit_runtime`        | `emit_runtime(code: arm64.Assembler, empty_tagged: int64, patches: []macho.AddressPatch, os_state: int64) -> unit` | 向 `code` 发射文件、目录与清理运行时例程；当 `os_state >= 0` 时，同步发射进程、命令行参数、环境变量与路径规范化例程，并将访问全局进程状态槽的指令登记到 `patches`。 |
+| `emit_socket_runtime` | `emit_socket_runtime(code: arm64.Assembler, empty: int64) -> unit`                                                 | 向 `code` 发射阻塞 IPv4 TCP 套接字运行时例程（`native_socket_*`）。                                                                                                 |
+
+---
+
+### 使用限制与平台说明
+
+- **签名指纹严格校验**：`operation` 绑定了编译器生成的完整 `$mma::...` 签名哈希，不能仅凭短函数名调用，也不应将其视为可扩展的通用 FFI 机制。
+- **平台系统调用约定**：生成的汇编指令直接调用 Darwin ARM64 系统调用（`SVC #128`，系统调用号置于 `x16`），面向 macOS ARM64 原生目标平台。
+
+源码依据：[Mio V2.1 · `bunko/kiso/aot/lower/nativefs`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/aot/lower/nativefs)。

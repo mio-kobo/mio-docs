@@ -1,86 +1,183 @@
 ---
-title: AOT 类型分析
-description: Mio V2.0 AOT 类型分析库 kiso/aot/lower/types
+title: AOT 类型与控制流分析
+description: Mio V2.1 字节码类型流求解、精确 GC 根判定与非空流窄化分析 kiso/aot/lower/types
 ---
 
-> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/aot/lower/types` 模块。在保留 V2.0 基础类型表示与分析入口的同时，V2.1 新增了 `type_map_ref` 表示类别、细粒度整数位宽描述符查询（`integer_descriptor`）、容器元素类型查询（`type_array_element`、`map_field`）以及多态参数转发与测试报告签名识别接口。
 
+## AOT 类型与控制流分析
 
-## AOT 类型分析
+`kiso/aot/lower/types` 为 Mio 原生 AOT 降级器（`kiso/aot/lower`）提供静态类型流求解与控制流可达性分析。
 
-AOT 类型分析模块读取 Mochi 文件并构造供 Lowering 使用的类型和控制流信息，包括节点表示、可空性、可达函数及其它内部判定结果。
-
-这是编译器内部表示分析接口，**不是**通用对象反射功能。使用者不能把分析节点编号与 Mio 运行时对象地址混为一谈。
-
-本模块属于 **AOT 编译工具链接口**，其公开声明不等于稳定的应用层 API；以下内容对应 `v2.0.0` 发布标签。
+该模块读取 `mochi.File` 字节码模块，通过两阶段求解（先建立基本块指令边界与精确操作数栈深度，再构造并查集类型等价类与数据流固定点）推导出每个全局槽位、局部槽位、捕获单元以及每条指令入口栈槽的物理表示类别、可空性及精确 GC 根属性。
 
 ### 导入包
 
-> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+> **运行环境：** 当前网页 Playground 的 WASM 环境不包含 AOT 工具链模块。以下代码需在本地通过 Mio V2.1 CLI 与完整 Bunko 标准库运行。
 
-通过 `yobu "kiso/aot/lower/types";` 导入本包，随后使用 `types.函数名(...)` 调用。
+通过 `yobu "kiso/aot/lower/types";` 导入本包，并使用 `types.函数名(...)` 调用：
 
-```mio title="Stdlib.mio" no-run
+```mio title="LowerTypesImport.mio" no-run
 yobu "kiso/aot/lower/types";
 ```
 
-### 表示类别
+### 执行类型分析与查询节点状态
 
-本包公开 `type_integer`、`type_float32`、`type_array_ref` 等常量表示内部分析结果。`type_kind`、`type_nullable` 和 `type_is_heap_reference` 可查询已建立分析中的节点状态。
+调用 `types.analyze_types` 传入 `mochi.File` 后，应先检查 `result.error_detail == 0`，再查询各槽位及指令入口栈槽的分析结果：
 
-```mio title="Types.mio" no-run
+```mio title="AnalyzeTypesDemo.mio" no-run
 yobu "kiso/aot/lower/types";
+yobu "kiso/encoding/binary";
+yobu "kiso/encoding/mochi";
 
-chant(types.type_unknown);
-chant(types.type_integer);
+// 构造包含常量压栈与丢弃的最小模块（OpConst 0; OpPop）
+kaku file = mochi.File {
+    version: 14,
+    constants: [
+        mochi.Constant {
+            tag: uint8(1),
+            bits: binary.U64 { high: uint32(0), low: uint32(42) },
+            data: []
+        }
+    ],
+    global_count: 0,
+    instructions: [1, 0, 0, 3],
+    functions: []
+};
+
+kaku analysis = types.analyze_types(file);
+moshi (analysis.error_detail == 0) {
+    // 查询第 1 条指令（字节偏移 3 处的 OpPop）入口栈顶节点
+    kaku stack = analysis.blocks[0].entry[3];
+    kaku top = stack[0];
+
+    chant(types.type_kind(analysis, top) == types.type_integer);
+    chant(types.type_nullable(analysis, top));
+    chant(types.type_is_heap_reference(analysis, top));
+}
 ```
 
-### 分析程序
+在上述示例中，`analysis.blocks[0]` 对应顶层主代码块（函数对应的 `TypeBlock` 位于 `blocks[function_id + 1]`）。字节偏移 `3` 处的栈顶元素被求解为非空 `type_integer`，因此 `type_is_heap_reference` 返回 `iie`，降级器无需将其登记为 GC 根。
 
-`analyze_types` 返回包含内部 arena、全局值、函数局部值与控制流信息的 `TypeAnalysis`。`analyze_types_traced` 可以开启分析追踪配置。
+---
 
-### 辅助判定
+### 表示类别与根判定规则
 
-`reachable_functions` 用于函数可达性分析，`enum_read_tag` 辅助枚举标签读取，`type_instruction_width` 提供指令宽度信息。它们应处理已验证的 Mochi 输入。
+本模块维护的 13 个闭合类别常量描述的是**运行时物理表示形态**，而非源码层语法类型名称：
+
+- **精确 GC 根判定（`type_is_heap_reference`）**：
+    - 引用类别（`type_string_id`、`type_array_ref`、`type_struct_ref`、`type_enum_ref`、`type_function_ref`、`type_map_ref`）始终返回 `hai`（其中静态字符串常量以最低位为 `1` 的 Tagged ID 形式发布，GC 标记阶段会自动跳过）。
+    - 基础标量类别（`type_integer`、`type_float32`、`type_float64`、`type_float_any`、`type_bool`）仅在标记为可空（`type_nullable == hai`，即需要分配 Type-106 堆装箱对象）时返回 `hai`；非空原始标量位模式绝不会被发布为堆根。
+    - `type_unknown` 与 `type_nil` 始终返回 `iie`。
+- **严谨的等价类合并（Strict Union）**：合并两条控制流分支时，`type_nil` 仅会为另一侧的具体类型补充 `nullable` 标记，而不会把两种不兼容的具体表示（如 `int64` 与 `string`）静默折叠为模糊指针。
+- **路径敏感的非空窄化**：前向必经分析（Must-Analysis）会在 `OpIsNil` 条件分支的非空边上为未捕获的局部变量建立非空事实；若变量被闭包捕获为共享 `Cell`，在经历函数调用或写单元操作后该非空证明会自动失效。
+
+---
+
+### 公开常量（13 个）
+
+| 常量                | 值   | 物理表示说明                                                             |
+| ------------------- | ---- | ------------------------------------------------------------------------ |
+| `type_unknown`      | `0`  | 尚未求解的约束变量或不可达位置                                           |
+| `type_integer`      | `1`  | 64 位寄存器槽承载的有符号/无符号整数（具体位宽见 `integer_descriptor`）  |
+| `type_float32`      | `2`  | IEEE 754 32 位单精度浮点数                                               |
+| `type_float64`      | `3`  | IEEE 754 64 位双精度浮点数                                               |
+| `type_bool`         | `4`  | 布尔值（`0` 或 `1`）                                                     |
+| `type_string_id`    | `5`  | 字符串槽（Tagged 常量表 ID 或动态托管字符串描述符）                      |
+| `type_array_ref`    | `6`  | 托管数组描述符引用                                                       |
+| `type_struct_ref`   | `7`  | 托管结构体实例引用                                                       |
+| `type_enum_ref`     | `8`  | 托管枚举实例引用                                                         |
+| `type_function_ref` | `9`  | 托管闭包 / 函数值对象引用                                                |
+| `type_nil`          | `10` | 纯 `mu` 空值                                                             |
+| `type_float_any`    | `11` | 浮点宽度的多态表示（用于同时接受 `float32` 与 `float64` 的内置浮点谓词） |
+| `type_map_ref`      | `12` | 托管 Map 映射描述符引用                                                  |
+
+---
 
 ### 公开类型
 
-- `TypeArena`：保存节点并查集、种类、宽度和引用信息的分析存储。
-- `TypeBlock`：表示控制流基本块的内部结构。
-- `TypeAnalysis`：保存 arena、函数可达与槽位/返回值分析及错误详情。
+```mio title="LowerTypesStructs.mio" no-run
+// 并查集存储与类型约束图状态
+koukai kata TypeArena {
+    parent: []int64;
+    revision: []int64;
+    kind: []int64;
+    nullable: []bool;
+    struct_arity: []int64;
+    struct_exact: []bool;
+    fields: [][]int64;
+    array_width: []int64;
+    array_descriptor: []int64;
+    integer_descriptor: []int64;
+    map_written: []bool;
+    targets: [][]int64;
+    variants: [][][]int64;
+    trace: []bool;
+    context: []int64;
+    nullable_origins: [][]int64;
+}
 
-### 公开常量
+// 单个代码块（顶层 main 或函数体）的逐字节入口栈快照与可达性
+koukai kata TypeBlock {
+    data: []uint8;
+    function_id: int64; // 顶层 main 为 -1，其余为函数索引
+    entry: [][]int64;   // entry[offset] 保存该字节偏移处的栈底到栈顶节点编号
+    reachable: []bool;  // reachable[offset] 标记该字节偏移是否从入口可达
+}
 
-`type_unknown`、`type_integer`、`type_float32`、`type_float64`、`type_bool`、`type_string_id`、`type_array_ref`、`type_struct_ref`、`type_enum_ref`、`type_function_ref`、`type_nil`、`type_float_any`，共 12 个公开类型分类常量。
-
-### 公开函数（10 个）
-
-以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
-
-| 函数 | 公开签名 | 功能与返回规则 |
-| --- | --- | --- |
-| `type_kind` | `type_kind(analysis: TypeAnalysis, node: int64) -> int64` | 返回分析节点的表示类别编号。 |
-| `type_nullable` | `type_nullable(analysis: TypeAnalysis, node: int64) -> bool` | 查询分析节点是否标记为可空。 |
-| `type_is_heap_reference` | `type_is_heap_reference(analysis: TypeAnalysis, node: int64) -> bool` | 判断节点表示是否需要作为受管理的堆引用追踪。 |
-| `type_instruction_width` | `type_instruction_width(opcode: int64) -> int64` | 返回分析使用的操作码编码宽度。 |
-| `enum_read_tag` | `enum_read_tag(file: mochi.File, data: []uint8, at: int64) -> int64` | 读取分析所需的枚举标签信息。 |
-| `reachable_functions` | `reachable_functions(file: mochi.File) -> []bool` | 返回函数可达性标记数组。 |
-| `array_forward_opcode` | `array_forward_opcode(function: mochi.Function) -> int64` | 查询函数在数组前向分析中的相关操作码信息。 |
-| `is_float_predicate` | `is_float_predicate(function: mochi.Function) -> bool` | 判断函数是否符合内部浮点谓词形态。 |
-| `analyze_types` | `analyze_types(file: mochi.File) -> TypeAnalysis` | 执行类型与控制流信息分析。 |
-| `analyze_types_traced` | `analyze_types_traced(file: mochi.File, trace: bool) -> TypeAnalysis` | 在给定追踪配置下执行类型分析。 |
-
-### 完整示例
-
-```mio title="Types.mio" no-run
-yobu "kiso/aot/lower/types";
-
-chant(types.type_unknown);
-chant(types.type_integer);
+// 完整类型分析结果
+koukai kata TypeAnalysis {
+    arena: TypeArena;
+    globals: []int64;     // 各全局变量槽位对应的类型节点编号
+    locals: [][]int64;    // locals[function_id][slot] 对应的类型节点编号
+    returns: []int64;     // 各函数返回值的类型节点编号（无返回值时为 -1）
+    upvalues: [][]int64;  // 各函数捕获上值（Upvalue）的类型节点编号
+    cells: [][]bool;      // cells[function_id][slot] 标记局部槽位是否被闭包捕获为共享 Cell
+    blocks: []TypeBlock;  // blocks[0] 为顶层代码，blocks[id + 1] 为对应函数代码
+    error_detail: int64;  // 0 表示求解成功；非 0 为打包的定位错误码
+}
 ```
 
-### 使用限制
+---
 
-`node` 必须来自同一次有效的分析结果；使用非法编号或破坏内部数组约束可能触发越界错误。不能仅凭 `type_is_heap_reference` 断言任意运行时指针合法，且分析 API 不承诺用户级动态类型信息。
+### 公开函数（15 个）
 
-源码依据：[Mio v2.0.0 · `bunko/kiso/aot/lower/types/types.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/aot/lower/types/types.mio)。
+#### 1. 求解入口与节点属性查询（6 个）
+
+| 函数                     | 公开签名                                                              | 功能与返回规则                                                                                                                            |
+| ------------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `analyze_types`          | `analyze_types(file: mochi.File) -> TypeAnalysis`                     | 对 `mochi.File` 执行完整类型流求解与可达性分析（关闭溯源追踪）。                                                                          |
+| `analyze_types_traced`   | `analyze_types_traced(file: mochi.File, trace: bool) -> TypeAnalysis` | 执行类型分析；当 `trace` 为 `hai` 时在 `arena.nullable_origins` 中记录可空性引入的指令来源。                                              |
+| `type_kind`              | `type_kind(analysis: TypeAnalysis, node: int64) -> int64`             | 压缩路径并返回等价类根节点的表示类别编号（`0 ~ 12`）。                                                                                    |
+| `integer_descriptor`     | `integer_descriptor(analysis: TypeAnalysis, node: int64) -> int64`    | 查询整数节点的细粒度位宽描述符编号（`1` 为默认 `int64`，`12..14` 为有符号 `int8/16/32`，`15..17` 为无符号 `uint8/16/32`，`0` 为未限定）。 |
+| `type_nullable`          | `type_nullable(analysis: TypeAnalysis, node: int64) -> bool`          | 查询类型节点是否可能为 `mu`。                                                                                                             |
+| `type_is_heap_reference` | `type_is_heap_reference(analysis: TypeAnalysis, node: int64) -> bool` | 判断该节点在运行时槽位中是否需要作为精确 GC 根登记。                                                                                      |
+
+#### 2. 容器与指令元数据辅助查询（6 个）
+
+| 函数                     | 公开签名                                                             | 功能与返回规则                                                                                               |
+| ------------------------ | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `type_array_element`     | `type_array_element(arena: TypeArena, node: int64) -> int64`         | 返回数组节点对应的元素类型节点编号；若 `node` 非数组类型则返回 `-1`。                                        |
+| `map_field`              | `map_field(arena: TypeArena, node: int64, index: int64) -> int64`    | 返回 Map 节点的键（`index == 0`）或可空值（`index == 1`）类型节点编号；非 Map 返回 `-1`。                    |
+| `type_instruction_width` | `type_instruction_width(opcode: int64) -> int64`                     | 返回已知 Mochi 操作码的字节编码长度（`1 ~ 5`）；未知操作码返回 `0`。                                         |
+| `enum_read_tag`          | `enum_read_tag(file: mochi.File, data: []uint8, at: int64) -> int64` | 识别编译器生成的标准 `awase` 变体检查前导指令，返回偏移 `at` 处负载读取对应的变体标签编号；未匹配返回 `-1`。 |
+| `reachable_functions`    | `reachable_functions(file: mochi.File) -> []bool`                    | 从顶层代码出发沿静态调用与函数值/闭包引用进行保守可达性分析，返回各函数可达性标记数组。                      |
+| `forwarded_parameter`    | `forwarded_parameter(function: mochi.Function) -> int64`             | 若函数体为无副作用的纯参数转发（如泛型 `identity`），返回被转发的参数索引；否则返回 `-1`。                   |
+
+#### 3. 编译器模式识别辅助函数（3 个）
+
+| 函数                   | 公开签名                                                  | 功能与返回规则                                                                                        |
+| ---------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `array_forward_opcode` | `array_forward_opcode(function: mochi.Function) -> int64` | 检测函数是否为 `kiso/array` 泛型包装转发体，返回对应的底层数组操作码（`57 ~ 64`）；非转发体返回 `0`。 |
+| `is_float_predicate`   | `is_float_predicate(function: mochi.Function) -> bool`    | 按完整 7 字节指令序列判定函数是否为多态浮点谓词（如 `is_nan`、`is_inf`、`is_finite`）。               |
+| `is_testing_report`    | `is_testing_report(name: string) -> bool`                 | 判断函数符号名是否为标准测试断言报告或数据包报告宿主入口。                                            |
+| `is_testing_packet`    | `is_testing_packet(name: string) -> bool`                 | 判断函数符号名是否为隔离测试结构化数据包报告入口。                                                    |
+
+---
+
+### 使用限制与平台说明
+
+- **节点编号归属**：传入 `type_kind`、`type_nullable`、`type_is_heap_reference` 等查询函数的 `node` 必须来自同一次 `TypeAnalysis` 实例；传入越界索引或跨分析实例混用会导致数组越界运行时错误。
+- **专用内部表示**：本模块面向编译期静态类型求解与代码生成，不提供运行期动态反射能力，也不应将分析节点编号与运行时堆对象地址混淆。
+
+源码依据：[Mio V2.1 · `bunko/kiso/aot/lower/types`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/aot/lower/types)。

@@ -1,30 +1,96 @@
 ---
 featureBadge: new
-title: SHA-256 摘要
-description: V2.1 的 kiso/crypto/sha256：字节摘要与范围计算。
+title: SHA-256 哈希摘要
+description: Mio V2.1 SHA-256 密码学哈希摘要、上下文查找表复用与零拷贝字节区间计算 kiso/crypto/sha256
 ---
 
-## SHA-256 <FeatureBadge status="new" since="2.1" />
+> **版本说明：** 本页对应 Mio V2.1 新增的 `kiso/crypto/sha256` 模块。全部 3 个公开函数与查找表上下文均基于纯 Mio 源码实现（在 Darwin ARM64 原生 AOT 后端下，大于等于 `4,096` 字节的块压缩会自动降级为硬件 ARMv8 SHA-256 指令），可在 Mochi VM、Web Playground 与原生 CLI 环境中运行。
 
-SHA-256 用于生成固定的 256 位（32 字节）哈希摘要。`kiso/crypto/sha256` 提供一次性计算和分段计算接口。
+## SHA-256 哈希摘要 <FeatureBadge status="new" since="2.1" />
 
-### 导入
+`kiso/crypto/sha256` 实现标准的 SHA-256（FIPS 180-4）单向散列算法，用于为任意字节序列生成固定 `256` 位（`32` 字节）的哈希摘要。
 
-```mio title="SHA256.mio"
+模块提供一次性摘要计算（`sum`）以及支持上下文复用的零拷贝子区间摘要计算（`context` + `sum_range`），适合用于文件页校验、代码签名页哈希与内容指纹计算。
+
+### 导入包
+
+> **网页运行说明：** 本页的 Playground 代码块均为独立可运行程序，已各自包含所需的 `yobu` 导入语句，运行时互不继承状态。
+
+通过 `yobu "kiso/crypto/sha256";` 导入本包，并使用 `sha256.函数名(...)` 调用：
+
+```mio title="Sha256Import.mio"
+yobu "kiso/crypto/sha256";
+```
+
+### 计算字节数组摘要
+
+`sha256.sum` 接收 `[]uint8` 字节数组，返回长度为 `32` 的 `[]uint8` 原始二进制摘要。
+
+```mio title="Sha256Basic.mio"
 yobu "kiso/crypto/sha256";
 yobu "kiso/string";
 
 kaku digest = sha256.sum(string.to_bytes("abc"));
-chant(len(digest));
-chant(digest[0]);
+
+chant(len(digest)); // 32
+chant(digest[0]);   // 186 (0xba)
 ```
 
-摘要是 `[]uint8`，因此不能直接用 `chant(digest)` 输出整个数组。若要显示十六进制字符串，需要将每个字节格式化为两个十六进制数字。
+在上述示例中，由于返回值是原始字节数组 `[]uint8`，不能直接传入 `chant(digest)` 打印整串文本；如需输出常见的 64 位小写十六进制字符串，可按高低半字节（Nibble）逐字节转换（见文末完整示例）。
 
-### 公开类型与函数
+### 上下文复用与零拷贝区间摘要
 
-```mio title="SHA256Types.mio" no-run
-// 以下是Context 类型布局（Tables 为包内公开查找表类型）；此代码不是独立程序。
+当需要对多个消息或同一大缓冲区的不同分页连续计算 SHA-256 时，应先调用 `sha256.context()` 创建上下文，再反复传入 `sha256.sum_range`。
+
+`sum_range` 直接在原数组 `[start, start + length)` 区间上执行分块填充与压缩，**无需预先切分或复制子数组**；每次调用都会自动重置内部哈希状态，但会保留并复用已生成的算术查找表。
+
+```mio title="Sha256Range.mio"
+yobu "kiso/crypto/sha256";
+yobu "kiso/string";
+
+kaku ctx = sha256.context();
+kaku payload = string.to_bytes("prefixabcpostfix");
+
+// 仅对中间的 "abc"（偏移 6，长度 3）计算摘要
+kaku sub_digest = sha256.sum_range(ctx, payload, 6, 3);
+chant(len(sub_digest)); // 32
+
+// 复用同一个 ctx 计算空输入摘要
+kaku empty_digest = sha256.sum_range(ctx, [], 0, 0);
+chant(len(empty_digest)); // 32
+
+// 非法区间（越界或负数）安全返回空数组
+kaku invalid = sha256.sum_range(ctx, payload, 10, 20);
+chant(len(invalid)); // 0
+```
+
+#### 双路径自适应加速机制
+
+由于 Mio 语言本身不包含位运算符，`kiso/crypto/sha256` 内部采用按字节切片的查表压缩算法，并根据输入长度自动切换路径：
+
+- **轻量路径（`< 4,096` 字节）**：使用初始化时生成的 `16 × 16` 半字节异或表与 `9 × 256` 移位表，减少短消息的初始化内存开销。
+- **高速路径（`>= 4,096` 字节，即单个 `4 KiB` 代码页大小）**：首次触发时在 `Context.byte_tables` 中懒加载并缓存 `256 × 256` 字节异或/与表及 $\Sigma/\sigma$ 线性组合表；在 Darwin ARM64 原生 AOT 后端下，核心压缩循环还会进一步映射为硬件 ARMv8 SHA-256 指令。
+
+---
+
+### 公开类型
+
+#### `Context` 与 `Tables`
+
+```mio title="Sha256Types.mio" no-run
+// 内部字节切片查找表缓存结构
+koukai kata Tables {
+    nib: []int64;
+    nib16: []int64;
+    low: []int64;
+    low16: []int64;
+    high: []int64;
+    high16: []int64;
+    shr: []int64;
+    shl: []int64;
+}
+
+// 可复用的 SHA-256 查找表与轮常量上下文
 koukai kata Context {
     xor_nibbles: []int64;
     powers: []int64;
@@ -33,28 +99,61 @@ koukai kata Context {
 }
 ```
 
-| 函数 | 公开签名 | 说明 |
-| --- | --- | --- |
-| `context` | `context() -> Context` | 构建查找表和常量表，供范围摘要复用 |
-| `sum_range` | `sum_range(ctx: Context, data: []uint8, start: int64, length: int64) -> []uint8` | 计算指定字节区间摘要 |
-| `sum` | `sum(data: []uint8) -> []uint8` | 计算整段字节数组摘要 |
+---
 
-### 只计算一部分内容
+### 公开函数（3 个）
 
-```mio title="SHA256Range.mio"
+| 函数        | 公开签名                                                                         | 功能与返回规则                                                                                                                                                                  |
+| ----------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `context`   | `context() -> Context`                                                           | 初始化包含 SHA-256 轮常量与半字节异或查找表的 `Context`，供 `sum_range` 多次复用。                                                                                              |
+| `sum_range` | `sum_range(ctx: Context, data: []uint8, start: int64, length: int64) -> []uint8` | 计算 `data` 从 `start` 开始、长度为 `length` 字节区间的 SHA-256 摘要，成功返回 `32` 字节数组；若 `start < 0`、`length < 0` 或 `start + length > len(data)`，则返回空数组 `[]`。 |
+| `sum`       | `sum(data: []uint8) -> []uint8`                                                  | 创建临时上下文并计算整段 `data` 的 SHA-256 摘要，固定返回 `32` 字节数组。                                                                                                       |
+
+---
+
+### 完整示例
+
+下面的示例演示了计算 NIST 标准测试向量并格式化输出为 64 字符小写十六进制摘要：
+
+```mio title="Sha256Hex.mio"
+yobu "kiso/array";
 yobu "kiso/crypto/sha256";
 yobu "kiso/string";
 
+waza to_hex(digest: []uint8) -> string {
+    kaku digits = string.to_bytes("0123456789abcdef");
+    kaku out: []uint8 = [];
+    kaku i = 0;
+    aida (i < len(digest)) {
+        kaku b = int64(digest[i]);
+        array.push(out, digits[b / 16]);
+        array.push(out, digits[b - (b / 16) * 16]);
+        i = i + 1;
+    }
+    kaku text = string.from_utf8(out);
+    moshi (text != mu) {
+        kaesu text;
+    }
+    kaesu "";
+}
+
 kaku ctx = sha256.context();
-kaku source = string.to_bytes("prefixabcpostfix");
-kaku digest = sha256.sum_range(ctx, source, 6, 3);
-chant(len(digest));
+kaku empty_hash = sha256.sum([]);
+kaku abc_hash = sha256.sum_range(ctx, string.to_bytes("abc"), 0, 3);
+
+// e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+chant(to_hex(empty_hash));
+
+// ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+chant(to_hex(abc_hash));
 ```
 
-`sum_range` 不需要先复制 `data` 的目标子数组。`start` 和 `length` 的单位都是字节，超出数组界限或负数区间时返回空数组。**返回 32 字节表示有效摘要；返回空数组表示本次范围参数非法**。
+---
 
-### 适用范围
+### 使用限制与平台说明
 
-源码测试包括空消息、`abc`、跨两个块的标准消息、百万个 `a`，以及上下文复用。这里的 SHA-256 是**无密钥摘要函数**，不是 HMAC、数字签名或加密算法。`Context` 中的公开数组用于计算内部常量，调用者不应随意修改。
+- **返回值合法性校验**：调用 `sum_range` 时，务必通过 `len(digest) == 32` 判断区间参数是否有效；当返回空数组 `[]` 时表示输入的 `start` 或 `length` 越界。
+- **算法定位**：本模块仅提供无密钥的 SHA-256 密码学散列函数，不包含 HMAC 消息认证码、对称/非对称加密或数字签名功能。
+- **只读上下文约定**：`Context` 结构体中的字段为公开可见，但调用方不应手动修改其中的查找表数组，否则会导致后续哈希计算结果错误。
 
-来源：[`sha256.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/crypto/sha256/sha256.mio)、[`sha256_test.mio`](https://github.com/mio-kobo/mio/blob/74e461b2985886160a285c7104d2a41090d0f548/bunko/kiso/crypto/sha256/sha256_test.mio)。
+源码依据：[Mio V2.1 · `bunko/kiso/crypto/sha256`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/crypto/sha256)。

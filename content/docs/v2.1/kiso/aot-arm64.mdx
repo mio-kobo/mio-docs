@@ -1,153 +1,265 @@
 ---
 title: ARM64 指令编码
-description: Mio V2.0 AOT ARM64 指令编码库 kiso/aot/arm64
+description: Mio V2.1 AArch64 指令编码器、原子操作与标签修补汇编器 kiso/aot/arm64
 ---
 
-> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
-
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/aot/arm64` 模块。相比 V2.0，本版本补充了寄存器偏移访存、A64 基础原子操作（Load-Acquire / Store-Release 与 LL/SC 独占访存）、`NZCV` 条件标志读写以及多平台系统调用（`linux_abi` / `windows_abi`）适配支持。
 
 ## ARM64 指令编码
 
-ARM64 指令编码模块提供 Darwin ARM64 AOT 编译器使用的指令字生成函数、错误枚举与带标签修补的汇编器。
+`kiso/aot/arm64` 为 Mio 的原生 AOT 后端提供纯 Mio 实现的 AArch64 指令编码器与汇编缓冲区（`Assembler`）。
 
-它主要面向编译器工具链开发，不是高层数值运算库。所有编码函数返回 `Instruction`，应在使用 `word` 之前检查其可空的 `error` 字段。
-
-本模块属于 **AOT 编译工具链接口**，其公开声明不等于稳定的应用层 API；以下内容对应 `v2.0.0` 发布标签。
+该模块将寄存器编号、立即数和地址偏移量编码为 32 位小端序机器指令字（`uint32`），并在转换前以 `int64` 执行严格的范围与对齐校验，确保非法操作数不会静默截断为错误指令。
 
 ### 导入包
 
-> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio V2.0.0 CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+> **运行环境：** 当前网页 Playground 的 WASM 环境不包含 AOT 工具链模块。以下代码需在本地通过 Mio V2.1 CLI 与完整 Bunko 标准库运行。
 
-通过 `yobu "kiso/aot/arm64";` 导入本包，随后使用 `arm64.函数名(...)` 调用。
+通过 `yobu "kiso/aot/arm64";` 导入本包，并使用 `arm64.函数名(...)` 调用：
 
-```mio title="Stdlib.mio" no-run
+```mio title="Arm64Import.mio" no-run
 yobu "kiso/aot/arm64";
 ```
 
-### 基础指令编码
+### 单条指令编码与错误检查
 
-`movz_x`、`movk_x`、`add_x`、`sub_x`、`ldr_x` 等函数接收寄存器编号和偏移量，按架构规则计算 32 位机器指令字。非法寄存器或超范围操作数通过 `EncodeError` 报告。
+所有指令编码函数均返回 `Instruction` 结构体。在读取 `word` 写入代码缓冲区之前，必须检查其 `error` 字段是否为 `mu`。
 
-```mio title="Arm64.mio" no-run
+```mio title="EncodeSingle.mio" no-run
 yobu "kiso/aot/arm64";
 
-kaku instruction = arm64.ret();
-chant(instruction.error == mu);
+// 编码 MOVZ X0, #42
+kaku inst = arm64.movz_x(0, 42, 0);
+moshi (inst.error == mu) {
+    chant(inst.word);
+}
+
+// 传入越界寄存器编号（有效范围为 0 ~ 31）
+kaku invalid = arm64.movz_x(32, 0, 0);
+moshi (invalid.error != mu) {
+    chant("捕获到非法寄存器编码错误");
+}
 ```
 
-### 分支与地址
+在上述示例中，`movz_x(0, 42, 0)` 生成合法的 32 位指令字，`error` 为 `mu`；而传入寄存器编号 `32` 时，编码器会返回 `EncodeError.InvalidRegister`，此时 `word` 为 `0`，调用方不应将其发射到指令流中。
 
-`b`、`bl`、`b_cond` 及 `cbz_x`、`cbnz_x` 等函数接收相对偏移。需要按名称建立分支时，可通过汇编器标签与修补列表处理，而不是手工猜测距离。
+### 使用 Assembler 管理标签与分支修补
 
-### 使用 Assembler
+编写包含前向或后向跳转的指令序列时，应使用 `Assembler` 缓冲指令，通过字符串标签（Label）自动计算相对指令字偏移并完成重定位修补。
 
-汇编器可接收指令、标签和延后解析的分支。`assembler_assemble` 返回 `AssembleResult`；有任何编码错误时，应当检查 `error` 而不是直接使用 `words`。
-
-```mio title="Arm64.mio" no-run
+```mio title="AssemblerDemo.mio" no-run
 yobu "kiso/aot/arm64";
 
 kaku code = arm64.assembler();
-kaku step = arm64.ret();
-kaku error = arm64.assembler_emit(code, step);
-chant(error == mu);
+
+// 前向跳转至 done 标签
+arm64.assembler_b_cond(code, 0, "done"); // B.EQ done
+arm64.assembler_emit(code, arm64.movz_x(0, 1, 0));
+
+// 声明目标标签并写入返回指令
+arm64.assembler_label(code, "done");
+arm64.assembler_emit(code, arm64.ret());
+
+// 解析所有标签与分支修补
+kaku result = arm64.assembler_assemble(code);
+moshi (result.error == mu) {
+    chant(len(result.words));
+}
 ```
 
-### v2.0.0 新增查询
+在上述示例中，`assembler_assemble` 会统一解析所有 `Fixup` 记录并返回最终的 `[]uint32` 指令字数组。如果存在未定义的标签、重复声明的标签或超出寻址范围的跳转，`result.error` 将返回对应的 `EncodeError`。
 
-本标签还公开 `assembler_label_word`，用于按标签名称查询汇编器内部的指令字位置。某些旧版文档未列出它，本文以 `v2.0.0` 源码为准。
+#### 汇编器的高级修补机制
+
+- **远距离条件分支自动跳板**：`B.cond`、`CBZ` 和 `CBNZ` 在汇编器中会预先保留 2 个指令字（短距离跳转时第 2 个字填充为 `NOP`）。当目标距离超出 19 位有符号指令字范围（`-262144 ~ 262143`）时，`assembler_assemble` 会自动将其展开为“条件取反跳过 + 26 位无条件 `B` 跳转”的双指令跳板（`AL`/`NV` 恒真条件除外），且不修改 `NZCV` 标志位或通用寄存器。
+- **多平台系统调用适配器**：默认情况下，`svc(128)` 会原样输出 Darwin 系统调用指令。如果在发射指令前通过 `assembler_label` 声明了 `"linux_abi"` 或 `"windows_abi"` 标签，汇编器会自动将 `SVC #128` 展开为 `stp x30, xzr, [sp, #-16]!`、`bl linux_syscall`（或 `windows_syscall`）与 `ldp x30, xzr, [sp], #16` 三条指令。
+
+---
 
 ### 公开类型
 
-- `EncodeError`：包含非法寄存器、立即数、偏移和标签问题的枚举。
-- `Instruction { word: uint32; error: EncodeError?; }`：单条编码结果。
-- `Label { name: string; word: int64; }`：标签名称与指令字索引。
-- `Fixup { at_word: int64; target: string; kind: int64; operand: int64; }`：分支修补项。
-- `Assembler { words: []uint32; labels: []Label; label_index: [][]int64; fixups: []Fixup; errors: []EncodeError; }`：汇编缓冲区。
-- `AssembleResult { words: []uint32; error: EncodeError?; }`：汇编完成结果。
+#### `EncodeError`
 
-### 公开函数（63 个）
+编码与汇编阶段可能产生的错误枚举：
 
-以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
-
-| 函数 | 公开签名 | 功能与返回规则 |
-| --- | --- | --- |
-| `movz_x` | `movz_x(rd: int64, immediate: int64, shift: int64) -> Instruction` | 64 位立即数段装入；需要合法寄存器、立即数和位移。 |
-| `movk_x` | `movk_x(rd: int64, immediate: int64, shift: int64) -> Instruction` | 64 位立即数段覆盖；需要合法寄存器、立即数和位移。 |
-| `movn_x` | `movn_x(rd: int64, immediate: int64, shift: int64) -> Instruction` | 64 位按位取反立即数构造；需要合法寄存器、立即数和位移。 |
-| `movz_w` | `movz_w(rd: int64, immediate: int64) -> Instruction` | 编码 32 位寄存器的 MOVZ。 |
-| `add_x` | `add_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成64 位加法指令。 |
-| `sub_x` | `sub_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成64 位减法指令。 |
-| `adds_x` | `adds_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成设置标志位的 64 位加法指令。 |
-| `subs_x` | `subs_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成设置标志位的 64 位减法指令。 |
-| `and_x` | `and_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成按位与指令。 |
-| `orr_x` | `orr_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成按位或指令。 |
-| `eor_x` | `eor_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成按位异或指令。 |
-| `mul_x` | `mul_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成乘法指令。 |
-| `sdiv_x` | `sdiv_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成有符号除法指令。 |
-| `udiv_x` | `udiv_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 生成无符号除法指令。 |
-| `msub_x` | `msub_x(rd: int64, rn: int64, rm: int64, ra: int64) -> Instruction` | 生成乘减指令。 |
-| `cmp_x` | `cmp_x(rn: int64, rm: int64) -> Instruction` | 比较两个 64 位寄存器并更新条件标志。 |
-| `add_imm_x` | `add_imm_x(rd: int64, rn: int64, immediate: int64, shift12: bool) -> Instruction` | 生成64 位立即数加法指令；`shift12` 控制立即数字段位移。 |
-| `sub_imm_x` | `sub_imm_x(rd: int64, rn: int64, immediate: int64, shift12: bool) -> Instruction` | 生成64 位立即数减法指令；`shift12` 控制立即数字段位移。 |
-| `cmp_imm_x` | `cmp_imm_x(rn: int64, immediate: int64, shift12: bool) -> Instruction` | 比较寄存器与立即数，支持 12 位位移形式。 |
-| `add_imm_w` | `add_imm_w(rd: int64, rn: int64, immediate: int64) -> Instruction` | 生成 32 位立即数加法指令。 |
-| `cset_w` | `cset_w(rd: int64, condition: int64) -> Instruction` | 根据条件标志设置 32 位寄存器布尔值。 |
-| `lsl_x` | `lsl_x(rd: int64, rn: int64, shift: int64) -> Instruction` | 生成 64 位逻辑左移指令。 |
-| `lsr_x` | `lsr_x(rd: int64, rn: int64, shift: int64) -> Instruction` | 生成 64 位逻辑右移指令。 |
-| `asr_x` | `asr_x(rd: int64, rn: int64, shift: int64) -> Instruction` | 生成 64 位算术右移指令。 |
-| `lsrv_x` | `lsrv_x(rd: int64, rn: int64, rm: int64) -> Instruction` | 按寄存器给出的位移量执行逻辑右移。 |
-| `ldr_x` | `ldr_x(rt: int64, rn: int64, byte_offset: int64) -> Instruction` | 编码读取 64 位寄存器的内存访问操作。 |
-| `str_x` | `str_x(rt: int64, rn: int64, byte_offset: int64) -> Instruction` | 编码写入 64 位寄存器的内存访问操作。 |
-| `ldrb_w` | `ldrb_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction` | 编码读取一个无符号字节的内存访问操作。 |
-| `strb_w` | `strb_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction` | 编码写入一个字节的内存访问操作。 |
-| `ldrh_w` | `ldrh_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction` | 编码读取 16 位半字的内存访问操作。 |
-| `stp_x` | `stp_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction` | 生成存储双寄存器操作。 |
-| `ldp_x` | `ldp_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction` | 生成加载双寄存器操作。 |
-| `stp_pre_x` | `stp_pre_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction` | 生成预索引双寄存器存储操作。 |
-| `ldp_post_x` | `ldp_post_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction` | 生成后索引双寄存器加载操作。 |
-| `b` | `b(delta_words: int64) -> Instruction` | 按指令字偏移编码无条件分支。 |
-| `bl` | `bl(delta_words: int64) -> Instruction` | 按指令字偏移编码带链接的函数调用分支。 |
-| `b_cond` | `b_cond(condition: int64, delta_words: int64) -> Instruction` | 按条件码及相对指令偏移生成分支。 |
-| `cbz_x` | `cbz_x(rt: int64, delta_words: int64) -> Instruction` | 生成寄存器为零时分支指令。 |
-| `cbnz_x` | `cbnz_x(rt: int64, delta_words: int64) -> Instruction` | 生成寄存器非零时分支指令。 |
-| `br_x` | `br_x(rn: int64) -> Instruction` | 生成间接跳转指令。 |
-| `blr_x` | `blr_x(rn: int64) -> Instruction` | 生成间接调用指令。 |
-| `ret_x` | `ret_x(rn: int64) -> Instruction` | 生成寄存器指定的返回地址指令。 |
-| `ret` | `ret() -> Instruction` | 生成使用默认链接寄存器的返回指令。 |
-| `adr` | `adr(rd: int64, delta_bytes: int64) -> Instruction` | 按字节偏移生成 ADR 地址计算。 |
-| `adrp_offset` | `adrp_offset(rd: int64, pc_offset: int64, target_offset: int64) -> Instruction` | 根据 PC 与目标字节偏移编码 ADRP 页地址。 |
-| `svc` | `svc(immediate: int64) -> Instruction` | 生成 SVC 系统调用指令。 |
-| `fadd_d` | `fadd_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 生成双精度浮点加法指令。 |
-| `fsub_d` | `fsub_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 生成双精度浮点减法指令。 |
-| `fmul_d` | `fmul_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 生成双精度浮点乘法指令。 |
-| `fdiv_d` | `fdiv_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 生成双精度浮点除法指令。 |
-| `fcmp_d` | `fcmp_d(vn: int64, vm: int64) -> Instruction` | 比较两个双精度浮点寄存器。 |
-| `scvtf_d` | `scvtf_d(vd: int64, rn: int64) -> Instruction` | 将带符号整数转换成双精度浮点。 |
-| `fcvtzs_x` | `fcvtzs_x(rd: int64, vn: int64) -> Instruction` | 将双精度浮点向零转换为带符号整数。 |
-| `assembler` | `assembler() -> Assembler` | 创建一个空的汇编器。 |
-| `assembler_emit` | `assembler_emit(value: Assembler, encoded: Instruction) -> EncodeError?` | 向汇编器追加已编码指令并记录错误。 |
-| `assembler_label` | `assembler_label(value: Assembler, name: string) -> EncodeError?` | 在当前位置声明标签。 |
-| `assembler_b` | `assembler_b(value: Assembler, target: string) -> EncodeError?` | 添加指向标签的无条件分支占位。 |
-| `assembler_bl` | `assembler_bl(value: Assembler, target: string) -> EncodeError?` | 添加带链接的标签分支。 |
-| `assembler_b_cond` | `assembler_b_cond(value: Assembler, condition: int64, target: string) -> EncodeError?` | 添加按条件码跳转的标签分支。 |
-| `assembler_cbz_x` | `assembler_cbz_x(value: Assembler, reg: int64, target: string) -> EncodeError?` | 添加寄存器为零的分支修补记录。 |
-| `assembler_cbnz_x` | `assembler_cbnz_x(value: Assembler, reg: int64, target: string) -> EncodeError?` | 添加寄存器非零的分支修补记录。 |
-| `assembler_assemble` | `assembler_assemble(value: Assembler) -> AssembleResult` | 解析标签和修补记录，返回指令字数组或错误。 |
-| `assembler_label_word` | `assembler_label_word(value: Assembler, name: string) -> int64` | 查询标签对应的指令字位置。 |
-
-### 完整示例
-
-```mio title="Arm64.mio" no-run
-yobu "kiso/aot/arm64";
-
-kaku good = arm64.ret();
-chant(good.error == mu);
-kaku bad = arm64.movz_x(-1, 0, 0);
-chant(bad.error != mu);
+```mio title="Arm64Types.mio" no-run
+koukai sentaku EncodeError {
+    InvalidRegister;        // 寄存器编号超出 0 ~ 31，或独占存储状态寄存器与操作数冲突
+    InvalidImmediate;       // 立即数、移位量或页偏移超出指令位宽允许范围
+    InvalidCondition;       // 条件码超出 0 ~ 15 范围
+    MisalignedOffset;       // 内存访存字节偏移未按访问宽度对齐
+    BranchOutOfRange;       // 相对跳转距离超出 PC 相对寻址位宽限制
+    DuplicateLabel(string); // 汇编器中重复声明了同名标签
+    UndefinedLabel(string); // 分支引用的标签未在汇编器中定义
+    InvalidPatch;           // 内部修补记录类型非法
+}
 ```
 
-### 使用限制
+#### 核心数据结构
 
-寄存器编号、立即数字宽度、偏移方向和字节/指令字单位都必须符合 ARM64 架构规则。该模块只负责编码与汇编辅助，不负责生成可执行文件的完整布局或代码签名；输出原始指令字时仍须经过调用方校验。
+```mio title="Arm64Structs.mio" no-run
+koukai kata Instruction {
+    word: uint32;
+    error: EncodeError?;
+}
 
-源码依据：[Mio v2.0.0 · `bunko/kiso/aot/arm64/arm64.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/aot/arm64/arm64.mio)。
+koukai kata Label {
+    name: string;
+    word: int64;
+}
+
+// kind: 0=B, 1=BL, 2=B.cond, 3=CBZ, 4=CBNZ
+koukai kata Fixup {
+    at_word: int64;
+    target: string;
+    kind: int64;
+    operand: int64;
+}
+
+koukai kata Assembler {
+    words: []uint32;
+    labels: []Label;
+    label_index: [][]int64;
+    fixups: []Fixup;
+    errors: []EncodeError;
+}
+
+koukai kata AssembleResult {
+    words: []uint32;
+    error: EncodeError?;
+}
+```
+
+---
+
+### 公开函数（81 个）
+
+#### 1. 立即数装载与数据传送（4 个）
+
+| 函数     | 公开签名                                                           | 说明                                                                                                        |
+| -------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `movz_x` | `movz_x(rd: int64, immediate: int64, shift: int64) -> Instruction` | 将 16 位无符号立即数（`0 ~ 65535`）左移 `shift * 16` 位（`shift` 为 `0 ~ 3`）装入 64 位寄存器并清零其余位。 |
+| `movk_x` | `movk_x(rd: int64, immediate: int64, shift: int64) -> Instruction` | 将 16 位立即数写入 64 位寄存器的指定 16 位分段（`shift` 为 `0 ~ 3`），保留其余位不变。                      |
+| `movn_x` | `movn_x(rd: int64, immediate: int64, shift: int64) -> Instruction` | 将 16 位立即数左移 `shift * 16` 位后按位取反装入 64 位寄存器。                                              |
+| `movz_w` | `movz_w(rd: int64, immediate: int64) -> Instruction`               | 将 16 位无符号立即数装入 32 位寄存器 `Wd`（同时清零高 32 位）。                                             |
+
+#### 2. 整数算术、逻辑与移位运算（25 个）
+
+| 函数         | 公开签名                                                                           | 说明                                                                          |
+| ------------ | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `add_x`      | `add_x(rd: int64, rn: int64, rm: int64) -> Instruction`                            | 64 位寄存器加法（`Xd = Xn + Xm`）。                                           |
+| `sub_x`      | `sub_x(rd: int64, rn: int64, rm: int64) -> Instruction`                            | 64 位寄存器减法（`Xd = Xn - Xm`）。                                           |
+| `adds_x`     | `adds_x(rd: int64, rn: int64, rm: int64) -> Instruction`                           | 64 位寄存器加法并更新 `NZCV` 条件标志。                                       |
+| `subs_x`     | `subs_x(rd: int64, rn: int64, rm: int64) -> Instruction`                           | 64 位寄存器减法并更新 `NZCV` 条件标志。                                       |
+| `and_x`      | `and_x(rd: int64, rn: int64, rm: int64) -> Instruction`                            | 64 位按位与。                                                                 |
+| `orr_x`      | `orr_x(rd: int64, rn: int64, rm: int64) -> Instruction`                            | 64 位按位或。                                                                 |
+| `eor_x`      | `eor_x(rd: int64, rn: int64, rm: int64) -> Instruction`                            | 64 位按位异或。                                                               |
+| `mul_x`      | `mul_x(rd: int64, rn: int64, rm: int64) -> Instruction`                            | 64 位整数乘法（`Xd = Xn * Xm`）。                                             |
+| `sdiv_x`     | `sdiv_x(rd: int64, rn: int64, rm: int64) -> Instruction`                           | 64 位有符号整数除法。                                                         |
+| `udiv_x`     | `udiv_x(rd: int64, rn: int64, rm: int64) -> Instruction`                           | 64 位无符号整数除法。                                                         |
+| `msub_x`     | `msub_x(rd: int64, rn: int64, rm: int64, ra: int64) -> Instruction`                | 64 位乘减运算（`Xd = Xa - Xn * Xm`）。                                        |
+| `cmp_x`      | `cmp_x(rn: int64, rm: int64) -> Instruction`                                       | 比较 `Xn` 与 `Xm`（等价于 `subs_x(31, rn, rm)`）。                            |
+| `add_imm_x`  | `add_imm_x(rd: int64, rn: int64, immediate: int64, shift12: bool) -> Instruction`  | 64 位立即数加法；`immediate` 为 `0 ~ 4095`，`shift12` 为 `hai` 时左移 12 位。 |
+| `sub_imm_x`  | `sub_imm_x(rd: int64, rn: int64, immediate: int64, shift12: bool) -> Instruction`  | 64 位立即数减法；参数约束同 `add_imm_x`。                                     |
+| `cmp_imm_x`  | `cmp_imm_x(rn: int64, immediate: int64, shift12: bool) -> Instruction`             | 比较 `Xn` 与 12 位立即数并更新标志位。                                        |
+| `adds_imm_x` | `adds_imm_x(rd: int64, rn: int64, immediate: int64, shift12: bool) -> Instruction` | 64 位立即数加法并更新 `NZCV` 条件标志。                                       |
+| `cmn_imm_x`  | `cmn_imm_x(rn: int64, immediate: int64, shift12: bool) -> Instruction`             | 负向立即数比较（等价于 `adds_imm_x(31, rn, immediate, shift12)`）。           |
+| `add_imm_w`  | `add_imm_w(rd: int64, rn: int64, immediate: int64) -> Instruction`                 | 32 位寄存器与无移位 12 位立即数加法（`0 ~ 4095`）。                           |
+| `cset_w`     | `cset_w(rd: int64, condition: int64) -> Instruction`                               | 当条件码 `condition`（`0 ~ 15`）成立时将 `Wd` 置为 `1`，否则置为 `0`。        |
+| `lsl_x`      | `lsl_x(rd: int64, rn: int64, shift: int64) -> Instruction`                         | 64 位逻辑左移（`shift` 为 `0 ~ 63`）。                                        |
+| `lsr_x`      | `lsr_x(rd: int64, rn: int64, shift: int64) -> Instruction`                         | 64 位逻辑右移（`shift` 为 `0 ~ 63`）。                                        |
+| `asr_x`      | `asr_x(rd: int64, rn: int64, shift: int64) -> Instruction`                         | 64 位算术右移（`shift` 为 `0 ~ 63`）。                                        |
+| `lsrv_x`     | `lsrv_x(rd: int64, rn: int64, rm: int64) -> Instruction`                           | 按寄存器 `Xm` 指定的位数执行 64 位逻辑右移。                                  |
+| `read_nzcv`  | `read_nzcv(rt: int64) -> Instruction`                                              | 通过 `MRS Xt, NZCV` 读取条件标志寄存器。                                      |
+| `write_nzcv` | `write_nzcv(rt: int64) -> Instruction`                                             | 通过 `MSR NZCV, Xt` 写入条件标志寄存器。                                      |
+
+#### 3. 内存加载、存储与预取（17 个）
+
+> **对齐与范围规则：** 立即数偏移访存要求 `byte_offset >= 0`、按访问宽度对齐，且缩放后的无符号立即数不超过 `4095`；双寄存器成对访存要求 `byte_offset` 在 `-512 ~ 504` 之间且为 `8` 的倍数。
+
+| 函数                    | 公开签名                                                                          | 说明                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `ldr_x`                 | `ldr_x(rt: int64, rn: int64, byte_offset: int64) -> Instruction`                  | 从 `[Xn, #offset]` 加载 64 位双字（8 字节对齐）。                             |
+| `str_x`                 | `str_x(rt: int64, rn: int64, byte_offset: int64) -> Instruction`                  | 向 `[Xn, #offset]` 存储 64 位双字（8 字节对齐）。                             |
+| `ldr_w`                 | `ldr_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction`                  | 从 `[Xn, #offset]` 加载 32 位字（4 字节对齐）。                               |
+| `str_w`                 | `str_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction`                  | 向 `[Xn, #offset]` 存储 32 位字（4 字节对齐）。                               |
+| `ldrh_w`                | `ldrh_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction`                 | 从 `[Xn, #offset]` 加载 16 位无符号半字（2 字节对齐）。                       |
+| `strh_w`                | `strh_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction`                 | 向 `[Xn, #offset]` 存储 16 位半字（2 字节对齐）。                             |
+| `ldrb_w`                | `ldrb_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction`                 | 从 `[Xn, #offset]` 加载 8 位无符号字节。                                      |
+| `strb_w`                | `strb_w(rt: int64, rn: int64, byte_offset: int64) -> Instruction`                 | 向 `[Xn, #offset]` 存储 8 位字节。                                            |
+| `ldr_x_register`        | `ldr_x_register(rt: int64, rn: int64, rm: int64) -> Instruction`                  | 寄存器偏移加载 `LDR Xt, [Xn, Xm]`（无缩放）。                                 |
+| `str_x_register`        | `str_x_register(rt: int64, rn: int64, rm: int64) -> Instruction`                  | 寄存器偏移存储 `STR Xt, [Xn, Xm]`（无缩放）。                                 |
+| `ldr_x_register_scaled` | `ldr_x_register_scaled(rt: int64, rn: int64, rm: int64) -> Instruction`           | 缩放寄存器偏移加载 `LDR Xt, [Xn, Xm, LSL #3]`。                               |
+| `ldrb_w_register`       | `ldrb_w_register(rt: int64, rn: int64, rm: int64) -> Instruction`                 | 寄存器偏移字节加载 `LDRB Wt, [Xn, Xm]`。                                      |
+| `prfm_load`             | `prfm_load(rn: int64, byte_offset: int64) -> Instruction`                         | 发射 `PRFM PLDL1KEEP, [Xn, #offset]` 预取提示（8 字节对齐，不触发地址异常）。 |
+| `stp_x`                 | `stp_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction`      | 成对存储两个 64 位寄存器（基址不变）。                                        |
+| `ldp_x`                 | `ldp_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction`      | 成对加载两个 64 位寄存器（基址不变）。                                        |
+| `stp_pre_x`             | `stp_pre_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction`  | 预索引成对存储（先更新基址 `Xn += offset`，再存储）。                         |
+| `ldp_post_x`            | `ldp_post_x(rt: int64, rt2: int64, rn: int64, byte_offset: int64) -> Instruction` | 后索引成对加载（先加载，再更新基址 `Xn += offset`）。                         |
+
+#### 4. A64 基础原子操作与内存屏障（6 个）
+
+> **约束说明：** `stxr_x` 的状态寄存器 `status` 不得与源寄存器 `rt` 或基址寄存器 `rn`（`rn != 31` 时）相同，否则返回 `EncodeError.InvalidRegister`。
+
+| 函数      | 公开签名                                                                    | 说明                                                                                   |
+| --------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `ldar_x`  | `ldar_x(rt: int64, rn: int64) -> Instruction`                               | 64 位获取语义加载（Load-Acquire，`LDAR Xt, [Xn]`）。                                   |
+| `stlr_x`  | `stlr_x(rt: int64, rn: int64) -> Instruction`                               | 64 位释放语义存储（Store-Release，`STLR Xt, [Xn]`）。                                  |
+| `ldxr_x`  | `ldxr_x(rt: int64, rn: int64, acquire: bool) -> Instruction`                | 64 位独占加载；`acquire` 为 `hai` 时编码 `LDAXR`，否则编码 `LDXR`。                    |
+| `stxr_x`  | `stxr_x(status: int64, rt: int64, rn: int64, release: bool) -> Instruction` | 64 位独占存储（结果写入 `Wstatus`，`0` 表示成功）；`release` 为 `hai` 时编码 `STLXR`。 |
+| `dmb_ish` | `dmb_ish() -> Instruction`                                                  | 内部共享域全内存屏障（`DMB ISH`）。                                                    |
+| `clrex`   | `clrex() -> Instruction`                                                    | 清除本地独占监视器状态（`CLREX`）。                                                    |
+
+#### 5. 分支控制、PC 相对寻址与系统调用（12 个）
+
+| 函数          | 公开签名                                                                        | 说明                                                                                        |
+| ------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `b`           | `b(delta_words: int64) -> Instruction`                                          | 无条件相对跳转（`delta_words` 范围 `-33554432 ~ 33554431`）。                               |
+| `bl`          | `bl(delta_words: int64) -> Instruction`                                         | 带链接的相对函数调用跳转（范围同 `b`）。                                                    |
+| `b_cond`      | `b_cond(condition: int64, delta_words: int64) -> Instruction`                   | 条件相对跳转（`condition` 为 `0 ~ 15`，`delta_words` 为 `-262144 ~ 262143`）。              |
+| `cbz_x`       | `cbz_x(rt: int64, delta_words: int64) -> Instruction`                           | 当 `Xt == 0` 时相对跳转（`delta_words` 为 `-262144 ~ 262143`）。                            |
+| `cbnz_x`      | `cbnz_x(rt: int64, delta_words: int64) -> Instruction`                          | 当 `Xt != 0` 时相对跳转（`delta_words` 为 `-262144 ~ 262143`）。                            |
+| `br_x`        | `br_x(rn: int64) -> Instruction`                                                | 跳转到寄存器 `Xn` 指定的地址。                                                              |
+| `blr_x`       | `blr_x(rn: int64) -> Instruction`                                               | 带链接调用寄存器 `Xn` 指定的函数地址。                                                      |
+| `ret_x`       | `ret_x(rn: int64) -> Instruction`                                               | 从寄存器 `Xn` 指定的返回地址返回。                                                          |
+| `ret`         | `ret() -> Instruction`                                                          | 使用默认链接寄存器 `X30` 返回（等价于 `ret_x(30)`）。                                       |
+| `adr`         | `adr(rd: int64, delta_bytes: int64) -> Instruction`                             | 计算 PC 相对字节地址（`delta_bytes` 范围 `-1048576 ~ 1048575`）。                           |
+| `adrp_offset` | `adrp_offset(rd: int64, pc_offset: int64, target_offset: int64) -> Instruction` | 按架构 4 KiB 页计算目标地址页基址（两偏移量均须 `>= 0` 且页差在 `-1048576 ~ 1048575` 内）。 |
+| `svc`         | `svc(immediate: int64) -> Instruction`                                          | 触发监控器系统调用（`immediate` 为 `0 ~ 65535`）。                                          |
+
+#### 6. 双精度浮点运算与转换（7 个）
+
+| 函数       | 公开签名                                                 | 说明                                                    |
+| ---------- | -------------------------------------------------------- | ------------------------------------------------------- |
+| `fadd_d`   | `fadd_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 64 位双精度浮点加法（`Dd = Dn + Dm`）。                 |
+| `fsub_d`   | `fsub_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 64 位双精度浮点减法（`Dd = Dn - Dm`）。                 |
+| `fmul_d`   | `fmul_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 64 位双精度浮点乘法（`Dd = Dn * Dm`）。                 |
+| `fdiv_d`   | `fdiv_d(vd: int64, vn: int64, vm: int64) -> Instruction` | 64 位双精度浮点除法（`Dd = Dn / Dm`）。                 |
+| `fcmp_d`   | `fcmp_d(vn: int64, vm: int64) -> Instruction`            | 比较双精度浮点寄存器 `Dn` 与 `Dm` 并更新条件标志。      |
+| `scvtf_d`  | `scvtf_d(vd: int64, rn: int64) -> Instruction`           | 将 64 位有符号整数 `Xn` 转换为双精度浮点 `Dd`。         |
+| `fcvtzs_x` | `fcvtzs_x(rd: int64, vn: int64) -> Instruction`          | 将双精度浮点 `Dn` 向零截断转换为 64 位有符号整数 `Xd`。 |
+
+#### 7. 汇编器操作（10 个）
+
+| 函数                   | 公开签名                                                                               | 说明                                                                  |
+| ---------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `assembler`            | `assembler() -> Assembler`                                                             | 初始化一个空的指令与标签汇编器。                                      |
+| `assembler_emit`       | `assembler_emit(value: Assembler, encoded: Instruction) -> EncodeError?`               | 追加单条已编码指令；若 `encoded.error != mu` 则记录并返回该错误。     |
+| `assembler_label`      | `assembler_label(value: Assembler, name: string) -> EncodeError?`                      | 在当前指令字偏移处注册标签；若标签已存在则返回 `DuplicateLabel`。     |
+| `assembler_b`          | `assembler_b(value: Assembler, target: string) -> EncodeError?`                        | 添加指向 `target` 标签的无条件 `B` 分支占位。                         |
+| `assembler_bl`         | `assembler_bl(value: Assembler, target: string) -> EncodeError?`                       | 添加指向 `target` 标签的带链接 `BL` 分支占位。                        |
+| `assembler_b_cond`     | `assembler_b_cond(value: Assembler, condition: int64, target: string) -> EncodeError?` | 校验条件码（`0 ~ 15`）并添加条件分支修补占位（预留 2 个指令字）。     |
+| `assembler_cbz_x`      | `assembler_cbz_x(value: Assembler, reg: int64, target: string) -> EncodeError?`        | 校验寄存器（`0 ~ 31`）并添加 `CBZ` 分支修补占位（预留 2 个指令字）。  |
+| `assembler_cbnz_x`     | `assembler_cbnz_x(value: Assembler, reg: int64, target: string) -> EncodeError?`       | 校验寄存器（`0 ~ 31`）并添加 `CBNZ` 分支修补占位（预留 2 个指令字）。 |
+| `assembler_assemble`   | `assembler_assemble(value: Assembler) -> AssembleResult`                               | 克隆指令缓冲区并解析所有标签修补，返回完整机器指令字数组或首个错误。  |
+| `assembler_label_word` | `assembler_label_word(value: Assembler, name: string) -> int64`                        | 查询标签在汇编器中的指令字索引；未找到时返回 `-1`。                   |
+
+---
+
+### 使用限制与平台说明
+
+- **工具链内部定位**：本模块仅覆盖 Mio 原生 AOT 编译器所需的 AArch64 基础指令子集（不依赖可选的 LSE 原子扩展），不负责生成 Mach-O/ELF 文件头、段布局或代码签名。
+- **页对齐差异**：`adrp_offset` 严格遵循 AArch64 架构定义的 **4 KiB** 页大小计算页差，即使在 Darwin Mach-O 镜像采用 **16 KiB** 段对齐时也是如此。
+- **验证边界**：该模块已在 macOS ARM64 上完成指令编码与独立交叉验证；`linux_abi` 与 `windows_abi` 系统调用适配器逻辑已在单元测试中验证指令展开，完整跨平台二进制产物验证请参考 [验证与来源](/docs/v2.1/tooling/verification)。
+
+源码依据：[Mio V2.1 · `bunko/kiso/aot/arm64`](https://github.com/mio-kobo/mio/tree/main/bunko/kiso/aot/arm64)。

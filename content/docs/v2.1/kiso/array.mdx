@@ -1,112 +1,159 @@
 ---
 title: 数组
-description: Mio V2.0 动态数组标准库 kiso/array
+description: Mio V2.1 动态数组创建、容量管理、共享引用、浅复制与截断操作 kiso/array
 ---
 
-> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
-
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/array` 模块。所有 8 个公开泛型函数均已接入 Mochi VM 与原生 AOT 后端（非可空 `[]uint8` 在原生后端采用紧凑 1 字节存储布局，其余类型采用 8 字节槽位）。
 
 ## 数组
 
-数组标准库（Array）为 `[]T` 动态数组提供创建、追加、容量管理、浅复制与截断操作。数组类型属于语言本身，动态操作通过 `kiso/array` 提供。
+数组标准库（`kiso/array`）为 Mio 的内置动态数组类型 `[]T` 提供元素填充创建、容量预留、原地追加、浅复制与原地截断等操作。
 
-数组赋值和函数传参共享底层存储，因此对元素或长度的修改会被其他引用观察到。
-
-本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
+在 Mio 中，数组变量保存的是对底层存储的共享引用（Shared Reference）。将数组赋值给其他变量或作为参数传递给函数时，不会自动复制元素；通过任意引用修改元素或更改长度，都会反映到所有共享该数组的引用上。
 
 ### 导入包
 
-> **网页运行说明：** 本页的 Playground 代码块都是独立程序，已分别加入所需的 `yobu` 导入语句。点击「运行」时不会继承页面中其他代码块的状态。
+> **网页运行说明：** 本页的 Playground 代码块均为独立可运行程序，已各自包含所需的 `yobu` 导入语句，运行时互不继承状态。
 
-通过 `yobu "kiso/array";` 导入本包，随后使用 `array.函数名(...)` 调用。
+通过 `yobu "kiso/array";` 导入本包，并使用 `array.函数名(...)` 调用：
 
-```mio title="Stdlib.mio"
+```mio title="ArrayImport.mio"
 yobu "kiso/array";
 ```
 
 ### 创建动态数组
 
-可以通过数组字面量 `[1, 2]` 建立数组，也可以使用 `array.make()` 指定初始长度，或者使用 `array.with_capacity()` 预留容量。长度和容量是两个独立概念。
+除了使用数组字面量 `[1, 2]` 外，还可以通过 `array.make` 创建指定初始长度并填充默认值的数组，或通过 `array.with_capacity` 创建长度为 `0` 但已预留底层缓冲区的空数组。
 
-```mio title="Array.mio"
+```mio title="ArrayCreate.mio"
 yobu "kiso/array";
 
-kaku a = array.make(3, 0);
-kaku b = array.with_capacity[int64](10);
-chant(len(a));
-chant(array.capacity(b));
+kaku filled = array.make[int64](3, 7);
+kaku reserved = array.with_capacity[int64](16);
+
+chant(len(filled));              // 3
+chant(filled[2]);                // 7
+chant(len(reserved));            // 0
+chant(array.capacity(reserved)); // 16（或更大的已分配容量）
 ```
 
-### 追加与预留
+在上述示例中，长度（`len`）表示当前可安全索引的有效元素数量，容量（`capacity`）表示无需重新分配内存即可容纳的元素上限。即使 `reserved` 的容量为 `16`，在其长度大于 `0` 之前依然不能直接通过 `reserved[0]` 访问。
 
-`push` 追加一个元素；`append_all` 将来源数组当时的元素批量追加到目标数组。`reserve` 只保证后续容量，不改变数组长度。
+### 追加与预留容量
 
-```mio title="Array.mio"
+`array.push` 在数组末尾原地追加单个元素；`array.append_all` 将源数组当前包含的元素批量追加到目标数组末尾（支持将数组追加到自身）；`array.reserve` 保证底层缓冲区还能额外容纳指定数量的元素，不会改变当前数组长度。
+
+```mio title="ArrayGrow.mio"
 yobu "kiso/array";
 
-kaku values = [1, 2];
-array.push(values, 3);
+kaku values = [10, 20];
+array.push(values, 30);
 array.reserve(values, 10);
+array.append_all(values, [40, 50]);
+
+chant(len(values));              // 5
+chant(values[4]);                // 50
+chant(array.capacity(values)); // >= 13
 ```
 
-### 共享与复制
+### 共享引用与浅复制
 
-普通赋值只复制数组引用。`clone` 创建独立的后备数组，但其元素按浅复制规则处理；嵌套数组仍可能共享内部引用。
+普通赋值只复制数组引用；若需要一份互不影响的独立副本，应使用 `array.clone`。`clone` 会分配新的底层存储并按**浅复制（Shallow Copy）**规则复制元素。
 
-```mio title="Array.mio"
+```mio title="ArrayClone.mio"
 yobu "kiso/array";
 
-kaku original = [10, 20];
+kaku original: []int64 = [10, 20];
 kaku alias = original;
-alias[0] = 30;
-kaku independent = array.clone(original);
+alias[0] = 99;
+
+// original 受到 alias 修改的影响
+chant(original[0]); // 99
+
+// clone 创建独立副本，修改 copied 不会影响 original
+kaku copied = array.clone(original);
+copied[0] = 42;
+chant(original[0]); // 99
+chant(copied[0]);   // 42
+
+// 嵌套数组为浅复制：内层数组依然共享引用
+kaku nested: [][]int64 = [[1, 2]];
+kaku shallow = array.clone(nested);
+shallow[0][0] = 88;
+chant(nested[0][0]); // 88
 ```
 
-### 缩短数组
+### 缩短数组长度
 
-`truncate` 将数组的共享长度缩短到指定位置，不负责选择中间子区间。Mio V2.0 目前没有数组切片表达式。
+`array.truncate` 将数组的共享长度原地缩短为 `new_length`，同时保留已分配的底层容量以便后续复用。
 
-```mio title="Array.mio"
+```mio title="ArrayTruncate.mio"
 yobu "kiso/array";
 
-kaku numbers = [1, 2, 3, 4];
-array.truncate(numbers, 2);
+kaku items: []string = ["a", "b", "c", "d"];
+kaku before_cap = array.capacity(items);
+
+array.truncate(items, 2);
+
+chant(len(items));                        // 2
+chant(items[1]);                          // b
+chant(array.capacity(items) == before_cap); // hai
 ```
+
+---
 
 ### 公开函数（8 个）
 
-以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+| 函数            | 公开签名                                               | 功能与参数规则                                                                                                    |
+| --------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `make`          | `make<T>(length: int64, initial: T) -> []T`            | 创建长度为 `length`（须 `>= 0`）的数组，并将每个位置初始化为 `initial`；若 `T` 为引用类型，所有槽位共享同一引用。 |
+| `with_capacity` | `with_capacity<T>(capacity: int64) -> []T`             | 创建初始长度为 `0`、底层缓冲区至少能容纳 `capacity`（须 `>= 0`）个元素的数组。                                    |
+| `push`          | `push<T>(values: []T, value: T) -> unit`               | 原地向 `values` 末尾追加一个元素，必要时自动扩容。                                                                |
+| `capacity`      | `capacity<T>(values: []T) -> int64`                    | 返回 `values` 当前底层缓冲区已分配的元素容量（始终 `>= len(values)`）。                                           |
+| `reserve`       | `reserve<T>(values: []T, additional: int64) -> unit`   | 确保 `values` 至少还能额外容纳 `additional`（须 `>= 0`）个元素，不改变当前长度。                                  |
+| `clone`         | `clone<T>(values: []T) -> []T`                         | 分配新的独立数组并浅复制 `values` 中的全部现有元素。                                                              |
+| `truncate`      | `truncate<T>(values: []T, new_length: int64) -> unit`  | 原地将 `values` 的长度缩短为 `new_length`（须满足 `0 <= new_length <= len(values)`），保留原容量。                |
+| `append_all`    | `append_all<T>(destination: []T, source: []T) -> unit` | 按顺序将 `source` 当前的全部元素追加到 `destination` 末尾；允许 `destination` 与 `source` 为同一数组（自追加）。  |
 
-| 函数 | 公开签名 | 功能与返回规则 |
-| --- | --- | --- |
-| `make` | `make<T>(length: int64, initial: T) -> []T` | 创建指定长度且所有元素初始值相同的数组；嵌套引用不自动深复制。 |
-| `with_capacity` | `with_capacity<T>(capacity: int64) -> []T` | 创建长度为零、预留指定容量的数组。 |
-| `push` | `push<T>(values: []T, value: T) -> unit` | 原地向末尾添加一个元素。 |
-| `capacity` | `capacity<T>(values: []T) -> int64` | 获取已分配容量。 |
-| `reserve` | `reserve<T>(values: []T, additional: int64) -> unit` | 保证可再容纳指定数量的元素，不改变长度。 |
-| `clone` | `clone<T>(values: []T) -> []T` | 创建浅复制的独立数组。 |
-| `truncate` | `truncate<T>(values: []T, new_length: int64) -> unit` | 将共享长度缩短为指定值，保留容量。 |
-| `append_all` | `append_all<T>(destination: []T, source: []T) -> unit` | 批量追加源数组现有元素，允许向自身追加。 |
+---
 
 ### 完整示例
 
-```mio title="Array.mio"
+下面的示例综合演示了引用共享、原地追加、浅复制隔离、自追加以及截断操作：
+
+```mio title="ArrayWorkflow.mio"
 yobu "kiso/array";
 
-kaku original = [1, 2];
+kaku original: []int64 = [1, 2];
 kaku alias = original;
+
+// 通过共享别名修改与追加
 alias[0] = 9;
 array.push(alias, 3);
-chant(original[0]);
+chant(original[0]); // 9
+chant(len(original)); // 3
+
+// 创建独立副本
 kaku copied = array.clone(original);
-copied[0] = 7;
+copied[0] = 77;
+chant(original[0]); // 9
+
+// 自追加：将 original 当前的 [9, 2, 3] 追加到自身末尾
 array.append_all(original, original);
-array.truncate(alias, 1);
-chant(len(original));
+chant(len(original)); // 6
+chant(original[3]);   // 9
+
+// 截断至前 2 个元素
+array.truncate(alias, 2);
+chant(len(original)); // 2
 ```
 
-### 使用限制
+---
 
-负长度、非法截断位置或资源不足会产生运行时错误。数组索引从零开始、必须位于有效长度内；`array.capacity()` 的返回值不代表这些位置已经能够直接读取。`[]T` 不支持直接相等比较或切片语法。
+### 使用限制与平台说明
 
-源码依据：[Mio v2.0.0 · `bunko/kiso/array/array.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/array/array.mio)。
+- **边界检查与运行时错误**：`make`、`with_capacity`、`reserve` 传入负数参数，或 `truncate` 传入小于 `0` 或大于当前 `len(values)` 的目标长度，均会触发运行时错误。数组下标访问的有效范围为 `0 <= index < len(values)`，超出长度但处于 `capacity` 范围内的位置不可直接读写。
+- **语法边界**：Mio V2.1 暂不支持 `values[1:3]` 切片语法，也不支持使用 `==` 直接比较两个数组的内容。
+- **扩容策略**：原生 AOT 运行时下，数组最小扩容基准为 `4` 个元素；容量低于 `1024` 时按倍增策略增长，达到或超过 `1024` 后每次按 `1.5` 倍增长。
+
+源码依据：[Mio V2.1 · `bunko/kiso/array`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/array)。

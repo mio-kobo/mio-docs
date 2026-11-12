@@ -1,101 +1,118 @@
 ---
 title: UTF-8 编解码
-description: Mio V2.0 Unicode 与 UTF-8 标准库 kiso/utf8
+description: Mio V2.1 严格 UTF-8 字节流验证、Unicode 标量值编码、单字符解码与码点计数 kiso/utf8
 ---
 
-> **版本说明：** 本页保留 V2.0 的基础 API 说明。V2.1 的新增模块与原有包变化见 [标准库索引](/docs/v2.1/kiso) 和 [增量变化](/docs/v2.1/kiso/changes)；示例的可运行性取决于 CLI 与 Bunko 版本。
-
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/utf8` 模块。全部 7 个公开函数与 `DecodeResult` 结构体均基于纯 Mio 源码与紧凑 `[]uint8` 存储实现，可在 Mochi VM、Web Playground 与原生 AOT 后端运行。
 
 ## UTF-8 编解码
 
-UTF-8 标准库（UTF-8）用于严格验证、解码和编码 Unicode 标量值，输入输出主要是 `[]uint8` 字节数组。
+UTF-8 编解码标准库（`kiso/utf8`）提供严格的 UTF-8（RFC 3629）字节序列合法性验证、Unicode 标量值（`rune`）计数以及单字符编码与解码操作。
 
-与 `kiso/string` 的文本操作不同，本包面向字节级编解码，适合文件格式和数据协议的实现。
-
-本页以 Mio `v2.0.0` 已实现的公开接口为准，不包含未实现的函数或语言语法。
+与面向高级文本处理的 `kiso/string` 不同，本模块直接操作 `[]uint8` 字节序列，适合用于二进制协议解析、词法扫描与自定义文本流编解码。
 
 ### 导入包
 
-> **网页运行说明：** 本页的 Playground 代码块都是独立程序，已分别加入所需的 `yobu` 导入语句。点击「运行」时不会继承页面中其他代码块的状态。
+> **网页运行说明：** 本页的 Playground 代码块均为独立可运行程序，已各自包含所需的 `yobu` 导入语句，运行时互不继承状态。
 
-通过 `yobu "kiso/utf8";` 导入本包，随后使用 `utf8.函数名(...)` 调用。
+通过 `yobu "kiso/utf8";` 导入本包，并使用 `utf8.函数名(...)` 调用：
 
-```mio title="Stdlib.mio"
+```mio title="Utf8Import.mio"
 yobu "kiso/utf8";
 ```
 
-### 验证与统计
+### 验证字节序列与统计标量值
 
-`valid` 检查数组是否为合法 UTF-8，`rune_count` 返回 Unicode 标量值的数量。统计失败时返回 `mu`。
+`utf8.valid` 严格校验整个 `[]uint8` 数组是否符合 UTF-8 编码规范（拒绝过长编码、UTF-16 代理区码点 `U+D800 ~ U+DFFF`、超出 `U+10FFFF` 的码点及截断的多字节序列）；`utf8.rune_count` 在合法时返回 Unicode 标量值总数，遇到非法字节序列时返回 `mu`。
 
-```mio title="Utf8.mio"
+```mio title="Utf8Validate.mio"
 yobu "kiso/utf8";
 
-kaku data = utf8.encode_rune('澪');
-chant(utf8.valid(data));
-chant(utf8.rune_count(data) != mu);
+kaku valid_bytes: []uint8 = [65, 195, 169, 240, 159, 152, 128]; // "Aé😀"
+chant(utf8.valid(valid_bytes)); // hai
+
+kaku count = utf8.rune_count(valid_bytes);
+moshi (count != mu) {
+    chant(count); // 3
+}
+
+// 非法编码（如孤立续字节 0x80 或过长编码）会被严格拒绝
+chant(utf8.valid([237, 160, 128]));      // iie（代理区码点）
+chant(utf8.rune_count([65, 128]) == mu); // hai
 ```
 
-### 解码一个字符
+### 逐字符解码与流式扫描
 
-`decode_one` 从指定字节偏移解码，返回 `DecodeResult`。除了 `value`，还需要检查 `valid` 和 `width`：非法序列同样可能返回 U+FFFD，不能单凭字符值判断失败。
+`utf8.decode_one(data, offset)` 从指定的字节偏移量解码单个 Unicode 标量值，返回 `DecodeResult`。调用方必须同时检查 `valid` 与 `width`（不能仅凭 `value == '\uFFFD'` 判断失败，因为 `U+FFFD` 本身也是合法的 Unicode 标量值）：
 
-```mio title="Utf8.mio"
+- **合法字符**：`valid == hai`，`width` 为 `1 ~ 4` 字节，`value` 为解码出的标量值。
+- **非法字节序列**：`valid == iie`，`width == 1`，`value == '\uFFFD'`（允许调用方按单字节步进恢复扫描）。
+- **到达数组末尾（`offset == len(data)`）**：`valid == iie`，`width == 0`，`value == '\uFFFD'`。
+
+```mio title="Utf8DecodeLoop.mio"
 yobu "kiso/utf8";
 
-kaku bytes = utf8.encode_rune('你');
-kaku result = utf8.decode_one(bytes, 0);
-chant(result.valid);
-chant(result.width);
+kaku data: []uint8 = [65, 230, 151, 165, 255]; // 'A' + '日' + 非法字节 0xFF
+kaku offset = 0;
+
+aida (offset < len(data)) {
+    kaku res = utf8.decode_one(data, offset);
+    chant(res.valid); // 依次输出 hai, hai, iie
+    chant(res.width); // 依次输出 1, 3, 1
+    offset = offset + res.width;
+}
+
+// 恰好到达末尾时返回 width == 0
+kaku end = utf8.decode_one(data, len(data));
+chant(end.width); // 0
 ```
 
-### 写入一个字符
+### 编码与追加 Unicode 标量值
 
-`encode_rune` 返回新数组；`append_rune` 向已存在的字节数组追加编码结果。非法 Unicode 标量会发生运行时错误。
+`utf8.encode_rune` 为单个合法 `rune` 分配精确宽度的新 `[]uint8` 数组并写入 UTF-8 字节；`utf8.append_rune` 则将编码后的 `1 ~ 4` 字节直接追加到现有目标数组末尾。
 
-```mio title="Utf8.mio"
+```mio title="Utf8Encode.mio"
 yobu "kiso/utf8";
 
-kaku data: []uint8 = [];
-utf8.append_rune(data, 'A');
+chant(utf8.is_valid_rune('澪')); // hai
+chant(utf8.rune_width('澪'));    // 3
+
+kaku single = utf8.encode_rune('😀');
+chant(len(single));              // 4
+
+kaku buf: []uint8 = [33];        // '!'
+utf8.append_rune(buf, '中');
+chant(len(buf));                 // 4 ([33, 228, 184, 173])
 ```
 
 ### 公开类型
 
-- `DecodeResult { value: rune; width: int64; valid: bool; }`：单个 Unicode 标量值的解码结果。
+#### `DecodeResult`
+
+```mio title="Utf8Types.mio" no-run
+koukai kata DecodeResult {
+    value: rune;  // 解码出的 Unicode 标量值（非法输入或末尾位置固定为 '\uFFFD'）
+    width: int64; // 消费的字节宽度（合法为 1~4，非法序列为 1，offset == len(data) 时为 0）
+    valid: bool;  // 是否成功解码出合法的 UTF-8 字符
+}
+```
 
 ### 公开函数（7 个）
 
-以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
+| 函数            | 公开签名                                                   | 功能与返回规则                                                                                                                                                                          |
+| --------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `is_valid_rune` | `is_valid_rune(value: rune) -> bool`                       | 判断 `value` 是否为合法 Unicode 标量值（`0 <= code <= 0x10FFFF` 且不在代理区 `0xD800 ~ 0xDFFF` 内）。                                                                                   |
+| `rune_width`    | `rune_width(value: rune) -> int64`                         | 返回合法 Unicode 标量值所需的 UTF-8 编码字节数（`1 ~ 4`）；传入非法 `rune` 时触发运行时错误。                                                                                           |
+| `decode_one`    | `decode_one(data: []uint8, offset: int64) -> DecodeResult` | 从 `data[offset]` 解码单个标量值；非法序列返回 `{ '\uFFFD', 1, iie }`，`offset == len(data)` 返回 `{ '\uFFFD', 0, iie }`；`offset < 0` 或 `offset > len(data)` 触发数组越界运行时错误。 |
+| `encode_rune`   | `encode_rune(value: rune) -> []uint8`                      | 将合法标量值 `value` 编码为长度 `1 ~ 4` 的新字节数组；传入非法 `rune` 时触发运行时错误。                                                                                                |
+| `append_rune`   | `append_rune(destination: []uint8, value: rune) -> unit`   | 将合法标量值 `value` 的 UTF-8 字节原地追加到 `destination` 末尾；传入非法 `rune` 时触发运行时错误且不修改目标数组。                                                                     |
+| `valid`         | `valid(data: []uint8) -> bool`                             | 检查 `data` 全部字节是否构成严格合法的 UTF-8 序列（空数组 `[]` 返回 `hai`）。                                                                                                           |
+| `rune_count`    | `rune_count(data: []uint8) -> int64?`                      | 统计合法 UTF-8 字节数组中的 Unicode 标量值总数；若包含任何非法 UTF-8 序列则返回 `mu`。                                                                                                  |
 
-| 函数 | 公开签名 | 功能与返回规则 |
-| --- | --- | --- |
-| `is_valid_rune` | `is_valid_rune(value: rune) -> bool` | 判断整数是否为合法 Unicode 标量值。 |
-| `rune_width` | `rune_width(value: rune) -> int64` | 获取合法标量的 UTF-8 编码宽度，范围为 1—4 字节。 |
-| `decode_one` | `decode_one(data: []uint8, offset: int64) -> DecodeResult` | 从字节偏移解码；结果包含 `value`、`width` 和 `valid`。 |
-| `encode_rune` | `encode_rune(value: rune) -> []uint8` | 将一个合法标量编码为新字节数组。 |
-| `append_rune` | `append_rune(destination: []uint8, value: rune) -> unit` | 将 UTF-8 编码追加到目标数组。 |
-| `valid` | `valid(data: []uint8) -> bool` | 检查整个字节数组是否为严格合法的 UTF-8。 |
-| `rune_count` | `rune_count(data: []uint8) -> int64?` | 返回标量值数量；非法 UTF-8 返回 `mu`。 |
+### 使用限制与平台说明
 
-### 完整示例
+- **错误处理差异**：解码与校验函数（`decode_one`、`valid`、`rune_count`）遇到非法 UTF-8 输入时通过返回值（`valid = iie` 或 `mu`）安全报告；而编码与宽度查询函数（`rune_width`、`encode_rune`、`append_rune`）传入非法码点（如负数、代理区或 `> 0x10FFFF`）时会直接触发运行时错误。
+- **越界规则**：`decode_one` 仅允许 `0 <= offset <= len(data)`（其中 `offset == len(data)` 用于循环终止检测）；传入负数或大于 `len(data)` 的偏移量会触发数组下标越界运行时错误。
+- **文本语义边界**：本模块仅处理 Unicode 标量值与 UTF-8 字节编码，不包含 Unicode 规范化（NFC/NFD）、大小写转换、显示宽度计算或字素簇（Grapheme Cluster）分割功能。
 
-```mio title="Utf8.mio"
-yobu "kiso/utf8";
-
-kaku data = utf8.encode_rune('澪');
-kaku result = utf8.decode_one(data, 0);
-chant(result.valid);
-chant(result.width);
-chant(result.value);
-kaku end = utf8.decode_one(data, len(data));
-chant(end.width);
-kaku invalid: []uint8 = [255];
-chant(utf8.rune_count(invalid) == mu);
-```
-
-### 使用限制
-
-本包不处理显示宽度、Unicode 规范化或字素簇。`decode_one` 在非法序列时返回替换字符及 `valid = iie`，到达末尾时宽度为零；其他越界偏移会发生运行时错误。
-
-源码依据：[Mio v2.0.0 · `bunko/kiso/utf8/utf8.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/utf8/utf8.mio)。
+源码依据：[Mio V2.1 · `bunko/kiso/utf8`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/utf8)。

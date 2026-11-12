@@ -1,131 +1,170 @@
 ---
-featureBadge: updated
 title: 字符串
-description: Mio V2.1 字符串标准库 kiso/string，包含 Unicode 空白裁剪。
+description: Mio V2.1 UTF-8 字符串转换、码点计数、查找、空白修剪与 StringBuilder 操作 kiso/string
 ---
+
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/string` 模块。在保留 V2.0 全部 17 个公开函数与 `StringBuilder` 的基础上，V2.1 新增了支持 Unicode 空白字符的 `trim_space` 函数。
 
 ## 字符串
 
-字符串标准库（String）提供 UTF-8 字节长度、Unicode 标量值计数、前后缀判断、查找、字符串拼接和 `StringBuilder`。
+字符串标准库（`kiso/string`）为 Mio 内置的不可变 UTF-8 文本类型 `string` 提供字节长度与 Unicode 标量值计数、前缀/后缀/子串字节语义查找、字符串拼接、首尾空白修剪、UTF-8 字节数组互转以及可复用的 `StringBuilder`。
 
-Mio 的 `string` 是不可变的 UTF-8 文本，语言本身没有字符串 `+` 拼接运算符。
-
-### trim_space <FeatureBadge status="new" since="2.1" />
-
-本页的基本字符串 API 沿用 Mio V2.0。V2.1 新增 `trim_space(value: string) -> string`，用于移除文本两端的 Unicode 空白字符；它不是 Unicode 规范化或大小写转换函数。
-
-```mio title="TrimSpace.mio"
-yobu "kiso/string";
-
-chant(string.trim_space("  Mio  "));
-```
-
-此示例可在 V2.1 Playground 运行。其他变化见 [标准库变化](/docs/v2.1/kiso/changes)。
+在 Mio 中，`string` 值本身是不可变的，采用 UTF-8 编码保存。语言内置 `==` 与 `!=` 用于比较字符串内容是否完全一致（区分大小写），不支持使用 `+` 运算符直接拼接字符串或对字符串进行下标赋值与切片操作。
 
 ### 导入包
 
-> **网页运行说明：** 本页的 Playground 代码块都是独立程序，已分别加入所需的 `yobu` 导入语句。点击「运行」时不会继承页面中其他代码块的状态。
+> **网页运行说明：** 本页的 Playground 代码块均为独立可运行程序，已各自包含所需的 `yobu` 导入语句，运行时互不继承状态。
 
-通过 `yobu "kiso/string";` 导入本包，随后使用 `string.函数名(...)` 调用。
+通过 `yobu "kiso/string";` 导入本包，并使用 `string.函数名(...)` 调用：
 
 ```mio title="Stdlib.mio"
 yobu "kiso/string";
 ```
 
-### 字节与字符数量
+### 字节长度与 Unicode 标量值计数
 
-`byte_len` 计算编码后占用的字节数；`rune_count` 计算 Unicode 标量值数量。两者不同，尤其在中文、日文与 Emoji 文本中。
+由于 UTF-8 采用变长编码（ASCII 字符占 1 字节，常见中日韩文字占 3 字节，部分 Emoji 占 4 字节），`kiso/string` 区分底层字节数与 Unicode 标量值（`rune`）数量：
 
-```mio title="String.mio"
+- `string.byte_len`：返回字符串的 UTF-8 字节长度（$O(1)$ 读取）。
+- `string.rune_count`：解码统计字符串包含的 Unicode 标量值个数。
+
+```mio title="StringLength.mio"
 yobu "kiso/string";
 
-kaku text = "澪Mio";
-chant(string.byte_len(text));
-chant(string.rune_count(text));
+kaku text = "澪Mio😀";
+
+chant(string.byte_len(text));   // 10（3 + 3 + 4 字节）
+chant(string.rune_count(text)); // 5（1 + 3 + 1 个 Unicode 标量值）
 ```
 
-### 查找与拼接
+在上述示例中，内置 `len()` 仅适用于数组，获取字符串长度请使用 `string.byte_len` 或 `string.rune_count`。
 
-`has_prefix`、`has_suffix` 和 `contains` 返回布尔值。`index` 返回首次匹配的 UTF-8 **字节偏移量**，找不到返回 `-1`。`concat` 返回新的字符串。
+### 查找与前后缀判断
 
-```mio title="String.mio"
+`has_prefix`、`has_suffix`、`contains` 和 `index` 均按 **UTF-8 字节序列**进行精确匹配。其中 `index` 返回子串首次出现时的**起始字节偏移量**，未找到时返回 `-1`（空模式串 `""` 始终返回 `0`）。
+
+```mio title="StringSearch.mio"
 yobu "kiso/string";
 
-chant(string.index("你Mio", "Mio"));
-chant(string.concat("Hello, ", "Mio"));
+kaku path = "src/日本語.mio";
+
+chant(string.has_prefix(path, "src/")); // hai
+chant(string.has_suffix(path, ".mio")); // hai
+chant(string.contains(path, "日本"));    // hai
+chant(string.index(path, "語"));        // 10（"src/" 占 4 字节，"日本" 占 6 字节）
+chant(string.index(path, "missing"));   // -1
 ```
 
-### 字符串与字节数组
+### 拼接与首尾空白修剪
 
-`to_bytes` 生成独立的 `[]uint8`；`from_utf8` 严格检查编码，有效时生成独立的字符串，无效时返回 `mu`。
+`string.concat` 按总字节长度预分配缓冲区并拼接两个字符串；V2.1 新增的 `string.trim_space` 用于去除字符串首尾的所有 Unicode 空白字符（包括 ASCII 空白 `\t`、`\n`、`\r`、空格，以及全角空格 `\u3000`、不换行空格 `\u00A0`、行分隔符 `\u2028` 等）。
 
-```mio title="String.mio"
+```mio title="StringTrimConcat.mio"
 yobu "kiso/string";
 
-kaku data = string.to_bytes("Mio");
-kaku decoded = string.from_utf8(data);
-moshi (decoded != mu) { chant(decoded); }
+kaku raw = "　\tHello, Mio!\n ";
+kaku clean = string.trim_space(raw);
+kaku greeting = string.concat(clean, " v2.1");
+
+chant(clean);    // Hello, Mio!
+chant(greeting); // Hello, Mio! v2.1
 ```
 
-### 使用 StringBuilder
+### 字符串与 UTF-8 字节数组互转
 
-`StringBuilder` 可以逐段追加字符串或 Unicode 标量值。写入和重置会修改共享的内部缓冲区；`builder_string` 返回独立的不可变文本。
+`string.to_bytes` 将字符串复制为独立的 `[]uint8` 字节数组；`string.from_utf8` 则校验字节序列的 UTF-8 合法性（拒绝非法续字节、代理区码点及过长编码），合法时返回对应 `string`，非法时返回 `mu`。
 
-```mio title="String.mio"
+```mio title="StringUtf8.mio"
 yobu "kiso/string";
 
-kaku builder = string.new_builder();
-string.write_string(builder, "Mio");
-string.write_rune(builder, '!');
-chant(string.builder_string(builder));
+kaku raw = string.to_bytes("A日");
+chant(len(raw)); // 4（[65, 230, 151, 165]）
+
+kaku valid = string.from_utf8([230, 151, 165]);
+moshi (valid != mu) {
+    chant(valid); // 日
+}
+
+// 非法 UTF-8 序列返回 mu
+kaku invalid = string.from_utf8([255]);
+chant(invalid == mu); // hai
 ```
+
+### 使用 StringBuilder 增量构建文本
+
+在循环或复杂格式化场景中，应使用 `StringBuilder` 避免频繁分配中间字符串。`StringBuilder` 内部封装了 `bytes.ByteBuffer`，支持追加字符串与单个 `rune` 码点，并通过 `builder_string` 导出独立的不可变字符串副本。
+
+```mio title="StringBuilder.mio"
+yobu "kiso/string";
+
+kaku sb = string.builder_with_capacity(32);
+string.write_string(sb, "Mio ");
+string.write_rune(sb, '澪');
+string.write_rune(sb, '😀');
+
+chant(string.builder_len(sb));      // 11（字节数）
+chant(string.builder_string(sb));   // Mio 澪😀
+
+// 清空内容并复用已分配容量
+string.builder_reset(sb);
+chant(string.builder_len(sb));      // 0
+chant(string.builder_capacity(sb)); // >= 32
+```
+
+---
 
 ### 公开类型
 
-- `StringBuilder { buffer: bytes.ByteBuffer; }`：共享字节缓冲区的字符串构造器。
+#### `StringBuilder`
 
-### 公开函数（17 个）
-
-以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
-
-| 函数 | 公开签名 | 功能与返回规则 |
-| --- | --- | --- |
-| `to_bytes` | `to_bytes(value: string) -> []uint8` | 将 UTF-8 文本复制到独立字节数组。 |
-| `from_utf8` | `from_utf8(data: []uint8) -> string?` | 严格解码；非法 UTF-8 返回 `mu`。 |
-| `byte_len` | `byte_len(value: string) -> int64` | 获取 UTF-8 字节长度。 |
-| `rune_count` | `rune_count(value: string) -> int64` | 获取 Unicode 标量值数量。 |
-| `has_prefix` | `has_prefix(value: string, prefix: string) -> bool` | 判断前缀。 |
-| `has_suffix` | `has_suffix(value: string, suffix: string) -> bool` | 判断后缀。 |
-| `index` | `index(value: string, pattern: string) -> int64` | 返回首次匹配的字节偏移，缺失为 `-1`，空模式为零。 |
-| `contains` | `contains(value: string, pattern: string) -> bool` | 判断是否包含指定内容，空模式为真。 |
-| `concat` | `concat(left: string, right: string) -> string` | 拼接成独立字符串。 |
-| `new_builder` | `new_builder() -> StringBuilder` | 创建空字符串构造器。 |
-| `builder_with_capacity` | `builder_with_capacity(capacity: int64) -> StringBuilder` | 创建并按字节预留容量的构造器。 |
-| `write_string` | `write_string(builder: StringBuilder, value: string) -> unit` | 向构造器追加文本。 |
-| `write_rune` | `write_rune(builder: StringBuilder, value: rune) -> unit` | 向构造器追加编码后的单个 Unicode 标量。 |
-| `builder_len` | `builder_len(builder: StringBuilder) -> int64` | 获取已写入的字节长度。 |
-| `builder_capacity` | `builder_capacity(builder: StringBuilder) -> int64` | 获取字节容量。 |
-| `builder_reset` | `builder_reset(builder: StringBuilder) -> unit` | 清空缓冲区长度并保留容量。 |
-| `builder_string` | `builder_string(builder: StringBuilder) -> string` | 导出独立不可变字符串，非法 UTF-8 缓冲内容报错。 |
-
-### 完整示例
-
-```mio title="String.mio"
-yobu "kiso/string";
-
-chant(string.byte_len("澪A"));
-chant(string.rune_count("澪A"));
-chant(string.index("澪A", "A"));
-kaku builder = string.new_builder();
-string.write_string(builder, "Mio");
-string.write_rune(builder, '!');
-chant(string.builder_string(builder));
-kaku invalid: []uint8 = [255];
-chant(string.from_utf8(invalid) == mu);
+```mio title="StringTypes.mio" no-run
+koukai kata StringBuilder {
+    buffer: bytes.ByteBuffer; // 底层可变字节缓冲区（直接赋值变量会共享缓冲区引用）
+}
 ```
 
-### 使用限制
+---
 
-字符串操作以 UTF-8 字节与 Unicode 标量为单位，不处理 Unicode 规范化、字素簇或语言相关的大小写匹配。`StringBuilder` 的赋值共享内部缓冲区，不等于生成独立副本。
+### 公开函数（18 个）
 
-源码依据：[Mio v2.0.0 · `bunko/kiso/string/string.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/string/string.mio)。
+#### 1. 长度与编码转换（4 个）
+
+| 函数         | 公开签名                              | 功能与返回规则                                                                 |
+| ------------ | ------------------------------------- | ------------------------------------------------------------------------------ |
+| `byte_len`   | `byte_len(value: string) -> int64`    | 返回字符串的 UTF-8 字节长度。                                                  |
+| `rune_count` | `rune_count(value: string) -> int64`  | 返回字符串中包含的 Unicode 标量值总数；若输入包含非法 UTF-8 则触发运行时错误。 |
+| `to_bytes`   | `to_bytes(value: string) -> []uint8`  | 将字符串的 UTF-8 字节序列复制为独立的 `[]uint8` 数组。                         |
+| `from_utf8`  | `from_utf8(data: []uint8) -> string?` | 验证并将合法 UTF-8 字节数组解码为 `string`；若包含非法编码则返回 `mu`。        |
+
+#### 2. 查找、拼接与修剪（6 个）
+
+| 函数         | 公开签名                                            | 功能与返回规则                                                                                   |
+| ------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `has_prefix` | `has_prefix(value: string, prefix: string) -> bool` | 判断 `value` 是否以 `prefix` 的字节序列开头（空前缀始终返回 `hai`）。                            |
+| `has_suffix` | `has_suffix(value: string, suffix: string) -> bool` | 判断 `value` 是否以 `suffix` 的字节序列结尾（空后缀始终返回 `hai`）。                            |
+| `index`      | `index(value: string, pattern: string) -> int64`    | 返回 `pattern` 在 `value` 中首次出现的起始 UTF-8 字节偏移；未找到返回 `-1`（空模式串返回 `0`）。 |
+| `contains`   | `contains(value: string, pattern: string) -> bool`  | 判断 `value` 中是否包含子串 `pattern`。                                                          |
+| `concat`     | `concat(left: string, right: string) -> string`     | 返回 `left` 与 `right` 拼接后的新字符串，不修改原值。                                            |
+| `trim_space` | `trim_space(value: string) -> string`               | 去除 `value` 开头和结尾的所有 Unicode 空白字符并返回新字符串（V2.1 新增）。                      |
+
+#### 3. `StringBuilder` 操作（8 个）
+
+| 函数                    | 公开签名                                                      | 功能与返回规则                                                                                               |
+| ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `new_builder`           | `new_builder() -> StringBuilder`                              | 创建一个初始为空的 `StringBuilder`。                                                                         |
+| `builder_with_capacity` | `builder_with_capacity(capacity: int64) -> StringBuilder`     | 创建一个初始长度为 `0`、底层缓冲区至少预留 `capacity` 字节的 `StringBuilder`。                               |
+| `write_string`          | `write_string(builder: StringBuilder, value: string) -> unit` | 向 `builder` 末尾追加字符串 `value` 的 UTF-8 字节。                                                          |
+| `write_rune`            | `write_rune(builder: StringBuilder, value: rune) -> unit`     | 将单个 Unicode 标量值 `value` 编码为 UTF-8 并追加到 `builder` 末尾。                                         |
+| `builder_len`           | `builder_len(builder: StringBuilder) -> int64`                | 返回 `builder` 当前已写入的字节数。                                                                          |
+| `builder_capacity`      | `builder_capacity(builder: StringBuilder) -> int64`           | 返回 `builder` 底层缓冲区当前已分配的字节容量。                                                              |
+| `builder_reset`         | `builder_reset(builder: StringBuilder) -> unit`               | 将 `builder` 内容长度归零并保留已分配容量。                                                                  |
+| `builder_string`        | `builder_string(builder: StringBuilder) -> string`            | 校验缓冲区的 UTF-8 合法性并导出独立的不可变 `string` 副本；若缓冲区被外部写入了非法 UTF-8 则触发运行时错误。 |
+
+---
+
+### 使用限制与平台说明
+
+- **字节语义与文本粒度**：查找与索引函数均基于 UTF-8 字节偏移执行，不执行 Unicode 规范化（NFC/NFD）、大小写折叠或字素簇（Grapheme Cluster）切分。
+- **构造器共享引用**：`StringBuilder` 内部持有的 `buffer` 字段遵循共享引用语义；若直接通过 `sb.buffer.data` 写入了非法 UTF-8 字节序列，后续调用 `builder_string(sb)` 将会触发运行时错误。
+
+源码依据：[Mio V2.1 · `bunko/kiso/string`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/string)。

@@ -1,154 +1,214 @@
 ---
 featureBadge: updated
 title: 文件系统
-description: Mio V2.1 文件系统标准库 kiso/fs，包含字符设备判断。
+description: Mio V2.1 同步文件读写、目录管理、流式适配器与字符设备判断 kiso/fs
 ---
+
+> **版本说明：** 本页对应 Mio V2.1 中的 `kiso/fs` 模块。在保留 V2.0 全部 16 个公开文件与目录接口的基础上，V2.1 新增了 `is_character_device` 字符设备检测函数，并在 macOS ARM64、Linux x86_64 与 Windows x86_64 正式版上通过了普通文件、追加写入、目录列举及 Unicode 文件名验证。
 
 ## 文件系统 <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
 
-正式版三平台通过普通文件、追加写入、目录及 Unicode 文件名测试。浏览器不提供文件系统接口。
+文件系统标准库（`kiso/fs`）为 Mio 提供同步文件打开、分块/全量读写、句柄关闭、单级目录创建、目录条目列举、路径状态查询以及 `kiso/io` 流适配器。
 
-文件系统标准库（File System）提供同步文件打开、读写、关闭、目录创建、文件状态与目录列表等操作。
-
-它借助宿主提供的文件系统能力执行操作。`File` 内部包含受信任的 `resource` 句柄，不是可以由 Mio 普通代码随意构造的操作系统指针。
-
-### is_character_device <FeatureBadge status="new" since="2.1" />
-
-文件读写与目录接口沿用 Mio V2.0。V2.1 新增 `is_character_device(path: string) -> bool`，用于通过宿主 NativeFS 状态判断路径是否为字符设备。布尔结果不包含详细错误信息，不应据此断言所有平台都有相同的设备类型语义。
-
-```mio title="CharacterDevice.mio" no-run
-yobu "kiso/fs";
-
-chant(fs.is_character_device("/dev/null"));
-```
-
-完整增量见 [标准库变化](/docs/v2.1/kiso/changes)。
+该模块通过受信任的宿主运行时（`mio/fs/runtime`）执行底层操作。打开的 `File` 结构体封装了由代际检查保护的 `resource` 句柄，无法由普通 Mio 代码伪造；对任意平台均执行精确字节传输（不执行 CRLF 换行符转换）。
 
 ### 导入包
 
-> **运行环境：** 当前网页 Playground 的 WASM 不包含此包。以下代码示例使用 Mio v2.1.0 Native CLI 与完整 Bunko 标准库，网页中仅展示代码，不提供无法运行的「运行」按钮。
+> **运行环境：** 当前网页 Playground 的 WASM 环境不提供本地文件系统访问能力。以下代码示例需在本地通过 Mio V2.1 CLI 与完整 Bunko 标准库运行。
 
-通过 `yobu "kiso/fs";` 导入本包，随后使用 `fs.函数名(...)` 调用。
+通过 `yobu "kiso/fs";` 导入本包，并使用 `fs.函数名(...)` 调用：
 
-```mio title="Stdlib.mio" no-run
+```mio title="FsImport.mio" no-run
 yobu "kiso/fs";
-yobu "kiso/string";
 ```
 
-### 读取和写入整个文件
+### 全量读取与写入文件
 
-`read_all` 和 `write_all` 适合一次性处理一个文件。两者均通过结果类型返回 `error`；其中 `read_all` 返回字节数组，而不是自动解码后的文本。
+`fs.write_all` 与 `fs.read_all` 适合处理中小规模文件。`write_all` 会创建或截断目标文件并完整写入字节数组；`read_all` 以 `32 KiB` 分块读取文件全部字节并自动关闭句柄（若中途出错，`ReadAllResult.data` 可能包含已读取的前缀字节）。
 
-```mio title="Fs.mio" no-run
+```mio title="FsReadWriteAll.mio" no-run
 yobu "kiso/fs";
 yobu "kiso/string";
 
-kaku written = fs.write_all("sample.txt", string.to_bytes("Mio"));
-chant(written.error == mu);
-kaku loaded = fs.read_all("sample.txt");
-chant(loaded.error == mu);
-```
-
-### 显式打开与关闭
-
-`open_read`、`open_write`、`open_append` 分别用于只读、创建或截断写入、追加写入。成功打开后可以调用 `read`、`write`；使用完毕应调用 `close`。
-
-```mio title="Fs.mio" no-run
-yobu "kiso/fs";
-yobu "kiso/string";
-
-kaku result = fs.open_read("sample.txt");
-kaku file = result.file;
-moshi (file != mu) {
-    kaku closed = fs.close(file);
-    chant(closed.error == mu);
+kaku written = fs.write_all("sample.txt", string.to_bytes("Hello, Mio!"));
+moshi (written.error == mu) {
+    kaku loaded = fs.read_all("sample.txt");
+    moshi (loaded.error == mu) {
+        kaku text = string.from_utf8(loaded.data);
+        moshi (text != mu) {
+            chant(text); // Hello, Mio!
+        }
+    }
 }
 ```
 
-### 文件和目录状态
+### 句柄流式读写与 `kiso/io` 适配
 
-`stat` 提供是否存在、是否为文件、是否为目录及错误详情。`exists`、`is_file`、`is_dir` 是便捷布尔函数，但会丢弃详细错误。`read_dir` 返回目录项数组。
+当需要流式处理大文件或控制读写偏移时，可使用 `open_read`、`open_write` 或 `open_append` 获取 `File` 句柄，配合 `fs.read`、`fs.write` 或通过 `fs.reader`、`fs.writer` 包装为 `kiso/io` 标准流接口使用。操作完成后必须调用 `fs.close` 释放操作系统描述符。
 
-```mio title="Fs.mio" no-run
+```mio title="FsStream.mio" no-run
+yobu "kiso/array";
 yobu "kiso/fs";
+yobu "kiso/io";
 yobu "kiso/string";
 
-kaku info = fs.stat("sample.txt");
-moshi (info.error == mu) { chant(info.exists); }
+// 1. 创建并写入初始内容
+kaku out = fs.open_write("app.log");
+kaku wf = out.file;
+moshi (wf != mu) {
+    io.write_all(fs.writer(wf), string.to_bytes("line 1\n"), 0, 7);
+    fs.close(wf);
+}
+
+// 2. 以追加模式打开并写入第二行
+kaku app = fs.open_append("app.log");
+kaku af = app.file;
+moshi (af != mu) {
+    fs.write(af, string.to_bytes("line 2\n"), 0, 7);
+    fs.close(af);
+}
+
+// 3. 只读打开并读取固定字节
+kaku inp = fs.open_read("app.log");
+kaku rf = inp.file;
+moshi (rf != mu) {
+    kaku buf = array.make[uint8](14, uint8(0));
+    kaku res = io.read_full(fs.reader(rf), buf, 0, 14);
+    moshi (res.error == mu) {
+        chant(res.count); // 14
+    }
+    fs.close(rf);
+}
 ```
 
-### 连接到 io
+在上述示例中，`fs.reader` 与 `fs.writer` 仅提供读写适配器，**不会接管 `File` 的关闭责任**，调用方仍需显式调用 `fs.close(file)`。
 
-`fs.reader`、`fs.writer` 将文件句柄包装为 `kiso/io` 兼容的 Reader 或 Writer。适配器不会接管文件的关闭责任。
+### 目录管理、状态查询与字符设备判断
 
-```mio title="Fs.mio" no-run
+`fs.stat` 返回包含 `exists`、`is_file`、`is_dir` 与 `error` 的完整路径状态（注意：路径不存在时 `stat` 返回 `exists == iie` 且 `error == mu`，不会将其视为错误）。`fs.read_dir` 返回目录下所有条目（自动过滤 `.` 与 `..`）；V2.1 新增的 `fs.is_character_device` 用于判断目标路径是否为字符设备（如 `/dev/null`）。
+
+```mio title="FsDirAndStat.mio" no-run
 yobu "kiso/fs";
-yobu "kiso/string";
 
-kaku opened = fs.open_read("sample.txt");
-kaku file = opened.file;
-moshi (file != mu) {
-    kaku reader = fs.reader(file);
-    fs.close(file);
+fs.create_dir("workspace");
+
+kaku st = fs.stat("workspace");
+moshi (st.error == mu) {
+    chant(st.exists); // hai
+    chant(st.is_dir); // hai
+}
+
+// V2.1 新增：检测字符设备
+chant(fs.is_character_device("/dev/null"));
+
+// 列举目录项
+kaku dir = fs.read_dir("workspace");
+moshi (dir.error == mu) {
+    kaku i = 0;
+    aida (i < len(dir.entries)) {
+        chant(dir.entries[i].name);
+        i = i + 1;
+    }
 }
 ```
 
 ### 公开类型
 
-- `File { handle: resource; }`：受宿主管理的文件句柄。
-- `FileResult { file: File?; error: FsError?; }`：文件打开结果。
-- `ReadAllResult { data: []uint8; error: FsError?; }`：完整读取结果。
-- `UnitResult { error: FsError?; }`：无普通值的操作结果。
-- `StatResult { exists: bool; is_file: bool; is_dir: bool; error: FsError?; }`：路径状态。
-- `DirEntry { name: string; is_file: bool; is_dir: bool; }`：目录项。
-- `DirResult { entries: []DirEntry; error: FsError?; }`：目录列举结果。
-- `FsError`：文件系统操作错误的枚举。
+#### 错误枚举：`FsError`
 
-### 公开函数（16 个）
+所有错误变体均携带底层宿主返回的描述文本：
 
-以下签名保留已实现的函数名称、参数类型和返回类型。`unit` 表示无普通返回值；`T?` 与 `Error?` 需要根据 API 语义处理 `mu`。
-
-| 函数 | 公开签名 | 功能与返回规则 |
-| --- | --- | --- |
-| `open_read` | `open_read(path: string) -> FileResult` | 以只读方式打开文件，失败时 `file = mu`。 |
-| `open_write` | `open_write(path: string) -> FileResult` | 创建或截断文件，以写入方式打开。 |
-| `open_append` | `open_append(path: string) -> FileResult` | 创建或以追加模式打开文件。 |
-| `read` | `read(file: File, destination: []uint8, offset: int64, length: int64) -> io.ReadResult` | 从打开的文件读取字节，支持部分读取。 |
-| `write` | `write(file: File, source: []uint8, offset: int64, length: int64) -> io.WriteResult` | 将字节写入文件，支持部分写入。 |
-| `close` | `close(file: File) -> UnitResult` | 关闭文件句柄，重复关闭会返回错误。 |
-| `reader` | `reader(file: File) -> io.Reader` | 将打开的文件包装为 io.Reader。 |
-| `writer` | `writer(file: File) -> io.Writer` | 将打开的文件包装为 io.Writer。 |
-| `read_all` | `read_all(path: string) -> ReadAllResult` | 打开、分块读取并关闭文件；错误时可能包含已读前缀。 |
-| `write_all` | `write_all(path: string, data: []uint8) -> UnitResult` | 创建或截断文件，完整写入字节并关闭。 |
-| `stat` | `stat(path: string) -> StatResult` | 返回文件是否存在、文件或目录的状态和错误。 |
-| `exists` | `exists(path: string) -> bool` | 判断是否存在；不保留详细错误。 |
-| `is_file` | `is_file(path: string) -> bool` | 判断是否为文件；不保留详细错误。 |
-| `is_dir` | `is_dir(path: string) -> bool` | 判断是否为目录；不保留详细错误。 |
-| `create_dir` | `create_dir(path: string) -> UnitResult` | 创建单级目录；不自动递归创建父目录。 |
-| `read_dir` | `read_dir(path: string) -> DirResult` | 列举目录项并返回错误。 |
-
-### 完整示例
-
-```mio title="Fs.mio" no-run
-yobu "kiso/fs";
-yobu "kiso/string";
-
-kaku written = fs.write_all("sample.txt", string.to_bytes("Mio"));
-chant(written.error == mu);
-kaku loaded = fs.read_all("sample.txt");
-chant(loaded.error == mu);
-chant(len(loaded.data));
-chant(fs.is_file("sample.txt"));
-kaku opened = fs.open_read("sample.txt");
-kaku file = opened.file;
-moshi (file != mu) {
-    kaku first = fs.close(file);
-    chant(first.error == mu);
+```mio title="FsError.mio" no-run
+koukai sentaku FsError {
+    NotFound(string);         // 目标文件或目录不存在
+    PermissionDenied(string); // 权限不足，无法打开、创建或修改目标
+    Closed(string);           // 尝试对已关闭的文件句柄执行读写或重复关闭
+    InvalidArgument(string);  // 缓冲区读写偏移/长度越界或参数非法
+    NoSpace(string);          // 设备存储空间已满
+    InvalidPath(string);      // 路径格式非法（如包含 NUL 字节）
+    IOFailure(string);        // 其他底层操作系统 I/O 错误
 }
 ```
 
-### 使用限制
+#### 句柄与结果载体
 
-使用 `kiso/fs` 需要当前运行环境提供文件系统宿主接口；浏览器中的 Mio Playground 不等同于具有本机文件访问能力。文件的访问权限、路径解析与实际写入结果由宿主系统决定。复制 `File` 值会共享句柄状态，关闭后其他副本同样不能再用。
+```mio title="FsTypes.mio" no-run
+// 受宿主代际检查保护的文件句柄（赋值复制会共享同一个底层句柄状态）
+koukai kata File {
+    handle: resource;
+}
 
-源码依据：[Mio v2.0.0 · `bunko/kiso/fs/fs.mio`](https://github.com/mio-kobo/mio/blob/0ce04dd06c6c6e4e26f55a2c0b4ffb23aa942a0a/bunko/kiso/fs/fs.mio)。
+koukai kata FileResult {
+    file: File?;
+    error: FsError?;
+}
+
+koukai kata ReadAllResult {
+    data: []uint8;
+    error: FsError?;
+}
+
+koukai kata UnitResult {
+    error: FsError?;
+}
+
+koukai kata StatResult {
+    exists: bool;
+    is_file: bool;
+    is_dir: bool;
+    error: FsError?;
+}
+
+koukai kata DirEntry {
+    name: string;   // 条目名称（UTF-8 字符串，不含父目录路径）
+    is_file: bool;
+    is_dir: bool;
+}
+
+koukai kata DirResult {
+    entries: []DirEntry;
+    error: FsError?;
+}
+```
+
+### 公开函数（17 个）
+
+#### 1. 文件打开、流式读写与关闭（8 个）
+
+| 函数          | 公开签名                                                                                | 功能与返回规则                                                                                             |
+| ------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `open_read`   | `open_read(path: string) -> FileResult`                                                 | 以只读模式打开现有文件；文件不存在或打开失败时 `file == mu` 且 `error != mu`。                             |
+| `open_write`  | `open_write(path: string) -> FileResult`                                                | 以写入模式打开文件（不存在则创建，已存在则截断为 0 字节）。                                                |
+| `open_append` | `open_append(path: string) -> FileResult`                                               | 以追加模式打开文件（不存在则创建，写入总是追加到文件末尾）。                                               |
+| `read`        | `read(file: File, destination: []uint8, offset: int64, length: int64) -> io.ReadResult` | 从 `file` 读取最多 `length` 字节写入 `destination[offset .. offset+length)`；到达文件末尾时 `eof == hai`。 |
+| `write`       | `write(file: File, source: []uint8, offset: int64, length: int64) -> io.WriteResult`    | 将 `source[offset .. offset+length)` 写入 `file`，返回实际写入字节数与可空 `io.IoError`。                  |
+| `close`       | `close(file: File) -> UnitResult`                                                       | 关闭文件句柄并释放系统描述符；对已关闭的句柄重复调用会返回 `FsError.Closed`。                              |
+| `reader`      | `reader(file: File) -> io.Reader`                                                       | 将 `file` 包装为 `kiso/io.Reader` 适配器（不接管关闭责任）。                                               |
+| `writer`      | `writer(file: File) -> io.Writer`                                                       | 将 `file` 包装为 `kiso/io.Writer` 适配器（不接管关闭责任）。                                               |
+
+#### 2. 全量读写便捷函数（2 个）
+
+| 函数        | 公开签名                                               | 功能与返回规则                                                                                               |
+| ----------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `read_all`  | `read_all(path: string) -> ReadAllResult`              | 打开文件、按 `32 KiB` 分块读取全部内容并自动关闭句柄；若中途发生 I/O 错误，`data` 可能包含已读出的前缀字节。 |
+| `write_all` | `write_all(path: string, data: []uint8) -> UnitResult` | 创建或截断 `path` 对应文件，完整写入 `data` 后关闭句柄。                                                     |
+
+#### 3. 路径状态、目录操作与设备检测（7 个）
+
+| 函数                  | 公开签名                                    | 功能与返回规则                                                                                        |
+| --------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `stat`                | `stat(path: string) -> StatResult`          | 查询路径元数据；若路径不存在则返回 `exists: iie, error: mu`，发生权限或 I/O 异常时通过 `error` 返回。 |
+| `exists`              | `exists(path: string) -> bool`              | 便捷判断路径是否存在（丢弃详细错误信息）。                                                            |
+| `is_file`             | `is_file(path: string) -> bool`             | 便捷判断路径是否为普通文件（丢弃详细错误信息）。                                                      |
+| `is_dir`              | `is_dir(path: string) -> bool`              | 便捷判断路径是否为目录（丢弃详细错误信息）。                                                          |
+| `is_character_device` | `is_character_device(path: string) -> bool` | 判断路径是否存在且为字符设备（如 `/dev/null`）（V2.1 新增）。                                         |
+| `create_dir`          | `create_dir(path: string) -> UnitResult`    | 创建单级目录；若父目录不存在或目标已存在则返回对应 `FsError`。                                        |
+| `read_dir`            | `read_dir(path: string) -> DirResult`       | 列举 `path` 目录下的全部直接子项（自动跳过 `.` 与 `..`）。                                            |
+
+### 使用限制与平台说明
+
+- **句柄共享与资源上限**：赋值 `File` 变量会共享同一个底层句柄状态，任意副本调用 `close` 后所有副本均变为已关闭状态；原生运行时单进程同时打开的文件与目录资源句柄槽位上限为 `32` 个，使用后应及时关闭。
+- **功能边界**：`create_dir` 仅创建单级目录（不自动递归创建多级父目录）；删除文件、删除目录或修改文件权限请使用 `kiso/os`（如 `os.remove`、`os.remove_dir`、`os.chmod`）；本模块不提供符号链接操作或文件系统事件监听。
+- **内部 ABI 说明**：`mio/fs/runtime` 属于内部宿主接口，不在公共版本兼容性承诺范围内。
+
+源码依据：[Mio V2.1 · `bunko/kiso/fs`](https://github.com/mio-kobo/mio/tree/Mio-2.1.2/bunko/kiso/fs)。
