@@ -23,18 +23,13 @@
 
 **Latest 是派生标记**，表示最新正式 Stable，不是能把开发快照升级为发布版的状态。Legacy 只表示旧的已发布文档；EOL 必须附明确的维护终止证据。没有证据的维护承诺标为 unspecified。
 
-## 当前事实与默认入口
+## 当前默认入口与 V2.1 预览
 
-| 精确版本 | 状态 | 来源 |
-| --- | --- | --- |
-| `/docs/v1.0` | Stable · Latest | [v1.0.0 正式 Release](https://github.com/mio-kobo/mio/releases/tag/v1.0.0)，2026-10-17T13:02:10Z；提交 `51f1ba883767c1fc08ba415fbb0075316ff03106` |
-| `/docs/v2.0` | Development | `Mio-2` 提交 `8b53a25142b0da1192a6c4868e807385d7bb50f9`；没有正式发布记录 |
+`/docs` 进入 [V2.1.2](/docs/v2.1.2)。精确补丁快照独立存放，固定于正式 tag 和源码提交，当前覆盖已核验的发布、安装、首个程序及迁移内容。技术参考等章节须完成独立修正并审阅后，方可更新此快照及其内容哈希锁。
 
-`/docs` 以可随新发布更新的重定向进入最新稳定版本，当前 `/docs/v1.0`。开发预览不会接管该入口。V2 页面、选项、搜索标签始终显式标注 Development，并设 noindex。V2.1、V2.10、V3.1.2 等只是测试 fixture 中的格式案例，不生成公共空页面。
+`/docs/v2.1` 显示「v2.1.0 正式版文档」，保留原有章节 URL。版本选择器将 V2.1 补丁版归入同一选项。该目录沿用既有版本登记与索引策略，可经独立审阅更新，保留站内版本搜索，设置 `noindex` 且不列入 sitemap。V2.0 保持 Stable 与原维护状态，旧未版本化章节别名仍指向原 V2.0 目标。V1.0 保留为 EOL 历史文档。
 
-V1.0 标签源码构建出的默认 CLI 字符串是 `Mio 1.0.0-beta.2`；V2 快照是 `Mio 1.0.0-beta.1`。发布身份以正式 GitHub Release 为准，教程如实记录源码构建结果，不修改核心源码来掩盖差异。
-
-M17e 尚未验收，M18 尚未启动。Compiler A 生成/启动、Mochi 字节码自编译和纯 Mio 原生自举属于不同事实，不能混淆。纯 Mio 原生自举和 WebAssembly Playground 均不能宣传为已发布。
+上游发布证据与网站生产验收分别记录。精确补丁快照在 `published` 模式可构建和预览，生产部署须通过 `live` 验收门禁。
 
 ## 内容目录、导航与稳定 URL
 
@@ -51,7 +46,9 @@ content/docs/
     kiso/
     tooling/
     internals/
-  v2.0/                # 同样的独立结构，明确标为 Development
+  v2.0/                # 既有的 Stable 历史快照
+  v2.1/                # 次版本预览
+  v2.1.2/              # 独立、冻结的精确补丁快照
 ```
 
 每个版本内六栏目固定顺序：Getting Started、Learn、Reference、Kiso、Tooling、Internals。slug 小写 ASCII + 连字符；版本允许点。示例：`/docs/v2.1/learn/variables`、`/docs/v3.1.2/reference/types`。新增版本无需新增路由文件。
@@ -130,9 +127,9 @@ CHECK_EXTERNAL=1 npm run check:links
 
 Fumadocs 官方 Next.js / Macro API 与现有固定依赖一致，2026-10-20 npm 稳定版为 Core/UI 16.17.7、MDX 15.4.8。A 的示例在两个固定提交的干净 git archive 快照分别构建执行；来源见 `content/LEARN_SOURCES.json`。B 的来源按其 `content/SOURCES.json` 与 `verification/` 证据逐页记录，不能假定所有迁移页属于同一发布版本。外链匿名 404、尚未完成的 B 页面及上游构建警告须如实报告，不能宣称全站已完成不存在的验证。
 
-## V2.0.0 网站发布门禁（2026-10-21）
+## 网站发布门禁
 
-`content/release-plan.json` 是首页展示、Release 与 V2 下载状态的共同开关，当前 `mode=prepared`、`docsVersion=v2.0`；`content/versions.json` 仍决定原生版本选项、搜索和默认文档。prepared 时 defaultVersion 必须保持 previousStable=v1.0。正式上线前遵循 README 的“V2.0.0 正式切换”步骤；`npm run build` 必须通过 `check-release.mjs`，禁止绕过门禁直接运行 next build 作为发布流程。
+`content/release-plan.json` 决定首页、发行和下载的当前版本。 `content/versions.json` 决定版本切换、搜索和默认文档。`prepared` 保留上一个稳定默认版本。`published` 允许基于正式上游发布构建并预览。对于精确补丁快照，生产部署须进入 `live` 并通过最终验收。
 
 下载证据独立放在 `content/downloads.json`，不修改 B 的 verification 或 MDX。清单只录入逐包下载核对过的大小与 SHA256，`check:release -- --online` 再核对官方发布、标签提交及实际字节。Release Candidate 仍 noindex，不参与 latestStable。最终验收必须含 build/types/routes/versions/search/desktop/mobile/accessibility/artifacts/releaseNotes/migration，精确绑定提交并由维护者记录审阅。
 

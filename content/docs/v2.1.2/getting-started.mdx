@@ -1,0 +1,17 @@
+---
+title: 安装与验证
+description: 选择 Mio v2.1.2 发行包、校验文件并验证 CLI。
+---
+
+安装包来自 [Mio v2.1.2 正式发布](https://github.com/mio-kobo/mio/releases/tag/v2.1.2)，对应源码提交 `7903f6d18a37b3e4a84fb381f019d1683d3fb81a`。
+
+1. 打开[发行包清单](/download/2.1.2)，按系统、CPU 架构和包类型选择文件。
+2. 校验 SHA-256。macOS 可用 `shasum -a 256`，Linux 可用 `sha256sum`，Windows PowerShell 可用 `Get-FileHash -Algorithm SHA256`。将输出与所选文件的哈希比较。
+3. 例如，在 macOS ARM64 上解压 Core 归档，从解压目录运行版本命令。
+
+```sh
+tar -xzf mio-2.1.2-darwin-arm64-core.tar.gz
+./mio-2.1.2-darwin-arm64-core/bin/mio version
+```
+
+版本输出应包含 `mio v2.1.2` 和上述提交。接下来[检查并运行第一个程序](/docs/v2.1.2/learn)。

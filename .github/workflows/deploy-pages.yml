@@ -25,6 +25,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - run: npm run check:release -- --production
       - uses: actions/configure-pages@v5
       - run: npm run types:check
       - run: npm run check:links

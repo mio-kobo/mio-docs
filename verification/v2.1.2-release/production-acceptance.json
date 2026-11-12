@@ -1,0 +1,524 @@
+{
+  "status": "passed",
+  "sourceCommit": "7903f6d18a37b3e4a84fb381f019d1683d3fb81a",
+  "docsCandidateCommit": "603624d594a09be30d148b9a81e3e61337d3429a",
+  "reviewedBy": "Codex (acceptance testing at the maintainer’s request)",
+  "reviewedAt": "2026-11-10T14:25:04Z",
+  "siteUrl": "https://mio.kaelexvp.cc",
+  "checks": {
+    "build": "passed",
+    "types": "passed",
+    "routes": "passed",
+    "versions": "passed",
+    "search": "passed",
+    "desktop": "passed",
+    "mobile": "passed",
+    "accessibility": "passed",
+    "artifacts": "passed",
+    "releaseNotes": "passed",
+    "migration": "passed"
+  },
+  "environment": {
+    "node": "24.22.2",
+    "preview": "Next.js production static export",
+    "playwright": "1.65.0",
+    "browserTooling": "Browser plugin unavailable; used Playwright with installed Chrome"
+  },
+  "automation": [
+    {
+      "command": "npm ci",
+      "status": "passed"
+    },
+    {
+      "command": "npm run types:check",
+      "status": "passed"
+    },
+    {
+      "command": "MIO_DOCS_SITE_URL=https://mio.kaelexvp.cc npm run build",
+      "status": "passed",
+      "exportedDocPages": 181
+    },
+    {
+      "command": "BASE_URL=http://127.0.0.1:3217 npm run test:versions",
+      "status": "passed",
+      "tests": 12
+    },
+    {
+      "command": "BASE_URL=http://127.0.0.1:3217 npm run test:release",
+      "status": "passed",
+      "tests": 7
+    },
+    {
+      "command": "BASE_URL=http://127.0.0.1:3217 npm run check:links",
+      "status": "passed",
+      "routes": 229,
+      "links": 719
+    },
+    {
+      "command": "npm run check:release -- --online",
+      "status": "passed",
+      "artifactRecords": 15
+    }
+  ],
+  "browser": {
+    "url": "http://127.0.0.1:3217",
+    "chrome": "157.0.8103.39",
+    "startedAt": "2026-11-10T14:24:22.257Z",
+    "cases": [
+      {
+        "device": "desktop",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "routes": [
+          {
+            "path": "/",
+            "status": 200,
+            "title": "Mio · 澪光文档"
+          },
+          {
+            "path": "/download/",
+            "status": 200,
+            "title": "下载 Mio · Mio"
+          },
+          {
+            "path": "/download/2.1.2/",
+            "status": 200,
+            "title": "下载 Mio v2.1.2 · Mio"
+          },
+          {
+            "path": "/releases/2.1.2/",
+            "status": 200,
+            "title": "Mio v2.1.2 · Release Notes · Mio"
+          },
+          {
+            "path": "/releases/2.1.2/migration/",
+            "status": 200,
+            "title": "迁移到 Mio v2.1.2 · Mio"
+          },
+          {
+            "path": "/docs/v2.1.2/",
+            "status": 200,
+            "title": "V2.1.2 · Mio V2.1.2 文档 · Mio"
+          },
+          {
+            "path": "/docs/v2.1.2/learn/",
+            "status": 200,
+            "title": "V2.1.2 · 运行第一个 Mio 程序 · Mio"
+          }
+        ],
+        "worker": "/wasm/v2.1/mio-worker.js",
+        "stdout": "42",
+        "diagnostic": "E0301",
+        "search": {
+          "query": "变量",
+          "destination": "/docs/v2.1.2/learn/"
+        },
+        "versionSwitch": "/docs/v2.1/learn/",
+        "downloadLinks": 9,
+        "keyboard": [
+          "homepage and docs skip links focus main-content",
+          "Playground check and run via Enter",
+          "search opens and selects result via keyboard",
+          "Tab stays inside search dialog",
+          "Escape closes search and restores trigger focus"
+        ]
+      },
+      {
+        "device": "mobile",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "routes": [
+          {
+            "path": "/",
+            "status": 200,
+            "title": "Mio · 澪光文档"
+          },
+          {
+            "path": "/download/",
+            "status": 200,
+            "title": "下载 Mio · Mio"
+          },
+          {
+            "path": "/download/2.1.2/",
+            "status": 200,
+            "title": "下载 Mio v2.1.2 · Mio"
+          },
+          {
+            "path": "/releases/2.1.2/",
+            "status": 200,
+            "title": "Mio v2.1.2 · Release Notes · Mio"
+          },
+          {
+            "path": "/releases/2.1.2/migration/",
+            "status": 200,
+            "title": "迁移到 Mio v2.1.2 · Mio"
+          },
+          {
+            "path": "/docs/v2.1.2/",
+            "status": 200,
+            "title": "V2.1.2 · Mio V2.1.2 文档 · Mio"
+          },
+          {
+            "path": "/docs/v2.1.2/learn/",
+            "status": 200,
+            "title": "V2.1.2 · 运行第一个 Mio 程序 · Mio"
+          }
+        ],
+        "worker": "/wasm/v2.1/mio-worker.js",
+        "stdout": "42",
+        "diagnostic": "E0301",
+        "search": {
+          "query": "变量",
+          "destination": "/docs/v2.1.2/learn/"
+        },
+        "downloadLinks": 9
+      }
+    ],
+    "console": [],
+    "finishedAt": "2026-11-10T14:24:31.718Z"
+  },
+  "accessibility": {
+    "rulesets": [
+      "wcag2a",
+      "wcag2aa",
+      "wcag21a",
+      "wcag21aa",
+      "wcag22aa"
+    ],
+    "initialFindings": [
+      {
+        "route": "/",
+        "rule": "link-in-text-block",
+        "contrastAgainstAdjacentText": "2.84:1",
+        "fix": "Underline the version reference link."
+      },
+      {
+        "route": "/docs/v2.1.2/learn/",
+        "interaction": "Search dialog loses focus on Escape.",
+        "fix": "Return focus to the element that opened the dialog."
+      }
+    ],
+    "scans": [
+      {
+        "device": "desktop",
+        "colorScheme": "light",
+        "route": "/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 26,
+        "incompleteRules": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      {
+        "device": "desktop",
+        "colorScheme": "light",
+        "route": "/docs/v2.1.2/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 26,
+        "incompleteRules": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      {
+        "device": "desktop",
+        "colorScheme": "light",
+        "route": "/docs/v2.1.2/getting-started/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 26,
+        "incompleteRules": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      {
+        "device": "desktop",
+        "colorScheme": "light",
+        "route": "/docs/v2.1.2/learn/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 24,
+        "incompleteRules": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      {
+        "device": "desktop",
+        "colorScheme": "light",
+        "route": "/docs/v2.1.2/learn/",
+        "state": "search results",
+        "axeVersion": "4.11.1",
+        "passedRules": 27,
+        "incompleteRules": [
+          "aria-hidden-focus",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      {
+        "device": "desktop",
+        "colorScheme": "light",
+        "route": "/docs/v2.1.2/migration/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 26,
+        "incompleteRules": [
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      {
+        "device": "desktop",
+        "colorScheme": "light",
+        "route": "/download/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 27,
+        "incompleteRules": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      {
+        "device": "desktop",
+        "colorScheme": "light",
+        "route": "/download/2.1.2/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 27,
+        "incompleteRules": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      {
+        "device": "desktop",
+        "colorScheme": "light",
+        "route": "/releases/2.1.2/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 25,
+        "incompleteRules": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      {
+        "device": "desktop",
+        "colorScheme": "light",
+        "route": "/releases/2.1.2/migration/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 25,
+        "incompleteRules": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      {
+        "device": "mobile",
+        "colorScheme": "dark",
+        "route": "/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 24,
+        "incompleteRules": [
+          "aria-prohibited-attr"
+        ],
+        "violations": []
+      },
+      {
+        "device": "mobile",
+        "colorScheme": "dark",
+        "route": "/docs/v2.1.2/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 26,
+        "incompleteRules": [],
+        "violations": []
+      },
+      {
+        "device": "mobile",
+        "colorScheme": "dark",
+        "route": "/docs/v2.1.2/getting-started/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 27,
+        "incompleteRules": [],
+        "violations": []
+      },
+      {
+        "device": "mobile",
+        "colorScheme": "dark",
+        "route": "/docs/v2.1.2/learn/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 24,
+        "incompleteRules": [],
+        "violations": []
+      },
+      {
+        "device": "mobile",
+        "colorScheme": "dark",
+        "route": "/docs/v2.1.2/learn/",
+        "state": "search results",
+        "axeVersion": "4.11.1",
+        "passedRules": 27,
+        "incompleteRules": [
+          "aria-hidden-focus",
+          "color-contrast"
+        ],
+        "violations": []
+      },
+      {
+        "device": "mobile",
+        "colorScheme": "dark",
+        "route": "/docs/v2.1.2/migration/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 26,
+        "incompleteRules": [],
+        "violations": []
+      },
+      {
+        "device": "mobile",
+        "colorScheme": "dark",
+        "route": "/download/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 25,
+        "incompleteRules": [
+          "aria-prohibited-attr"
+        ],
+        "violations": []
+      },
+      {
+        "device": "mobile",
+        "colorScheme": "dark",
+        "route": "/download/2.1.2/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 25,
+        "incompleteRules": [
+          "aria-prohibited-attr"
+        ],
+        "violations": []
+      },
+      {
+        "device": "mobile",
+        "colorScheme": "dark",
+        "route": "/releases/2.1.2/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 23,
+        "incompleteRules": [
+          "aria-prohibited-attr"
+        ],
+        "violations": []
+      },
+      {
+        "device": "mobile",
+        "colorScheme": "dark",
+        "route": "/releases/2.1.2/migration/",
+        "state": "page",
+        "axeVersion": "4.11.1",
+        "passedRules": 25,
+        "incompleteRules": [
+          "aria-prohibited-attr"
+        ],
+        "violations": []
+      }
+    ],
+    "scope": "Key release routes in desktop light and mobile dark, including search results. Keyboard spot checks include skip links, focus containment and restoration, search selection, and Playground controls. Axe incomplete results are recorded for manual follow-up. Dedicated screen reader testing is outside this run."
+  },
+  "downloads": {
+    "verifiedAt": "2026-11-10T14:23:50.911Z",
+    "verified": [
+      {
+        "name": "mio-2.1.2-darwin-arm64-core.tar.gz",
+        "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-darwin-arm64-core.tar.gz",
+        "status": 200,
+        "size": 980337,
+        "sha256": "8fecf123504f03bbc095427201bcf2f3badaea9bafbcdf4a25ea5c1b454552c7"
+      },
+      {
+        "name": "mio-2.1.2-darwin-arm64-full.tar.gz",
+        "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-darwin-arm64-full.tar.gz",
+        "status": 200,
+        "size": 1314778,
+        "sha256": "5bd450ab96e6da945e5baa97d9ddd31162a289e183ffe3eff6635d3006344c8d"
+      },
+      {
+        "name": "mio-2.1.2-linux-amd64-core.tar.gz",
+        "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-linux-amd64-core.tar.gz",
+        "status": 200,
+        "size": 638509,
+        "sha256": "1fdee15adf06cb1b633162d26dcc4f92269fac36df04d11840f8adf97a154844"
+      },
+      {
+        "name": "mio-2.1.2-linux-amd64-full.docker.tar",
+        "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-linux-amd64-full.docker.tar",
+        "status": 200,
+        "size": 15582720,
+        "sha256": "e8f11d8468a49c4dedbbf03e727ddfaa4fdf2e504d037d8395bdf2eefe38591c"
+      },
+      {
+        "name": "mio-2.1.2-linux-amd64-full.tar.gz",
+        "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-linux-amd64-full.tar.gz",
+        "status": 200,
+        "size": 959133,
+        "sha256": "3937fc0c52e79eea6bf60f7721c5ea4a86e5ef6e0c9578020ce4cdedac94611e"
+      },
+      {
+        "name": "mio-2.1.2-windows-amd64-core-setup.exe",
+        "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-windows-amd64-core-setup.exe",
+        "status": 200,
+        "size": 2622035,
+        "sha256": "bbb49d86035838760c5f800de3c4a594a539dd357c90f5a076d337a0e86ddd8c"
+      },
+      {
+        "name": "mio-2.1.2-windows-amd64-core.zip",
+        "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-windows-amd64-core.zip",
+        "status": 200,
+        "size": 694732,
+        "sha256": "8fbecc6d42316d08204c7887dc5b5973dc912a23af6a6abcf7be8170a7961402"
+      },
+      {
+        "name": "mio-2.1.2-windows-amd64-full-setup.exe",
+        "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-windows-amd64-full-setup.exe",
+        "status": 200,
+        "size": 2819564,
+        "sha256": "ae2656c5f1364ec2acb2165149bc3c6c16a29827f9bc67756fbb79f29dff158f"
+      },
+      {
+        "name": "mio-2.1.2-windows-amd64-full.zip",
+        "url": "https://github.com/mio-kobo/mio/releases/download/v2.1.2/mio-2.1.2-windows-amd64-full.zip",
+        "status": 200,
+        "size": 1019267,
+        "sha256": "6970dad8809f6338e6c4a5c411da1a37885dcd58ec8db1ba829859ce9f389937"
+      }
+    ]
+  },
+  "captureDigests": {
+    "desktop-downloads.png": "5bbb0b9d625eabdcea97bcfda1d5190d2a3753d7e1ca67816614b33d86bdf677",
+    "desktop-playground.png": "611bcf4893aaf226e6ec3fc77814b7d3ada7763b0a656a4d3a325fa8ed224b6c",
+    "desktop-search.png": "ffaedb0315bc0e57016e5df4248dfb26bbbbf2ccb6d287faa5d7d215b906552c",
+    "mobile-downloads.png": "df7ff680cf749102a553925a7f865c6fcf55cd91b02d14068ca14b5eef59774e",
+    "mobile-playground.png": "2bf1680c619cec5ceb3d7a26a4d5c1d33bb74f42c97ce93266cc8a73ba26ba70",
+    "mobile-search.png": "d6621c610bbf4d65db50781793f50d1777568f43461cd04639899e8ab0b46f05"
+  }
+}
