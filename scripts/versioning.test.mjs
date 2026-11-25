@@ -12,9 +12,9 @@ test('numeric ordering supports minor 10, optional patch and future majors', () 
   assert.throws(() => numericVersion('2.01'));
 });
 test('default never follows an unreleased higher development version', () => {
-  assert.equal(latestStable(registry).id, 'v2.0');
-  assert.equal(registry.defaultVersion, 'v2.0');
-  const changed = structuredClone(registry); changed.defaultVersion = 'v2.1';
+  assert.equal(latestStable(registry).id, 'v2.1');
+  assert.equal(registry.defaultVersion, 'v2.1');
+  const changed = structuredClone(registry); changed.defaultVersion = 'v2.0';
   assert.throws(() => validateRegistry(changed), /latest formally released/);
 });
 test('release evidence, duplicate URL identities, maintenance and EOL are validated', () => {
