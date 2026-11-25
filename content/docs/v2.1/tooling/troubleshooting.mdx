@@ -3,7 +3,7 @@ title: 故障排查
 description: Mio V2.0 安装、CLI、Bunko、Playground、LSP 与 Native AOT 常见问题
 ---
 
-> **版本说明：** 本页主要保留 V2.0 正式工具与插件的用法。V2.1 CLI、LSP 和测试工具的变化见 [开发工具](/docs/v2.1/tooling)。
+> **版本说明：** 本页已补充 V2.1 Native CLI、`v2.1.1` 内嵌 Bunko 与 `v2.1.2` 本地化/主题的常见错误排查；历史段落仍保留 V2.0 Go CLI 对照说明。
 
 
 ## 故障排查
@@ -48,15 +48,12 @@ export MIO_BUNKO="$MIO_HOME/bunko"
 
 其中，`MIO_HOME` 必须替换成实际安装位置。
 
-### 无法导入标准库
+### `E_BUNKO_ROOT` / `E_BUNKO_MISSING`：Bunko 根目录错误 <FeatureBadge status="updated" since="2.1.1" />
 
-如果代码中出现导入错误，应确认标准库的物理目录是否存在，并检查 `MIO_BUNKO` 是否指向正确的 Bunko 根目录。
+如果代码中出现导入错误，应先区分当前使用的是 Full（`v2.1.1+` 已内嵌标准库）还是 Core（需要外部 `bunko/`）：
 
-例如：
-
-```sh
-test -d "$MIO_BUNKO/kiso/math" && echo "Bunko directory found"
-```
+- **`E_BUNKO_ROOT`**：显式传入的 `--bunko-root` 或环境变量 `MIO_BUNKO` 为空字符串、指向不存在的目录，或目录中缺少 `kiso/`。即使使用的是 `v2.1.1+` Full，CLI 也不会静默回退到内嵌库——请执行 `unset MIO_BUNKO` 取消残留的旧环境变量，或将其指向完整的 `bunko/` 目录。
+- **`E_BUNKO_MISSING`**：使用 Core 或未找到任何 Bunko 目录时导入了 `kiso/...`。请改用 Full 发行包，或通过 `MIO_BUNKO` / `--bunko-root` 指定标准库物理根。
 
 在 Mio 源代码中，标准库导入路径从 `kiso/` 开始，不需要包含物理目录名 `bunko/`。
 
@@ -142,19 +139,24 @@ moshi (age != mu) {
 
 ### 网页 Playground 无法运行
 
-Mio 文档网站在构建时为符合条件的 `mio` 代码块添加 Playground。网页当前内置的 Bunko 范围如下：
+Mio 文档网站在构建时为符合条件的 `mio` 代码块添加 Playground。V2.1 网页当前内置的 12 个纯 Mio Bunko 模块如下：
 
 | 可用模块 | 导入路径 |
 | --- | --- |
-| 数学 | `kiso/math` |
-| 数组 | `kiso/array` |
-| 字符串 | `kiso/string` |
-| 字节 | `kiso/bytes` |
-| UTF-8 | `kiso/utf8` |
+| 数学与转换 | `kiso/math`、`kiso/convert` |
+| 数组、字节与文本 | `kiso/array`、`kiso/bytes`、`kiso/string`、`kiso/utf8` |
+| 路径与编解码 | `kiso/path`、`kiso/encoding/binary`、`kiso/encoding/json` |
+| 正则与哈希 | `kiso/regexp`、`kiso/regexp/unicode_data`、`kiso/crypto/sha256` |
 
-上述模块可以在浏览器内置的 WASM 运行环境中使用，前提是相关代码块本身是独立且有效的完整程序。
+上述模块可以在浏览器内置的 Web 参考 VM 运行环境中使用，前提是相关代码块本身是独立且有效的完整程序。
 
-`kiso/fs`、`kiso/io`、`kiso/convert`、`kiso/encoding/binary`、`kiso/testing` 等模块不能据此假定已经包含在浏览器 WASM 中。涉及这些模块的文档示例应在本地 CLI 环境执行。
+`kiso/fs`、`kiso/io`、`kiso/os`、`kiso/net/tcp`、`kiso/testing` 等依赖宿主的模块没有包含在浏览器环境中。涉及这些模块的文档示例应在本地 CLI 环境执行。
+
+### CLI 本地化、颜色与选项报错（`E_OPTIONS`） <FeatureBadge status="new" since="2.1.2" />
+
+- **`E_OPTIONS`**：检查参数是否使用了受支持的写法（例如 `--format=json`、`--theme=auto|dark|light`、`--lang=<locale>` 或 `--lang <locale>`）；`--` 之后的所有参数都会直接透传给用户程序，不会被 Mio 解析。
+- **语言未按预期切换**：按 `--lang` → `MIO_LANG` → `LANGUAGE` / `LC_ALL` / `LC_MESSAGES` / `LANG` → 系统首选项的顺序排查；不支持的地区会静默回退到 `en-US` 而不会阻塞启动。编译器底层类型诊断和标准库文件系统错误仍保留英文技术原文。
+- **终端无颜色或主题不对**：检查是否设置了 `NO_COLOR`、`TERM=dumb`、`CLICOLOR=0` 或处于 `CI` / 非 TTY 重定向环境；可通过 `--color=always` 与 `--theme=dark|light` 显式覆盖。
 
 对于不能独立运行的代码示例，可以在 MDX 代码围栏中添加 `no-run`：
 

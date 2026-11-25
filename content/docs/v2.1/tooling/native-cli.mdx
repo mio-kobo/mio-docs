@@ -34,11 +34,24 @@ description: Mio v2.1.0 原生 CLI 的命令、目标平台与选项。
 | `--gc-stress` | 源码原生构建的 GC 压力测试选项 |
 | `--observe`、`--emit-symbols <file>` | 仅用于 Darwin ARM64 源码原生 `build`，不能与 `--emit=mochi` 合用 |
 | `--format=human\|short\|json` | 选择源码诊断形式 |
-| `--color=auto\|always\|never` | 控制诊断颜色形式 |
+| `--color=auto\|always\|never` | 控制诊断与帮助文本的颜色输出 |
+| `--theme=auto\|dark\|light` <FeatureBadge status="new" since="2.1.2" /> | 选择帮助与诊断的语义调色板（`auto` 依次读取 `MIO_THEME` 与 `COLORFGBG`） |
+| `--lang=<locale>` <FeatureBadge status="new" since="2.1.2" /> | 指定 CLI 输出语言（支持 39 个 BCP 47 地区目录，也接受 `--lang <locale>`） |
 | `--verbose` | 开启详细诊断 |
 | `--` | 对 `run` / `exec` 分隔后续用户程序参数 |
 
 `test` 与 `lsp` 使用独立的子命令解析逻辑。例如，无效的 Bunko 根目录返回 `E_BUNKO_ROOT` 和退出码 2；源码类型错误返回退出码 1。
+
+### CLI 本地化与终端主题 <FeatureBadge status="new" since="2.1.2" />
+
+自 `v2.1.2` 起，原生 CLI 与 Go 参考 CLI 共用一套内嵌的多语言目录（覆盖 39 个 BCP 47 地区标签），运行期完全离线，不访问网络也不依赖外部运行时。
+
+- **帮助排版与终端宽度**：`mio help` 按 General、Compilation、Execution、Diagnostics、Testing、Development tools 六组列出全部子命令；`mio help <command>` 显示单条命令的用法与示例，并按环境变量 `COLUMNS`（20–1000，默认 80）自适应宽度。
+- **语言解析优先级**：`--lang` → `MIO_LANG` → `LANGUAGE` / `LC_ALL` / `LC_MESSAGES` / `LANG` → 操作系统首选项（macOS 读取 `AppleLanguages`，Windows 读取注册表 `LocaleName` / `Get-Culture`，Linux 读取 `/etc/locale.conf`）→ 回退 `en-US`。Go 参考 CLI 共用环境变量优先级，但不启动操作系统探测进程。
+- **标签规范化与回退链**：支持将 `zh_CN.UTF-8` 等 POSIX 标签规范化为 BCP 47，并兼容旧语言代码（`no`→`nb`、`iw`→`he`、`in`→`id`、`tl`→`fil`、`mo`→`ro`）；按「精确地区 → 区域别名（如 `zh-MO`→`zh-HK`）→ 文字默认（`zh-Hant`→`zh-TW`、`zh-Hans`→`zh-CN`）→ 主语言 → `en-US`」回退。
+- **受支持的 39 个地区**：`ar-SA`（RTL）、`bn-BD`、`cs-CZ`、`da-DK`、`de-DE`、`el-GR`、`en-US`、`en-GB`、`es-ES`、`es-MX`、`fa-IR`（RTL）、`fi-FI`、`fil-PH`、`fr-FR`、`he-IL`（RTL）、`hi-IN`、`hu-HU`、`id-ID`、`it-IT`、`ja-JP`、`ko-KR`、`ms-MY`、`nb-NO`、`nl-NL`、`pl-PL`、`pt-BR`、`pt-PT`、`ro-RO`、`ru-RU`、`sv-SE`、`ta-IN`、`te-IN`、`th-TH`、`tr-TR`、`uk-UA`、`vi-VN`、`zh-CN`、`zh-TW`、`zh-HK`。
+- **机器可读输出与边界**：`--format=json` 诊断与测试报告、LSP 协议帧、错误码（如 `E_OPTIONS`、`E0602`）及版本字符串保持字节稳定，不会被本地化或着色。编译器底层的类型/源码诊断细节、运行时 trap 与标准库外部文件系统/Bunko 错误仍保持英文技术原文（仅 CLI 标签与 `cause:` 本地化）；RTL 描述以纯 Unicode 输出，不插入不可见双向控制符。
+- **颜色优先级**：`--color=always/never` → `NO_COLOR` / `TERM=dumb` / `CLICOLOR=0` → `CLICOLOR_FORCE` → `CI` → TTY 检测。未明确检测到亮/暗背景时，`--theme=auto` 使用高对比度 ANSI 16 色语义角色，不发送 OSC 11 等终端探测序列。
 
 ### 原生运行与测试 <PlatformSupport showArch={true} systems={{ macos: { arm64: "full" }, linux: { x86_64: "full" }, windows: { x86_64: "full" } }} />
 

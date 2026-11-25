@@ -5,17 +5,19 @@ description: Mio V2.1 原生发行包的内容边界、Bunko 查找规则、平�
 
 [Mio v2.1.0](https://github.com/mio-kobo/mio/releases/tag/v2.1.0) 提供 Core 和 Full 归档。三平台原生归档的校验、执行与 Bunko 路径解析见 [正式版 CI](https://github.com/mio-kobo/mio/actions/runs/42384976176)。
 
-## 为什么拆分 Core 与 Full？
+## 为什么拆分 Core 与 Full？ <FeatureBadge status="updated" since="2.1.1" />
 
-两种发行包使用**同一份、该平台原生编译的 Mio 可执行文件**。它们的区别在于是否附带独立的标准库和扩展工具，而不是语言语法、GC 或编译器实现有所不同。
+自 `v2.1.1` 起，**Full** 发行包改为单个自包含的原生 `mio` 可执行文件（Windows 为 `mio.exe`），构建时通过 `selfhost/resourcegen` 将完整的 `bunko/kiso/` 标准库直接内嵌进二进制中；**Core** 则是内嵌表为空的精简编译器，需要外部提供 `bunko/` 目录（或仅编译不导入标准库的程序）。两者的语言语法、GC 和编译器前端语义完全一致，但因内嵌资源不同，Core 与 Full 的可执行文件 SHA-256 摘要不再相同。
 
-| 内容 | Core | Full |
+| 内容 | Core | Full（`v2.1.1+`） |
 | --- | --- | --- |
-| 原生 Mio 编译器及其必需运行组件 | 包含 | 包含，且编译器 SHA-256 与 Core 一致 |
-| `bunko/kiso/` 标准库源码 | 不包含 | 包含 |
+| 原生 Mio 编译器及其必需运行组件 | 包含 | 包含（内嵌完整标准库，SHA-256 与 Core 不同） |
+| `bunko/kiso/` 标准库 | 不包含 | 直接内嵌在可执行文件中（无需外部 `bunko/` 目录） |
 | 额外内容 | 许可、README、manifest 与 provenance | 同样包含这些记录，另附已验证示例；当前不附独立工具二进制 |
-| 不导入 Bunko 的 Mio 源码 | 应可编译、运行 | 应可编译、运行 |
-| 导入 `kiso/...` 的 Mio 源码 | 需要另行提供 Bunko | 使用随包附带的 Bunko |
+| 不导入 Bunko 的 Mio 源码 | 可直接编译、运行 | 可直接编译、运行 |
+| 导入 `kiso/...` 的 Mio 源码 | 需要另行提供外部 Bunko | 开箱即用，也可通过参数或环境变量显式覆盖 |
+
+> **说明：** 在 `v2.1.0` 归档中，Full 通过随包附带的独立 `bunko/` 目录提供标准库，Core 与 Full 共享同一个编译器 SHA-256。
 
 **注意：** `mio test`、`mio lsp` 等如果实现为同一编译器可执行文件的子命令，Core 仍可能识别这些命令。“不带工具”指不附带额外的独立工具和标准库，不表示从编译器二进制中删去已有子命令。
 
@@ -58,22 +60,23 @@ chant(math.gcd(84, 30));
 
 `bunko/` 是文件系统中的库根目录，**不属于** `yobu` 导入路径的一部分。
 
-## Bunko 路径解析
+## Bunko 路径解析 <FeatureBadge status="updated" since="2.1.1" />
 
-V2.1 CLI 通过共享的 `selfhost/bunkopath` 解析标准库位置，优先级从高到低为：
+V2.1 CLI 通过共享的 `selfhost/bunkopath` 解析标准库位置，自 `v2.1.1` 起优先级从高到低为：
 
-1. 用户显式传入的 `--bunko-root`（仅适用于接受此参数的命令）。
-2. 环境变量 `MIO_BUNKO`。
-3. 与实际可执行文件所在位置对应的 `../bunko` 目录。
-4. 没有找到 Bunko：无标准库导入的 Core 程序仍应可用，导入 `kiso/...` 时则明确报错。
+1. 用户显式传入的 `--bunko-root <directory>`（非空且必须包含 `kiso/`，仅适用于接受此参数的命令）。
+2. 环境变量 `MIO_BUNKO`（已设置但为空值或路径无效时直接报错 `E_BUNKO_ROOT`）。
+3. **内嵌 Bunko（仅 `v2.1.1+` Full）** <FeatureBadge status="new" since="2.1.1" />：编译时内嵌的全部 `kiso/` 生产源码。
+4. 与实际可执行文件所在位置对应的 `../bunko` 目录（Core 与 `v2.1.0` 布局）。
+5. 没有找到 Bunko：无标准库导入的 Core 程序仍可用，导入 `kiso/...` 时明确报错 `E_BUNKO_MISSING`。
 
-显式指定不存在或无效的 Bunko 路径时必须报错；不能静默回退到其他目录。自动解析应依据**可执行文件的实际位置**，而不是当前工作目录或不可靠的 `argv[0]` 字符串。
+显式指定不存在或无效的 `--bunko-root` 或 `MIO_BUNKO` 时必须报错，**不会静默回退到内嵌库或其他目录**。例如从旧版本升级到 `v2.1.1` Full 后，若环境中仍残留指向已删除路径的 `MIO_BUNKO`，需取消该变量（`unset MIO_BUNKO`）或更新为有效的兼容目录。自动解析应依据**可执行文件的实际位置**，而不是当前工作目录或不可靠的 `argv[0]` 字符串。
 
-这一顺序已在 v2.1.0 实现，并经过迁移目录与错误路径测试；源码见 [`selfhost/bunkopath`](https://github.com/mio-kobo/mio/tree/74e461b2985886160a285c7104d2a41090d0f548/selfhost/bunkopath)。
+这一顺序已在 `v2.1.0` / `v2.1.1` 实现并经过迁移目录、内嵌回退边界与错误路径测试。
 
 ## 如何安装与校验？
 
-从 [v2.1.0 发布页](https://github.com/mio-kobo/mio/releases/tag/v2.1.0) 下载归档和 `SHA256SUMS`。解压前，使用 macOS 的 `shasum -a 256 <文件>`、Linux 的 `sha256sum <文件>` 或 PowerShell 的 `Get-FileHash <文件> -Algorithm SHA256`，与清单中对应文件的摘要比较。
+从 [Mio 发布页](https://github.com/mio-kobo/mio/releases) 下载对应版本的归档和 `SHA256SUMS`。解压前，使用 macOS 的 `shasum -a 256 <文件>`、Linux 的 `sha256sum <文件>` 或 PowerShell 的 `Get-FileHash <文件> -Algorithm SHA256`，与清单中对应文件的摘要比较。
 
 解压后将包内 `bin` 目录加入 `PATH`，执行：
 
@@ -81,7 +84,16 @@ V2.1 CLI 通过共享的 `selfhost/bunkopath` 解析标准库位置，优先级�
 mio version
 ```
 
-不必为预编译原生发行包安装 Go。若使用 Full，请保持 `bin/` 与 `bunko/` 的相对目录结构；也可以通过 `MIO_BUNKO` 明确指定 Bunko 根目录。
+不必为预编译原生发行包安装 Go。若使用 `v2.1.1+` Full，单可执行文件即可离线导入 `kiso/...`；若使用 Core 或 `v2.1.0` Full，请保持 `bin/` 与 `bunko/` 的相对目录结构，或通过 `MIO_BUNKO` 明确指定 Bunko 根目录。
+
+## 包管理器安装渠道
+
+除手动下载归档外，仓库还提供了以下包管理器分发定义（具体可用状态以各仓库审核进度为准）：
+
+- **macOS ARM64（Homebrew）**：`brew tap mio-kobo/mio` 后执行 `brew install mio`（Full）或 `brew install mio-core`（Core）；两者均提供 `mio` 命令，切换前需先卸载旧包。
+- **Windows AMD64（WinGet）**：`winget install --id MioKobo.Mio --exact`（Full，命令为 `mio`）或 `MioKobo.Mio.Core`（Core，命令为 `mio-core`），使用自包含 Inno 安装程序管理用户 `PATH`。
+- **Windows AMD64（Chocolatey）**：`choco install mio`（Full）或 `choco install mio-core`（Core）；通过 Shim 调用，项目与配置请保存在包目录之外。不要与 WinGet 同时安装同一变体。
+- **Linux AMD64（APT）**：配置 `https://mio-kobo.github.io/mio-apt` 的签名源与 GPG 公钥后，执行 `sudo apt-get install mio`（或 `mio-core`）。
 
 ## 发行验证范围
 

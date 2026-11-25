@@ -1,8 +1,8 @@
 {
-  "decidedOn": "2026-11-03",
-  "authority": "maintainer instruction in Codex chat",
-  "instruction": "把V2.0设为主发布版本，1.0为过时版本不再更新",
-  "defaultVersion": "v2.0",
+  "decidedOn": "2026-11-26",
+  "authority": "maintainer instruction",
+  "instruction": "把V2.1设为主发布版本（承载v2.1.2正式发布），2.0保留稳定维护，1.0为过时版本不再更新",
+  "defaultVersion": "v2.1",
   "versions": {
     "v1.0": {
       "status": "EOL",
@@ -13,6 +13,11 @@
       "status": "Stable",
       "maintenance": "maintained",
       "release": "v2.0.0"
+    },
+    "v2.1": {
+      "status": "Stable",
+      "maintenance": "maintained",
+      "release": "v2.1.2"
     }
   }
 }

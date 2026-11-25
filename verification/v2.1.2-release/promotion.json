@@ -1,0 +1,14 @@
+{
+  "verifiedOn": "2026-11-26",
+  "sourceCommit": "7903f6d18a37b3e4a84fb381f019d1683d3fb81a",
+  "releaseUrl": "https://github.com/mio-kobo/mio/releases/tag/v2.1.2",
+  "publishedAt": "2026-11-10T08:11:15Z",
+  "prerelease": false,
+  "artifact": {
+    "name": "mio-2.1.2-darwin-arm64-full.tar.gz",
+    "size": 1314778,
+    "sha256": "5bd450ab96e6da945e5baa97d9ddd31162a289e183ffe3eff6635d3006344c8d"
+  },
+  "decision": "content/version-lifecycle.json",
+  "note": "Official v2.1.2 release metadata, exact tag commit and asset checksums verified; v2.1 minor-series documentation promoted in place."
+}

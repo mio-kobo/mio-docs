@@ -3,26 +3,27 @@ title: Docker 离线开发
 description: 将验证过的 Mio Linux Full 发行包封装成容器镜像，在断网环境中编译与运行 Mio。
 ---
 
-v2.1.0 发布页提供 Linux AMD64 Full Docker 归档。[正式版 CI 的 docker-full-offline 任务](https://github.com/mio-kobo/mio/actions/runs/42384976176) 已验证断网运行和 save/load。
+v2.1 系列提供 Linux AMD64 Full Docker 归档。[v2.1.0 正式版 CI 的 docker-full-offline 任务](https://github.com/mio-kobo/mio/actions/runs/42384976176) 已验证断网运行和 save/load。
 
-## 设计目标
+## 设计目标 <FeatureBadge status="updated" since="2.1.1" />
 
 在一台已经安装 Docker 的机器上，提前获取镜像，然后离线编写、编译和运行 Mio 程序。
 
-镜像以 **Linux AMD64 Full 发行包**为输入：容器中的 `mio` 与归档中的原生编译器应该具有完全一致的 SHA-256。Bunko 以独立目录提供，不能为了制作镜像重新嵌入编译器，也不能在启动时从网络下载。
+镜像以 **Linux AMD64 Full 发行包**为输入：容器中的 `mio` 与归档中的原生编译器具有完全一致的 SHA-256。
+
+- **v2.1.1 及之后版本**：Full 可执行文件已内嵌完整 Bunko 标准库，镜像只提供 `/opt/mio/bin/mio`、许可与 manifest/provenance，**不再包含外部 `bunko/` 目录，也不再设置 `MIO_BUNKO`**。
+- **v2.1.0 历史归档**：Bunko 以独立 `/opt/mio/bunko` 目录提供，镜像内预设 `MIO_BUNKO=/opt/mio/bunko`。
 
 正式镜像包含：
 
-- 原生 Mio 编译器与必要运行组件；
-- 独立的 Bunko 标准库；
-- 已经验证的 Full 包工具与示例；
+- 原生 Mio 编译器与必要运行组件（`v2.1.1+` 已内嵌标准库）；
 - 能够交互式使用的 Shell 和必要的基础开发工具。
 
-镜像已将 `/opt/mio/bin` 加入 `PATH`，将 `MIO_BUNKO` 指向 `/opt/mio/bunko`，默认工作目录为 `/workspace`。
+镜像已将 `/opt/mio/bin` 加入 `PATH`，默认工作目录为 `/workspace`。
 
 ## 下载并加载镜像
 
-从 [v2.1.0 发布页](https://github.com/mio-kobo/mio/releases/tag/v2.1.0) 下载 `mio-2.1.0-linux-amd64-full.docker.tar` 和 `SHA256SUMS`。核对归档的 SHA-256 后，执行 `docker load -i mio-2.1.0-linux-amd64-full.docker.tar`。加载后的本地标签为 `mio:2.1.0-full`。
+从 [Mio 发布页](https://github.com/mio-kobo/mio/releases) 下载对应版本的 `linux-amd64-full.docker.tar` 和 `SHA256SUMS`。核对归档的 SHA-256 后，执行 `docker load -i mio-2.1.2-linux-amd64-full.docker.tar`。加载后的本地标签为 `mio:2.1.2-full`（`v2.1.0` 为 `mio:2.1.0-full`）。
 
 镜像默认使用 UID/GID `1000:1000`。绑定目录需允许该用户写入；必要时添加与宿主匹配的 `--user` 参数及 `--env HOME=/tmp`。
 
@@ -36,7 +37,7 @@ docker run --rm -it \
   --network none \
   -v "$PWD:/workspace" \
   -w /workspace \
-  mio:2.1.0-full
+  mio:2.1.2-full
 ```
 
 进入容器后，例如执行：
@@ -58,14 +59,14 @@ Windows 用户可以在 Docker Desktop 的 Linux 容器环境下使用相同镜�
 可以在一台联网且已加载镜像的电脑上将镜像导出为文件：
 
 ```sh
-docker save -o mio-2.1.0-full-docker.tar \
-  mio:2.1.0-full
+docker save -o mio-2.1.2-full-docker.tar \
+  mio:2.1.2-full
 ```
 
 通过移动硬盘或其他文件传输方式将 `.tar` 复制到目标电脑，再导入：
 
 ```sh
-docker load -i mio-2.1.0-full-docker.tar
+docker load -i mio-2.1.2-full-docker.tar
 ```
 
 导入后就可以使用上面的 `docker run --network none` 命令。目标电脑仍然需要事先安装、配置好 Docker；镜像不负责安装 Docker 本身。

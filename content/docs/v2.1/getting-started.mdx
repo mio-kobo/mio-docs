@@ -36,12 +36,12 @@ V2.1 文档中的 Playground 使用由 v2.1.0 源码构建的 Web 参考 VM。�
 
 网页运行环境不提供宿主文件、网络、进程、原生编译或字节码文件导入。需要这些功能时，请使用本地 CLI。
 
-## 安装 V2.1.0
+## 安装 V2.1 <FeatureBadge status="updated" since="2.1.1" />
 
-1. 打开 [v2.1.0 发布页](https://github.com/mio-kobo/mio/releases/tag/v2.1.0)，选择对应系统和 CPU 架构的 Full 归档。首次使用推荐 Full，它包含 Bunko；Core 适用于不导入标准库或另行配置 Bunko 的场景。
+1. 打开 [Mio 发布页](https://github.com/mio-kobo/mio/releases)，选择对应系统和 CPU 架构的 Full 归档。首次使用推荐 Full：自 `v2.1.1` 起 Full 将 Bunko 标准库直接内嵌在单个可执行文件中，复制可执行文件即可离线使用；Core 适用于不导入标准库或另行配置外部 Bunko 的场景。
 2. 下载 `SHA256SUMS`，按 [发行包说明](/docs/v2.1/tooling/distribution#如何安装与校验) 核对归档摘要，再解压。
-3. 将归档内的 `bin` 目录加入 `PATH`。Full 请保留 `bin` 与 `bunko` 的相对位置。
-4. 执行 `mio version`；正式版输出包含 `v2.1.0 (release; commit 74e461b2985886160a285c7104d2a41090d0f548; pure Mio Native AOT)`。
+3. 将归档内的 `bin` 目录加入 `PATH`（若使用 `v2.1.0` Full 或 Core+外部库，请保留 `bin` 与 `bunko` 的相对位置）。如果此前配置过指向旧版或已删除目录的 `MIO_BUNKO`，升级到 `v2.1.1` Full 后请取消该环境变量（`unset MIO_BUNKO`），否则会优先触发 `E_BUNKO_ROOT` 报错而不会回退到内嵌库。
+4. 执行 `mio version` 核对当前安装的 `2.1.x` 版本信息。
 
 ## 在本地运行 Mio 程序
 
@@ -252,7 +252,7 @@ export MIO_BUNKO="$PWD/bunko"
 
 ## 版本与支持范围
 
-当前功能说明按 v2.1.0 核对。文档站的版本登记仍保留早期开发快照 `59002db2c9dc0c6dd11ff0f4341de42f79677df2`。各功能与目标平台的测试证据见 [版本状态](/docs/v2.1/development) 和 [验证与来源](/docs/v2.1/tooling/verification)。
+当前功能说明已同步至 `v2.1.2`（源码提交 `7903f6d18a37b3e4a84fb381f019d1683d3fb81a`），并通过 `<FeatureBadge>` 标注 `v2.1.1` 与 `v2.1.2` 的增量特性。各功能与目标平台的测试证据见 [版本状态](/docs/v2.1/development) 和 [验证与来源](/docs/v2.1/tooling/verification)。
 
 ## 常见问题
 
